@@ -44,6 +44,7 @@ Never commit microdata, never send it to an LLM or any external service, and nev
 - **Phase order is fixed (P0–P7 in `PLAN.md`). Stop at every phase gate for the author's review.** Scope creep is the main way this project fails. After each phase, update the README hero links and add a CHANGELOG entry (conventional commits).
 - **Accessibility is a requirement.** Keyboard only (Tab reaches everything, no mouse-only interactions) and screen readers (semantic HTML, ARIA labels on charts). Automated checks (axe, Lighthouse) catch only part of the problems; the author's manual NVDA sign-off is part of each relevant gate.
 - **LLM free quotas are small and unpublished** (Gemini free tier is roughly 100–1,000 RPD by third-party reports, and prompts may be used for training). Cache to disk, batch, send only public aggregates. Tests must not make live LLM calls.
+- **NBS terms:** MPI data are for reporting aggregated information only, and an electronic copy of every publication must be sent to the National Data Archive.
 - **Report the poverty result as an adjusted association, not a causal effect.** The pre-registration (DAG, estimand, plan) is committed before outcomes are examined. The GHS analysis is labelled exploratory and underpowered.
 - **dbt SQL must work on DuckDB.** Avoid Snowflake-specific functions.
 
@@ -52,9 +53,9 @@ Never commit microdata, never send it to an LLM or any external service, and nev
 - HF `electricsheepafrica/africa-disability-niger` covers **Niger**, not Nigeria; the `-nigeria` variant is a WHO health-indicator mirror. Both are dropped.
 - The JONAPWD PDF **does** have a text layer (planning research wrongly said it was scanned). Values come out sorted rather than next to their labels, so validate the label→value mapping by hand against the rendered page. It is "All rights reserved": keep the PDF git-ignored in `data/sources/`, and cite figures rather than redistributing it.
 - The "71% vs 62% MPI poor" figure is unverified; compute it from the microdata.
-- NPC 2025 state projections aren't public; use NBS Demographic Bulletin 2023, cross-checked with WorldPop.
-- DHS registration is paused; use published DHS tables as a benchmark only.
-- GHS-Panel is only national/zone-representative; the full disability set is W5 only (W3 asks seeing and mobility).
+- NPC 2025 state projections aren't public. Denominators come from NBS Demographic Bulletin 2023 Annex 3 (state × sex), cross-checked with WorldPop v3.0 `state_pop_total_scaled.csv` (CC BY 4.0).
+- DHS registration is open again (it was reported paused during planning). Nigeria DHS 2024 microdata (full WG-SS) comes from dhsprogram.com, not the World Bank library.
+- GHS-Panel is only national/zone-representative. The full WG-SS is in W4 (`s4aq23`–`s4aq33`) and W5 (`s3q23`–`s3q28`); W3 asks only about seeing and walking.
 - Render Free cold start is about 1 minute.
 - `pymatchit-causal` and `StatsPAI` do exist, but aren't needed. `samplics` is deprecated — use `svy`.
 - Check that any other package exists and is maintained before adding it.

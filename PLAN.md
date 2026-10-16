@@ -36,12 +36,12 @@ About the author and setup:
 | `pymatchit-causal`, `StatsPAI` may not exist | Wrong: both exist and are active. Still not needed. |
 | Publish data files as GitHub Release assets | Won't work: Release downloads lack CORS headers, so DuckDB-WASM can't read them. Host Parquet inside the Pages site instead. |
 | `samplics` for survey statistics | Deprecated. Use `svy`, validated against R `survey`. |
-| GHS-Panel onset design | National/zone-representative only. The full disability question set is in W5 only; W3 asks only about seeing and mobility. About 1,400 households appear in every wave, about 5 years apart. **Only an exploratory version is feasible.** |
+| GHS-Panel onset design | National/zone-representative only. **P0 correction (2026-10-16):** the full WG-SS is in **W4 (2018/19) and W5 (2023/24)**, not W5 only; W3 asks only about seeing and walking. About 1,400 households appear in every wave. **Only an exploratory version is feasible**, but W4→W5 can cover all six domains. |
 | Streamlit | Improving, but you can't control the page markup. Dropped. |
 
 ### New findings
 
-- **DHS** registration is **paused** (US aid review). Use the published DHS tables as a benchmark only.
+- **DHS** registration was reported paused during planning. **As of 2026-10-16 it is open again**, and Nigeria DHS 2024 (with the full WG-SS) was released 2025-10-20. It is a candidate second prevalence source; deciding whether to use it is a P0 gate decision.
 - **Licensing (NBS / World Bank / DHS):** household-level microdata may **not** be republished, including inside a dashboard. Only aggregates can be public.
 - **Prior art:** `maidr` (Python accessible charts: keyboard, sound, braille, text) already exists. `a11yviz` (accessible plotnine/plotly/Quarto charts, WCAG 2.1, active since May 2026) also exists, so the planned name `a11y-viz` was unavailable: PyPI rejects names that match an existing project after removing `.-_` and mapping l/i→1, o→0. The library is renamed **`disability-access-charts`** and must stand apart from both maidr and a11yviz.
 - **dbt:** pin dbt-core 1.x, since v2 is alpha. Use the metaplane fork of dbt-expectations.
@@ -59,7 +59,7 @@ About the author and setup:
 - **API:** FastAPI on Render, **optional**. The site never depends on it.
 - **Poverty analysis:**
   - **Primary:** NBS MPI 2021, pre-registered, adjusted association using DoubleML, with sensemakr / E-values.
-  - **Secondary:** GHS W3→W5 onset event study (seeing/walking), labelled exploratory and underpowered.
+  - **Secondary:** GHS W4→W5 onset event study (all six WG-SS domains), labelled exploratory and underpowered.
 - **Population figures:** NBS 2023 bulletin, cross-checked against WorldPop.
 - **Author's story:** front and centre, in a README section and a narrated NVDA/keyboard walkthrough video.
 - **Stakeholder outreach:** later, once there's a demo.
@@ -143,7 +143,7 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
   - Estimate the poverty gap between households with and without a disabled member using DoubleML, controlling for confounders, with SEs.
   - Robustness: sensemakr / E-values, a placebo treatment, DoWhy refutations.
   - Reported as an **adjusted association**, not a causal effect.
-- **Exploratory (GHS):** event study on onset of seeing/walking difficulty (pyfixest, checked against R `did`), with power stated honestly.
+- **Exploratory (GHS):** event study on onset of difficulty between W4 and W5 (all six WG-SS domains; W3→W5 for seeing/walking only), using pyfixest checked against R `did`, with power stated honestly.
 - **Brief:** policy brief written via pandoc.
 - **Gate:** the brief is committed and the results page is live.
 

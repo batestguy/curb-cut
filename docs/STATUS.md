@@ -29,20 +29,26 @@ The one page to read first. It says where things stand and what happens next. Th
 
   Weights `hh_wgt` / `pop_wgt` / `indiv_wgt` are in Section A; senatorial district `a1b` and EA `a4` are there for the design.
 - JONAPWD PDF downloaded (git-ignored). It **has a text layer**, so no OCR is needed.
+- NBS email sent (2026-10-16) asking about publishing aggregates under an open licence, state-level adequacy, and any further terms.
+- NBS 2023 Demographic Bulletin datasheet obtained (git-ignored). Annex 3 gives state × sex 2023 projections; totals validated.
+- WorldPop v3.0 confirmed CC BY 4.0, with a ready-made state totals CSV for the cross-check.
+- GHS-Panel checked: **W4 and W5 both have all six WG-SS questions**; W3 has only seeing and walking.
+- Nigeria DHS 2024 is released, and DHS registration is open again.
 - Research checks logged with sources in `verification.md`.
 
 ## Blocked / waiting
 
 | Item | Waiting on | Since |
 |---|---|---|
-| NBS email on publishing aggregates (draft in Gmail) | **Author** to review and send; then NBS reply | 2026-10-16 |
+| NBS reply on publishing aggregates (sent from Gmail) | NBS | 2026-10-16 |
+| DHS account + project request (only if we adopt DHS 2024) | **Author** (account creation) | 2026-10-16 |
 | Gemini / Groq real quotas | Accounts (only needed at the alt-text step, P2) | 2026-10-16 |
 
 ## Next actions
 
-1. **Claude:** GHS-Panel W3/W4/W5 questionnaires: do they ask the same disability questions (D2)? Then download GHS W5 (World Bank catalog 6410) with the author's approval.
-2. **Claude:** check the Nigeria DHS 2024 access route (WB catalog 8029) as a second prevalence source. Also open the NBS 2023 bulletin Excel file for state-by-sex projections (D8), and confirm the WorldPop licence (D9).
-3. **Author:** send the NBS email; then the P0 gate review. After that, P1 starts.
+1. **Author: P0 gate review.** Decide (a) whether to add Nigeria DHS 2024 as a second prevalence source, and (b) whether to switch the exploratory panel to W4→W5.
+2. **Claude (after approval):** download GHS-Panel W4 and W5 (public use) into `data/restricted/`, then count the W4 households re-interviewed in W5 and compare response categories.
+3. **Claude:** start P1, the thin vertical slice: one JONAPWD state page → dbt staging → mart → Parquet → one accessible chart page on GitHub Pages.
 
 ## Decisions log
 
@@ -52,3 +58,4 @@ The one page to read first. It says where things stand and what happens next. Th
 | 2026-10-16 | Chart library renamed `disability-access-charts` (`a11y-viz` unavailable on PyPI). |
 | 2026-10-16 | JONAPWD ingest uses text extraction, not OCR. |
 | 2026-10-16 | Applications describe the author as an independent researcher. |
+| 2026-10-16 | All of `data/sources/` is git-ignored (third-party files are "All rights reserved"). |

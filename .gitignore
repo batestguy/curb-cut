@@ -46,4 +46,4 @@ Thumbs.db
 .idea/
 
 # Third-party source files: kept out of git until their licence is confirmed
-data/sources/**/*.pdf
+data/sources/
