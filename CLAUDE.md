@@ -18,7 +18,7 @@ Curb Cut is a zero-cost, accessible data platform for Nigerian disability data, 
 Public GitHub repo `curb-cut`, MIT. Main components:
 
 - **`disability-access-charts`** (Python, PyPI): accessible Plotly wrapper. Palettes, contrast checks (WCAG 2.2 SC 1.4.3 / 1.4.11), `audit(fig)` that runs in CI, `theme()`, an `disability-access-charts check` CLI, **alt-text checked against the data**, and a **data-table fallback** for every chart. It must stand apart from the existing `maidr` library. Data-derived alt-text is the default; LLM polish (Gemini → Groq) is optional, number-checked, cached, and only ever sees public aggregates.
-- **Ingest:** OCR of the JONAPWD 2025 PDF (scanned — needs docling/Tesseract, not pdfplumber), NBS MPI 2021 microdata (the main source), GHS-Panel W3–W5, NBS 2023 Demographic Bulletin projections, WorldPop and geoBoundaries (CC BY).
+- **Ingest:** text extraction from the JONAPWD 2025 PDF (it has a text layer: per-state Power BI pages, no OCR needed), NBS MPI 2021 microdata (the main source), GHS-Panel W3–W5, NBS 2023 Demographic Bulletin projections, WorldPop and geoBoundaries (CC BY).
 - **Warehouse:** dbt Core **1.x** on dbt-duckdb (v2 is alpha), with the metaplane fork of dbt-expectations, a state-name alias seed, and a provenance manifest.
 - **Analysis:** survey-weighted state prevalence (R `survey`, cross-checked with Python `svy`), Fay-Herriot small-area estimation (`sae`/`emdi`); pre-registered DoubleML adjusted association between disability and MPI poverty with sensemakr/E-values, placebo and DoWhy refutations; an exploratory GHS onset event study (pyfixest, checked against R `did`).
 - **Site:** static, semantic HTML built with Vite, on GitHub Pages. DuckDB-WASM queries Parquet files served from the Pages site. Charts render from disability-access-charts JSON produced at build time (Plotly spec, alt-text, data table, audit result). Claude writes the JS.
@@ -49,7 +49,7 @@ Never commit microdata, never send it to an LLM or any external service, and nev
 ## Corrected facts (don't reintroduce the spec's errors)
 
 - HF `electricsheepafrica/africa-disability-niger` covers **Niger**, not Nigeria; the `-nigeria` variant is a WHO health-indicator mirror. Both are dropped.
-- The JONAPWD PDF has no text layer — OCR it and measure accuracy by hand-checking a sample.
+- The JONAPWD PDF **does** have a text layer (planning research wrongly said it was scanned). Values come out sorted rather than next to their labels, so validate the label→value mapping by hand against the rendered page. It is "All rights reserved": keep the PDF git-ignored in `data/sources/`, and cite figures rather than redistributing it.
 - The "71% vs 62% MPI poor" figure is unverified; compute it from the microdata.
 - NPC 2025 state projections aren't public; use NBS Demographic Bulletin 2023, cross-checked with WorldPop.
 - DHS registration is paused; use published DHS tables as a benchmark only.

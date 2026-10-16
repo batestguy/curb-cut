@@ -18,7 +18,7 @@ About the author and setup:
 
 | Spec claim | Finding |
 |---|---|
-| JONAPWD PDF is extractable with pdfplumber | The 5.7 MB PDF has no text layer, so it is probably scanned. It needs OCR (docling / Tesseract). The "reliable data remains…" quote wasn't found outside the PDF itself. |
+| JONAPWD PDF is extractable with pdfplumber | Planning research said the PDF had no text layer and needed OCR. **P0 found that wrong (2026-10-16):** it has a text layer, and pages 14–50 are per-state Power BI exports. Text extraction works, but the numbers come out sorted rather than next to their labels, so the mapping must be hand-validated. The "reliable data remains…" quote wasn't found outside the PDF itself. |
 | HF `africa-disability-niger` = Nigerian disability data | It covers **Niger**. The `-nigeria` version is a WHO health-indicator mirror, not disability data. **Dropped.** |
 | NBS MPI 2021, 144 disability variables | **Confirmed.** Covers the six Washington Group difficulty areas (seeing, hearing, walking, communicating, self-care, remembering), ages 5+, answered by a household member on others' behalf, with state/LGA IDs and free registration. **This is the main source.** |
 | "71% vs 62% MPI poor" | **Not found.** We compute it ourselves from the microdata. |
@@ -88,7 +88,7 @@ Licensing makes this necessary.
 | Track | Showcase | 2-minute proof |
 |---|---|---|
 | Accessibility / frontend | disability-access-charts + site | axe/Lighthouse badge, NVDA walkthrough video, checked alt-text |
-| Data / analytics engineering | Two data zones + dbt + OCR ingest | dbt docs, data tests, provenance manifest, measured OCR accuracy, disclosure control |
+| Data / analytics engineering | Two data zones + dbt + PDF ingest | dbt docs, data tests, provenance manifest, measured extraction accuracy, disclosure control |
 | Data science / statistics | Survey-weighted state prevalence + small-area estimation | Map of the JONAPWD 15% vs survey estimates with CIs, methodology note |
 | Causal / econometrics | Pre-registered MPI analysis + exploratory panel | Pre-registration commit, DAG, sensitivity analysis, honest limits |
 | Backend | FastAPI | OpenAPI docs, tests, rate limiting |
@@ -113,7 +113,7 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 - **Gate:** CI green, and every check above written up in `docs/verification.md`.
 
 ### P1 — Thin vertical slice (weeks 1–2)
-- OCR one JONAPWD table → dbt staging model → one mart → Parquet.
+- Extract one JONAPWD table (text layer; no OCR needed) → dbt staging model → one mart → Parquet.
 - A one-page site shows one chart from disability-access-charts JSON, plus the data table, with DuckDB-WASM.
 - Playwright + axe run in CI; deploy to Pages.
 - **Gate:** the live URL works by keyboard and with NVDA, tested by the author.
@@ -126,7 +126,7 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 
 ### P3 — Restricted zone + warehouse (weeks 4–6)
 - Load MPI 2021, GHS W3–W5, NBS 2023 projections, WorldPop and geoBoundaries (CC BY).
-- **Measure OCR accuracy:** hand-check a sample of the JONAPWD tables and report the accuracy.
+- **Measure extraction accuracy:** hand-check a sample of the JONAPWD state pages against the rendered charts and report the accuracy.
 - **Warehouse:** alias seed, manifest, dbt tests with metaplane dbt-expectations, synthetic fixtures, dbt docs.
 - **Gate:** `dbt build` green on the fixtures, and the public aggregates pass the disclosure check.
 
