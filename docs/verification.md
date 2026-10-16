@@ -8,8 +8,8 @@ Status key: ☐ open · ☑ confirmed · ✗ contradicts the plan (stop and revi
 
 | # | Item | Status | Notes | Checked |
 |---|---|---|---|---|
-| A1 | PyPI account created, 2FA on | ☐ | | |
-| A2 | `disability-access-charts` claimed on PyPI by publishing 0.0.1 from CI via trusted publishing (`a11y-viz` was blocked as too similar to the existing `a11yviz`) | ☐ | | |
+| A1 | PyPI account created, 2FA on | ☑ | 2FA is mandatory on PyPI | 2026-10-16 |
+| A2 | `disability-access-charts` claimed on PyPI by publishing 0.0.1 from CI via trusted publishing (`a11y-viz` was blocked as too similar to the existing `a11yviz`) | ☑ | 0.0.1 published by run 38858669507; fresh `pip install` verified. https://pypi.org/p/disability-access-charts | 2026-10-16 |
 | A3 | NBS microdata portal registration | ☐ | | |
 | A4 | World Bank Microdata Library registration | ☐ | | |
 | A5 | DHS Program registration (optional; paused as of 2026-10-16) | ☐ | | |
@@ -51,9 +51,9 @@ Status key: ☐ open · ☑ confirmed · ✗ contradicts the plan (stop and revi
 | # | Item | Status | Checked |
 |---|---|---|---|
 | R1 | uv workspace, ruff, pyright, pytest pass locally (Python 3.12.13) | ☑ | 2026-10-16 |
-| R2 | renv 1.3.0 initialised (R 4.5.2, explicit snapshots); `renv.lock` to be committed | ☑ | 2026-10-16 |
+| R2 | renv 1.3.0 initialised (R 4.5.2, explicit snapshots); `renv.lock` committed | ☑ | 2026-10-16 |
 | R3 | pre-commit installed; restricted-zone guard blocks a staged `data/restricted/` file | ☑ | 2026-10-16 |
-| R4 | GitHub repo `curb-cut` created; CI green on `main` | ☐ | |
+| R4 | GitHub repo `curb-cut` created (public); CI green on `main` (run 38858560202) | ☑ | 2026-10-16 |
 
 ## P0 gate
 
