@@ -1,0 +1,27 @@
+[project]
+name = "disability-access-charts"
+version = "0.0.1"
+description = "Accessible Plotly charts: alt-text checked against the data, a CI-ready audit, and a data-table fallback for every chart"
+readme = "README.md"
+requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["accessibility", "a11y", "disability", "wcag", "charts", "plotly", "screen-reader"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Intended Audience :: Science/Research",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/batestguy/curb-cut"
+Issues = "https://github.com/batestguy/curb-cut/issues"
+
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/disability_access_charts"]

@@ -1,0 +1,43 @@
+name: Publish disability-access-charts
+
+# Push a tag like `charts-v0.0.1` to publish. Uses PyPI trusted publishing (OIDC):
+# no API token is stored anywhere. PyPI trusts this exact workflow file + environment.
+on:
+  push:
+    tags: ["charts-v*"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - name: Check tag matches package version
+        run: |
+          pkg=$(uv run --no-project python -c "import tomllib;print(tomllib.load(open('packages/disability-access-charts/pyproject.toml','rb'))['project']['version'])")
+          [ "charts-v$pkg" = "$GITHUB_REF_NAME" ] || { echo "Tag $GITHUB_REF_NAME != charts-v$pkg"; exit 1; }
+      - name: Test
+        run: uv sync --locked && uv run pytest packages/disability-access-charts
+      - name: Build
+        run: uv build --package disability-access-charts --out-dir dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/disability-access-charts
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

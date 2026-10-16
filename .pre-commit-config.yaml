@@ -1,0 +1,31 @@
+exclude: ^(CurbCut\.txt|renv/activate\.R)$  # original spec kept verbatim; renv-generated file
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ["--maxkb=10240"]
+      - id: check-yaml
+      - id: check-toml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.17.1
+    hooks:
+      - id: ruff-check
+        args: ["--fix"]
+      - id: ruff-format
+  - repo: local
+    hooks:
+      - id: block-restricted-data
+        name: Block restricted-zone files (licensed microdata)
+        entry: "Files under data/restricted/ must never be committed"
+        language: fail
+        files: ^data/restricted/
+      - id: block-duckdb-files
+        name: Block DuckDB files (public data ships as Parquet)
+        entry: "DuckDB files must not be committed"
+        language: fail
+        files: \.duckdb(\.wal)?$

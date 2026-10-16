@@ -1,0 +1,9 @@
+Type: Project
+Package: curbcut
+Title: Curb Cut R analysis environment
+Version: 0.0.0
+Description: R side of Curb Cut (survey estimates, small-area estimation, DiD
+    cross-checks). Dependencies are added to Imports as each phase needs them;
+    renv snapshots only what is listed here (snapshot.type = "explicit").
+License: MIT + file LICENSE
+Encoding: UTF-8

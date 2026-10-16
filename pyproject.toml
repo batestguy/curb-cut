@@ -1,0 +1,43 @@
+[project]
+name = "curb-cut"
+version = "0.0.0"
+description = "Accessible, zero-cost data platform for Nigerian disability data"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/*"]
+
+[tool.uv.sources]
+disability-access-charts = { workspace = true }
+
+[dependency-groups]
+dev = [
+    "disability-access-charts",
+    "pre-commit>=4",
+    "pyright>=1.1.400",
+    "pytest>=8",
+    "pytest-cov>=6",
+    "ruff>=0.12",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
+
+[tool.pyright]
+include = ["packages"]
+pythonVersion = "3.12"
+typeCheckingMode = "standard"
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+testpaths = ["packages"]
+addopts = "--import-mode=importlib"

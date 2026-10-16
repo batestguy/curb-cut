@@ -1,0 +1,480 @@
+PROJECT: Curb Cut — An Accessible, Zero-Cost Disability Data Platform for Nigeria
+A full specification for an AI agent to execute end-to-end.
+
+1. Problem Statement
+Nigeria has an estimated 35 million persons with disabilities, yet the data ecosystem is fragmented across PDF reports, closed registries, and inconsistent survey microdata. The 2025 JONAPWD Assumptive Data report acknowledges that "reliable data remains one of the most significant gaps" and calls for "more robust national data systems, disability registries, and inclusive statistical frameworks." Policymakers, advocates, and researchers cannot easily query, compare, or visualize disability prevalence, poverty intersection, or accessibility gaps across states.
+
+Simultaneously, data tools themselves are rarely accessible. Screen-reader users, keyboard-only users, and wheelchair users who rely on assistive technology are excluded from the very dashboards meant to serve them.
+
+Curb Cut solves both problems with one platform: a zero-cost, end-to-end data system that unifies fragmented public disability data into an accessible, queryable interface — and publishes the accessibility layer as a reusable open-source Python package.
+
+2. Expected Solution
+A monorepo platform with six layers:
+
+Layer	Artifact	Purpose
+Accessibility	a11y-viz on PyPI	WCAG-compliant plotting wrappers, auto alt-text, colorblind-safe palettes
+Ingest	Source-specific loaders	Extract JONAPWD PDFs, NBS microdata, Hugging Face datasets into a unified raw layer
+Warehouse	DuckDB + dbt models	Transform raw data into staging and marts with parameterized prevalence models
+Analysis	Causal inference module	Estimate disability–poverty effect using doubly robust estimation
+Serving	FastAPI + OpenAPI	Expose marts as a documented, read-only public API
+Presentation	Streamlit app + MkDocs	Accessible Explorer app consuming the API, with a data dictionary and methodology docs
+The unifying principle: the a11y-viz package sits at the bottom, consumed by the API (alt-text in JSON), the Streamlit app (every chart), and the docs (every diagram). This makes accessibility architecture, not an afterthought.
+
+3. Non-Negotiable Constraint: Total Free Tier
+Every component must operate at $0/month. The following verified limits govern all design decisions:
+
+Component	Service	Free-Tier Limit	Source
+CI/CD	GitHub Actions (public repo)	Unlimited minutes, 20 concurrent jobs, 10 GB cache per repo	
+CI/CD (private fallback)	GitHub Actions Free	2,000 min/month, 500 MB storage	
+Warehouse	DuckDB (embedded)	MIT license, no limits, single-file, no concurrent writers	
+dbt	dbt Core + DuckDB adapter	Free, local execution, some Snowflake functions unavailable	
+Database (API serving)	Neon Free	1 GB storage/project, 100 projects, 100 CU-hours/month, scale-to-zero after 5 min	
+Database (alternative)	Supabase Free	500 MB, 2 projects, pauses after 1 week inactivity	
+API hosting	Render Free	512 MB RAM, 0.1 CPU, spins down after 15 min idle, 30+ sec cold start	
+App hosting	Hugging Face Spaces (Static)	Free, no limit, no compute	
+App hosting (compute)	HF Spaces CPU Basic	2 vCPU, 16 GB RAM, paused after 15 min inactivity	
+App hosting (alternative)	Streamlit Community Cloud	1 GB RAM, 1 CPU, unlimited public apps, sleeps after 12h–7d	
+Docs	GitHub Pages + MkDocs	Free, unlimited	—
+Package registry	PyPI	Free	—
+LLM (alt-text)	Gemini Flash	1,500 requests/day, 1M TPM	
+LLM (alt-text fallback)	Groq	30 RPM, 1,000–14,400 RPD, 40K TPM	
+Critical constraint: Hugging Face Spaces now requires a paid plan for Gradio and Docker Spaces on free personal accounts. Design for Static Spaces or Streamlit Community Cloud as the primary deployment target. If compute-backed Spaces are needed, use ZeroGPU (limited to 2 per account) or request a community grant. For Curb Cut, Static Spaces is sufficient if the app is pure client-side, but a Streamlit app requires compute. Recommended: deploy the Streamlit app on Streamlit Community Cloud and the static docs on HF Spaces.
+
+4. Phase-by-Phase Workflow
+PHASE 0: Repository Bootstrap (Day 1–2)
+Goal: Create the monorepo skeleton with CI that runs on every push.
+
+Deliverables:
+
+GitHub repository curb-cut (public, MIT license)
+
+Directory structure (see Section 5)
+
+.github/workflows/ci.yml — runs linting (ruff), type-checking (mypy), and tests (pytest) on every push to main and every PR
+
+README.md with the hero pitch and five clickable links (placeholder URLs initially)
+
+pyproject.toml at root with workspace configuration
+
+Free-tier check: Public repo → GitHub Actions unlimited. No cloud services invoked. $0.
+
+Agent instruction: Initialize with uv or poetry workspace. Use ruff for linting and formatting. Configure pytest with coverage reporting to Codecov (free for public repos).
+
+PHASE 1: a11y-viz Package (Week 1–2)
+Goal: Ship a focused, accessible plotting library to PyPI before building anything else. This is the load-bearing piece; it validates the accessibility thesis and produces a verifiable external artifact.
+
+Modules:
+
+Module	Function	WCAG Reference
+a11y_viz.plots	bar(), line(), scatter() — thin wrappers over Plotly	—
+a11y_viz.contrast	Contrast ratio checker; warns or raises on failure	WCAG 2.2 SC 1.4.3 (4.5:1 minimum)
+a11y_viz.alttext	LLM-generated alt-text from dataframe + chart spec, cached to disk	WCAG 2.2 SC 1.1.1
+a11y_viz.keyboard	Emits keyboard-navigation metadata for interactive charts	WCAG 2.2 SC 2.1.1
+a11y_viz.palettes	Colorblind-safe palettes as constants (Okabe-Ito, Tol)	—
+Public API:
+
+python
+from a11y_viz import bar
+fig = bar(
+    df, x="state", y="estimated_pwd",
+    title="Estimated persons with disabilities by state",
+    alt_text="auto",          # LLM-generated, cached
+    palette="okabe_ito",      # colorblind-safe
+    strict_contrast=True,     # raise on WCAG failure
+)
+Free-tier dependencies:
+
+LLM alt-text: Gemini Flash (1,500 RPD) with Groq (1,000 RPD per model) as fallback. Cache aggressively to stay within limits.
+
+PyPI publishing: free via GitHub Actions trusted publishing (no API token needed if using OIDC)
+
+Testing: pytest + pytest-cov, no paid services
+
+Deliverables:
+
+packages/a11y-viz/ with source, tests, and pyproject.toml
+
+Published to PyPI as a11y-viz==0.1.0
+
+README with three copy-pasteable examples
+
+GitHub Actions workflow for automated PyPI publishing on tag
+
+Gate: pip install a11y-viz works and produces a WCAG-compliant chart with auto alt-text.
+
+Improvements over prior plan:
+
+Add a11y_viz.audit() — a function that takes an existing Plotly figure and returns a list of WCAG violations, so users can retrofit accessibility onto existing charts.
+
+Add a11y_viz.theme() — a context manager that applies accessible defaults globally.
+
+Include a --check CLI mode (a11y-viz check chart.html) for CI integration in other projects.
+
+Publish to conda-forge as a secondary distribution channel (free, community-maintained).
+
+PHASE 2: Ingest + Warehouse (Week 3–4)
+Goal: Land two heterogeneous public sources into DuckDB and build dbt staging models.
+
+Sources (Phase 2 scope — keep it to two):
+
+Source	Format	Ingestion Method	Key Variables
+JONAPWD Assumptive Data 2025	PDF (tables)	pdfplumber + regex extraction, with manual validation	State, disability cluster, gender, estimated count
+Hugging Face electricsheepafrica/africa-disability-niger	Parquet	datasets library	Disability indicators by state
+Additional sources (queued for Phase 3):
+
+NBS Nigeria Multidimensional Poverty Index Survey 2021 (microdata .dta) — contains DISABILITY FOR 5 YEARS AND ABOVE section with 144 variables 
+
+NPC population projections 2025
+
+Zenodo Northern Nigeria PWD livelihood dataset
+
+Warehouse design:
+
+text
+raw.jonapwd_assumptive        # PDF-extracted table, loaded_at, source_hash
+raw.hf_africa_disability      # Parquet, as-is
+staging.stg_jonapwd__assumptive   # Cleaned, typed, state-normalized
+staging.stg_hf__disability        # Cleaned, joined to state codes
+marts.dim_states                 # State dimension with geopolitical zone
+marts.fct_disability_prevalence  # Unified prevalence by state × cluster × gender
+dbt configuration:
+
+dbt-duckdb adapter (free, local)
+
+profiles.yml pointing to data/curbcut.duckdb
+
+Tests: not_null, unique, accepted_values on all keys
+
+Sources defined in sources.yml with freshness checks
+
+Free-tier check: DuckDB is MIT-licensed, no infrastructure. dbt Core is free. GitHub Actions runs dbt build on every push. $0.
+
+Deliverables:
+
+packages/ingest/ with source-specific loaders
+
+packages/transform/ as a dbt project
+
+data/curbcut.duckdb committed to repo (keep under 50 MB)
+
+CI workflow that runs dbt build and dbt test
+
+Gate: dbt build succeeds and marts.fct_disability_prevalence is queryable.
+
+Improvements over prior plan:
+
+Add a source_metadata table tracking provenance, extraction confidence, and manual corrections for every ingested record.
+
+Add a state_name_aliases seed to handle inconsistent state naming across sources (e.g., "Akwa Ibom" vs "Akwa-Ibom").
+
+Use dbt-expectations for more expressive data quality tests.
+
+Commit the DuckDB file to the repo so the API can serve it without a separate database service. This avoids the Neon/Supabase cold-start problem entirely for the API layer.
+
+PHASE 3: Prevalence Module + Sensitivity Analysis (Week 5–6)
+Goal: Rebuild the JONAPWD Assumptive Data methodology as a parameterized, reproducible model with sensitivity analysis.
+
+Method:
+JONAPWD applied a 15% global prevalence benchmark to NPC 2025 population projections. The module implements this as a parameterized function and stress-tests the assumption.
+
+dbt models:
+
+text
+marts.fct_prevalence_sensitivity
+  -- columns: state, disability_cluster, gender, prevalence_rate (10–18%),
+  --          estimated_count, scenario_label
+Sensitivity grid:
+
+Scenario	Prevalence Rate	Rationale
+Low	10%	WHO lower-bound estimate
+Conservative	12%	Nigeria-specific survey-adjusted
+JONAPWD baseline	15%	Global benchmark used by JONAPWD
+High	18%	Upper-bound from household surveys
+Deliverables:
+
+transform/models/prevalence/ with parameterized models
+
+A sensitivity table queryable from DuckDB
+
+A written methodology note (Markdown) documenting the divergence between benchmark-based and survey-based estimates
+
+Visualization of the sensitivity grid in the Streamlit app (Phase 4)
+
+Free-tier check: All computation in DuckDB locally. No cloud services. $0.
+
+Gate: A sensitivity table exists as a queryable artifact, and the methodology note is committed.
+
+Improvements over prior plan:
+
+Add a prevalence_rate seed table so the sensitivity grid is configurable without editing SQL.
+
+Add confidence intervals using a simple Monte Carlo simulation over prevalence rate uncertainty (run in DuckDB with random()).
+
+Compare against NBS MPI estimates where available (71% of individuals in households with a disabled person are multidimensionally poor vs. 62% without) .
+
+PHASE 4: API + Accessible Explorer App (Week 7–8)
+Goal: Deploy a public API and a live, accessible Streamlit app that a stranger can use.
+
+API design (FastAPI):
+
+text
+GET /health
+GET /states                          # list all states
+GET /prevalence?state=Kano&cluster=physical&gender=female
+GET /prevalence/sensitivity?state=Kano
+GET /poverty?state=Kano             # from Phase 5, placeholder initially
+GET /openapi.json                    # auto-generated by FastAPI
+API serving strategy — the critical decision:
+
+Option	Pros	Cons	Recommendation
+Read DuckDB directly	No cold start, no separate service, fast	DuckDB file must be shipped with API container	✅ Primary
+Neon Postgres	Managed, scales to zero, 1 GB free	5-min cold start, separate service	Fallback if DuckDB file >50 MB
+Supabase Postgres	Familiar interface	500 MB limit, pauses after 1 week	Not recommended
+Recommended architecture: The API reads from the committed DuckDB file. Deploy on Render Free (512 MB RAM, 0.1 CPU). The cold start (~30 sec) is acceptable for a portfolio demo. Add a /health endpoint that triggers a warm-up query.
+
+Streamlit app design:
+
+Page 1: State Explorer — select state, view prevalence by cluster and gender, download CSV
+
+Page 2: Sensitivity — interactive slider for prevalence rate, see estimates shift
+
+Page 3: Poverty Intersection — disability–poverty effect estimates (Phase 5)
+
+Page 4: Data Dictionary — searchable variable catalog
+
+Every chart rendered through a11y-viz
+
+Keyboard-navigable: all interactive elements reachable via Tab; no mouse-only interactions
+
+Screen-reader compatible: semantic HTML, ARIA labels on all charts
+
+Deployment:
+
+API: Render Free (or Fly.io if $5 credit is acceptable; otherwise Render)
+
+App: Streamlit Community Cloud (1 GB RAM, sleeps after inactivity, wakes on visit) 
+
+Docs: GitHub Pages with MkDocs
+
+Free-tier check: Render Free spins down after 15 min. Streamlit sleeps after inactivity. Both acceptable for portfolio. $0.
+
+Deliverables:
+
+packages/api/ with FastAPI app, OpenAPI spec, and tests
+
+apps/explorer/ with Streamlit app
+
+Public URLs for API and app
+
+README updated with live links
+
+Gate: A public URL a stranger can use without instructions.
+
+Improvements over prior plan:
+
+Add a /compare endpoint that takes two states and returns a diff of prevalence and poverty indicators.
+
+Add CSV and JSON download on every Explorer view.
+
+Add a "methodology" page in the app that explains the Assumptive Data and sensitivity analysis in plain language.
+
+Add a /health endpoint that triggers a warm-up query, so the first user request is not the cold start.
+
+Add rate limiting (in-memory, no Redis) to prevent abuse of the free-tier API.
+
+PHASE 5: Causal Inference Module (Week 9–10)
+Goal: Estimate the causal effect of disability on multidimensional poverty using NBS MPI microdata.
+
+Method:
+
+Treatment: Household has at least one person with a disability (binary)
+
+Outcome: Multidimensional poverty status (binary or index)
+
+Confounders: Age, household size, education, urban/rural, geopolitical zone
+
+Estimator: Propensity score matching (PSM) with doubly robust estimation
+
+Heterogeneity: Causal forest or meta-learners by state and disability type
+
+Libraries:
+
+pymatchit-causal for PSM (free, open-source)
+
+DoubleML for doubly robust estimation (free)
+
+econml for causal forests (free)
+
+StatsPAI as an alternative unified toolkit
+
+Data:
+
+NBS MPI 2021 microdata (.dta files) — requires registration at microdata.nigerianstat.gov.ng. Verify access before Phase 5. If denied, fall back to Nigeria DHS or MICS 2021 child functioning module.
+
+Deliverables:
+
+packages/models/ with PSM and doubly robust implementations
+
+A policy brief (Markdown → PDF via pandoc) with effect estimates, confidence intervals, and plain-language interpretation
+
+API endpoint /poverty/effect?state=Kano serving the estimates
+
+Explorer app page visualizing heterogeneous effects
+
+Free-tier check: All computation local. Policy brief generated with pandoc (free). $0.
+
+Gate: An effect estimate with confidence intervals and a written brief.
+
+Improvements over prior plan:
+
+Add a refutation step using DoWhy to test the robustness of the estimate to unobserved confounding.
+
+Add a placebo test using a pseudo-treatment (e.g., random assignment) to validate the pipeline.
+
+Report both ATT and ATE with standard errors.
+
+Document the ignorability assumption explicitly and discuss its plausibility.
+
+PHASE 6: Documentation, Data Dictionary, and Launch (Week 11–12)
+Goal: Make the entire platform understandable in 90 seconds.
+
+Deliverables:
+
+Artifact	Format	Tool
+Landing page	Markdown → HTML	MkDocs with Material theme
+Data dictionary	Table	dbt docs generate + custom page
+OpenAPI spec	JSON/YAML	FastAPI auto-generated
+Architecture diagram	Mermaid	Rendered in README and docs
+Methodology note	Markdown	Committed in repo
+Policy brief	PDF	pandoc from Markdown
+Two blog posts	Markdown	Dev.to and Medium (free)
+Blog post 1: "Building WCAG-compliant data visualizations in Python" — technical, code-heavy, targets the a11y-viz audience.
+
+Blog post 2: "Estimating disability prevalence when the data doesn't exist" — domain-heavy, targets the data science and global development audience.
+
+README hero section:
+
+text
+# Curb Cut
+An open, accessible data platform for Nigeria's disability data.
+Ingests fragmented public sources → models prevalence and its causal
+relationship to poverty → serves findings through an accessible web app
+and a documented public API. Built entirely on free tiers.
+
+[Live Explorer] [API Docs] [PyPI] [Architecture] [Policy Brief]
+Free-tier check: GitHub Pages free, MkDocs free, pandoc free, Dev.to/Medium free. $0.
+
+Gate: A recruiter can understand the whole thing in 90 seconds.
+
+Improvements over prior plan:
+
+Add a /status page in the API that shows data freshness, last pipeline run, and source health.
+
+Add a "Cite this" section with a DOI from Zenodo (free for open-source projects).
+
+Add a CONTRIBUTING.md with instructions for adding new data sources.
+
+Add a CHANGELOG.md generated from conventional commits.
+
+5. Repository Structure (Final)
+text
+curb-cut/
+├── packages/
+│   ├── a11y-viz/                 # PyPI: accessible plotting wrappers
+│   │   ├── src/a11y_viz/
+│   │   │   ├── plots.py
+│   │   │   ├── contrast.py
+│   │   │   ├── alttext.py
+│   │   │   ├── keyboard.py
+│   │   │   ├── palettes.py
+│   │   │   └── audit.py
+│   │   ├── tests/
+│   │   └── pyproject.toml
+│   ├── ingest/                   # source-specific loaders
+│   │   ├── sources/jonapwd_pdf.py
+│   │   ├── sources/hf_datasets.py
+│   │   ├── sources/nbs_microdata.py
+│   │   └── sources/npc_projections.py
+│   ├── transform/                # dbt project
+│   │   ├── models/staging/
+│   │   ├── models/marts/
+│   │   ├── models/prevalence/
+│   │   ├── seeds/
+│   │   └── dbt_project.yml
+│   ├── models/                   # causal inference
+│   │   ├── psm.py
+│   │   ├── doubly_robust.py
+│   │   ├── causal_forest.py
+│   │   └── refutation.py
+│   └── api/                      # FastAPI
+│       ├── routes/
+│       ├── schemas/
+│       └── main.py
+├── apps/
+│   ├── explorer/                 # Streamlit
+│   │   ├── pages/
+│   │   ├── app.py
+│   │   └── requirements.txt
+│   └── docs/                     # MkDocs
+│       ├── index.md
+│       ├── methodology.md
+│       ├── data-dictionary.md
+│       └── mkdocs.yml
+├── data/
+│   └── curbcut.duckdb            # committed, <50MB
+├── .github/workflows/
+│   ├── ci.yml
+│   ├── refresh-data.yml          # weekly cron
+│   └── publish-a11y-viz.yml
+├── scripts/
+│   └── extract_pdf.py            # one-off PDF extraction
+├── README.md
+├── CONTRIBUTING.md
+├── CHANGELOG.md
+└── LICENSE                       # MIT
+6. Free-Tier Operational Playbook
+Risk	Mitigation
+GitHub Actions minutes exhausted (private repo fallback)	Use public repo → unlimited. For private forks, keep CI lean: only run ruff + pytest on PR, not on every push.
+HF Spaces requires paid plan for compute	Deploy Streamlit app on Streamlit Community Cloud instead. Use HF Spaces only for static docs. 
+Render cold starts	Accept 30-sec cold start for portfolio. Add /health warm-up endpoint.
+Neon scale-to-zero	DuckDB file in repo eliminates this. Only use Neon if DuckDB >50 MB.
+LLM rate limits	Cache alt-text to disk. Use Gemini Flash (1,500 RPD) with Groq fallback (1,000 RPD). Batch requests where possible.
+NBS microdata access denied	Verify access before Phase 5. Fallback: Nigeria DHS, MICS 2021.
+dbt DuckDB limitations	Avoid Snowflake-specific SQL. Test dbt build locally before pushing.
+Streamlit app sleeps	Accept 30–60 sec wake time. Document it in the app.
+7. Agent Execution Instructions
+Feed this entire document to the agent. The agent should:
+
+Start with Phase 0 — bootstrap the repo, CI, and directory structure.
+
+Execute Phase 1 — build and publish a11y-viz before touching any data. This is non-negotiable.
+
+Execute Phase 2 — ingest two sources only. Do not add a third until staging models pass tests.
+
+Execute Phase 3 — parameterize prevalence, run sensitivity, write the methodology note.
+
+Execute Phase 4 — deploy API and app. The API must be live before Phase 5.
+
+Execute Phase 5 — causal inference. Verify microdata access first.
+
+Execute Phase 6 — docs, data dictionary, launch.
+
+After each phase, update the README hero section with the new live link.
+
+After each phase, write a short changelog entry.
+
+Never introduce a paid service. If a free tier is insufficient, redesign the component to use DuckDB or a static file.
+
+The agent should ask for human review at each gate. The gates exist because scope creep is the primary failure mode.
+
+8. Why This Project Wins
+Recruiter Question	Curb Cut Answer
+"Can you ship?"	Live URL, PyPI package, documented API
+"Can you handle messy data?"	Five heterogeneous sources: PDF, Parquet, Stata, Hugging Face, CSV
+"Can you model?"	Prevalence sensitivity + doubly robust causal inference
+"Can you engineer?"	dbt + DuckDB warehouse, FastAPI, CI/CD, monorepo
+"Do you understand users?"	Built from a wheelchair, tested with screen readers and keyboard-only navigation
+"Can you communicate?"	Two blog posts, a policy brief, and a 90-second README
+"Can you do all this for free?"	Every component is on a verified free tier. $0/month.
+The one-sentence version: Curb Cut is a zero-cost, accessible data platform where the plotting library, the warehouse, the prevalence model, the causal analysis, and the API are all layers of one system — and that system is live, clickable, and free.
+

@@ -1,0 +1,46 @@
+# --- Restricted zone: licensed microdata must never be committed ---
+data/restricted/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Local databases (public data ships as Parquet, not DuckDB)
+*.duckdb
+*.duckdb.wal
+
+# LLM alt-text cache is local; regenerate from data
+.disability_access_charts_cache/
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# Node / site
+node_modules/
+site/dist/
+
+# R / renv
+.Rhistory
+.RData
+.Rproj.user/
+
+# Secrets
+.env
+.env.*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
