@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current state
 
-Phase **P0** (accounts, checks, bootstrap) is in progress. The repo scaffold and tooling exist; the account and verification checks in `docs/verification.md` are still open.
+Phase **P1** (thin vertical slice) is in progress. P0 passed its gate on 2026-10-16; its evidence is in `docs/verification.md`.
 
 - **Start with `docs/STATUS.md`:** phase states, blockers, next actions and the decisions log. Update it at the end of every working session and at each gate.
 - **`PLAN.md` is the source of truth** (agreed 2026-10-16). Read the section for the current phase before starting work.
