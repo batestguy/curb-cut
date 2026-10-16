@@ -67,6 +67,6 @@ Never commit microdata, never send it to an LLM or any external service, and nev
 - **Publishing:** `.github/workflows/publish-charts.yml` publishes `disability-access-charts` to PyPI via trusted publishing (environment `pypi`) when a `charts-v<version>` tag is pushed; the tag must match the version in its `pyproject.toml`. The library was going to be `a11y-viz`, but PyPI blocks that as too similar to the existing `a11yviz`.
 - **CI** (`.github/workflows/ci.yml`): uv sync, a restricted-data guard, ruff, pyright, pytest with coverage. dbt build on fixtures, axe and Lighthouse jobs are added in P1.
 
-Still to come: dbt (`dbt build` / `dbt test` on synthetic fixtures), the Vite site with Playwright + axe and Lighthouse CI,
+Still to come: dbt (`dbt build` / `dbt test` on synthetic fixtures), and the Vite site with Playwright + axe and Lighthouse CI.
 
 P0 verification results go in `docs/verification.md`, each with source URL and date.
