@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Phase **P0** (accounts, checks, bootstrap) is in progress. The repo scaffold and tooling exist; the account and verification checks in `docs/verification.md` are still open.
 
+- **Start with `docs/STATUS.md`:** phase states, blockers, next actions and the decisions log. Update it at the end of every working session and at each gate.
 - **`PLAN.md` is the source of truth** (agreed 2026-10-16). Read the section for the current phase before starting work.
 - `CurbCut.txt` is the original spec, kept for the record. Where it disagrees with `PLAN.md`, `PLAN.md` wins — many of its claims turned out wrong (see "Corrected facts").
 
