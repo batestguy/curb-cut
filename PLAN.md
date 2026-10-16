@@ -61,6 +61,7 @@ About the author and setup:
   - **Primary:** NBS MPI 2021, pre-registered, adjusted association using DoubleML, with sensemakr / E-values.
   - **Secondary:** GHS W4→W5 onset event study (all six WG-SS domains), labelled exploratory and underpowered.
 - **Population figures:** NBS 2023 bulletin, cross-checked against WorldPop.
+- **P0 gate (2026-10-16):** Nigeria DHS 2024 is added as a second prevalence source (P3 load, P4 estimate side by side with MPI 2021). The exploratory panel uses GHS W4→W5.
 - **Author's story:** front and centre, in a README section and a narrated NVDA/keyboard walkthrough video.
 - **Stakeholder outreach:** later, once there's a demo.
 

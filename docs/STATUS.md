@@ -2,14 +2,14 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-16 · **Current phase:** P0 — accounts, checks, bootstrap
+**Last updated:** 2026-10-16 · **Current phase:** P1 — thin vertical slice
 
 ## Phases
 
 | Phase | State | Gate |
 |---|---|---|
-| P0 Accounts, checks, bootstrap | 🟡 in progress | CI green ✅ · every check in `verification.md` confirmed or decided ⏳ · author review ⏳ |
-| P1 Thin vertical slice | ⚪ not started | Live URL works by keyboard and with NVDA (author-tested) |
+| P0 Accounts, checks, bootstrap | ✅ done 2026-10-16 (author sign-off) | CI green ✅ · checks confirmed or decided ✅ · author review ✅ |
+| P1 Thin vertical slice | 🟡 in progress | Live URL works by keyboard and with NVDA (author-tested) |
 | P2 disability-access-charts 0.1 | ⚪ not started (0.0.1 contrast checks published) | Clean install reproduces examples; LLM mocked in tests |
 | P3 Restricted zone + warehouse | ⚪ not started | `dbt build` green on fixtures; disclosure check passes |
 | P4 Prevalence | ⚪ not started | Map and comparison live |
@@ -46,8 +46,8 @@ The one page to read first. It says where things stand and what happens next. Th
 
 ## Next actions
 
-1. **Author: P0 gate review.** Decide (a) whether to add Nigeria DHS 2024 as a second prevalence source, and (b) whether to switch the exploratory panel to W4→W5.
-2. **Claude (after approval):** download GHS-Panel W4 and W5 (public use) into `data/restricted/`, then count the W4 households re-interviewed in W5 and compare response categories.
+1. **Author:** create a DHS Program account; Claude drafts the project request.
+2. **Claude:** download GHS-Panel W4 and W5 (public use) into `data/restricted/`, then count the W4 households re-interviewed in W5 and compare response categories.
 3. **Claude:** start P1, the thin vertical slice: one JONAPWD state page → dbt staging → mart → Parquet → one accessible chart page on GitHub Pages.
 
 ## Decisions log
@@ -59,3 +59,4 @@ The one page to read first. It says where things stand and what happens next. Th
 | 2026-10-16 | JONAPWD ingest uses text extraction, not OCR. |
 | 2026-10-16 | Applications describe the author as an independent researcher. |
 | 2026-10-16 | All of `data/sources/` is git-ignored (third-party files are "All rights reserved"). |
+| 2026-10-16 | **P0 gate passed.** Nigeria DHS 2024 is adopted as a second prevalence source next to MPI 2021. The exploratory panel uses GHS W4→W5 (all six WG-SS domains). |

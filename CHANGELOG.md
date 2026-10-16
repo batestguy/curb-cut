@@ -4,6 +4,8 @@ All notable changes to this project are documented here. Entries follow [Convent
 
 ## [Unreleased]
 
+## P0 — 2026-10-16
+
 ### Added
 - Project plan (`PLAN.md`) and verification log (`docs/verification.md`).
 - uv workspace with ruff, pyright and pytest; renv; pre-commit with a restricted-data guard; CI workflow.
