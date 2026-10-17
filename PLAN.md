@@ -153,6 +153,26 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 ### P4 — Prevalence (weeks 6–7)
 - Survey-weighted state prevalence by difficulty type and sex, with SEs (R `survey`, cross-checked with `svy`).
 - Fay-Herriot small-area estimation for small-sample states.
+- **Spatial analysis (on measured prevalence only)** (added 2026-10-17):
+  - **Never on JONAPWD.** Its figures are 15% of population (r = 0.998 with NBS 2023 state population, checked 2026-10-17; `docs/verification.md` D17), so a spatial result would only reflect population. Say this in the methodology note.
+  - **Spatial Fay-Herriot.** Small-area estimates where neighbouring states share strength through a spatial random effect, compared with the plain FH model by MSE/CV.
+    - Neighbours: queen contiguity from the committed geoBoundaries file (`data/public/geoboundaries/`).
+    - Candidate: `sae::eblupSFH`. Check that the package is maintained before adding it, and add it to `DESCRIPTION` Imports before `renv::snapshot()`.
+    - If FH fails for a state, report the direct estimate with its CV.
+  - **Moran's I.** One global test per difficulty domain, on the survey estimates, with a permutation p-value (e.g. `spdep::moran.mc`), against the same contiguity weights. Report it in words, e.g. "Difficulty seeing is / is not geographically clustered (I = …, p = …)".
+  - **LISA hotspots and clustering: exploratory.**
+    - LISA flags states that are high or low together with their neighbours. Correct for multiple comparisons and label results exploratory, since 37 units is few. Consider senatorial districts (MPI design: 3 per state, 109) if the district-level estimates are precise enough.
+    - Cluster states by their profile across the six WG-SS domains (e.g. hierarchical clustering on standardised prevalences). This is descriptive only.
+  - **Services against needs (descriptive, state level).**
+    - Correlate measured prevalence with service supply per state: health facilities from GRID3 Nigeria, possibly schools or rehabilitation centres.
+    - Label it an ecological association: no causal claim, no inference about individuals. P5's individual-level analysis is the rigorous version.
+    - Before use, add a `docs/verification.md` D-row for the facilities source (licence, year, coverage).
+  - **Accessibility.**
+    - Every map result is also stated in a sentence and a table.
+    - Hotspot and cluster maps use the existing pattern: `role="img"` with a data-derived name, the SVG hidden, and a data table.
+    - Colour is never the only cue: add a pattern or outline for "hotspot".
+    - Charts still go through `disability-access-charts`.
+  - The P4 gate stays "the map and comparison are live". The spatial results go on the same page.
 - Compare with the JONAPWD 15% figure and the 10–18% grid, plus the published DHS tables as a benchmark.
 - **"First" check:** before any claim that these are the first measured state figures, check whether the DHS 2024, MPI 2021 and DHS 2018 reports publish disability prevalence by state. Record the result, with sources and date, in `docs/verification.md`. If any report does, the claim changes to what is actually new (e.g. accessible, queryable, with small-area estimates).
 - Methodology note. It explains how the definitions differ: the WG-SS cut-off ("a lot of difficulty" or "cannot do at all" in at least one domain) is a narrower definition than the one behind the WHO 15%, a global estimate from different surveys and thresholds (check and cite the WHO source's definition when writing the note). Part of the gap between the survey estimates and JONAPWD comes from that difference, so the comparison is not framed as "JONAPWD was wrong".
