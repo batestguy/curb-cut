@@ -142,6 +142,7 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 - **Modules:** palettes, contrast (1.4.3 / 1.4.11), plots, `audit(fig)`, `theme()`, and the `disability-access-charts check` CLI.
 - **Outputs:** checked alt-text, data-table export, keyboard metadata.
 - **Publishing:** docs with three examples, a comparison with maidr, and OIDC trusted publishing.
+- **Name and story** (decided 2026-10-17): the name stays `disability-access-charts`, because the code is generic and a Nigerian name would oversell it and narrow its users. The README and the PyPI `description` lead with where it comes from: "Built for Curb Cut, an accessible platform for Nigerian disability data". Add `nigeria` to the keywords.
 - **Gate:** clean-environment install reproduces the examples; tests mock the LLM.
 
 ### P3 — Restricted zone + warehouse (weeks 4–6)
@@ -205,6 +206,19 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
   - "Nigeria's disability numbers are an assumption — here's what surveys say"
 - **Launch copy** (README, posts, outreach) uses only claims backed by the P4 "first" check in `docs/verification.md`.
 - Optional: reach out to JONAPWD/NCPWD with the demo.
+
+## Candidates (not scheduled)
+
+Ideas the author wants kept, outside the fixed phase order. Each needs the author's go-ahead at a gate before any work.
+
+- **`nigeria-states` package (after P3, recorded 2026-10-17).** A small published Python package for the Nigeria-specific plumbing that every Nigerian data analyst repeats:
+  - state-name matching across spellings (the P3 alias seed: "FCT"/"Abuja", "Nassarawa"/"Nasarawa", "Akwa-Ibom"…);
+  - ISO 3166-2 codes, geopolitical zones and capitals, each with its source (`docs/verification.md` D12, D16);
+  - optionally, the geoBoundaries ADM1 shapes (CC BY 4.0, attribution kept).
+
+  Why: it is genuinely Nigerian code with a Nigerian name, a local problem solved in package form, which matters to recruiters in and out of Nigeria. The chart library stays generic. Wait until P3, when the alias seed is complete and tested. Before starting:
+  - check the name on PyPI and look for existing packages that do this, and record the result in `verification.md`;
+  - confirm every bundled fact's licence (the NBS Annex 3 populations are "All Rights Reserved" and stay out).
 
 ## Cut from the spec
 
