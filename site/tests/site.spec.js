@@ -15,6 +15,7 @@ async function loaded(page) {
 
 async function chooseState(page, state) {
   await page.locator('#state-select').selectOption(state);
+  await page.getByRole('button', { name: 'Show figures' }).click();
   await expect(page.locator('#state-table table')).toBeVisible({ timeout: 30_000 });
 }
 
@@ -49,9 +50,14 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   }
   expect(reached).toBe(true);
 
-  // Choose Lagos by typing its name, as a keyboard user would on a closed select.
+  // Choose Lagos by typing its name, as a keyboard user would on a closed select. Nothing loads
+  // yet; Tab to "Show figures" and press Enter.
   await page.keyboard.type('Lagos');
   await expect(select).toHaveValue('Lagos');
+  await expect(page.locator('#state-table table')).toHaveCount(0);
+  await page.keyboard.press('Tab');
+  await expect(page.getByRole('button', { name: 'Show figures' })).toBeFocused();
+  await page.keyboard.press('Enter');
   const table = page.locator('#state-table table');
   await expect(table).toBeVisible({ timeout: 30_000 });
   await expect(table.locator('caption')).toContainText('Lagos');
@@ -59,6 +65,32 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
     LAGOS_PHYSICAL,
   );
   await expect(page.locator('#state-status')).toHaveText('Showing 10 disability types for Lagos.');
+  // Focus moves to the new table so screen readers read its caption straight away.
+  await expect(table).toBeFocused();
+});
+
+test('arrowing through the state picker does not start any query', async ({ page }) => {
+  const parquetRequests = [];
+  page.on('request', (r) => {
+    if (r.url().endsWith('.parquet')) parquetRequests.push(r.url());
+  });
+  await loaded(page);
+  await page.locator('#state-select').focus();
+  for (let i = 0; i < 5; i += 1) await page.keyboard.press('ArrowDown');
+  await page.keyboard.type('Gombe');
+  await page.waitForTimeout(1500);
+  expect(parquetRequests).toEqual([]);
+  await expect(page.locator('#state-table table')).toHaveCount(0);
+  await expect(page.locator('#state-status')).toHaveText('');
+});
+
+test('pressing Show figures with no state chosen explains what to do', async ({ page }) => {
+  await loaded(page);
+  await page.getByRole('button', { name: 'Show figures' }).click();
+  await expect(page.locator('#state-status')).toHaveText(
+    'Choose a state first, then press Show figures.',
+  );
+  await expect(page.locator('#state-select')).toBeFocused();
 });
 
 test('the chart is one image named by the data-derived alt-text', async ({ page, request }) => {
@@ -124,6 +156,7 @@ test('a data failure is announced and the chart and table still work', async ({ 
   await page.route('**/jonapwd_state_by_type.parquet', (route) => route.abort());
   await loaded(page);
   await page.locator('#state-select').selectOption('Oyo');
+  await page.getByRole('button', { name: 'Show figures' }).click();
   await expect(page.locator('#state-status')).toContainText('could not be loaded', {
     timeout: 30_000,
   });

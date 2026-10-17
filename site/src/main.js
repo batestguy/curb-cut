@@ -37,6 +37,7 @@ async function showExplorer() {
     const states = await getJson('states.json');
     setUpExplorer({
       select: document.getElementById('state-select'),
+      button: document.getElementById('state-show'),
       status,
       tableEl: document.getElementById('state-table'),
       dataUrl: DATA_URL,

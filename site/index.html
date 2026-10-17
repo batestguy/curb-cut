@@ -66,14 +66,16 @@
       <section aria-labelledby="explore-heading">
         <h2 id="explore-heading">Explore by state</h2>
         <p>
-          Choose a state to see its figures. They are queried in your browser from a Parquet
-          file with DuckDB-WASM; nothing is sent to a server.
+          Choose a state, then press <strong>Show figures</strong>. The figures are queried in your
+          browser from a Parquet file with DuckDB-WASM; nothing is sent to a server. The first
+          query can take a few seconds while the in-browser database loads.
         </p>
         <div class="field">
           <label for="state-select">State</label>
           <select id="state-select" name="state" disabled>
             <option value="">Loading states…</option>
           </select>
+          <button type="button" id="state-show" disabled>Show figures</button>
         </div>
         <p id="state-status" class="status" role="status" aria-live="polite"></p>
         <div id="state-table"></div>

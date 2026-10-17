@@ -254,6 +254,30 @@ select {
   max-width: 100%;
 }
 
+button {
+  font: inherit;
+  font-weight: 700;
+  /* Inverted text colours: the same high contrast as body text in both themes. */
+  color: var(--bg);
+  background: var(--text);
+  border: 2px solid var(--text);
+  border-radius: 4px;
+  padding: 0.35rem 0.9rem;
+  min-height: 2.75rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Tables that receive focus after "Show figures" get the standard focus outline. */
+table:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
 .status {
   min-height: 1.55em;
   color: var(--muted);
