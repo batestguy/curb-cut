@@ -65,6 +65,25 @@ About the author and setup:
 - **Author's story:** front and centre, in a README section and a narrated NVDA/keyboard walkthrough video.
 - **Stakeholder outreach:** later, once there's a demo.
 
+## Positioning
+
+Recorded 2026-10-17 from a gap analysis. These are findings from a search, not verified facts; P4 checks the "first" claim before anything public relies on it.
+
+**The gap**
+
+- **Assumed, not measured.** Nigeria's best-known disability figures (JONAPWD, ~35M people) come from multiplying the population by the WHO 15% benchmark. Measured Washington Group data (NBS MPI 2021, DHS 2018 and 2024) exists, but as far as the search found, only as national figures in PDF reports or locked inside licensed microdata.
+- **No public state dashboard found.** The search found no public dashboard of measured state-level disability prevalence for Nigeria. Not found is not the same as doesn't exist (see the P4 check).
+- **An untraced headline figure.** The "71% vs 62% MPI poor" figure circulates without a traceable source. Curb Cut computes it from the microdata.
+- **Accessibility checked against the data.** Alt-text whose numbers are checked against the chart's data, a data table for every chart, and an audit that runs in CI.
+- **Lived experience.** The author has lived experience of disability and assistive technology, and tests the site by keyboard and screen reader.
+- **$0 and forkable.** Static site, public aggregates, MIT licence: anyone can fork it for another country with WG-SS data.
+
+**What isn't new**
+
+Survey-weighted estimation, Fay-Herriot small-area estimation, DoubleML with sensitivity analysis, and accessible charting (maidr, a11yviz) are all established. The novelty is combining them on Nigerian disability data, with the accessibility checks applied to the project's own output.
+
+**One-line pitch:** Nigeria's disability numbers are mostly an assumption; Curb Cut puts measured, state-level survey estimates next to them, in charts that are checked against their own data.
+
 ## Architecture: two data zones
 
 Licensing makes this necessary.
@@ -135,7 +154,8 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 - Survey-weighted state prevalence by difficulty type and sex, with SEs (R `survey`, cross-checked with `svy`).
 - Fay-Herriot small-area estimation for small-sample states.
 - Compare with the JONAPWD 15% figure and the 10–18% grid, plus the published DHS tables as a benchmark.
-- Methodology note.
+- **"First" check:** before any claim that these are the first measured state figures, check whether the DHS 2024, MPI 2021 and DHS 2018 reports publish disability prevalence by state. Record the result, with sources and date, in `docs/verification.md`. If any report does, the claim changes to what is actually new (e.g. accessible, queryable, with small-area estimates).
+- Methodology note. It explains how the definitions differ: the WG-SS cut-off ("a lot of difficulty" or "cannot do at all" in at least one domain) is a narrower definition than the one behind the WHO 15%, a global estimate from different surveys and thresholds (check and cite the WHO source's definition when writing the note). Part of the gap between the survey estimates and JONAPWD comes from that difference, so the comparison is not framed as "JONAPWD was wrong".
 - **Gate:** the map and comparison are live.
 
 ### P5 — Poverty analysis (weeks 7–9)
@@ -163,6 +183,7 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 - **Blog posts:**
   - "Alt-text that can't lie"
   - "Nigeria's disability numbers are an assumption — here's what surveys say"
+- **Launch copy** (README, posts, outreach) uses only claims backed by the P4 "first" check in `docs/verification.md`.
 - Optional: reach out to JONAPWD/NCPWD with the demo.
 
 ## Cut from the spec
