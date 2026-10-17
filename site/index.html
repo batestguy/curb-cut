@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en-NG">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Curb Cut: Nigerian disability data</title>
+    <meta
+      name="description"
+      content="Accessible charts and tables of Nigerian disability data. Every chart has a data table and a description checked against the data."
+    />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <header class="site-header">
+      <p class="site-name">Curb Cut</p>
+      <p class="tagline">Nigerian disability data, built to be used by everyone</p>
+    </header>
+
+    <main id="main" tabindex="-1">
+      <h1>How many Nigerians have each type of disability? JONAPWD's 2025 estimates</h1>
+
+      <section class="caveat" aria-labelledby="caveat-heading">
+        <h2 id="caveat-heading">These are estimates built on an assumption</h2>
+        <p>
+          JONAPWD did not count or survey anyone for these figures. It applied the global
+          benchmark that 15% of any population has a disability to the National Population
+          Commission's 2025 population projections, then divided the result by type of
+          disability. Read them as JONAPWD's assumption-based estimates, not as measured
+          prevalence.
+        </p>
+        <p>
+          Totals on this page are sums of JONAPWD's published state figures. They can differ
+          from JONAPWD's own printed totals by a few persons because of rounding.
+        </p>
+      </section>
+
+      <section aria-labelledby="national-heading">
+        <h2 id="national-heading">All 37 states, by type of disability</h2>
+        <figure class="chart-figure">
+          <div id="national-chart" class="chart" role="img" aria-labelledby="national-chart-desc">
+            <div class="chart-plot" aria-hidden="true"></div>
+          </div>
+          <figcaption>
+            <span id="national-chart-title" class="chart-title">Loading chart…</span>
+            <span id="national-chart-desc" class="chart-desc"></span>
+          </figcaption>
+        </figure>
+        <p class="table-intro">The same figures as a table:</p>
+        <div id="national-table"></div>
+      </section>
+
+      <section aria-labelledby="explore-heading">
+        <h2 id="explore-heading">Explore by state</h2>
+        <p>
+          Choose a state to see its figures. They are queried in your browser from a Parquet
+          file with DuckDB-WASM; nothing is sent to a server.
+        </p>
+        <div class="field">
+          <label for="state-select">State</label>
+          <select id="state-select" name="state" disabled>
+            <option value="">Loading states…</option>
+          </select>
+        </div>
+        <p id="state-status" class="status" role="status" aria-live="polite"></p>
+        <div id="state-table"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <h2 class="footer-heading">Source</h2>
+      <p>
+        Joint National Association of Persons with Disabilities (JONAPWD),
+        <cite>2025 Assumptive Disability Disaggregated Data</cite>, state pages 14 to 50.
+        © JONAPWD, all rights reserved. Figures are cited from the
+        <a href="https://jonapwdng.org/10865-2/">publication on JONAPWD's website</a>; the PDF is
+        not redistributed here.
+      </p>
+      <p>
+        How the figures were extracted and checked:
+        <a href="https://github.com/batestguy/curb-cut/tree/main/data/public/jonapwd"
+          >data notes on GitHub</a
+        >.
+      </p>
+    </footer>
+
+    <script type="module" src="./src/main.js"></script>
+  </body>
+</html>
