@@ -9,12 +9,12 @@ The one page to read first. It says where things stand and what happens next. Th
 | Phase | State | Gate |
 |---|---|---|
 | P0 Accounts, checks, bootstrap | ✅ done 2026-10-16 (author sign-off) | CI green ✅ · checks confirmed or decided ✅ · author review ✅ |
-| P1 Thin vertical slice | 🟡 built and live — **awaiting author keyboard + NVDA test** | Live URL works by keyboard and with NVDA (author-tested) |
+| P1 Thin vertical slice | 🟡 built and live — **awaiting author keyboard + NVDA check** | Live URL works by keyboard and with NVDA (author, per `docs/accessibility-testing.md`) |
 | P2 disability-access-charts 0.1 | ⚪ not started (0.0.1 contrast checks published) | Clean install reproduces examples; LLM mocked in tests |
 | P3 Restricted zone + warehouse | ⚪ not started | `dbt build` green on fixtures; disclosure check passes |
 | P4 Prevalence | ⚪ not started | Map and comparison live |
 | P5 Poverty analysis | ⚪ not started | Pre-registration committed first; brief and results page live |
-| P6 API + site polish | ⚪ not started | Accessibility 100 in CI; walkthrough video recorded |
+| P6 API + site polish | ⚪ not started | Accessibility 100 in CI; walkthrough video recorded; feedback from a regular screen-reader user acted on |
 | P7 Launch | ⚪ not started | — |
 
 ## Done so far (P0)
@@ -51,13 +51,13 @@ The one page to read first. It says where things stand and what happens next. Th
 
 | Item | Waiting on | Since |
 |---|---|---|
-| **P1 gate: keyboard + NVDA test of the live site** | **Author** | 2026-10-17 |
+| **P1 gate: keyboard + NVDA check of the live site (`docs/accessibility-testing.md`)** | **Author** | 2026-10-17 |
 | NBS reply on publishing aggregates | NBS | 2026-10-16 |
 | Gemini / Groq real quotas | Accounts (P2) | 2026-10-16 |
 
 ## Next actions (pick up here)
 
-1. **Author:** test https://batestguy.github.io/curb-cut/ with keyboard only and with NVDA, and report anything confusing. Passing this test is the P1 gate.
+1. **Author:** install NVDA (free, nvaccess.org) and follow `docs/accessibility-testing.md` on https://batestguy.github.io/curb-cut/. Report anything confusing. Passing this check is the P1 gate.
 2. ✅ DHS 2024 downloaded and checked (see Done in P1). The data for P3/P4 is now complete: MPI 2021, DHS 2024, GHS W4/W5.
 3. **After the P1 gate:** P2, `disability-access-charts` 0.1. Carry over these follow-ups:
    - Alt-text checks should also verify *which* category each number belongs to, not just that the number exists (review finding 8).
@@ -86,5 +86,6 @@ The one page to read first. It says where things stand and what happens next. Th
 | 2026-10-16 | JONAPWD ingest uses text extraction, not OCR. |
 | 2026-10-16 | Applications describe the author as an independent researcher. |
 | 2026-10-16 | All of `data/sources/` is git-ignored (third-party files are "All rights reserved"). |
+| 2026-10-17 | Gate wording changed: the author (new to screen readers) does a scripted keyboard + NVDA check at each site gate; the P6 gate adds feedback from a regular screen-reader user. |
 | 2026-10-17 | P1 built by `executor`, reviewed by `reviewer` (merge after fixes), fixes applied, merged and deployed to GitHub Pages. |
 | 2026-10-16 | **P0 gate passed.** Nigeria DHS 2024 is adopted as a second prevalence source next to MPI 2021. The exploratory panel uses GHS W4→W5 (all six WG-SS domains). |

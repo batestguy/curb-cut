@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current state
 
-Phase **P1** (thin vertical slice) is built and live at https://batestguy.github.io/curb-cut/ and awaits the author's keyboard/NVDA gate. P0 passed its gate on 2026-10-16; its evidence is in `docs/verification.md`.
+Phase **P1** (thin vertical slice) is built and live at https://batestguy.github.io/curb-cut/ and awaits the author's keyboard + NVDA check (`docs/accessibility-testing.md`). P0 passed its gate on 2026-10-16; its evidence is in `docs/verification.md`.
 
 - **Start with `docs/STATUS.md`:** phase states, blockers, next actions and the decisions log. Update it at the end of every working session and at each gate.
 - **`PLAN.md` is the source of truth** (agreed 2026-10-16). Read the section for the current phase before starting work.
@@ -14,7 +14,7 @@ Update this file as real commands and structure appear, and replace the "intende
 
 ## What the project is
 
-Curb Cut is a zero-cost, accessible data platform for Nigerian disability data, and a portfolio piece aimed at recruiters across data roles (see the recruiter-track table in `PLAN.md`). The author has lived experience with disability and assistive technology; that story and their manual NVDA/keyboard testing are central, not decoration.
+Curb Cut is a zero-cost, accessible data platform for Nigerian disability data, and a portfolio piece aimed at recruiters across data roles (see the recruiter-track table in `PLAN.md`). The author has lived experience with disability and assistive technology; that story is central, not decoration. The author is not a screen-reader user: their keyboard/NVDA check is a first-time-user check, and a regular screen-reader user's feedback is required before launch.
 
 Public GitHub repo `curb-cut`, MIT. Main components:
 
@@ -42,7 +42,7 @@ Never commit microdata, never send it to an LLM or any external service, and nev
 - **$0/month, always.** Never introduce a paid service. HF Gradio/Docker Spaces need a paid plan; static Spaces are free. Neon/Supabase are cut.
 - **No committed DuckDB file.** Public data ships as Parquet inside the Pages site (1 GB site limit; git warns over 50 MiB and rejects over 100 MiB). Do not use GitHub Release assets for data: they lack CORS headers, so DuckDB-WASM can't read them. DuckDB allows one writer at a time — no concurrent writers in CI or scripts.
 - **Phase order is fixed (P0–P7 in `PLAN.md`). Stop at every phase gate for the author's review.** Scope creep is the main way this project fails. After each phase, update the README hero links and add a CHANGELOG entry (conventional commits).
-- **Accessibility is a requirement.** Keyboard only (Tab reaches everything, no mouse-only interactions) and screen readers (semantic HTML, ARIA labels on charts). Automated checks (axe, Lighthouse) catch only part of the problems; the author's manual NVDA sign-off is part of each relevant gate.
+- **Accessibility is a requirement.** Keyboard only (Tab reaches everything, no mouse-only interactions) and screen readers (semantic HTML, ARIA labels on charts). Automated checks (axe, Lighthouse) catch only part of the problems. Every site gate includes the author's manual keyboard + NVDA check following `docs/accessibility-testing.md`. The P6 gate also needs feedback from at least one regular screen-reader user. When asking the author to test, give exact keystrokes.
 - **LLM free quotas are small and unpublished** (Gemini free tier is roughly 100–1,000 RPD by third-party reports, and prompts may be used for training). Cache to disk, batch, send only public aggregates. Tests must not make live LLM calls.
 - **NBS terms:** MPI data are for reporting aggregated information only, and an electronic copy of every publication must be sent to the National Data Archive.
 - **DHS terms:** use only for the registered project ("Curb Cut: disability prevalence and poverty in Nigeria"); no microdata in any tool or dashboard; send a PDF of every publication to references@dhsprogram.com. GPS coordinates are displaced and stay restricted.

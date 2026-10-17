@@ -117,7 +117,7 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 - Extract one JONAPWD table (text layer; no OCR needed) → dbt staging model → one mart → Parquet.
 - A one-page site shows one chart from disability-access-charts JSON, plus the data table, with DuckDB-WASM.
 - Playwright + axe run in CI; deploy to Pages.
-- **Gate:** the live URL works by keyboard and with NVDA, tested by the author.
+- **Gate:** the live URL works by keyboard and with a screen reader (NVDA). The author checks it using `docs/accessibility-testing.md`.
 
 ### P2 — disability-access-charts 0.1 (weeks 2–4)
 - **Modules:** palettes, contrast (1.4.3 / 1.4.11), plots, `audit(fig)`, `theme()`, and the `disability-access-charts check` CLI.
@@ -155,7 +155,7 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 - **Site:**
   - Pages: explorer, sensitivity slider, poverty, methodology, data dictionary.
   - CSV/JSON downloads everywhere; Lighthouse CI.
-- **Gate:** accessibility score 100 in CI, and the walkthrough video recorded.
+- **Gate:** accessibility score 100 in CI, the walkthrough video recorded, and **feedback from at least one regular screen-reader user collected and acted on**. Start looking for that tester (JONAPWD, a blind persons' association, NVDA user communities) during P4–P5, so the feedback lands before launch.
 
 ### P7 — Launch (weeks 10–11)
 - README with the role table, the author's story, a Mermaid diagram and a GIF.
@@ -177,4 +177,4 @@ The HF dataset, conda-forge, Streamlit, committing the DuckDB file, the Monte Ca
   - the disclosure check passes on every public Parquet file
   - the live site loads in under 3 s with no backend
   - `pip install disability-access-charts` works in a fresh venv
-  - the author signs off on NVDA and keyboard testing
+  - the author completes the keyboard and NVDA script (`docs/accessibility-testing.md`) at each site gate, and a regular screen-reader user's feedback is in before launch
