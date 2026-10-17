@@ -40,6 +40,23 @@ def national_by_type(data_dir: Path) -> dict:
     )
 
 
+def national_by_state(data_dir: Path) -> dict:
+    parquet = (data_dir / "jonapwd_state_by_type.parquet").as_posix()
+    rows = duckdb.sql(
+        "select state, any_value(state_total) as total "
+        f"from read_parquet('{parquet}') group by state order by total desc, state"
+    ).fetchall()
+    return bar_chart(
+        [str(state) for state, _ in rows],
+        [int(total) for _, total in rows],
+        title="Persons with disabilities by state, all types (JONAPWD estimates)",
+        value_label="Persons",
+        category_label="State",
+        source=SOURCE,
+        chart_id="national_by_state",
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build chart JSON documents for the site.")
     parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA)
@@ -48,7 +65,11 @@ def main() -> int:
     out_dir.mkdir(parents=True, exist_ok=True)
 
     failed = False
-    for name, doc in {"national_by_type": national_by_type(args.data_dir)}.items():
+    docs = {
+        "national_by_type": national_by_type(args.data_dir),
+        "national_by_state": national_by_state(args.data_dir),
+    }
+    for name, doc in docs.items():
         path = out_dir / f"{name}.json"
         path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8", newline="\n")
         status = "passed" if doc["audit"]["passed"] else "FAILED"

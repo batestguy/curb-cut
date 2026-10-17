@@ -35,3 +35,31 @@ seeds:
         data_tests: [unique, not_null]
       - name: sort_order
         data_tests: [unique, not_null]
+
+  - name: state_facts
+    description: >
+      Facts shown on the state card. Capitals from Wikipedia ("States of Nigeria"). Slogans
+      from Zikoko (2025), kept only where Wikipedia's "List of nicknames of Nigerian states"
+      agrees; Ekiti and Osun differ between the two and are left blank. population_2023 is
+      the NBS Demographic Bulletin 2023, Annex 3 projection (source: National Population
+      Commission), cited; the datasheet itself is not redistributed. See docs/verification.md.
+    config:
+      column_types:
+        population_2023: bigint
+      meta:
+        population_source_url: https://microdata.nigerianstat.gov.ng/index.php/catalog/182
+    columns:
+      - name: state
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_states')
+                field: state
+      - name: capital
+        data_tests: [not_null]
+      - name: capital_source_url
+        data_tests: [not_null]
+      - name: population_2023
+        data_tests: [not_null, non_negative]

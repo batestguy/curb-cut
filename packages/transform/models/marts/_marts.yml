@@ -42,3 +42,42 @@ models:
               arguments:
                 values: [37]
                 quote: false
+
+  - name: mart_state_profile
+    description: >
+      One row per state for the site's state card: zone, capital, slogan (blank where it
+      could not be sourced), 2023 population projection, and the state's JONAPWD total with
+      its share of the all-state total and its rank of 37. Exported into states.json.
+    columns:
+      - name: state
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_states')
+                field: state
+      - name: state_code
+        data_tests: [unique, not_null]
+      - name: zone
+        data_tests: [not_null]
+      - name: capital
+        data_tests: [not_null]
+      - name: population_2023
+        data_tests: [not_null, non_negative]
+      - name: jonapwd_total
+        data_tests: [not_null, non_negative]
+      - name: share_of_national
+        data_tests: [not_null, non_negative]
+      - name: rank_of_37
+        data_tests:
+          - unique
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
+                quote: false
+      - name: slogan
+        description: Null where two sources did not agree; the card then leaves the line out.
+      - name: slogan_source_url
+        description: Present exactly when slogan is present.

@@ -9,25 +9,31 @@ async function getJson(path) {
   return response.json();
 }
 
-async function showNationalChart() {
-  const titleEl = document.getElementById('national-chart-title');
+// The state chosen in the explorer, highlighted in the by-state chart once that has loaded.
+let chosenState = null;
+let stateChart = null;
+
+async function showChart(name, id) {
+  const titleEl = document.getElementById(`${id}-title`);
   try {
-    const doc = await getJson('charts/national_by_type.json');
-    await renderChart(doc, {
-      container: document.getElementById('national-chart'),
+    const doc = await getJson(`charts/${name}.json`);
+    return await renderChart(doc, {
+      container: document.getElementById(id),
       titleEl,
-      descEl: document.getElementById('national-chart-desc'),
-      tableEl: document.getElementById('national-table'),
+      descEl: document.getElementById(`${id}-desc`),
+      tableEl: document.getElementById(id === 'national-chart' ? 'national-table' : `${id}-table`),
+      highlight: id === 'state-chart' ? chosenState : null,
     });
   } catch (error) {
     const message = `The chart could not be loaded: ${error.message}.`;
     titleEl.textContent = 'Chart unavailable';
-    const chart = document.getElementById('national-chart');
+    const chart = document.getElementById(id);
     chart.removeAttribute('aria-labelledby'); // it would override aria-label
     chart.setAttribute('aria-label', message);
-    const status = document.getElementById('national-chart-status');
+    const status = document.getElementById(`${id}-status`);
     status.classList.add('error');
     status.textContent = message;
+    return null;
   }
 }
 
@@ -39,10 +45,15 @@ async function showExplorer() {
       select: document.getElementById('state-select'),
       button: document.getElementById('state-show'),
       status,
+      card: document.getElementById('state-card'),
       tableEl: document.getElementById('state-table'),
       dataUrl: DATA_URL,
       extensionsUrl: `${import.meta.env.BASE_URL}duckdb-extensions`,
       states,
+      onStateShown(state) {
+        chosenState = state;
+        stateChart?.highlight(state);
+      },
     });
   } catch (error) {
     status.classList.add('error');
@@ -50,6 +61,11 @@ async function showExplorer() {
   }
 }
 
-// Independent: a failure in one never blocks the other.
-showNationalChart();
+// Independent: a failure in one never blocks the others.
+showChart('national_by_type', 'national-chart');
+showChart('national_by_state', 'state-chart').then((handle) => {
+  stateChart = handle;
+  // A state chosen while the chart was still drawing.
+  if (chosenState) stateChart?.highlight(chosenState);
+});
 showExplorer();

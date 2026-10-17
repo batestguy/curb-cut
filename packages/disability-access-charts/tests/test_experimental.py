@@ -111,10 +111,50 @@ def test_audit_passes_with_default_themes() -> None:
 
 def test_default_theme_ratios() -> None:
     light, dark = DEFAULT_THEMES["light"], DEFAULT_THEMES["dark"]
-    assert contrast_ratio(light.mark, light.background) >= 5.0  # Okabe-Ito blue on white
+    assert light.mark == "#008751"  # Nigerian flag green
+    assert contrast_ratio(light.mark, light.background) >= 4.5
     assert contrast_ratio(light.text, light.background) >= 4.5
     assert contrast_ratio(dark.mark, dark.background) >= 3.0
     assert contrast_ratio(dark.text, dark.background) >= 4.5
+
+
+@pytest.mark.parametrize("scheme", ["light", "dark"])
+def test_default_highlight_stands_out_from_bars_and_background(scheme: str) -> None:
+    theme = DEFAULT_THEMES[scheme]
+    assert theme.highlight is not None
+    assert contrast_ratio(theme.highlight, theme.background) >= 3.0
+    assert contrast_ratio(theme.highlight, theme.mark) >= 3.0
+
+
+def test_audit_checks_the_highlight_against_background_and_bars() -> None:
+    checks = _doc()["audit"]["checks"]
+    highlight = [c for c in checks if c["description"].startswith("Highlight colour")]
+    assert {(c["theme"], c["description"]) for c in highlight} == {
+        ("light", "Highlight colour against background"),
+        ("light", "Highlight colour against bar colour"),
+        ("dark", "Highlight colour against background"),
+        ("dark", "Highlight colour against bar colour"),
+    }
+    assert all(c["passed"] for c in highlight)
+
+
+def test_audit_fails_for_a_highlight_too_close_to_the_bars() -> None:
+    # A darker green is not enough: about 1.4:1 against the flag green.
+    close = {
+        "light": Theme(
+            background="#ffffff", text="#000000", mark="#008751", grid="#ccc", highlight="#006b3f"
+        )
+    }
+    audit = bar_chart(CATS, VALS, themes=close, **KW)["audit"]
+    assert audit["passed"] is False
+    failed = [c["description"] for c in audit["checks"] if not c["passed"]]
+    assert failed == ["Highlight colour against bar colour"]
+
+
+def test_theme_without_highlight_skips_the_highlight_checks() -> None:
+    plain = {"light": Theme(background="#ffffff", text="#000000", mark="#008751", grid="#ccc")}
+    checks = bar_chart(CATS, VALS, themes=plain, **KW)["audit"]["checks"]
+    assert not [c for c in checks if c["description"].startswith("Highlight")]
 
 
 def test_audit_fails_for_low_contrast_bars() -> None:

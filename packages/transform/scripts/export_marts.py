@@ -38,11 +38,15 @@ def export(db_path: Path, out_dir: Path) -> list[Path]:
                 "(format parquet, compression zstd)"
             )
             written.append(target)
-        states = con.execute(
-            "select state, state_code, zone from dim_states order by state"
-        ).fetchall()
+        # The state list for the picker, plus the state card's facts (small: 37 rows).
+        cursor = con.execute(
+            "select state, state_code, zone, capital, capital_source_url, slogan, "
+            "slogan_source_url, population_2023, jonapwd_total, share_of_national, rank_of_37 "
+            "from mart_state_profile order by state"
+        )
+        columns = [d[0] for d in cursor.description]
+        payload = [dict(zip(columns, row, strict=True)) for row in cursor.fetchall()]
     states_path = out_dir / "states.json"
-    payload = [{"state": s, "state_code": c, "zone": z} for s, c, z in states]
     states_path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8", newline="\n")
     written.append(states_path)
     return written

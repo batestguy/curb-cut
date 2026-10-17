@@ -52,6 +52,8 @@ jobs:
         run: uv run python packages/transform/scripts/export_marts.py
       - name: Build chart JSON (fails on a failed accessibility audit)
         run: uv run python packages/transform/scripts/build_charts.py
+      - name: Build locator map (from the committed geoBoundaries file; fails if a state is missing)
+        run: uv run python packages/transform/scripts/build_map.py
       - uses: actions/upload-artifact@v7
         with:
           name: site-data

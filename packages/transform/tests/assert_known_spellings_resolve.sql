@@ -1,4 +1,4 @@
--- Spellings seen in JONAPWD and NBS files must all resolve to a canonical state.
+-- Spellings seen in JONAPWD, NBS and geoBoundaries files must all resolve to a canonical state.
 -- Uses the same matching as stg_jonapwd__state_type.
 with spellings (raw, expected) as (
     values
@@ -10,7 +10,8 @@ with spellings (raw, expected) as (
         ('FEDERAL CAPITAL TERRITORY', 'Federal Capital Territory'),
         ('Akwa Ibom ', 'Akwa Ibom'),
         ('Akwa-Ibom', 'Akwa Ibom'),
-        ('AKWA IBOM', 'Akwa Ibom')
+        ('AKWA IBOM', 'Akwa Ibom'),
+        ('Abuja Federal Capital Territory', 'Federal Capital Territory')
 ),
 
 state_keys as (

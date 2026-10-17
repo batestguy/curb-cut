@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current state
 
-Phase **P1** (thin vertical slice) is built and live at https://batestguy.github.io/curb-cut/ and awaits the author's keyboard + NVDA check (`docs/accessibility-testing.md`). P0 passed its gate on 2026-10-16; its evidence is in `docs/verification.md`.
+Phase **P1** (thin vertical slice) is built and live at https://batestguy.github.io/curb-cut/ and awaits the author's keyboard + NVDA check (`docs/accessibility-testing.md`). The Nigerian identity and state card (2026-10-17, pulled forward at the author's request) are committed but not yet pushed; push and let CI deploy before the gate check. P0 passed its gate on 2026-10-16; its evidence is in `docs/verification.md`.
 
 - **Start with `docs/STATUS.md`:** phase states, blockers, next actions and the decisions log. Update it at the end of every working session and at each gate.
 - **`PLAN.md` is the source of truth** (agreed 2026-10-16). Read the section for the current phase before starting work.
@@ -68,11 +68,11 @@ Never commit microdata, never send it to an LLM or any external service, and nev
   - Lint and type check: `uv run ruff check .`, `uv run ruff format .`, `uv run pyright`.
   - Tests: `uv run pytest`. Single test: `uv run pytest packages/disability-access-charts/tests/test_smoke.py::test_version`.
   - JONAPWD extraction (local only; needs the git-ignored PDF): `uv run python -I -m curbcut_ingest.jonapwd <pdf> [--render DIR]`. It writes `data/public/jonapwd/state_disability_type.csv`, which is committed and is what CI uses.
-  - Warehouse: `cd packages/transform && uv run dbt build --profiles-dir .` (DuckDB file `data/curbcut.duckdb`, git-ignored). Then `uv run python packages/transform/scripts/export_marts.py` (Parquet and `states.json` into `site/public/data/`) and `uv run python packages/transform/scripts/build_charts.py` (chart JSON).
+  - Warehouse: `cd packages/transform && uv run dbt build --profiles-dir .` (DuckDB file `data/curbcut.duckdb`, git-ignored). Then `uv run python packages/transform/scripts/export_marts.py` (Parquet and `states.json` into `site/public/data/`), `uv run python packages/transform/scripts/build_charts.py` (chart JSON) and `uv run python packages/transform/scripts/build_map.py` (locator map paths from the committed geoBoundaries file in `data/public/geoboundaries/`; fails if any state is missing). The map build's tests are in `packages/transform/tests_py/` (kept out of dbt's `tests/`).
   - Site: `cd site && npm ci && npm run build && npm test` (Playwright + axe against `vite preview`). Override the base path with `SITE_BASE`. `prebuild` downloads the DuckDB Parquet extension with a pinned SHA-256, so the build needs network access but the browser never leaves the site's origin.
 - **R:** renv at the repo root with `snapshot.type = "explicit"`, so `renv::snapshot()` records only packages listed under `Imports:` in `DESCRIPTION`. Add a package there before snapshotting it.
 - **pre-commit:** standard hygiene hooks, ruff, and local hooks that refuse anything under `data/restricted/` or any `*.duckdb` file. `CurbCut.txt` and `renv/activate.R` are excluded from the fixers. Line endings are LF (`.gitattributes`).
 - **Publishing:** `.github/workflows/publish-charts.yml` publishes `disability-access-charts` to PyPI via trusted publishing (environment `pypi`) when a `charts-v<version>` tag is pushed; the tag must match the version in its `pyproject.toml`. The library was going to be `a11y-viz`, but PyPI blocks that as too similar to the existing `a11yviz`.
-- **CI** (`.github/workflows/ci.yml`): `python` (ruff, pyright, pytest, restricted-data guard) → `data` (dbt build, export, chart JSON → artifact) → `site` (build, Playwright + axe, Pages artifact) → `deploy` (GitHub Pages, push to `main` only; Pages source is "GitHub Actions", enabled 2026-10-17). CI never needs the PDF or restricted data. Lighthouse CI comes in P6.
+- **CI** (`.github/workflows/ci.yml`): `python` (ruff, pyright, pytest, restricted-data guard) → `data` (dbt build, export, chart JSON, locator map → artifact) → `site` (build, Playwright + axe, Pages artifact) → `deploy` (GitHub Pages, push to `main` only; Pages source is "GitHub Actions", enabled 2026-10-17). CI never needs the PDF or restricted data. Lighthouse CI comes in P6.
 
 P0 verification results go in `docs/verification.md`, each with source URL and date.

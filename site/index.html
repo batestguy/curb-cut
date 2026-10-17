@@ -9,11 +9,17 @@
       name="description"
       content="Accessible charts and tables of Nigerian disability data. Every chart has a data table and a description checked against the data."
     />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Cpath fill='%23008751' d='M0 0h3v2H0z'/%3E%3Cpath fill='%23fff' d='M1 0h1v2H1z'/%3E%3C/svg%3E"
+    />
     <link rel="stylesheet" href="./src/style.css" />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to main content</a>
 
+    <div class="flag-band" aria-hidden="true"></div>
     <header class="site-header">
       <p class="site-name">Curb Cut</p>
       <p class="tagline">Nigerian disability data, built to be used by everyone</p>
@@ -61,12 +67,32 @@
         </noscript>
         <p class="table-intro">The same figures as a table:</p>
         <div id="national-table"></div>
+
+        <h3 id="by-state-heading">All types, by state</h3>
+        <figure class="chart-figure" aria-labelledby="state-chart-title">
+          <div id="state-chart" class="chart" role="img" aria-labelledby="state-chart-desc">
+            <div class="chart-plot tall" aria-hidden="true"></div>
+          </div>
+          <figcaption>
+            <span id="state-chart-title" class="chart-title">Loading chart…</span>
+            <span id="state-chart-desc" class="chart-desc" aria-hidden="true"></span>
+          </figcaption>
+        </figure>
+        <p id="state-chart-status" class="status" role="status"></p>
+        <p>
+          Because JONAPWD's figures are about 15% of each state's projected population, this
+          ranking mostly follows population, not a measured difference in disability.
+        </p>
+        <p class="table-intro">The same figures as a table:</p>
+        <div id="state-chart-table"></div>
       </section>
 
       <section aria-labelledby="explore-heading">
         <h2 id="explore-heading">Explore by state</h2>
         <p>
-          Choose a state, then press <strong>Show figures</strong>. The figures are queried in your
+          Choose a state, then press <strong>Show figures</strong> to see a short profile of the
+          state, a map showing where it is, and its figures by type of disability. The state is
+          also highlighted in the chart of all states above. The figures are queried in your
           browser from a Parquet file with DuckDB-WASM; nothing is sent to a server. The first
           query can take a few seconds while the in-browser database loads.
         </p>
@@ -78,6 +104,17 @@
           <button type="button" id="state-show" disabled>Show figures</button>
         </div>
         <p id="state-status" class="status" role="status" aria-live="polite"></p>
+        <div id="state-card" class="state-card" hidden>
+          <h3 id="state-card-heading" tabindex="-1"></h3>
+          <div class="state-card-body">
+            <dl class="facts"></dl>
+            <figure class="locator" hidden>
+              <div class="locator-map" role="img"></div>
+              <figcaption>Boundaries: geoBoundaries (CC BY 4.0)</figcaption>
+            </figure>
+          </div>
+          <p class="card-sources"></p>
+        </div>
         <div id="state-table"></div>
       </section>
     </main>
@@ -90,6 +127,14 @@
         © JONAPWD, all rights reserved. Figures are cited from the
         <a href="https://jonapwdng.org/10865-2/">publication on JONAPWD's website</a>; the PDF is
         not redistributed here.
+      </p>
+      <p>
+        State profiles: 2023 population projections from the National Bureau of Statistics,
+        <a href="https://microdata.nigerianstat.gov.ng/index.php/catalog/182"
+          ><cite>Demographic Bulletin 2023</cite></a
+        >, Annex 3 (source: National Population Commission). Capitals and geopolitical zones from Wikipedia; slogans
+        from Zikoko, shown only where a second list agrees. State boundaries from
+        <a href="https://www.geoboundaries.org/">geoBoundaries</a> (CC BY 4.0; source GRID3).
       </p>
       <p>
         How the figures were extracted and checked:

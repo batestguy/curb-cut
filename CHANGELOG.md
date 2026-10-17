@@ -4,6 +4,17 @@ All notable changes to this project are documented here. Entries follow [Convent
 
 ## [Unreleased]
 
+### Added
+- Nigerian visual identity: flag-green brand colour (WCAG 2.2 AA in light and dark), a decorative green-white-green band and a striped SVG favicon.
+- `disability_access_charts.experimental`: optional `Theme.highlight` colour, audited at 3:1 against the background and the bars (SC 1.4.11); default themes now flag green.
+- "All types, by state" chart (37 bars) built with `bar_chart`; the state chosen in the explorer is highlighted with colour, outline and bold label.
+- State card after "Show figures": capital, zone, 2023 population (NBS), slogan where two sources agree, JONAPWD total with share and rank, sources, and a locator map.
+- dbt seed `state_facts` and mart `mart_state_profile` (exported into `states.json`), with tests.
+- geoBoundaries NGA ADM1 (CC BY 4.0) committed under `data/public/geoboundaries/`; `build_map.py` builds the locator map's SVG paths in CI and fails if a state is missing.
+
+### Changed
+- Focus moves to the state card's heading after "Show figures"; the map gives up after 10 s, so the card still shows without it.
+
 ## P1 — 2026-10-17
 
 ### Added

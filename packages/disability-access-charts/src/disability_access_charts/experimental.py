@@ -34,18 +34,32 @@ _NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")
 
 @dataclass(frozen=True)
 class Theme:
-    """Colours for one colour scheme. ``mark`` is the bar fill."""
+    """Colours for one colour scheme.
+
+    ``mark`` is the bar fill. ``highlight`` (optional) is the fill for one selected bar; it
+    must differ from both the background and ``mark`` by at least 3:1, and a page that uses
+    it should add a non-colour cue too (an outline, a bold label).
+    """
 
     background: str
     text: str
     mark: str
     grid: str
+    highlight: str | None = None
 
 
-# Okabe-Ito blue on white (about 5.2:1) and Okabe-Ito sky blue on near-black (about 8.1:1).
+# Nigerian flag green. Light: the flag green #008751 on white (about 4.6:1), with a deep
+# indigo highlight (about 3.5:1 against the green). Dark: with light green bars, the only
+# colours 3:1 from both them and the background are dim mid-tones (a crimson such as
+# #c31e55, about 3.2:1), which read as "darker", not "selected". So the bars are a mid green
+# (about 4.1:1 on near-black) and the highlight is a light gold (about 3.5:1 against them).
 DEFAULT_THEMES: dict[str, Theme] = {
-    "light": Theme(background="#ffffff", text="#1a1a1a", mark="#0072b2", grid="#d9d9d9"),
-    "dark": Theme(background="#121212", text="#f0f0f0", mark="#56b4e9", grid="#3a3a3a"),
+    "light": Theme(
+        background="#ffffff", text="#1a1a1a", mark="#008751", grid="#d9d9d9", highlight="#1b1464"
+    ),
+    "dark": Theme(
+        background="#121212", text="#f0f0f0", mark="#198754", grid="#3a3a3a", highlight="#ffe08a"
+    ),
 }
 
 
@@ -125,13 +139,20 @@ def check_alt_text(
 
 
 def _contrast_check(
-    criterion: str, theme: str, what: str, foreground: str, background: str, minimum: float
+    criterion: str,
+    theme: str,
+    what: str,
+    foreground: str,
+    background: str,
+    minimum: float,
+    *,
+    against: str = "background",
 ) -> dict[str, Any]:
     ratio = contrast_ratio(foreground, background)
     return {
         "id": f"wcag-{criterion}",
         "theme": theme,
-        "description": f"{what} against background",
+        "description": f"{what} against {against}",
         "foreground": foreground,
         "background": background,
         "ratio": round(ratio, 2),
@@ -158,6 +179,28 @@ def audit_chart(
         checks.append(
             _contrast_check("1.4.3", name, "Text colour", theme.text, theme.background, TEXT_MIN)
         )
+        if theme.highlight is not None:
+            checks.append(
+                _contrast_check(
+                    "1.4.11",
+                    name,
+                    "Highlight colour",
+                    theme.highlight,
+                    theme.background,
+                    NON_TEXT_MIN,
+                )
+            )
+            checks.append(
+                _contrast_check(
+                    "1.4.11",
+                    name,
+                    "Highlight colour",
+                    theme.highlight,
+                    theme.mark,
+                    NON_TEXT_MIN,
+                    against="bar colour",
+                )
+            )
     unverified = check_alt_text(alt_text, categories, values, verbatim=verbatim)
     checks.append(
         {

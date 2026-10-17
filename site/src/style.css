@@ -1,17 +1,29 @@
-/* Colours match the chart themes in disability_access_charts.experimental.DEFAULT_THEMES,
-   so the chart background is the page background in both schemes. All text pairs pass
-   WCAG 1.4.3 (4.5:1) and focus/borders pass 1.4.11 (3:1). */
+/* Background, text and bar colours match the chart themes in
+   disability_access_charts.experimental.DEFAULT_THEMES (--flag-green / --highlight are the
+   theme's mark / highlight), so the chart background is the page background in both
+   schemes. Nigerian green is the brand colour. Ratios against --bg:
+   light --green #006b3f 6.6:1 (text, links, focus), --flag-green #008751 4.6:1 (band, rules,
+   map); dark --green #6fd6a0 10.5:1, --flag-green #198754 4.1:1. All text pairs pass
+   WCAG 1.4.3 (4.5:1) and focus/borders/bars pass 1.4.11 (3:1). On the map, the chosen
+   state is told apart by its thick outline (and ring) as well as its fill: in dark mode the
+   fill alone is just under 3:1 against the other states. */
 :root {
   --bg: #ffffff;
   --text: #1a1a1a;
   --muted: #4d4d4d;
-  --link: #0050a0;
-  --focus: #0050a0;
+  --green: #006b3f;
+  --flag-green: #008751;
+  --highlight: #1b1464;
+  --link: var(--green);
+  --focus: var(--green);
   --border: #767676;
   --rule: #d9d9d9;
   --caveat-bg: #fff6dc;
   --caveat-border: #8a6100;
   --row-alt: #f3f3f3;
+  --map-land: #e6e6e6;
+  --map-edge: #767676;
+  --card-bg: #f2f8f4;
   color-scheme: light;
 }
 
@@ -20,13 +32,19 @@
     --bg: #121212;
     --text: #f0f0f0;
     --muted: #c4c4c4;
-    --link: #8cc8ff;
-    --focus: #8cc8ff;
+    --green: #6fd6a0;
+    --flag-green: #198754;
+    --highlight: #ffe08a;
+    --link: var(--green);
+    --focus: var(--green);
     --border: #8f8f8f;
     --rule: #3a3a3a;
     --caveat-bg: #2b2414;
     --caveat-border: #e0b44c;
     --row-alt: #1e1e1e;
+    --map-land: #2e2e2e;
+    --map-edge: #9a9a9a;
+    --card-bg: #16211b;
     color-scheme: dark;
   }
 }
@@ -91,6 +109,20 @@ h2 {
   margin: 2rem 0 0.75rem;
 }
 
+h3 {
+  font-size: 1.15rem;
+  line-height: 1.3;
+  margin: 1.75rem 0 0.5rem;
+}
+
+/* Green accent rule on the page's own headings; the caveat keeps its amber (a warning is
+   not the brand). */
+main h1,
+main > section:not(.caveat) > h2 {
+  border-left: 0.3rem solid var(--flag-green);
+  padding-left: 0.6rem;
+}
+
 a {
   color: var(--link);
   text-underline-offset: 0.15em;
@@ -116,16 +148,31 @@ a {
   top: 0.5rem;
 }
 
+/* Decorative green-white-green band (the flag's vertical stripes), never behind text.
+   The thin grey frame keeps the white stripe visible on a white page, and the band reads
+   as a flag on a dark page too. */
+.flag-band {
+  height: 0.6rem;
+  background: linear-gradient(
+    to right,
+    var(--flag-green) 0 33.333%,
+    #ffffff 33.333% 66.667%,
+    var(--flag-green) 66.667% 100%
+  );
+  border: 1px solid var(--border);
+}
+
 .site-header {
   padding-top: 1rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid var(--rule);
+  border-bottom: 3px solid var(--flag-green);
 }
 
 .site-name {
   font-weight: 700;
   font-size: 1.2rem;
   margin: 0;
+  color: var(--green);
 }
 
 .tagline {
@@ -155,6 +202,11 @@ a {
 .chart-plot {
   width: 100%;
   min-height: 26rem;
+}
+
+/* 37 bars need more height to keep each state's label readable. */
+.chart-plot.tall {
+  min-height: 52rem;
 }
 
 figcaption {
@@ -300,4 +352,91 @@ table:focus-visible {
   font-size: 1.05rem;
   margin-top: 0.75rem;
   color: var(--text);
+}
+
+/* State card: facts on the left, locator map on the right; stacked on narrow screens and
+   at high zoom (the grid wraps once each column would be under 15rem). */
+.state-card {
+  margin: 1rem 0 1.5rem;
+  padding: 0.25rem 1rem 1rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-top: 0.4rem solid var(--flag-green);
+  border-radius: 4px;
+}
+
+.state-card h3 {
+  margin-top: 0.75rem;
+  font-size: 1.4rem;
+}
+
+.state-card h3:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.state-card-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 0.5rem 1.5rem;
+  align-items: start;
+}
+
+.facts {
+  margin: 0;
+}
+
+.facts dt {
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
+.facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.slogan {
+  font-style: italic;
+}
+
+.locator {
+  margin: 0;
+}
+
+.locator-map svg {
+  display: block;
+  width: 100%;
+  max-width: 22rem;
+  height: auto;
+}
+
+.locator-map path {
+  fill: var(--map-land);
+  stroke: var(--map-edge);
+  stroke-width: 0.8;
+  stroke-linejoin: round;
+}
+
+/* Not colour alone: the chosen state is filled and also drawn with a thick outline. */
+.locator-map path.selected {
+  fill: var(--flag-green);
+  stroke: var(--text);
+  stroke-width: 3;
+}
+
+.locator-map .locator-ring {
+  fill: none;
+  stroke: var(--text);
+  stroke-width: 3;
+}
+
+.locator figcaption,
+.card-sources {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.card-sources {
+  margin-bottom: 0;
 }
