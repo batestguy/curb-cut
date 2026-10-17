@@ -43,6 +43,15 @@ The one page to read first. It says where things stand and what happens next. Th
 - dbt project `packages/transform` (dbt-core 1.12.6 + dbt-duckdb 1.11.0): source CSV → `stg_jonapwd__state_type` → two marts. Seeds: `dim_states` (ISO codes and zones verified), `state_name_aliases`. 51 tests pass.
 - `disability_access_charts.experimental.bar_chart`: Plotly spec, data-derived alt-text checked against the data, table, and contrast audit.
 - Site (`site/`, Vite + Plotly basic + DuckDB-WASM, all self-hosted). 9 Playwright + axe tests pass: WCAG 2.2 AA light and dark, keyboard, accessible names, table semantics, 320 px, same-origin only, failure paths. CI is green on Linux, including the deploy. A live check by keyboard (Lagos) worked, and the page contacted only `batestguy.github.io`.
+- **Automated NVDA run, 2026-10-17** (NVDA 2026.2 via Guidepup 0.35.0 + Playwright, Chromium, live site; script kept outside the repo, in the session scratchpad). Spoken output confirmed:
+  - skip link first, and it works
+  - clean heading structure
+  - the chart's description is read once, with its numbers
+  - tables announced with size and caption, every number read with its headers
+  - the picker is labelled "State, combo box"
+  - choosing a state says "Loading figures for …", and the state table works with Ctrl+Alt+arrows
+
+  **Not heard:** the completion message "Showing 10 disability types for …". The page displayed it, but NVDA didn't speak it within 30 s. Confirm by ear. First state load takes ~10 s (7.8 MB DuckDB wasm plus extension).
 - Reviewed by `reviewer`. Review fixes applied: chart description read once, chart failure announced, `<noscript>` link to the CSV, "likely because of rounding" wording.
 - GHS-Panel W4 and W5 downloaded (`data/restricted/ghs-w4`, `ghs-w5`, with hash manifests). WG-SS uses the same 4 categories in both waves; W4 adds a "too young" code (−1), to be set to missing. **4,735 households are in both waves**: 98% have the same state, 97% the same EA. That is enough for the W4→W5 panel.
 - DHS project "Curb Cut: disability prevalence and poverty in Nigeria" (project 246118): **Survey and GPS access approved 2026-10-16** (authorization letter AuthLetter_246118.pdf is in the author's Gmail). **Downloaded 2026-10-17** into `data/restricted/dhs-2024/` (`pr/NGPR8BFL.dta`, `hr/NGHR8BFL.dta`, with a hash manifest; ZIP sizes match the DHS API). The PR file has 176,045 people. The full WG-SS is asked of 149,380 people aged 5+: `hdis2` seeing, `hdis4` hearing, `hdis5` communicating, `hdis6` remembering, `hdis7` walking, `hdis8` self-care, each in 4 categories plus 8 = don't know. `hdis9` is the highest degree across domains; `hdis1`/`hdis3` record glasses and hearing aid use. Design: weight `hv005` (÷1,000,000), PSU `hv021`, strata `hv022`/`hv023`, state `shstate` (37 values), plus `hv025` urban/rural, `hv104` sex, `hv105` age, `hv270` wealth quintile. GPS points are displaced (urban up to 2 km, rural up to 5 km, 1% up to 10 km), so never use them for distances or small areas, and never publish them.
@@ -61,7 +70,8 @@ The one page to read first. It says where things stand and what happens next. Th
 2. ✅ DHS 2024 downloaded and checked (see Done in P1). The data for P3/P4 is now complete: MPI 2021, DHS 2024, GHS W4/W5.
 3. **After the P1 gate:** P2, `disability-access-charts` 0.1. Carry over these follow-ups:
    - Alt-text checks should also verify *which* category each number belongs to, not just that the number exists (review finding 8).
-   - Decide whether the state `<select>` should query on every arrow key or use a "Show figures" button (review finding 6).
+   - Replace query-on-every-change with a **"Show figures" button** (review finding 6, confirmed by the NVDA run: each arrow press or letter key on the picker starts a load). Start the DuckDB download in the background after first paint.
+   - Make the load-finished announcement reliable. In the NVDA run, "Showing 10 disability types for …" was not spoken. Options: move focus to the new table's caption, or re-announce via a fresh live-region node.
 4. **P6 follow-ups:**
    - Pre-render the national table into the HTML at build time. First paint measured 4.8 s on the author's connection, against a 3 s target.
    - The chart shows only 2 axis ticks at 320 px.
