@@ -45,6 +45,7 @@ Never commit microdata, never send it to an LLM or any external service, and nev
 - **Accessibility is a requirement.** Keyboard only (Tab reaches everything, no mouse-only interactions) and screen readers (semantic HTML, ARIA labels on charts). Automated checks (axe, Lighthouse) catch only part of the problems; the author's manual NVDA sign-off is part of each relevant gate.
 - **LLM free quotas are small and unpublished** (Gemini free tier is roughly 100–1,000 RPD by third-party reports, and prompts may be used for training). Cache to disk, batch, send only public aggregates. Tests must not make live LLM calls.
 - **NBS terms:** MPI data are for reporting aggregated information only, and an electronic copy of every publication must be sent to the National Data Archive.
+- **DHS terms:** use only for the registered project ("Curb Cut: disability prevalence and poverty in Nigeria"); no microdata in any tool or dashboard; send a PDF of every publication to references@dhsprogram.com. GPS coordinates are displaced and stay restricted.
 - **Report the poverty result as an adjusted association, not a causal effect.** The pre-registration (DAG, estimand, plan) is committed before outcomes are examined. The GHS analysis is labelled exploratory and underpowered.
 - **dbt SQL must work on DuckDB.** Avoid Snowflake-specific functions.
 

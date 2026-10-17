@@ -45,21 +45,20 @@ The one page to read first. It says where things stand and what happens next. Th
 - Site (`site/`, Vite + Plotly basic + DuckDB-WASM, all self-hosted). 9 Playwright + axe tests pass: WCAG 2.2 AA light and dark, keyboard, accessible names, table semantics, 320 px, same-origin only, failure paths. CI is green on Linux, including the deploy. A live check by keyboard (Lagos) worked, and the page contacted only `batestguy.github.io`.
 - Reviewed by `reviewer`. Review fixes applied: chart description read once, chart failure announced, `<noscript>` link to the CSV, "likely because of rounding" wording.
 - GHS-Panel W4 and W5 downloaded (`data/restricted/ghs-w4`, `ghs-w5`, with hash manifests). WG-SS uses the same 4 categories in both waves; W4 adds a "too young" code (−1), to be set to missing. **4,735 households are in both waves**: 98% have the same state, 97% the same EA. That is enough for the W4→W5 panel.
-- DHS project "Curb Cut: disability prevalence and poverty in Nigeria" submitted for Nigeria Survey + GPS. It is pending DHS review. If DHS asks about GPS, say it is optional.
+- DHS project "Curb Cut: disability prevalence and poverty in Nigeria" (project 246118): **Survey and GPS access approved 2026-10-16** (authorization letter AuthLetter_246118.pdf is in the author's Gmail). Files to fetch: `NGPR8BDT.zip` (household members, 8.1 MB) and `NGHR8BDT.zip` (households, 10.6 MB). GPS points are displaced (urban up to 2 km, rural up to 5 km, 1% up to 10 km), so never use them for distances or small areas, and never publish them.
 
 ## Blocked / waiting
 
 | Item | Waiting on | Since |
 |---|---|---|
 | **P1 gate: keyboard + NVDA test of the live site** | **Author** | 2026-10-17 |
-| DHS dataset approval | DHS (email to the author's Gmail) | 2026-10-17 |
 | NBS reply on publishing aggregates | NBS | 2026-10-16 |
 | Gemini / Groq real quotas | Accounts (P2) | 2026-10-16 |
 
 ## Next actions (pick up here)
 
 1. **Author:** test https://batestguy.github.io/curb-cut/ with keyboard only and with NVDA, and report anything confusing. Passing this test is the P1 gate.
-2. **Claude, after DHS approval:** download Nigeria DHS 2024 PR and HR recodes (Stata) into `data/restricted/dhs-2024/` with a manifest. Confirm `hdis*` variables and weights.
+2. **Claude (approved; the author must log in to DHS first):** download Nigeria DHS 2024 PR and HR recodes (Stata) into `data/restricted/dhs-2024/` with a manifest. Confirm `hdis*` variables and weights.
 3. **After the P1 gate:** P2, `disability-access-charts` 0.1. Carry over these follow-ups:
    - Alt-text checks should also verify *which* category each number belongs to, not just that the number exists (review finding 8).
    - Decide whether the state `<select>` should query on every arrow key or use a "Show figures" button (review finding 6).
@@ -76,6 +75,7 @@ The one page to read first. It says where things stand and what happens next. Th
 - **Local data** (git-ignored, never commit or send anywhere): `data/restricted/nbs-mpi-2021/` (MPI 2021 Stata files plus `MANIFEST.md`); `data/restricted/ghs-w4/`, `data/restricted/ghs-w5/` (GHS-Panel Stata files plus manifests; the W4 disability file is `sect4a_harvestw4.dta`, the W5 one is `Post Planting Wave 5/Household/sect3_plantingw5.dta`); `data/sources/jonapwd/` (PDF); `data/sources/nbs-demographic-2023/` (xlsx).
 - **Release:** bump the version in `packages/disability-access-charts/pyproject.toml` and push tag `charts-v<version>`. Trusted publishing handles the rest.
 - **NBS obligation:** send an electronic copy of every publication based on MPI data to the National Data Archive.
+- **DHS obligation:** send a PDF of every report or publication using DHS data to references@dhsprogram.com. DHS data may be used only for the registered project. A new purpose needs a new DHS project.
 
 ## Decisions log
 
