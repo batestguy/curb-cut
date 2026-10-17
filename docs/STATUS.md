@@ -2,7 +2,7 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-17 · **Current phase:** P1 — thin vertical slice (built and live; identity + state card committed locally, not yet pushed; awaiting author gate)
+**Last updated:** 2026-10-17 · **Current phase:** P1 — thin vertical slice (built and live, including the identity + state card; awaiting author gate)
 
 ## Phases
 
@@ -55,7 +55,7 @@ The one page to read first. It says where things stand and what happens next. Th
 - Reviewed by `reviewer`. Review fixes applied: chart description read once, chart failure announced, `<noscript>` link to the CSV, "likely because of rounding" wording.
 - GHS-Panel W4 and W5 downloaded (`data/restricted/ghs-w4`, `ghs-w5`, with hash manifests). WG-SS uses the same 4 categories in both waves; W4 adds a "too young" code (−1), to be set to missing. **4,735 households are in both waves**: 98% have the same state, 97% the same EA. That is enough for the W4→W5 panel.
 - **"Show figures" button and announcement (commit 36f5ca4):** the picker no longer queries on every change; DuckDB warms up when the picker or button is first focused; after a press, focus moves to the result. Both still need checking **by ear** with NVDA at the P1 gate.
-- **Nigerian visual identity and state card (2026-10-17, committed on `main`, not yet pushed or deployed):**
+- **Nigerian visual identity and state card (2026-10-17, commit 119cf4e, deployed by CI run 39004343042, all jobs green):**
   - Flag green is the brand colour. Light: `#006b3f` for text, links and focus (6.6:1), `#008751` for the band, heading rules and bars (4.6:1). Dark: `#6fd6a0` for text, links and focus (10.5:1), `#198754` for bars (4.1:1). A decorative green-white-green band (`aria-hidden`, with a thin grey frame so the white stripe shows on a white page) sits above the header, and the favicon has the same stripes. The caveat keeps its amber.
   - Chart library: `DEFAULT_THEMES` gains a `highlight` colour, deep indigo `#1b1464` in light mode and gold `#ffe08a` in dark (3.45:1 and 3.51:1 against the green bars). The audit checks it against both the background and the bars (SC 1.4.11), with tests. **Deviation from the plan:** the dark-mode bars are a mid green, not a light one. With light green bars, the only highlight colours 3:1 from both the bars and `#121212` are dim mid-tones (e.g. crimson `#c31e55`, 3.2:1), which look darker rather than selected. A mid green with a light gold highlight stands out more. (The review corrected an earlier, wrong claim that no such colour exists.)
   - New chart "All types, by state" (37 bars, via `bar_chart`, so it has data-checked alt-text, a table and an audit). The chosen state's bar gets the highlight colour, a thick outline, and a bold label and value. The chart's accessible name doesn't change.
@@ -74,7 +74,7 @@ The one page to read first. It says where things stand and what happens next. Th
 
 ## Next actions (pick up here)
 
-1. **Author:** `git push` the identity + state card commit and wait for CI to deploy (check the Actions tab is green). Then judge the look on the live page.
+1. ✅ Pushed and deployed 2026-10-17 (CI run 39004343042 green). **Author:** judge the look on the live page.
 2. **Author:** install NVDA (free, nvaccess.org) and follow `docs/accessibility-testing.md` on https://batestguy.github.io/curb-cut/. Report anything confusing. Passing this check is the P1 gate. Listen especially for what NVDA says after "Show figures" (the heading "Lagos"? the "Showing 10 disability types…" message?).
 3. ✅ DHS 2024 downloaded and checked (see Done in P1). The data for P3/P4 is now complete: MPI 2021, DHS 2024, GHS W4/W5.
 4. **After the P1 gate:** P2, `disability-access-charts` 0.1. Carry over these follow-ups:
