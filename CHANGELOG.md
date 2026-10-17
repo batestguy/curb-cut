@@ -4,6 +4,14 @@ All notable changes to this project are documented here. Entries follow [Convent
 
 ## [Unreleased]
 
+## P1 — 2026-10-17
+
+### Added
+- JONAPWD state × disability-type extraction from the PDF text layer (`packages/ingest`), validated against rendered pages.
+- dbt project (`packages/transform`): staging model, national and state marts, `dim_states` and alias seeds, 51 tests.
+- `disability_access_charts.experimental.bar_chart`: Plotly spec, data-checked alt-text, table and contrast audit.
+- Accessible static site with DuckDB-WASM state explorer, deployed to GitHub Pages; Playwright + axe in CI.
+
 ## P0 — 2026-10-16
 
 ### Added

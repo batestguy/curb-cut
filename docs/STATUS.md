@@ -2,14 +2,14 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-16 · **Current phase:** P1 — thin vertical slice
+**Last updated:** 2026-10-17 · **Current phase:** P1 — thin vertical slice (built and live; awaiting author gate)
 
 ## Phases
 
 | Phase | State | Gate |
 |---|---|---|
 | P0 Accounts, checks, bootstrap | ✅ done 2026-10-16 (author sign-off) | CI green ✅ · checks confirmed or decided ✅ · author review ✅ |
-| P1 Thin vertical slice | 🟡 in progress | Live URL works by keyboard and with NVDA (author-tested) |
+| P1 Thin vertical slice | 🟡 built and live — **awaiting author keyboard + NVDA test** | Live URL works by keyboard and with NVDA (author-tested) |
 | P2 disability-access-charts 0.1 | ⚪ not started (0.0.1 contrast checks published) | Clean install reproduces examples; LLM mocked in tests |
 | P3 Restricted zone + warehouse | ⚪ not started | `dbt build` green on fixtures; disclosure check passes |
 | P4 Prevalence | ⚪ not started | Map and comparison live |
@@ -36,35 +36,44 @@ The one page to read first. It says where things stand and what happens next. Th
 - Nigeria DHS 2024 is released, and DHS registration is open again.
 - Research checks logged with sources in `verification.md`.
 
+## Done in P1 (2026-10-17)
+
+- **Live site: https://batestguy.github.io/curb-cut/**, deployed by CI on every push to `main`.
+- JONAPWD state figures extracted from the PDF text layer into `data/public/jonapwd/state_disability_type.csv`. That is 370 rows: 37 states × 10 types. Two page layouts are handled. Bar lengths are checked against the values. 7 pages (70 values) were checked by eye against renders, and a re-run gives a byte-identical file. The per-state sum is 34,901,406; JONAPWD prints 34,901,403. The difference is left as printed and disclosed on the page.
+- dbt project `packages/transform` (dbt-core 1.12.6 + dbt-duckdb 1.11.0): source CSV → `stg_jonapwd__state_type` → two marts. Seeds: `dim_states` (ISO codes and zones verified), `state_name_aliases`. 51 tests pass.
+- `disability_access_charts.experimental.bar_chart`: Plotly spec, data-derived alt-text checked against the data, table, and contrast audit.
+- Site (`site/`, Vite + Plotly basic + DuckDB-WASM, all self-hosted). 9 Playwright + axe tests pass: WCAG 2.2 AA light and dark, keyboard, accessible names, table semantics, 320 px, same-origin only, failure paths. CI is green on Linux, including the deploy. A live check by keyboard (Lagos) worked, and the page contacted only `batestguy.github.io`.
+- Reviewed by `reviewer`. Review fixes applied: chart description read once, chart failure announced, `<noscript>` link to the CSV, "likely because of rounding" wording.
+- GHS-Panel W4 and W5 downloaded (`data/restricted/ghs-w4`, `ghs-w5`, with hash manifests). WG-SS uses the same 4 categories in both waves; W4 adds a "too young" code (−1), to be set to missing. **4,735 households are in both waves**: 98% have the same state, 97% the same EA. That is enough for the W4→W5 panel.
+- DHS project "Curb Cut: disability prevalence and poverty in Nigeria" submitted for Nigeria Survey + GPS. It is pending DHS review. If DHS asks about GPS, say it is optional.
+
 ## Blocked / waiting
 
 | Item | Waiting on | Since |
 |---|---|---|
-| NBS reply on publishing aggregates (sent from Gmail) | NBS | 2026-10-16 |
-| DHS account + project request (only if we adopt DHS 2024) | **Author** (account creation) | 2026-10-16 |
-| Gemini / Groq real quotas | Accounts (only needed at the alt-text step, P2) | 2026-10-16 |
+| **P1 gate: keyboard + NVDA test of the live site** | **Author** | 2026-10-17 |
+| DHS dataset approval | DHS (email to the author's Gmail) | 2026-10-17 |
+| NBS reply on publishing aggregates | NBS | 2026-10-16 |
+| Gemini / Groq real quotas | Accounts (P2) | 2026-10-16 |
 
 ## Next actions (pick up here)
 
-Session ended 2026-10-16 right after the P0 gate. **Nothing of P1 has been started.**
-
-1. **Author:** create a DHS Program account (https://dhsprogram.com/data/new-user-registration.cfm). Claude cannot create accounts. Then Claude drafts the project request for NG2024DHS (Household Member Recode, which has the disability items `hdis2`–`hdis9`) and shows the text before submitting.
-2. **Claude:** download GHS-Panel W4 (World Bank catalog 3557) and W5 (catalog 6410) through the author's logged-in World Bank session in the browser. Tell the author each file's name and size first (already approved in principle on 2026-10-16). Move the files into `data/restricted/ghs-w4/` and `data/restricted/ghs-w5/` with a hash `MANIFEST.md` (same pattern as `data/restricted/nbs-mpi-2021/`). Then count the W4 households re-interviewed in W5, and compare the WG-SS response categories between waves.
-3. **Claude: P1 thin vertical slice.** It touches 10+ files, so per the global workflow delegate it to `executor`, then pass the report and diff to `reviewer`. Planned design:
-   - **Ingest** (`packages/ingest/`): extract the JONAPWD per-state pages (PDF pages 14–50, Power BI exports; text layer, no OCR) into a tidy CSV `state, disability_type, persons`. pypdf text lists the 10 type labels, then the 10 values in **descending** order. Map label→value by bar position and **validate by rendering pages to PNG** (pypdfium2) and checking a sample by eye. Record page number and PDF SHA-256 per row. The extracted figures are cited as facts, with source © JONAPWD.
-   - **Warehouse** (`packages/transform/`, dbt-core 1.x + dbt-duckdb): source → `stg_jonapwd__state_type` → one mart (for example national totals by type, plus state × type). Add a `state_name_aliases` seed: NBS uses "Abia state", "Cross river", "FCT Abuja". The DuckDB file stays git-ignored. Export the marts to `site/data/*.parquet`.
-   - **Chart JSON at build time:** a minimal, experimental bar-chart builder in `disability-access-charts`. It outputs a Plotly spec, data-derived alt-text, a data table and a contrast audit (using `contrast.py`), written to `site/data/charts/*.json`. The full API is P2.
-   - **Site** (`site/`, Vite, vanilla JS, Plotly.js): semantic HTML. A `<figure>` holds the chart, labelled by the alt-text, with an HTML `<table>` fallback. The chart and table render from the static JSON first. DuckDB-WASM, self-hosted via Vite `?url` imports, loads lazily and powers a native `<select>` "explore by state" table. Keyboard only, no mouse-only interactions. GitHub Pages base path `/curb-cut/`.
-   - **CI:** add `dbt build` and a site job (build, Playwright + `@axe-core/playwright`), and deploy to Pages with `actions/deploy-pages`. Pages must be enabled with source "GitHub Actions". Also bump the actions that triggered Node 20 deprecation warnings (checkout, setup-uv, upload/download-artifact). Check that every pinned version exists before using it.
-   - **Gate:** the live URL works by keyboard and with NVDA, tested by the author.
-4. **Open, not blocking:** NBS reply to the publishing email (comes to the author's Gmail); Gemini and Groq limits (needed in P2).
+1. **Author:** test https://batestguy.github.io/curb-cut/ with keyboard only and with NVDA, and report anything confusing. Passing this test is the P1 gate.
+2. **Claude, after DHS approval:** download Nigeria DHS 2024 PR and HR recodes (Stata) into `data/restricted/dhs-2024/` with a manifest. Confirm `hdis*` variables and weights.
+3. **After the P1 gate:** P2, `disability-access-charts` 0.1. Carry over these follow-ups:
+   - Alt-text checks should also verify *which* category each number belongs to, not just that the number exists (review finding 8).
+   - Decide whether the state `<select>` should query on every arrow key or use a "Show figures" button (review finding 6).
+4. **P6 follow-ups:**
+   - Pre-render the national table into the HTML at build time. First paint measured 4.8 s on the author's connection, against a 3 s target.
+   - The chart shows only 2 axis ticks at 320 px.
+   - `dist` is 74 MB (both DuckDB bundles), but each visitor downloads only one, about 8 MB gzip, and only after choosing a state.
 
 ## Handoff notes
 
 - **Browser:** the author uses Brave with the Claude-in-Chrome extension connected ("Browser 1"). Use those tools in the author's logged-in session. A Brave launched by Playwright with its own profile does **not** share the author's logins. The author is logged in to PyPI, NBS microdata and the World Bank Microdata Library. Never type passwords; ask the author.
 - **NBS portal quirk:** on access forms, the Submit button only enables after a real click on "I agree" (`isagree()`). Public-use requests are granted at once. Downloads land in `~/Downloads/Compressed/`.
 - **Identity on applications:** Jerry Bannister, independent researcher, NBS account `jzbannister@atbu.edu.ng`. Gmail used for correspondence: batesthommie@gmail.com.
-- **Local data** (git-ignored, never commit or send anywhere): `data/restricted/nbs-mpi-2021/` (MPI 2021 Stata files plus `MANIFEST.md`); `data/sources/jonapwd/` (PDF); `data/sources/nbs-demographic-2023/` (xlsx).
+- **Local data** (git-ignored, never commit or send anywhere): `data/restricted/nbs-mpi-2021/` (MPI 2021 Stata files plus `MANIFEST.md`); `data/restricted/ghs-w4/`, `data/restricted/ghs-w5/` (GHS-Panel Stata files plus manifests; the W4 disability file is `sect4a_harvestw4.dta`, the W5 one is `Post Planting Wave 5/Household/sect3_plantingw5.dta`); `data/sources/jonapwd/` (PDF); `data/sources/nbs-demographic-2023/` (xlsx).
 - **Release:** bump the version in `packages/disability-access-charts/pyproject.toml` and push tag `charts-v<version>`. Trusted publishing handles the rest.
 - **NBS obligation:** send an electronic copy of every publication based on MPI data to the National Data Archive.
 
@@ -77,4 +86,5 @@ Session ended 2026-10-16 right after the P0 gate. **Nothing of P1 has been start
 | 2026-10-16 | JONAPWD ingest uses text extraction, not OCR. |
 | 2026-10-16 | Applications describe the author as an independent researcher. |
 | 2026-10-16 | All of `data/sources/` is git-ignored (third-party files are "All rights reserved"). |
+| 2026-10-17 | P1 built by `executor`, reviewed by `reviewer` (merge after fixes), fixes applied, merged and deployed to GitHub Pages. |
 | 2026-10-16 | **P0 gate passed.** Nigeria DHS 2024 is adopted as a second prevalence source next to MPI 2021. The exploratory panel uses GHS W4→W5 (all six WG-SS domains). |

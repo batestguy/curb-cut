@@ -59,7 +59,7 @@ Status key: ☐ open · ◐ partly confirmed (see notes) · ☑ confirmed · ✗
 
 - **D7 (✗): the JONAPWD PDF needs no OCR.** P1 and P3 can use text extraction (pdfplumber/pypdf) plus hand validation instead of docling/Tesseract.
 - **New candidate source: Nigeria DHS 2024** (NG2024DHS, released 2025-10-20). Its household-member file carries the full Washington Group Short Set (hdis2–hdis9). The World Bank catalog (8029) only links out: access goes through dhsprogram.com (account plus project request), and registration is open again. It could be a second prevalence source next to MPI 2021, not only a published-table benchmark.
-- **D2 (✗, in our favour): GHS-Panel W4 already has all six WG-SS questions.** An exploratory onset analysis can use W4→W5 across all six domains, not just W3→W5 seeing/walking. Still to check: how many W4 households were re-interviewed in W5, and whether the response categories match.
+- **D2 (✗, in our favour): GHS-Panel W4 already has all six WG-SS questions.** An exploratory onset analysis can use W4→W5 across all six domains, not just W3→W5 seeing/walking. **Checked 2026-10-17 on the downloaded files:** the same 4 response categories in both waves (W4 adds −1 "too young"). 4,735 households are in both waves (W4 4,979; W5 4,771). Among matched households, 98.2% have the same state and 96.6% the same EA.
 
 ## P0 gate
 
