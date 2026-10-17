@@ -79,7 +79,7 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   await expect(page.getByRole('heading', { level: 3, name: 'Lagos' })).toBeFocused();
 });
 
-test('the state card shows the facts, share and rank from the state profile', async ({
+test('the state card shows the facts, and the map carries the share and rank', async ({
   page,
   request,
 }) => {
@@ -101,9 +101,10 @@ test('the state card shows the facts, share and rank from the state profile', as
   const share = ((100 * lagos.jonapwd_total) / total).toFixed(1);
   const rank = 1 + states.filter((s) => s.jonapwd_total > lagos.jonapwd_total).length;
   expect(rank).toBe(lagos.rank_of_37);
-  await expect(card).toContainText(
-    `${fmt(lagos.jonapwd_total)}: ${share}% of the ${fmt(total)} for all 37 states, ranked ${rank} of 37`,
-  );
+  const figure = `${fmt(lagos.jonapwd_total)} people: ${share}% of the ${fmt(total)} for all 37 states, ranked ${rank} of 37`;
+  // Not in the facts list: the map's name has it, and hover, tap or focus show it.
+  await expect(card.locator('.facts')).not.toContainText('JONAPWD');
+  await expect(card.locator('.locator-map')).toHaveAccessibleName(new RegExp(`${figure}\\.$`));
   await expect(card.getByRole('link', { name: 'Zikoko' })).toHaveAttribute(
     'href',
     lagos.slogan_source_url,
@@ -117,6 +118,44 @@ test('the state card shows the facts, share and rank from the state profile', as
   expect(cardFirst).toBe(true);
 });
 
+test('the map tip shows a state on hover, tap and focus, and Esc closes it', async ({
+  page,
+  request,
+}) => {
+  const states = await (await request.get('data/states.json')).json();
+  const kano = states.find((s) => s.state === 'Kano');
+  await loaded(page);
+  await chooseState(page, 'Lagos');
+  const map = page.locator('#state-card .locator-map');
+  const tip = page.locator('#state-card .map-tip');
+  await expect(tip).toBeHidden();
+
+  // Hovering any state shows that state, and the pointer can move onto the tip.
+  await map.locator('path[data-state="NG-KN"]').hover();
+  await expect(tip).toBeVisible();
+  await expect(tip).toContainText('Kano');
+  await expect(tip).toContainText(`ranked ${kano.rank_of_37} of 37`);
+  await tip.hover();
+  await expect(tip).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(tip).toBeHidden();
+
+  // A click (or tap) shows it too; moving off the map closes it.
+  await map.locator('path[data-state="NG-KN"]').click();
+  await expect(tip).toContainText('Kano');
+  await page.mouse.move(0, 0);
+  await expect(tip).toBeHidden();
+
+  // Keyboard: Tab from the card's heading to the map shows the chosen state; Esc closes it.
+  await page.locator('#state-card h3').focus();
+  await page.keyboard.press('Tab');
+  await expect(map).toBeFocused();
+  await expect(tip).toContainText('Lagos');
+  await expect(tip).toContainText('ranked 2 of 37');
+  await page.keyboard.press('Escape');
+  await expect(tip).toBeHidden();
+});
+
 test('a state without a sourced slogan leaves the slogan line out', async ({ page }) => {
   await loaded(page);
   await chooseState(page, 'Ekiti');
@@ -126,13 +165,13 @@ test('a state without a sourced slogan leaves the slogan line out', async ({ pag
   await expect(card.getByRole('link', { name: 'Zikoko' })).toHaveCount(0);
 });
 
-test('the locator map is one image named with the state and zone', async ({ page }) => {
+test('the locator map is one image named with the state, zone and figure', async ({ page }) => {
   await loaded(page);
   await chooseState(page, 'Lagos');
   const map = page.locator('#state-card .locator-map');
   await expect(map).toHaveAttribute('role', 'img');
   await expect(map).toHaveAccessibleName(
-    'Map of Nigeria with Lagos highlighted, in the South West zone',
+    /^Map of Nigeria with Lagos highlighted, in the South West zone\. JONAPWD's estimate: [\d,]+ people: [\d.]+% of the [\d,]+ for all 37 states, ranked 2 of 37\.$/,
   );
   await expect(map.locator('svg')).toHaveAttribute('aria-hidden', 'true');
   await expect(map.locator('path')).toHaveCount(37);

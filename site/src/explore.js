@@ -36,9 +36,82 @@ function link(href, text) {
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
+// One line per state for the map's tip, e.g. "76,613 people: 0.2% of the … for all 37 states,
+// ranked 30 of 37".
+function stateFigure(profile, total) {
+  return `${formatValue(profile.jonapwd_total, 'integer')} people: ${formatValue(
+    profile.share_of_national * 100,
+    'percent',
+  )}% of the ${total} for all 37 states, ranked ${profile.rank_of_37} of 37`;
+}
+
+// The map's tip shows a state's JONAPWD figure on hover (mouse), on tap or click (any state),
+// and on keyboard focus (the chosen state; the picker is the keyboard route to the others).
+// Esc closes it, and the pointer can move onto it (WCAG 2.2 SC 1.4.13). Screen readers get the
+// chosen state's figure in the map's name instead, so the tip itself is hidden from them.
+function setUpMapTip(figure, profilesByCode, total) {
+  const holder = figure.querySelector('.locator-map');
+  const tip = figure.querySelector('.map-tip');
+  const tipName = tip.querySelector('.map-tip-state');
+  const tipFigure = tip.querySelector('.map-tip-figure');
+
+  function show(path) {
+    const profile = profilesByCode.get(path.dataset.state);
+    if (!profile) return;
+    tipName.textContent = profile.state;
+    tipFigure.textContent = stateFigure(profile, total);
+    tip.hidden = false;
+    // Below the state, kept inside the map's width.
+    const box = figure.getBoundingClientRect();
+    const area = path.getBoundingClientRect();
+    const left = area.left + area.width / 2 - box.left - tip.offsetWidth / 2;
+    tip.style.left = `${Math.max(0, Math.min(left, box.width - tip.offsetWidth))}px`;
+    tip.style.top = `${area.bottom - box.top + 4}px`;
+  }
+
+  function hide() {
+    tip.hidden = true;
+  }
+
+  // After Esc, hovering stays off until the pointer leaves the map: Chrome re-sends "over"
+  // to the state under the pointer once the tip disappears, which would reopen it at once.
+  let hoverOff = false;
+  figure.addEventListener('pointerover', (event) => {
+    if (event.pointerType === 'mouse' && !hoverOff && event.target.matches('path')) {
+      show(event.target);
+    }
+  });
+  figure.addEventListener('click', (event) => {
+    if (event.target.matches('path')) show(event.target);
+    else if (!tip.contains(event.target)) hide();
+  });
+  // Touch pointers "leave" when the finger lifts, so only a mouse leaving closes the tip.
+  // A click also focuses the map, so only keyboard focus (:focus-visible) keeps it open.
+  figure.addEventListener('pointerleave', (event) => {
+    if (event.pointerType !== 'mouse') return;
+    hoverOff = false;
+    if (!holder.matches(':focus-visible')) hide();
+  });
+  holder.addEventListener('focus', () => {
+    const selected = holder.querySelector('path.selected');
+    if (selected && holder.matches(':focus-visible')) show(selected);
+  });
+  holder.addEventListener('blur', hide);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !tip.hidden) {
+      hoverOff = true;
+      hide();
+    }
+  });
+  document.addEventListener('pointerdown', (event) => {
+    if (!figure.contains(event.target)) hide();
+  });
+  return hide;
+}
+
 // The map is an orientation graphic: the container is one image named in words, and the SVG
 // inside is hidden from assistive technology.
-function renderMap(figure, map, profile) {
+function renderMap(figure, map, profile, total) {
   const holder = figure.querySelector('.locator-map');
   const svg = document.createElementNS(SVG_NS, 'svg');
   svg.setAttribute('viewBox', map.viewBox);
@@ -71,7 +144,8 @@ function renderMap(figure, map, profile) {
   holder.replaceChildren(svg);
   holder.setAttribute(
     'aria-label',
-    `Map of Nigeria with ${profile.state} highlighted, in the ${profile.zone} zone`,
+    `Map of Nigeria with ${profile.state} highlighted, in the ${profile.zone} zone. ` +
+      `JONAPWD's estimate: ${stateFigure(profile, total)}.`,
   );
   figure.hidden = false;
 }
@@ -85,14 +159,6 @@ function renderCard(card, profile, map, total) {
     ['Population, 2023 projection', formatValue(profile.population_2023, 'integer')],
   ];
   if (profile.slogan) rows.push(['Slogan', `“${profile.slogan}”`]);
-  rows.push([
-    "JONAPWD's estimate of persons with disabilities",
-    `${formatValue(profile.jonapwd_total, 'integer')}: ${formatValue(
-      profile.share_of_national * 100,
-      'percent',
-    )}% of the ${total} for all 37 states, ranked ${profile.rank_of_37} of 37. ` +
-      "JONAPWD's figures are about 15% of each state's population, so this ranking mostly follows population.",
-  ]);
   facts.replaceChildren(
     ...rows.flatMap(([term, value]) => {
       const dt = document.createElement('dt');
@@ -117,11 +183,11 @@ function renderCard(card, profile, map, total) {
     link('https://en.wikipedia.org/wiki/Geopolitical_zones_of_Nigeria', 'Wikipedia'),
   ];
   if (profile.slogan) parts.push('; slogan, ', link(profile.slogan_source_url, 'Zikoko'));
-  parts.push('; persons with disabilities, JONAPWD 2025 (see Source at the foot of the page).');
+  parts.push('; map figures, JONAPWD 2025 (see Source at the foot of the page).');
   sources.replaceChildren(...parts);
 
   const figure = card.querySelector('.locator');
-  if (map) renderMap(figure, map, profile);
+  if (map) renderMap(figure, map, profile, total);
   else figure.hidden = true;
   card.hidden = false;
 }
@@ -146,6 +212,11 @@ export function setUpExplorer({
   const total = formatValue(
     states.reduce((sum, s) => sum + s.jonapwd_total, 0),
     'integer',
+  );
+  const hideMapTip = setUpMapTip(
+    card.querySelector('.locator'),
+    new Map(states.map((s) => [s.state_code, s])),
+    total,
   );
 
   let queryPromise;
@@ -212,6 +283,7 @@ export function setUpExplorer({
         ],
         rows,
       });
+      hideMapTip();
       renderCard(card, profiles.get(state), map, total);
       tableEl.replaceChildren(table);
       status.textContent = `Showing ${rows.length} disability types for ${state}.`;

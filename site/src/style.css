@@ -396,7 +396,44 @@ table:focus-visible {
 }
 
 .locator {
+  position: relative;
   margin: 0;
+  max-width: 22rem;
+}
+
+.locator-map:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.locator-map path {
+  cursor: pointer;
+}
+
+.locator-map path:hover {
+  stroke: var(--text);
+  stroke-width: 2;
+}
+
+.map-tip {
+  position: absolute;
+  z-index: 1;
+  width: max-content;
+  max-width: min(18rem, 100%);
+  padding: 0.4rem 0.6rem;
+  background: var(--bg);
+  color: var(--text);
+  border: 2px solid var(--text);
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.map-tip[hidden] {
+  display: none;
+}
+
+.map-tip-state {
+  display: block;
 }
 
 .locator-map svg {
@@ -421,6 +458,7 @@ table:focus-visible {
 }
 
 .locator-map .locator-ring {
+  pointer-events: none;
   fill: none;
   stroke: var(--text);
   stroke-width: 3;

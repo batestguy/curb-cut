@@ -101,7 +101,12 @@
           <div class="state-card-body">
             <dl class="facts"></dl>
             <figure class="locator" hidden>
-              <div class="locator-map" role="img"></div>
+              <div class="locator-map" role="img" tabindex="0"></div>
+              <!-- Shown on hover, tap or focus; screen readers get the same figure in the map's name. -->
+              <div class="map-tip" aria-hidden="true" hidden>
+                <strong class="map-tip-state"></strong>
+                <span class="map-tip-figure"></span>
+              </div>
               <figcaption>Boundaries: geoBoundaries (CC BY 4.0)</figcaption>
             </figure>
           </div>
