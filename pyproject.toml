@@ -11,6 +11,8 @@ default-groups = ["dev", "transform"]
 
 [tool.uv.workspace]
 members = ["packages/*"]
+# dbt project, not a Python package; its scripts run in the root environment.
+exclude = ["packages/transform"]
 
 [tool.uv.sources]
 disability-access-charts = { workspace = true }

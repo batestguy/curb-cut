@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: stg_jonapwd__state_type
+    description: JONAPWD per-state figures with canonical state names.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [state, disability_type]
+    columns:
+      - name: state_as_printed
+        data_tests: [not_null]
+      - name: state
+        description: Canonical state name (dim_states).
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_states')
+                field: state
+      - name: disability_type
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  - physical
+                  - hearing
+                  - visual
+                  - leprosy
+                  - albinism
+                  - spinal_cord_injury
+                  - intellectual
+                  - others
+                  - deaf_blindness
+                  - little_stature
+          - relationships:
+              arguments:
+                to: ref('disability_types')
+                field: disability_type
+      - name: persons
+        data_tests: [not_null, non_negative]
+      - name: source_page
+        data_tests: [not_null]

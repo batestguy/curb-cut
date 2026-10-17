@@ -1,0 +1,11 @@
+disability_type,source_label,display_label,sort_order
+physical,PERSONS WITH PHYSICAL DISABILITIES,Physical disability,1
+hearing,PERSONS WITH HEARING IMPAIRMENT,Hearing impairment,2
+visual,PERSONS WITH VISUAL IMPAIRMENT,Visual impairment,3
+leprosy,PERSONS AFFECTED BY LEPROSY,Affected by leprosy,4
+albinism,PERSONS WITH ALBINISM,Albinism,5
+spinal_cord_injury,PERSONS WITH SPINAL CORD INJURY,Spinal cord injury,6
+intellectual,PERSONS WITH INTELLECTUAL DISABILITIES,Intellectual disability,7
+others,OTHERS,Others,8
+deaf_blindness,PERSONS WITH DEAF-BLINDNESS,Deaf-blindness,9
+little_stature,PERSONS WITH LITTLE STATURE,Little stature,10

@@ -1,0 +1,9 @@
+# Committed on purpose: there are no secrets. Run dbt from packages/transform with
+# `--profiles-dir .` so the relative paths resolve the same way locally and in CI.
+curbcut:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../../data/curbcut.duckdb  # git-ignored (*.duckdb); rebuilt by `dbt build`
+      threads: 1

@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: jonapwd
+    description: >
+      Figures extracted from JONAPWD, "2025 Assumptive Disability Disaggregated Data"
+      (c) JONAPWD, all rights reserved; cited, not redistributed. Assumption-based: the
+      global 15% benchmark applied to population projections. Provenance and hand
+      validation are in data/public/jonapwd/README.md and manifest.json.
+    meta:
+      source_url: https://jonapwdng.org/wp-content/uploads/2026/03/2025-Assumptive-Disability-Disaggregated-Data-2.pdf
+      publisher_page: https://jonapwdng.org/10865-2/
+      pdf_sha256: c861f33cdfd8ed79e83598acb853dc2295667b9d169cd511e4beb1a54d638732
+      licence: (c) JONAPWD. All rights reserved.
+    tables:
+      - name: state_disability_type
+        description: One row per state and disability type, as printed (PDF pages 14-50).
+        meta:
+          # Read the committed CSV in place (dbt-duckdb external source). The path is
+          # relative to packages/transform, where dbt is run. Types are cast in staging
+          # (dbt-duckdb formats this string with str.format, so no braces here).
+          external_location: "read_csv('../../data/public/jonapwd/state_disability_type.csv', header = true, all_varchar = true)"
+        columns:
+          - name: state
+            data_tests: [not_null]
+          - name: persons
+            data_tests: [not_null]
