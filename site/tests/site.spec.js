@@ -69,7 +69,7 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   await expect(table).toBeFocused();
 });
 
-test('arrowing through the state picker does not start any query', async ({ page }) => {
+test('arrowing through the state picker does not run a query per state', async ({ page }) => {
   const parquetRequests = [];
   page.on('request', (r) => {
     if (r.url().endsWith('.parquet')) parquetRequests.push(r.url());
@@ -79,7 +79,9 @@ test('arrowing through the state picker does not start any query', async ({ page
   for (let i = 0; i < 5; i += 1) await page.keyboard.press('ArrowDown');
   await page.keyboard.type('Gombe');
   await page.waitForTimeout(1500);
-  expect(parquetRequests).toEqual([]);
+  // Focusing the picker warms DuckDB up in the background, which may fetch the Parquet file
+  // once. What must not happen is a query per state: at most that one warm-up fetch.
+  expect(parquetRequests.length).toBeLessThanOrEqual(1);
   await expect(page.locator('#state-table table')).toHaveCount(0);
   await expect(page.locator('#state-status')).toHaveText('');
 });
