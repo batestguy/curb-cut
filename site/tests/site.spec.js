@@ -58,7 +58,7 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   await expect(table.getByRole('row', { name: /Physical disability/ })).toContainText(
     LAGOS_PHYSICAL,
   );
-  await expect(page.getByRole('status')).toHaveText('Showing 10 disability types for Lagos.');
+  await expect(page.locator('#state-status')).toHaveText('Showing 10 disability types for Lagos.');
 });
 
 test('the chart is one image named by the data-derived alt-text', async ({ page, request }) => {
@@ -124,10 +124,23 @@ test('a data failure is announced and the chart and table still work', async ({ 
   await page.route('**/jonapwd_state_by_type.parquet', (route) => route.abort());
   await loaded(page);
   await page.locator('#state-select').selectOption('Oyo');
-  await expect(page.getByRole('status')).toContainText('could not be loaded', {
+  await expect(page.locator('#state-status')).toContainText('could not be loaded', {
     timeout: 30_000,
   });
   await expect(page.locator('#state-table table')).toHaveCount(0);
   await expect(page.locator('#national-table table')).toBeVisible();
   await expect(page.locator('#national-chart svg').first()).toBeVisible();
+});
+
+test('a chart failure is announced and the chart keeps an accessible name', async ({ page }) => {
+  await page.route('**/charts/national_by_type.json', (route) => route.abort());
+  await page.goto('./');
+  const status = page.locator('#national-chart-status');
+  await expect(status).toHaveAttribute('role', 'status');
+  await expect(status).toContainText('The chart could not be loaded');
+  await expect(page.locator('#national-chart')).toHaveAccessibleName(
+    /The chart could not be loaded/,
+  );
+  // The state explorer is independent of the chart and still works.
+  await expect(page.locator('#state-select')).toBeEnabled();
 });

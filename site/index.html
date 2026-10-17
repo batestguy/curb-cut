@@ -33,21 +33,32 @@
         </p>
         <p>
           Totals on this page are sums of JONAPWD's published state figures. They can differ
-          from JONAPWD's own printed totals by a few persons because of rounding.
+          from JONAPWD's own printed totals by a few persons, likely because of rounding.
         </p>
       </section>
 
       <section aria-labelledby="national-heading">
         <h2 id="national-heading">All 37 states, by type of disability</h2>
-        <figure class="chart-figure">
+        <figure class="chart-figure" aria-labelledby="national-chart-title">
           <div id="national-chart" class="chart" role="img" aria-labelledby="national-chart-desc">
             <div class="chart-plot" aria-hidden="true"></div>
           </div>
           <figcaption>
             <span id="national-chart-title" class="chart-title">Loading chart…</span>
-            <span id="national-chart-desc" class="chart-desc"></span>
+            <!-- Read once, as the chart's accessible name; hidden here so screen readers don't hear it twice. -->
+            <span id="national-chart-desc" class="chart-desc" aria-hidden="true"></span>
           </figcaption>
         </figure>
+        <p id="national-chart-status" class="status" role="status"></p>
+        <noscript>
+          <p class="status error">
+            The chart, its table and the state explorer need JavaScript. The same figures are
+            available as a CSV file:
+            <a href="https://github.com/batestguy/curb-cut/blob/main/data/public/jonapwd/state_disability_type.csv"
+              >JONAPWD state figures by type of disability</a
+            >.
+          </p>
+        </noscript>
         <p class="table-intro">The same figures as a table:</p>
         <div id="national-table"></div>
       </section>

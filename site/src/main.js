@@ -20,7 +20,14 @@ async function showNationalChart() {
       tableEl: document.getElementById('national-table'),
     });
   } catch (error) {
-    titleEl.textContent = `The chart could not be loaded: ${error.message}.`;
+    const message = `The chart could not be loaded: ${error.message}.`;
+    titleEl.textContent = 'Chart unavailable';
+    const chart = document.getElementById('national-chart');
+    chart.removeAttribute('aria-labelledby'); // it would override aria-label
+    chart.setAttribute('aria-label', message);
+    const status = document.getElementById('national-chart-status');
+    status.classList.add('error');
+    status.textContent = message;
   }
 }
 

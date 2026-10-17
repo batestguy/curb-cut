@@ -30,6 +30,9 @@ dev = [
     "ruff>=0.12",
 ]
 transform = [
+    # dbt-core 1.12 depends on dbt-core-experimental-parser, which PyPI ships only as a tiny
+    # sdist: installing it downloads the platform wheel from github.com/dbt-labs/dbt releases
+    # (SHA-256 checked). So `uv sync` needs github.com reachable; retry CI if that step flakes.
     "dbt-core==1.12.6",
     "dbt-duckdb==1.11.0",
     "duckdb==1.5.6",
