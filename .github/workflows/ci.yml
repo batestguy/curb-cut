@@ -8,20 +8,24 @@ on:
 permissions:
   contents: read
 
+# CI never sees licensed data: data/restricted/ and data/sources/ (the JONAPWD PDF) are
+# git-ignored, so they are not in the checkout. The data job builds only from the committed
+# public CSV in data/public/.
+
 jobs:
   python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
         with:
           enable-cache: true
       - name: Install
         run: uv sync --locked
       - name: Guard restricted zone
         run: |
-          if git ls-files | grep -E '^data/restricted/|\.duckdb(\.wal)?$'; then
-            echo "Restricted data or DuckDB files are tracked" && exit 1
+          if git ls-files | grep -E '^data/(restricted|sources)/|\.duckdb(\.wal)?$|\.pdf$'; then
+            echo "Restricted data, source PDFs or DuckDB files are tracked" && exit 1
           fi
       - name: Ruff lint
         run: uv run ruff check .
@@ -31,4 +35,78 @@ jobs:
         run: uv run pyright
       - name: Pytest
         run: uv run pytest --cov=packages --cov-report=xml
-      # dbt build (synthetic fixtures), axe and Lighthouse jobs are added in P1.
+
+  data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
+        with:
+          enable-cache: true
+      - name: Install
+        run: uv sync --locked
+      - name: dbt build (seeds, models, tests)
+        working-directory: packages/transform
+        run: uv run dbt build --profiles-dir .
+      - name: Export marts to Parquet
+        run: uv run python packages/transform/scripts/export_marts.py
+      - name: Build chart JSON (fails on a failed accessibility audit)
+        run: uv run python packages/transform/scripts/build_charts.py
+      - uses: actions/upload-artifact@v7
+        with:
+          name: site-data
+          path: site/public/data/
+          if-no-files-found: error
+
+  site:
+    needs: data
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: site-data
+          path: site/public/data/
+      - name: Install
+        run: npm ci
+      - name: Build (fetches the pinned DuckDB Parquet extension, then vite build)
+        run: npm run build
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Playwright + axe
+        run: npm test
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            site/playwright-report/
+            site/test-results/
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site/dist/
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: site
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

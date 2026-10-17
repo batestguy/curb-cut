@@ -12,8 +12,8 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10.2.0
       - name: Check tag matches package version
         run: |
           pkg=$(uv run --no-project python -c "import tomllib;print(tomllib.load(open('packages/disability-access-charts/pyproject.toml','rb'))['project']['version'])")
@@ -22,7 +22,7 @@ jobs:
         run: uv sync --locked && uv run pytest packages/disability-access-charts
       - name: Build
         run: uv build --package disability-access-charts --out-dir dist
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: dist/
@@ -36,7 +36,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: dist
           path: dist/
