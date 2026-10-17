@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Current state
 
-Phase **P1** (thin vertical slice) is built and live at https://batestguy.github.io/curb-cut/ and awaits the author's keyboard + NVDA check (`docs/accessibility-testing.md`). The Nigerian identity and state card (2026-10-17, pulled forward at the author's request) are deployed (commit 119cf4e). P0 passed its gate on 2026-10-16; its evidence is in `docs/verification.md`.
+Phase **P1** (thin vertical slice) is built and live at https://batestguy.github.io/curb-cut/ and passed a keyboard pre-check. The author deferred the NVDA part of its gate (to be done before P6 at the latest), and **P2 (`disability-access-charts` 0.1) is next**: see "P2 start" in `docs/STATUS.md`. The Nigerian identity and state card (2026-10-17, pulled forward at the author's request) are deployed (commit 119cf4e). P0 passed its gate on 2026-10-16; its evidence is in `docs/verification.md`.
 
 - **Start with `docs/STATUS.md`:** phase states, blockers, next actions and the decisions log. Update it at the end of every working session and at each gate.
 - **`PLAN.md` is the source of truth** (agreed 2026-10-16). Read the section for the current phase before starting work.

@@ -2,15 +2,15 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-17 · **Current phase:** P1 — thin vertical slice (built and live, including the identity + state card; awaiting author gate)
+**Last updated:** 2026-10-17 · **Current phase:** P1 → P2. P1 is built and live and passed a keyboard pre-check. The author deferred the NVDA part of the gate and moved on to P2 (see "P2 start" below).
 
 ## Phases
 
 | Phase | State | Gate |
 |---|---|---|
 | P0 Accounts, checks, bootstrap | ✅ done 2026-10-16 (author sign-off) | CI green ✅ · checks confirmed or decided ✅ · author review ✅ |
-| P1 Thin vertical slice | 🟡 built and live — **awaiting author keyboard + NVDA check** | Live URL works by keyboard and with NVDA (author, per `docs/accessibility-testing.md`) |
-| P2 disability-access-charts 0.1 | ⚪ not started (0.0.1 contrast checks published) | Clean install reproduces examples; LLM mocked in tests |
+| P1 Thin vertical slice | 🟡 built and live; keyboard pre-check passed 2026-10-17. **The author's NVDA check is deferred (author, 2026-10-17)**: do it before the P6 gate at the latest | Live URL works by keyboard and with NVDA (author, per `docs/accessibility-testing.md`) |
+| P2 disability-access-charts 0.1 | 🔵 next: starts here (0.0.1 contrast checks published) | Clean install reproduces examples; LLM mocked in tests |
 | P3 Restricted zone + warehouse | ⚪ not started | `dbt build` green on fixtures; disclosure check passes |
 | P4 Prevalence | ⚪ not started | Map and comparison live |
 | P5 Poverty analysis | ⚪ not started | Pre-registration committed first; brief and results page live |
@@ -89,9 +89,31 @@ The one page to read first. It says where things stand and what happens next. Th
 ## Next actions (pick up here)
 
 1. ✅ Pushed and deployed 2026-10-17 (CI run 39004343042 green). **Author:** judge the look on the live page.
-2. **Author:** install NVDA (free, nvaccess.org) and follow `docs/accessibility-testing.md` on https://batestguy.github.io/curb-cut/. Report anything confusing. Passing this check is the P1 gate. Listen especially for what NVDA says after "Show figures" (the heading "Lagos"? the "Showing 10 disability types…" message?).
+2. **Deferred (author, 2026-10-17): the NVDA part of the P1 gate.** The keyboard part passed a pre-check (see Done in P1). When picking it up, follow section 2 of `docs/accessibility-testing.md` on https://batestguy.github.io/curb-cut/ and listen for:
+   - what NVDA says after "Show figures" (the heading "Lagos"? the "Showing 10 disability types…" message?);
+   - the map's name on Tab, which should end "ranked 2 of 37", with the box not read a second time.
+
+   Do it before the P6 gate at the latest. Automated Guidepup runs only work with every other window closed; the author's open apps took the keystrokes on 2026-10-17.
 3. ✅ DHS 2024 downloaded and checked (see Done in P1). The data for P3/P4 is now complete: MPI 2021, DHS 2024, GHS W4/W5.
-4. **After the P1 gate:** P2, `disability-access-charts` 0.1. Carry over these follow-ups:
+4. **P2 start: `disability-access-charts` 0.1** (`PLAN.md` → P2). Read that section first.
+   - **What exists:**
+     - `contrast.py` is the public API in 0.0.1 on PyPI: `contrast_ratio`, `passes_text` (SC 1.4.3), `passes_non_text` (SC 1.4.11), `relative_luminance`.
+     - `experimental.py` is a stop-gap, not exported, not stable: `Theme` / `DEFAULT_THEMES`, `describe_bar_chart` (alt-text from the data), `check_alt_text`, `audit_chart` (contrast for every theme, including the highlight against the bars), and `bar_chart` (a JSON document with the Plotly spec, themes, alt-text, table, audit and meta, with no Plotly import).
+     - The site's build (`packages/transform/scripts/build_charts.py`) depends on `experimental.bar_chart`.
+   - **What P2 adds:**
+     - modules: palettes, contrast, plots, `audit(fig)`, `theme()`, and the `disability-access-charts check` CLI;
+     - outputs: checked alt-text, data-table export, keyboard metadata;
+     - docs with three examples and a comparison with `maidr`;
+     - publishing through the existing tag workflow (`charts-v<version>`).
+   - **Gate:** a clean-environment install reproduces the examples, and the tests mock the LLM.
+   - **Approach:**
+     - Promote the proven parts of `experimental.py` into the 0.1 API rather than rewrite them.
+     - Keep `experimental.bar_chart` working, or move `build_charts.py` to the new API in the same change, so CI and the live site never break.
+     - The site's colour tokens must stay equal to the themes (see Handoff notes → Colour tokens).
+     - Check that `maidr` and any new dependency are maintained before relying on them (CLAUDE.md rule).
+     - LLM polish (Gemini → Groq) is optional. Every number it writes must be checked, results cached, no live calls in tests, and only public aggregates sent.
+   - **Out of scope for P2:** map or choropleth support. P4 decides how its prevalence map goes through the library (Handoff notes → Maps). The locator map's tip stays site code, since it is orientation, not a chart.
+   - **Carry-over follow-ups:**
    - Alt-text checks should also verify *which* category each number belongs to, not just that the number exists (review finding 8).
    - ✅ Done early (commit 36f5ca4): **"Show figures" button** instead of query-on-every-change (review finding 6). Still to check by ear at the P1 gate.
    - ✅ Done early (commit 36f5ca4, then the state card): focus moves to the result after "Show figures" (now the card's heading), so the load-finished state no longer depends on the live region alone. Still to check by ear.
@@ -142,4 +164,5 @@ The one page to read first. It says where things stand and what happens next. Th
 | 2026-10-17 | **Nigerian visual identity and state card built before the P1 gate**, at the author's request, so the gate tests the page that will stay. This pulls a little P6 polish and the geoBoundaries load (P3) forward. Choices: bold flag green; a green-white-green band, never a watermark behind text; a state card with a locator map, facts, slogan, and share and rank. All rules still hold (WCAG 2.2 AA in both modes, keyboard and NVDA, same origin, charts through `disability-access-charts`, every fact cited). |
 | 2026-10-17 | **Spatial analysis added to P4, on measured prevalence (DHS 2024, MPI 2021) only:** spatial Fay-Herriot, Moran's I, LISA/clustering (exploratory), services-vs-needs correlation (ecological, descriptive). JONAPWD gets none: its state totals correlate 0.998 with population and its type shares are nearly constant (`verification.md` D17). Runs in P4; no code or dependencies before then. |
 | 2026-10-17 | Locator map left as is until P4. P4 adds a separate national prevalence map with hotspot outlines and optional hover figures (see Handoff notes → Maps). Site tagline removed and the JONAPWD caveat shortened. |
+| 2026-10-17 | **The author moved on to P2 with the NVDA part of the P1 gate deferred.** Keyboard pre-check passed on the live site; NVDA is to be done before the P6 gate at the latest. |
 | 2026-10-16 | **P0 gate passed.** Nigeria DHS 2024 is adopted as a second prevalence source next to MPI 2021. The exploratory panel uses GHS W4→W5 (all six WG-SS domains). |
