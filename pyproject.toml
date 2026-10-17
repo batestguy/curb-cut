@@ -7,21 +7,35 @@ license = "MIT"
 
 [tool.uv]
 package = false
+default-groups = ["dev", "transform"]
 
 [tool.uv.workspace]
 members = ["packages/*"]
+# dbt project, not a Python package; its scripts run in the root environment.
+exclude = ["packages/transform"]
 
 [tool.uv.sources]
 disability-access-charts = { workspace = true }
+curbcut-ingest = { workspace = true }
 
 [dependency-groups]
 dev = [
+    "curbcut-ingest",
     "disability-access-charts",
     "pre-commit>=4",
+    "pypdfium2==5.14.0",
     "pyright>=1.1.400",
     "pytest>=8",
     "pytest-cov>=6",
     "ruff>=0.12",
+]
+transform = [
+    # dbt-core 1.12 depends on dbt-core-experimental-parser, which PyPI ships only as a tiny
+    # sdist: installing it downloads the platform wheel from github.com/dbt-labs/dbt releases
+    # (SHA-256 checked). So `uv sync` needs github.com reachable; retry CI if that step flakes.
+    "dbt-core==1.12.6",
+    "dbt-duckdb==1.11.0",
+    "duckdb==1.5.6",
 ]
 
 [tool.ruff]

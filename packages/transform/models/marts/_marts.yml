@@ -1,0 +1,44 @@
+version: 2
+
+models:
+  - name: mart_jonapwd_state_by_type
+    description: >
+      JONAPWD assumption-based figures by state and disability type, with each type's
+      share of the state total. Exported to site/public/data/ as Parquet.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [state, disability_type]
+    columns:
+      - name: state
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_states')
+                field: state
+      - name: state_code
+        data_tests: [not_null]
+      - name: zone
+        data_tests: [not_null]
+      - name: persons
+        data_tests: [not_null, non_negative]
+      - name: share_of_state
+        data_tests: [not_null, non_negative]
+
+  - name: mart_jonapwd_national_by_type
+    description: JONAPWD assumption-based figures summed over the 37 states, by type.
+    columns:
+      - name: disability_type
+        data_tests: [unique, not_null]
+      - name: disability_type_label
+        data_tests: [not_null]
+      - name: persons
+        data_tests: [not_null, non_negative]
+      - name: states
+        description: Number of states contributing; must be 37.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [37]
+                quote: false

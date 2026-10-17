@@ -1,0 +1,279 @@
+/* Colours match the chart themes in disability_access_charts.experimental.DEFAULT_THEMES,
+   so the chart background is the page background in both schemes. All text pairs pass
+   WCAG 1.4.3 (4.5:1) and focus/borders pass 1.4.11 (3:1). */
+:root {
+  --bg: #ffffff;
+  --text: #1a1a1a;
+  --muted: #4d4d4d;
+  --link: #0050a0;
+  --focus: #0050a0;
+  --border: #767676;
+  --rule: #d9d9d9;
+  --caveat-bg: #fff6dc;
+  --caveat-border: #8a6100;
+  --row-alt: #f3f3f3;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121212;
+    --text: #f0f0f0;
+    --muted: #c4c4c4;
+    --link: #8cc8ff;
+    --focus: #8cc8ff;
+    --border: #8f8f8f;
+    --rule: #3a3a3a;
+    --caveat-bg: #2b2414;
+    --caveat-border: #e0b44c;
+    --row-alt: #1e1e1e;
+    color-scheme: dark;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", Arial, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.55;
+}
+
+main,
+.site-header,
+.site-footer {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+main:focus {
+  outline: none;
+}
+
+h1 {
+  font-size: clamp(1.5rem, 1.1rem + 2vw, 2.1rem);
+  line-height: 1.2;
+  margin: 1.25rem 0 1rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+  line-height: 1.3;
+  margin: 2rem 0 0.75rem;
+}
+
+a {
+  color: var(--link);
+  text-underline-offset: 0.15em;
+}
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -10rem;
+  z-index: 10;
+  padding: 0.5rem 0.75rem;
+  background: var(--bg);
+  color: var(--link);
+  border: 2px solid var(--focus);
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+.site-header {
+  padding-top: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--rule);
+}
+
+.site-name {
+  font-weight: 700;
+  font-size: 1.2rem;
+  margin: 0;
+}
+
+.tagline {
+  margin: 0;
+  color: var(--muted);
+}
+
+.caveat {
+  background: var(--caveat-bg);
+  border-left: 6px solid var(--caveat-border);
+  padding: 0.25rem 1rem 0.5rem;
+}
+
+.caveat h2 {
+  margin-top: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.chart-figure {
+  margin: 0;
+}
+
+.chart {
+  width: 100%;
+}
+
+.chart-plot {
+  width: 100%;
+  min-height: 26rem;
+}
+
+figcaption {
+  margin-top: 0.5rem;
+}
+
+.chart-title {
+  display: block;
+  font-weight: 700;
+}
+
+.chart-desc {
+  display: block;
+  color: var(--muted);
+}
+
+.table-intro {
+  margin-bottom: 0.25rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5rem 0 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+caption {
+  text-align: left;
+  font-weight: 700;
+  padding-bottom: 0.5rem;
+}
+
+th,
+td {
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+/* Small screens: tighter cells so three columns fit at 320px without breaking words. */
+@media (max-width: 30rem) {
+  table {
+    font-size: 0.95rem;
+  }
+
+  th,
+  td {
+    padding: 0.35rem 0.25rem;
+  }
+}
+
+thead th {
+  border-bottom: 2px solid var(--border);
+  text-align: left;
+}
+
+tbody tr:nth-child(even) {
+  background: var(--row-alt);
+}
+
+th[scope="row"] {
+  font-weight: 400;
+  text-align: left;
+}
+
+.num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+thead th.num {
+  white-space: normal;
+}
+
+.field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+}
+
+label {
+  font-weight: 700;
+}
+
+select {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+  min-height: 2.75rem;
+  max-width: 100%;
+}
+
+.status {
+  min-height: 1.55em;
+  color: var(--muted);
+}
+
+.status.error {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.site-footer {
+  margin-top: 3rem;
+  padding-top: 0.5rem;
+  padding-bottom: 2rem;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+}
+
+.footer-heading {
+  font-size: 1.05rem;
+  margin-top: 0.75rem;
+  color: var(--text);
+}

@@ -1,0 +1,20 @@
+[project]
+name = "curbcut-ingest"
+version = "0.0.0"
+description = "Curb Cut ingest: extract public source tables into tidy, provenance-tracked CSV"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+dependencies = [
+    "pdfplumber==0.11.10",
+    "pypdfium2==5.14.0",
+]
+
+[project.scripts]
+curbcut-ingest-jonapwd = "curbcut_ingest.jonapwd:main"
+
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/curbcut_ingest"]

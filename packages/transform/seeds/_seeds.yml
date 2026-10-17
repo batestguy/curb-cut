@@ -1,0 +1,37 @@
+version: 2
+
+seeds:
+  - name: dim_states
+    description: The 36 states and the Federal Capital Territory, with ISO 3166-2 codes and geopolitical zones.
+    columns:
+      - name: state
+        data_tests: [unique, not_null]
+      - name: state_code
+        data_tests: [unique, not_null]
+      - name: zone
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [North Central, North East, North West, South East, South South, South West]
+
+  - name: state_name_aliases
+    description: Non-canonical state spellings seen in sources, mapped to dim_states. Matched after normalise_state_key().
+    columns:
+      - name: alias
+        data_tests: [unique, not_null]
+      - name: state
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_states')
+                field: state
+
+  - name: disability_types
+    description: The ten JONAPWD categories, with display labels and order.
+    columns:
+      - name: disability_type
+        data_tests: [unique, not_null]
+      - name: sort_order
+        data_tests: [unique, not_null]

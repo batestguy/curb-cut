@@ -1,0 +1,140 @@
+{
+  "source": "JONAPWD, 2025 Assumptive Disability Disaggregated Data",
+  "copyright": "(c) JONAPWD. All rights reserved. Figures cited; PDF not redistributed.",
+  "source_url": "https://jonapwdng.org/wp-content/uploads/2026/03/2025-Assumptive-Disability-Disaggregated-Data-2.pdf",
+  "publisher_page": "https://jonapwdng.org/10865-2/",
+  "pdf_sha256": "c861f33cdfd8ed79e83598acb853dc2295667b9d169cd511e4beb1a54d638732",
+  "pages": "14-50",
+  "extracted_on": "2026-10-16",
+  "method": "pdfplumber text layer; label-to-value mapping by bar geometry",
+  "rows": 370,
+  "cross_check": {
+    "page_10_states_visible": 32,
+    "page_10_mismatches": [
+      {
+        "state": "ANAMBRA",
+        "printed": 946510,
+        "sum_of_types": 946509
+      },
+      {
+        "state": "BAUCHI",
+        "printed": 1378410,
+        "sum_of_types": 1378411
+      },
+      {
+        "state": "BAYELSA",
+        "printed": 401741,
+        "sum_of_types": 401742
+      },
+      {
+        "state": "BORNO",
+        "printed": 968834,
+        "sum_of_types": 968835
+      },
+      {
+        "state": "CROSS-RIVER",
+        "printed": 696431,
+        "sum_of_types": 696432
+      },
+      {
+        "state": "DELTA",
+        "printed": 896351,
+        "sum_of_types": 896352
+      },
+      {
+        "state": "EBONYI",
+        "printed": 524472,
+        "sum_of_types": 524471
+      },
+      {
+        "state": "EDO",
+        "printed": 766016,
+        "sum_of_types": 766015
+      },
+      {
+        "state": "ENUGU",
+        "printed": 751030,
+        "sum_of_types": 751029
+      },
+      {
+        "state": "FCT",
+        "printed": 524062,
+        "sum_of_types": 524061
+      },
+      {
+        "state": "GOMBE",
+        "printed": 651604,
+        "sum_of_types": 651603
+      },
+      {
+        "state": "KANO",
+        "printed": 2514443,
+        "sum_of_types": 2514444
+      },
+      {
+        "state": "KATSINA",
+        "printed": 1739946,
+        "sum_of_types": 1739948
+      },
+      {
+        "state": "KEBBI",
+        "printed": 933394,
+        "sum_of_types": 933395
+      },
+      {
+        "state": "KOGI",
+        "printed": 724088,
+        "sum_of_types": 724089
+      },
+      {
+        "state": "KWARA",
+        "printed": 579711,
+        "sum_of_types": 579710
+      },
+      {
+        "state": "LAGOS",
+        "printed": 2142659,
+        "sum_of_types": 2142658
+      },
+      {
+        "state": "NASARAWA",
+        "printed": 478608,
+        "sum_of_types": 478611
+      },
+      {
+        "state": "NIGER",
+        "printed": 1110476,
+        "sum_of_types": 1110475
+      },
+      {
+        "state": "OGUN",
+        "printed": 1032221,
+        "sum_of_types": 1032223
+      },
+      {
+        "state": "ONDO",
+        "printed": 855829,
+        "sum_of_types": 855828
+      },
+      {
+        "state": "PLATEAU",
+        "printed": 760794,
+        "sum_of_types": 760796
+      }
+    ],
+    "page_10_grand_total": 34901403,
+    "sum_of_all_rows": 34901406,
+    "national_by_type": {
+      "physical": 8186521,
+      "hearing": 7653482,
+      "visual": 7187637,
+      "leprosy": 2818330,
+      "albinism": 2781922,
+      "spinal_cord_injury": 2532418,
+      "intellectual": 2487588,
+      "others": 1101077,
+      "deaf_blindness": 90920,
+      "little_stature": 61511
+    }
+  }
+}

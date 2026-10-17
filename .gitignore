@@ -24,11 +24,17 @@ htmlcov/
 # dbt
 target/
 dbt_packages/
+.user.yml
 logs/
 
 # Node / site
 node_modules/
 site/dist/
+# Generated at build time by packages/transform/scripts (CI rebuilds them)
+site/public/data/
+site/public/duckdb-extensions/
+site/test-results/
+site/playwright-report/
 
 # R / renv
 .Rhistory
