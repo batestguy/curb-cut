@@ -22,11 +22,12 @@ Two kinds of manual check feed the gates:
 - [ ] **Enter** on the skip link moves focus into the main content.
 - [ ] Every link and control can be reached with **Tab** and **Shift+Tab**, in a sensible order, and there is always a visible focus outline.
 - [ ] **Tab** to the state picker. Type **Lagos** (or use **Down arrow**): nothing loads yet. Press **Tab** to reach **Show figures**, then **Enter**.
-- [ ] After a few seconds the first time, a state card appears with the heading "Lagos", and focus (the outline) is on that heading. The card shows the capital, zone, 2023 population, slogan, JONAPWD's estimate with share and rank, a map with Lagos filled green, outlined and circled, and a "Sources" line. The Lagos table follows below the card.
+- [ ] After a few seconds the first time, a state card appears with the heading "Lagos", and focus (the outline) is on that heading. The card shows the capital, zone, 2023 population, slogan, a map with Lagos filled green, outlined and circled, and a "Sources" line. The Lagos table follows below the card.
+- [ ] **Tab** from the card heading: focus moves to the map (outline around it) and a box opens showing "Lagos" and its JONAPWD figure ("… people: …% of the … for all 37 states, ranked 2 of 37"). **Esc** closes the box. With a mouse, hovering or clicking any state shows that state's box.
 - [ ] In the "All types, by state" chart above, the Lagos bar is now a different colour, outlined, with a bold label. Choose **Kano** and press **Show figures** again: the highlight moves to Kano.
 - [ ] **Tab** from the card heading reaches the source links in the card (NBS, Wikipedia, Zikoko), each with a visible focus outline.
 - [ ] Choose **Ekiti** and press **Show figures**: the card has no slogan line (no sourced slogan), and nothing else is missing.
-- [ ] Nothing needs a mouse: no hover-only information, and no focus traps.
+- [ ] Nothing needs a mouse: no hover-only information (the chosen state's map figure also shows on keyboard focus, and every state's total is in the by-state table), and no focus traps.
 - [ ] At 400% browser zoom (Ctrl + plus), nothing is cut off and there is no sideways scrolling. The state card stacks: facts first, then the map.
 - [ ] The green-white-green band at the top of the page is visible in both light and dark mode (Windows: Settings → Personalisation → Colours → "Choose your mode").
 
@@ -38,7 +39,7 @@ Two kinds of manual check feed the gates:
 - [ ] **T**: the table caption is read. Inside the table, **Ctrl+Alt+arrow keys** announce the column and row headers with each number.
 - [ ] **Tab** to the state picker: its label ("State") is read, as a combo box. Moving through states with the arrow keys reads each name and loads nothing.
 - [ ] **Tab** to **Show figures** and press **Enter**: "Loading figures for Lagos…" is spoken. When it finishes, NVDA reads the heading "Lagos" (focus moves there). Whether "Showing 10 disability types for Lagos." is also spoken: note what you hear.
-- [ ] From the "Lagos" heading, **Down arrow** reads the card in order: the facts as a list of terms and values, the share and rank sentence, then "Map of Nigeria with Lagos highlighted, in the South West zone" (read once as a graphic, no SVG noise), "Boundaries: geoBoundaries (CC BY 4.0)", the sources line, then the Lagos table.
+- [ ] From the "Lagos" heading, **Down arrow** reads the card in order: the facts as a list of terms and values, then "Map of Nigeria with Lagos highlighted, in the South West zone. JONAPWD's estimate: … ranked 2 of 37." (read once as a graphic, no SVG noise, and the pop-up box is not read a second time), "Boundaries: geoBoundaries (CC BY 4.0)", the sources line, then the Lagos table.
 - [ ] Choose **Kano**, then **Show figures**: NVDA reads the heading "Kano". The chart's description does not change (the bar highlight is visual only; the card says the same thing in words).
 - [ ] Error and loading messages are spoken without moving focus.
 - [ ] Nothing important is silent, and nothing is repeated so often that it gets in the way.

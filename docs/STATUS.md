@@ -54,6 +54,20 @@ The one page to read first. It says where things stand and what happens next. Th
   **Not heard:** the completion message "Showing 10 disability types for …". The page displayed it, but NVDA didn't speak it within 30 s. Confirm by ear. First state load takes ~10 s (7.8 MB DuckDB wasm plus extension).
 - Reviewed by `reviewer`. Review fixes applied: chart description read once, chart failure announced, `<noscript>` link to the CSV, "likely because of rounding" wording.
 - GHS-Panel W4 and W5 downloaded (`data/restricted/ghs-w4`, `ghs-w5`, with hash manifests). WG-SS uses the same 4 categories in both waves; W4 adds a "too young" code (−1), to be set to missing. **4,735 households are in both waves**: 98% have the same state, 97% the same EA. That is enough for the W4→W5 panel.
+- **Keyboard pre-check of the live site after the map change, 2026-10-17** (Claude, real key presses in the author's Brave, commit f64481d deployed). This is not the gate check, which stays with the author.
+  - **Passed:**
+    - The skip link is the first stop, visible, and moves focus to `<main>`.
+    - Tab order: picker → Show figures → card (heading, then map, then the card's source links) → footer links → back to the skip link. No trap, and an outline on every stop.
+    - Typing "Lagos" loads nothing. Show figures builds the card, with focus on the "Lagos" heading. The card has no JONAPWD row.
+    - Tab onto the map opens the box ("Lagos, 2,142,658 people: 6.1% … ranked 2 of 37"), and Esc closes it.
+    - Mouse hover on Borno outlines it and shows its figure; the box closes when the mouse leaves.
+    - The chart highlight moves from Lagos to Kano. Ekiti has no slogan line.
+    - The map's accessible name carries the figure.
+  - **Cosmetic:** while the box is open under Lagos, it covers the "Boundaries: geoBoundaries" caption.
+  - **Not checked:**
+    - 400% zoom and window resizing (Brave wouldn't resize; the 320 px Playwright test covers the narrow layout).
+    - The flag band in dark mode (an OS setting).
+    - NVDA. Two automated Guidepup runs failed because the author's other open windows took keyboard focus, so the keystrokes went elsewhere. They were stopped, and no NVDA result is claimed.
 - **"Show figures" button and announcement (commit 36f5ca4):** the picker no longer queries on every change; DuckDB warms up when the picker or button is first focused; after a press, focus moves to the result. Both still need checking **by ear** with NVDA at the P1 gate.
 - **Nigerian visual identity and state card (2026-10-17, commit 119cf4e, deployed by CI run 39004343042, all jobs green):**
   - Flag green is the brand colour. Light: `#006b3f` for text, links and focus (6.6:1), `#008751` for the band, heading rules and bars (4.6:1). Dark: `#6fd6a0` for text, links and focus (10.5:1), `#198754` for bars (4.1:1). A decorative green-white-green band (`aria-hidden`, with a thin grey frame so the white stripe shows on a white page) sits above the header, and the favicon has the same stripes. The caveat keeps its amber.
