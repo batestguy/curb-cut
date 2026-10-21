@@ -2,7 +2,7 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-17 · **Current phase:** P1 → P2. P1 is built and live and passed a keyboard pre-check. The author deferred the NVDA part of the gate and moved on to P2 (see "P2 start" below).
+**Last updated:** 2026-10-21 · **Current phase:** P2 in progress. P1 is built and live and passed a keyboard pre-check; the author deferred its NVDA part. The 0.1 build now includes the claim checker and language-ready templates (decisions log, 2026-10-21).
 
 ## Phases
 
@@ -114,17 +114,23 @@ The one page to read first. It says where things stand and what happens next. Th
      - LLM polish (Gemini → Groq) is optional. Every number it writes must be checked, results cached, no live calls in tests, and only public aggregates sent.
    - **Name and story:** keep `disability-access-charts`. The README and the PyPI `description` lead with "Built for Curb Cut, an accessible platform for Nigerian disability data", and `nigeria` goes in the keywords (`PLAN.md` P2).
    - **Out of scope for P2:** map or choropleth support. P4 decides how its prevalence map goes through the library (Handoff notes → Maps). The locator map's tip stays site code, since it is orientation, not a chart.
+   - **Added 2026-10-21** (`PLAN.md` P2): the claim checker (extremes, pairwise, ratios, ranks, equality; interval-aware), uncertainty wording in generated alt-text, language-ready templates (English only), LLM polish gated on the claim checker, and the README led by "charts that check their own words". Example 2 is a dot plot with intervals showing one passing and one rejected claim.
    - **Carry-over follow-ups:**
    - Alt-text checks should also verify *which* category each number belongs to, not just that the number exists (review finding 8).
    - ✅ Done early (commit 36f5ca4): **"Show figures" button** instead of query-on-every-change (review finding 6). Still to check by ear at the P1 gate.
    - ✅ Done early (commit 36f5ca4, then the state card): focus moves to the result after "Show figures" (now the card's heading), so the load-finished state no longer depends on the live region alone. Still to check by ear.
-5. **After P3, candidate: a `nigeria-states` package** (state-name matching, codes, zones, capitals, optionally boundaries). Recorded in `PLAN.md` → Candidates (not scheduled); it needs the author's go-ahead at the P3 gate.
-6. **P4 follow-ups:**
+5. **P3–P5 follow-ups (2026-10-21):**
+   - P3: a precision flag (RSE or interval width) with every aggregate; confirm the WG-SS DISABILITY3 cut-off against WG Doc 7A (`verification.md` D23).
+   - P4: 0.2 statistical findings (FDR-controlled, "N checked, K supported") and adire-inspired `patterns`; breakdowns by domain, severity, sex, age, urban/rural and wealth; AT unmet need only if rATA maps (D24); the disability-law panel from primary sources (D25).
+   - P5: a methods-on-show page modelled on Ethnicity Facts and Figures (D32).
+6. **After P3, candidate: a `nigeria-states` package** (state-name matching, codes, zones, capitals, optionally boundaries). Recorded in `PLAN.md` → Candidates (not scheduled); it needs the author's go-ahead at the P3 gate.
+7. **P4 follow-ups:**
    - **"First" check:** before claiming the first measured state figures, check whether the DHS 2024, MPI 2021 and DHS 2018 reports publish disability prevalence by state. Record the result in `docs/verification.md`. Launch copy (P7) relies only on what this check supports.
    - Methodology note explains the WG-SS cut-off vs the WHO 15%, so the comparison isn't framed as "JONAPWD was wrong" (see `PLAN.md` → Positioning).
    - Adopted into `PLAN.md` P4 → Spatial analysis (2026-10-17): spatial FH, Moran's I, LISA/clustering (exploratory), services-vs-needs correlation. The facilities source still needs a D-row in `verification.md` before use.
    - Disability NGO/OPD counts by state and type: no source exists (`verification.md` D15). Revisit only if JONAPWD or NCPWD shares a register.
-7. **P6 follow-ups:**
+8. **P6 follow-ups:**
+   - **Added 2026-10-21:** descriptions in Hausa, Yoruba, Igbo and Pidgin, reviewed by the author's native reviewers, with a language selector and `lang` attributes, and an honest note that no screen-reader voice was found for them (D26, D27); test NVDA with `lang="yo"`. An adire-inspired decorative band reviewed by a Nigerian designer (D31). Font coverage check and a self-hosted woff2 subset (D29).
    - Pre-render the national table into the HTML at build time. First paint measured 4.8 s on the author's connection, against a 3 s target.
    - The charts show only 2–3 axis ticks at 320 px, and the 37-bar chart is cramped there ("Federal Capital Territory" takes half the width).
    - In light mode the highlighted bar's dark outline barely shows against its indigo fill (the bold label and colour still mark it). Try a lighter outline or a gap line. The Lagos ring doesn't cover the whole state at its western tip.
@@ -168,4 +174,5 @@ The one page to read first. It says where things stand and what happens next. Th
 | 2026-10-17 | Locator map left as is until P4. P4 adds a separate national prevalence map with hotspot outlines and optional hover figures (see Handoff notes → Maps). Site tagline removed and the JONAPWD caveat shortened. |
 | 2026-10-17 | **The author moved on to P2 with the NVDA part of the P1 gate deferred.** Keyboard pre-check passed on the live site; NVDA is to be done before the P6 gate at the latest. |
 | 2026-10-17 | **The chart library keeps its generic name** (`disability-access-charts`), with the Nigeria story leading its README and PyPI description in P2. The Nigerian identity goes on genuinely Nigerian code: a `nigeria-states` package, recorded as a candidate after P3. |
+| 2026-10-21 | **"Make it stand out" plan adopted** (package first, then the site; no new phase). The claim checker goes into 0.1; automatic findings go into 0.2 (P4). Native reviewers are available for Hausa, Yoruba, Igbo and Pidgin. Accepted for 0.1: the chart file only gains fields; bars with intervals show no value labels; each number must belong to the nearest category in its clause. Research logged as `verification.md` D18–D32 (several UNVERIFIED). |
 | 2026-10-16 | **P0 gate passed.** Nigeria DHS 2024 is adopted as a second prevalence source next to MPI 2021. The exploratory panel uses GHS W4→W5 (all six WG-SS domains). |

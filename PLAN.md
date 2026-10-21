@@ -84,6 +84,10 @@ Survey-weighted estimation, Fay-Herriot small-area estimation, DoubleML with sen
 
 **One-line pitch:** Nigeria's disability numbers are mostly an assumption; Curb Cut puts measured, state-level survey estimates next to them, in charts that are checked against their own data.
 
+**Pitch lines (added 2026-10-21):**
+- *The package:* charts that check their own words. Every number, and every "higher", "largest", "twice" or "ranked 3rd", is checked against the data and its confidence intervals; LLM text is used only if it passes. A search found no other library that checks comparative claims against the data (closest: AggChecker, a VLDB 2019 research system; `docs/verification.md` D18). Say "we found no other", never "the first".
+- *The site:* measured Nigerian disability figures, shown honestly with their uncertainty, in a visual language drawn from Nigerian textiles, with descriptions in Hausa, Yoruba, Igbo and Pidgin.
+
 ## Architecture: two data zones
 
 Licensing makes this necessary.
@@ -143,12 +147,17 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 - **Outputs:** checked alt-text, data-table export, keyboard metadata.
 - **Publishing:** docs with three examples, a comparison with maidr, and OIDC trusted publishing.
 - **Name and story** (decided 2026-10-17): the name stays `disability-access-charts`, because the code is generic and a Nigerian name would oversell it and narrow its users. The README and the PyPI `description` lead with where it comes from: "Built for Curb Cut, an accessible platform for Nigerian disability data". Add `nigeria` to the keywords.
-- **Gate:** clean-environment install reproduces the examples; tests mock the LLM.
+- **Claim checker** (added 2026-10-21): alongside the number-and-category check, `describe.py` checks extremes, pairwise comparisons, ratios (±5%), ranks and "the same as" against the data. With intervals, "A higher than B" passes only if abs(a−b) > 1.96·√(se_a²+se_b²) (se = half-width ÷ 1.96; assumes symmetric intervals and independent groups, with a warning when groups may not be independent). "No difference" always fails (suggest "the survey cannot show a difference"); an unsupported unqualified superlative fails; unrecognised comparatives give an "unchecked claim" warning. Generated alt-text uses uncertainty wording ("highest estimate", the interval, whether the survey can show a difference; summary first) and must pass its own checker. LLM polish must pass it too.
+- **Language-ready templates:** sentence templates and claim vocabulary in one table per language, `describe(..., lang="en")`, category glossary, `alt_text_lang` in the chart file, numbers always as digits. Only `en` ships in 0.1.
+- **README** leads with "charts that check their own words", honest about overlap with a11yviz (palettes, audits) and maidr (sound, braille, keyboard).
+- **Gate:** clean-environment install reproduces the examples (example 2: a dot plot with intervals showing one claim that passes and one that is rejected); tests mock the LLM.
 
 ### P3 — Restricted zone + warehouse (weeks 4–6)
 - Load MPI 2021, GHS W3–W5, NBS 2023 projections, WorldPop and geoBoundaries (CC BY).
 - **Measure extraction accuracy:** hand-check a sample of the JONAPWD state pages against the rendered charts and report the accuracy.
 - **Warehouse:** alias seed, manifest, dbt tests with metaplane dbt-expectations, synthetic fixtures, dbt docs.
+- **Precision flag** (added 2026-10-21): keep the ≥30-respondent disclosure rule and also store a precision flag (relative standard error or interval width) with every aggregate. The 30 rule protects privacy; it does not make an estimate reliable.
+- **Disability definition:** WG-SS DISABILITY3 (any domain "a lot of difficulty" or "cannot do at all"); ages 5–17 reported separately. Confirm against WG Doc 7A first (`verification.md` D23).
 - **Gate:** `dbt build` green on the fixtures, and the public aggregates pass the disclosure check.
 
 ### P4 — Prevalence (weeks 6–7)
@@ -177,6 +186,11 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 - Compare with the JONAPWD 15% figure and the 10–18% grid, plus the published DHS tables as a benchmark.
 - **"First" check:** before any claim that these are the first measured state figures, check whether the DHS 2024, MPI 2021 and DHS 2018 reports publish disability prevalence by state. Record the result, with sources and date, in `docs/verification.md`. If any report does, the claim changes to what is actually new (e.g. accessible, queryable, with small-area estimates).
 - Methodology note. It explains how the definitions differ: the WG-SS cut-off ("a lot of difficulty" or "cannot do at all" in at least one domain) is a narrower definition than the one behind the WHO 15%, a global estimate from different surveys and thresholds (check and cite the WHO source's definition when writing the note). Part of the gap between the survey estimates and JONAPWD comes from that difference, so the comparison is not framed as "JONAPWD was wrong".
+- **`disability-access-charts` 0.2** (added 2026-10-21):
+  - *Statistical findings:* pre-declared families (extremes, gaps, rankings, outliers); every comparison counted, false discovery rate controlled, "N comparisons checked, K supported" printed; findings from cells failing the disclosure or precision checks hedged or suppressed.
+  - *Patterns:* a `patterns` module of up to 5 abstract adire-inspired tiles (oniko-style rings and dots, checks, lines) via Plotly `marker.pattern.path`, for grouped and stacked bars, always with colour and direct labels (SC 1.4.1); the audit checks that patterns and colours line up. Never nsibidi or Ukara signs. Test support beyond bar first (D30).
+- **Breakdowns:** domain, severity, sex, age band, urban/rural and wealth quintile, by state where the precision flag allows. Assistive-technology unmet need (MPI `d22`–`d26`) only if WHO rATA's definitions map onto those questions (D24).
+- **"Nigeria's disability law" panel**, every fact from a primary source: the Act (signed 2019-01-23), the 5-year building transition (ended January 2024), the 5% jobs quota, NCPWD, the count of states with their own law, and the CRPD ratification year (D25).
 - **Gate:** the map and comparison are live.
 
 ### P5 — Poverty analysis (weeks 7–9)
@@ -187,6 +201,7 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
   - Reported as an **adjusted association**, not a causal effect.
 - **Exploratory (GHS):** event study on onset of difficulty between W4 and W5 (all six WG-SS domains; W3→W5 for seeing/walking only), using pyfixest checked against R `did`, with power stated honestly.
 - **Brief:** policy brief written via pandoc.
+- **Methods on show** (added 2026-10-21): the results page explains, with worked examples, survey weights, intervals, adjusted association versus effect, and sensitivity analysis, modelled on the UK Ethnicity Facts and Figures "how to read survey data" page (D32).
 - **Gate:** the brief is committed and the results page is live.
 
 ### P6 — API + site polish (weeks 9–10)
@@ -196,6 +211,9 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 - **Site:**
   - Pages: explorer, sensitivity slider, poverty, methodology, data dictionary.
   - CSV/JSON downloads everywhere; Lighthouse CI.
+- **Languages** (added 2026-10-21): chart descriptions in Hausa, Yoruba, Igbo and Pidgin (templates and glossaries translated, reusing NCPWD's Disability Act terms, D26), reviewed by the author's native reviewers. A language selector with `lang` attributes (`ha`, `yo`, `ig`, `pcm`). Say on the page that no screen-reader voice was found for these languages (D27), so the descriptions serve readers, not listeners; test by hand what NVDA does with `lang="yo"`.
+- **Look:** an adire-inspired decorative band (`aria-hidden`, at least 3:1 in both themes) next to the flag band, reviewed by a Nigerian designer or textile practitioner before launch (D31).
+- **Type:** check that Atkinson Hyperlegible Next or Noto Sans covers ẹ̀ ọ́ ṣ ɓ ɗ ƙ ƴ ị ụ ṅ (fontTools plus a browser render, D29); self-host a woff2 subset and record its size.
 - **Gate:** accessibility score 100 in CI, the walkthrough video recorded, and **feedback from at least one regular screen-reader user collected and acted on**. Start looking for that tester (JONAPWD, a blind persons' association, NVDA user communities) during P4–P5, so the feedback lands before launch.
 
 ### P7 — Launch (weeks 10–11)
