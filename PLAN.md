@@ -164,6 +164,8 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 - **Measure extraction accuracy:** hand-check a sample of the JONAPWD state pages against the rendered charts and report the accuracy.
 - **Warehouse:** alias seed, manifest, dbt tests with metaplane dbt-expectations, synthetic fixtures, dbt docs.
 - **Precision flag** (added 2026-10-21): keep the ≥30-respondent disclosure rule and also store a precision flag (relative standard error or interval width) with every aggregate. The 30 rule protects privacy; it does not make an estimate reliable.
+- **User conversations** (added 2026-10-21; before P4 is designed): 15-minute calls with 3–5 people from the first audience (`Positioning` → Audience): someone from JONAPWD or another disability organisation, a journalist, a researcher, a disabled user. One question: "What would you want to look up?" Record the answers (no names without consent) in `docs/user-research.md`; they decide what the P4 state pages show.
+- **Reproducible from licensed data:** publish the aggregation scripts so a researcher with their own NBS or DHS access can reproduce every published figure (the microdata never leaves `data/restricted/`).
 - **Disability definition:** WG-SS DISABILITY3 (any domain "a lot of difficulty" or "cannot do at all"); ages 5–17 reported separately. Confirm against WG Doc 7A first (`verification.md` D23).
 - **Gate:** `dbt build` green on the fixtures, and the public aggregates pass the disclosure check.
 
@@ -197,11 +199,15 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
   - *Statistical findings:* pre-declared families (extremes, gaps, rankings, outliers); every comparison counted, false discovery rate controlled, "N comparisons checked, K supported" printed; findings from cells failing the disclosure or precision checks hedged or suppressed.
   - *Patterns:* a `patterns` module of up to 5 abstract adire-inspired tiles (oniko-style rings and dots, checks, lines) via Plotly `marker.pattern.path`, for grouped and stacked bars, always with colour and direct labels (SC 1.4.1); the audit checks that patterns and colours line up. Never nsibidi or Ukara signs. Test support beyond bar first (D30).
 - **Breakdowns:** domain, severity, sex, age band, urban/rural and wealth quintile, by state where the precision flag allows. Assistive-technology unmet need (MPI `d22`–`d26`) only if WHO rATA's definitions map onto those questions (D24).
+- **Light state pages** (added 2026-10-21): one page per state (37), built at build time as plain HTML text and small tables that load in about a second on a phone, with no DuckDB-WASM. Each is the state's profile: every public source for that state (JONAPWD, MPI, DHS estimates with intervals, population, breakdowns, the state's disability-law status). DuckDB-WASM stays for the P6 explorer only. GHS is national/zone only and never appears on a state page.
+- **Shareable findings:** each state page has its own link and a small summary image made at build time (Open Graph), e.g. "Kano: X% of people have a disability (survey estimate)", with the same text in the page and the image's alt text. Images go through the same contrast checks.
 - **"Nigeria's disability law" panel**, every fact from a primary source: the Act (signed 2019-01-23), the 5-year building transition (ended January 2024), the 5% jobs quota, NCPWD, the count of states with their own law, and the CRPD ratification year (D25).
 - **Gate:** the map and comparison are live.
 
 ### P5 — Poverty analysis (weeks 7–9)
 - **Pre-registration:** DAG, estimand and analysis plan committed *before* outcomes are examined.
+  - Also registered on OSF (free) for a public timestamp (added 2026-10-21).
+  - One outside statistician or academic, ideally at a Nigerian university, reads it before any outcome is examined; record who and when (with consent) in `docs/STATUS.md`.
 - **Primary (MPI):**
   - Estimate the poverty gap between households with and without a disabled member using DoubleML, controlling for confounders, with SEs.
   - Robustness: sensemakr / E-values, a placebo treatment, DoWhy refutations.
@@ -218,6 +224,9 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 - **Site:**
   - Pages: explorer, sensitivity slider, poverty, methodology, data dictionary.
   - CSV/JSON downloads everywhere; Lighthouse CI.
+- **Feedback and use** (added 2026-10-21):
+  - A "report a problem" link on every page that needs no GitHub account (a mailto link), reachable by keyboard.
+  - Visit counts with GoatCounter (free for non-commercial use, no cookies), so launch copy can say how many people used it. A third-party service: check its terms, data handling and that the script passes axe before adding it, and record a `verification.md` D-row. It never receives anything but page views.
 - **Languages** (added 2026-10-21): chart descriptions in Hausa, Yoruba, Igbo and Pidgin (templates and glossaries translated, reusing NCPWD's Disability Act terms, D26), reviewed by the author's native reviewers. A language selector with `lang` attributes (`ha`, `yo`, `ig`, `pcm`). Say on the page that no screen-reader voice was found for these languages (D27), so the descriptions serve readers, not listeners; test by hand what NVDA does with `lang="yo"`.
 - **Look:** an adire-inspired decorative band (`aria-hidden`, at least 3:1 in both themes) next to the flag band, reviewed by a Nigerian designer or textile practitioner before launch (D31).
 - **Type:** check that Atkinson Hyperlegible Next or Noto Sans covers ẹ̀ ọ́ ṣ ɓ ɗ ƙ ƴ ị ụ ṅ (fontTools plus a browser render, D29); self-host a woff2 subset and record its size.
