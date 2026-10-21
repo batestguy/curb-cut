@@ -69,6 +69,13 @@ About the author and setup:
 
 Recorded 2026-10-17 from a gap analysis. These are findings from a search, not verified facts; P4 checks the "first" claim before anything public relies on it.
 
+**Audience (decided 2026-10-21)**
+
+1. **First: Nigerian users of the site.** Disability advocates and organisations (JONAPWD, NCPWD), policymakers, journalists, researchers, and disabled Nigerians themselves. When a choice trades polish for usefulness, they win: plain-language findings, Nigerian languages, phone-friendly pages, downloadable aggregates.
+2. **Second: recruiters across data roles.** Real use by the first audience is the strongest portfolio evidence; the README's role table, the methods page and the claim checker serve them.
+
+The chart library is a separate, generic audience: anyone publishing charts who needs them accessible and checked (newsrooms, statistics offices, NGOs, researchers). It holds no Nigerian data; people learn about disability in Nigeria from the site and its public data, never from microdata, which stays with NBS and DHS.
+
 **The gap**
 
 - **Assumed, not measured.** Nigeria's best-known disability figures (JONAPWD, ~35M people) come from multiplying the population by the WHO 15% benchmark. Measured Washington Group data (NBS MPI 2021, DHS 2018 and 2024) exists, but as far as the search found, only as national figures in PDF reports or locked inside licensed microdata.
