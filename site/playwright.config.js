@@ -2,7 +2,10 @@ import { defineConfig, devices } from '@playwright/test';
 
 // Tests run against `vite preview` of the production build (run `npm run build` first).
 const base = process.env.SITE_BASE ?? '/curb-cut/';
-const origin = 'http://127.0.0.1:4173';
+// An uncommon port with --strictPort: a clash fails loudly instead of testing whatever
+// other app already listens on vite's default 4173. Override with PREVIEW_PORT.
+const port = process.env.PREVIEW_PORT ?? '4317';
+const origin = `http://127.0.0.1:${port}`;
 
 export default defineConfig({
   testDir: './tests',
@@ -21,7 +24,7 @@ export default defineConfig({
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {
-    command: 'npm run preview -- --host 127.0.0.1',
+    command: `npm run preview -- --host 127.0.0.1 --port ${port} --strictPort`,
     url: `${origin}${base}`,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,

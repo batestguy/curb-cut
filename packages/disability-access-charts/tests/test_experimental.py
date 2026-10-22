@@ -12,6 +12,9 @@ from disability_access_charts.experimental import (
     describe_bar_chart,
 )
 
+# The module is deprecated; these tests pin its old behaviour, so hide the warning here.
+pytestmark = pytest.mark.filterwarnings("ignore::DeprecationWarning")
+
 CATS = ["Physical", "Hearing", "Visual", "Little stature"]
 VALS = [8186521, 7653482, 7187637, 61511]
 
@@ -172,3 +175,9 @@ def test_audit_fails_for_low_contrast_bars() -> None:
 def test_rejects_bad_input(cats: list[str], vals: list[int]) -> None:
     with pytest.raises(ValueError):
         bar_chart(cats, vals, **KW)
+
+
+@pytest.mark.filterwarnings("default")
+def test_experimental_functions_warn() -> None:
+    with pytest.warns(DeprecationWarning, match="experimental.bar_chart is deprecated"):
+        bar_chart(CATS, VALS, **KW)

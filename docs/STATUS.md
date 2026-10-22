@@ -2,7 +2,7 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-21 · **Current phase:** P2 in progress. P1 is built and live and passed a keyboard pre-check; the author deferred its NVDA part. The 0.1 build now includes the claim checker and language-ready templates (decisions log, 2026-10-21).
+**Last updated:** 2026-10-22 · **Current phase:** P2 built, awaiting the author's gate review. `disability-access-charts` 0.1.0 is committed but **not published**: publishing to PyPI needs the author's go-ahead (a version can't be reused). P1 is live; its NVDA check is deferred.
 
 ## Phases
 
@@ -10,7 +10,7 @@ The one page to read first. It says where things stand and what happens next. Th
 |---|---|---|
 | P0 Accounts, checks, bootstrap | ✅ done 2026-10-16 (author sign-off) | CI green ✅ · checks confirmed or decided ✅ · author review ✅ |
 | P1 Thin vertical slice | 🟡 built and live; keyboard pre-check passed 2026-10-17. **The author's NVDA check is deferred (author, 2026-10-17)**: do it before the P6 gate at the latest | Live URL works by keyboard and with NVDA (author, per `docs/accessibility-testing.md`) |
-| P2 disability-access-charts 0.1 | 🔵 next: starts here (0.0.1 contrast checks published) | Clean install reproduces examples; LLM mocked in tests |
+| P2 disability-access-charts 0.1 | 🟡 built 2026-10-22 (executor, three reviewer rounds, final fixes inline); not yet published | Clean install reproduces examples; LLM mocked in tests |
 | P3 Restricted zone + warehouse | ⚪ not started | `dbt build` green on fixtures; disclosure check passes |
 | P4 Prevalence | ⚪ not started | Map and comparison live |
 | P5 Poverty analysis | ⚪ not started | Pre-registration committed first; brief and results page live |
@@ -95,7 +95,12 @@ The one page to read first. It says where things stand and what happens next. Th
 
    Do it before the P6 gate at the latest. Automated Guidepup runs only work with every other window closed; the author's open apps took the keystrokes on 2026-10-17.
 3. ✅ DHS 2024 downloaded and checked (see Done in P1). The data for P3/P4 is now complete: MPI 2021, DHS 2024, GHS W4/W5.
-4. **P2 start: `disability-access-charts` 0.1** (`PLAN.md` → P2). Read that section first.
+4. **P2 (built 2026-10-22, awaiting the author's gate review).**
+   - **Author:** review the gate (clean install reproduces the examples; tests mock the LLM) and decide on publishing: bump nothing, push tag `charts-v0.1.0`, and trusted publishing does the rest.
+   - Built: `bar()`/`dot()` documents, the claim checker (interval-aware, warnings for what it can't check), `audit()` with `chart-matches-data`, `theme()`, `to_html`/`to_csv`, `figure()`, the `check` CLI, the LLM gate (no errors or warnings except independence; `disclosure_checked=True` required), English templates, 3 examples. Dot plots set series side by side with whiskers in each series' colour. README shortened; full rules in `packages/disability-access-charts/docs/claim-checker.md`.
+   - Verified: 379 pytest, ruff, pyright, pre-commit; dbt build, export, charts, map; site 18/18 Playwright + axe; clean wheel on 3.12 (core and `[plotly]`) and 3.10; the live `national_by_type` chart is byte-identical.
+   - **0.1.1 follow-ups** (from the third review; all are false rejects or warnings, never silent passes): "the two highest" as a top-N rank; parenthetical and apposition lists ("12.0% (Kano)"); relative clauses ("…, which is higher than"); "50% higher" / "3 points higher" / "above 10%"; the audit could check `title` and trace `text` labels; a CI job on Python 3.10.
+   - The original P2 brief follows for the record.
    - **What exists:**
      - `contrast.py` is the public API in 0.0.1 on PyPI: `contrast_ratio`, `passes_text` (SC 1.4.3), `passes_non_text` (SC 1.4.11), `relative_luminance`.
      - `experimental.py` is a stop-gap, not exported, not stable: `Theme` / `DEFAULT_THEMES`, `describe_bar_chart` (alt-text from the data), `check_alt_text`, `audit_chart` (contrast for every theme, including the highlight against the bars), and `bar_chart` (a JSON document with the Plotly spec, themes, alt-text, table, audit and meta, with no Plotly import).
@@ -155,7 +160,7 @@ The one page to read first. It says where things stand and what happens next. Th
     - The "ranking mostly follows population" sentence went with the row; the page caveat still says the figures are 15% of population.
   - *P4:* measured prevalence by state, shaded, plus hotspot outlines (`PLAN.md` P4 → Spatial analysis). This is a **separate national map**, in the P4 section, built from the same `build_map.py` paths so it looks the same. It shows data, so it goes through `disability-access-charts` (alt-text from the data, data table, audit); the locator doesn't. The locator stays in the card.
   - *Hover figures (P4):* allowed only as an extra. The same figures must also be reachable without a mouse, through the state picker, the card and the data table, and tapping a state on a phone must work too, since phones have no hover. A custom tooltip must meet WCAG 2.2 SC 1.4.13: it closes with Esc, the pointer can move onto it, and it stays until the pointer leaves. Don't make the 37 states separate Tab stops; the picker is the keyboard route.
-- **Colour tokens:** the site's `--flag-green`/`--highlight` must stay equal to `DEFAULT_THEMES` mark/highlight in `experimental.py`; change both together and re-run the audit tests.
+- **Colour tokens:** the site's `--flag-green`/`--highlight` must stay equal to `DEFAULT_THEMES` mark/highlight in `palettes.py`; change both together and re-run the audit tests.
 - **Release:** bump the version in `packages/disability-access-charts/pyproject.toml` and push tag `charts-v<version>`. Trusted publishing handles the rest.
 - **NBS obligation:** send an electronic copy of every publication based on MPI data to the National Data Archive.
 - **DHS obligation:** send a PDF of every report or publication using DHS data to references@dhsprogram.com. DHS data may be used only for the registered project. A new purpose needs a new DHS project.

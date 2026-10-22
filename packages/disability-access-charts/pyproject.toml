@@ -1,19 +1,35 @@
 [project]
 name = "disability-access-charts"
-version = "0.0.1"
-description = "Accessible Plotly charts: alt-text checked against the data, a CI-ready audit, and a data-table fallback for every chart"
+version = "0.1.0"
+description = "Built for Curb Cut, an accessible platform for Nigerian disability data: charts that check their own words, with alt-text tested against the data, a CI-ready audit and a data-table fallback"
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
-keywords = ["accessibility", "a11y", "disability", "wcag", "charts", "plotly", "screen-reader"]
+keywords = [
+    "accessibility",
+    "a11y",
+    "disability",
+    "wcag",
+    "charts",
+    "plotly",
+    "screen-reader",
+    "alt-text",
+    "nigeria",
+]
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
     "Topic :: Scientific/Engineering :: Visualization",
     "Intended Audience :: Science/Research",
 ]
 dependencies = []
+
+[project.optional-dependencies]
+plotly = ["plotly>=6"]
+
+[project.scripts]
+disability-access-charts = "disability_access_charts.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/batestguy/curb-cut"

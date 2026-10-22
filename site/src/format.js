@@ -6,11 +6,26 @@ const percent = new Intl.NumberFormat('en-NG', {
   maximumFractionDigits: 1,
 });
 
-export function formatValue(value, type) {
+const fixed = new Map();
+
+export function formatValue(value, type, decimals = 1) {
   // DuckDB-WASM returns BIGINT columns as JavaScript BigInt.
   const n = typeof value === 'bigint' ? Number(value) : value;
   if (type === 'integer') return integer.format(n);
   if (type === 'percent') return percent.format(n);
+  if (type === 'number') {
+    // A fixed number of decimals, from the chart document's column (interval bounds, rates).
+    if (!fixed.has(decimals)) {
+      fixed.set(
+        decimals,
+        new Intl.NumberFormat('en-NG', {
+          minimumFractionDigits: decimals,
+          maximumFractionDigits: decimals,
+        }),
+      );
+    }
+    return fixed.get(decimals).format(n);
+  }
   return String(value);
 }
 
@@ -18,7 +33,7 @@ export function formatValue(value, type) {
  * Render an accessible data table: <caption>, column headers with scope="col", the first
  * cell of each row as a row header with scope="row", and numbers right-aligned.
  *
- * @param {{caption: string, columns: {label: string, type: string}[], rows: unknown[][]}} spec
+ * @param {{caption: string, columns: {label: string, type: string, decimals?: number}[], rows: unknown[][]}} spec
  */
 export function renderTable(spec) {
   const table = document.createElement('table');
@@ -42,7 +57,7 @@ export function renderTable(spec) {
       const cell = document.createElement(i === 0 ? 'th' : 'td');
       if (i === 0) cell.scope = 'row';
       if (column.type !== 'text') cell.className = 'num';
-      cell.textContent = formatValue(value, column.type);
+      cell.textContent = formatValue(value, column.type, column.decimals);
       tr.append(cell);
     });
   }

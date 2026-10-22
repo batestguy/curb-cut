@@ -1,5 +1,5 @@
 /* Background, text and bar colours match the chart themes in
-   disability_access_charts.experimental.DEFAULT_THEMES (--flag-green / --highlight are the
+   disability_access_charts.palettes.DEFAULT_THEMES (--flag-green / --highlight are the
    theme's mark / highlight), so the chart background is the page background in both
    schemes. Nigerian green is the brand colour. Ratios against --bg:
    light --green #006b3f 6.6:1 (text, links, focus), --flag-green #008751 4.6:1 (band, rules,

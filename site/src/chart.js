@@ -29,19 +29,31 @@ function compact(layout, data) {
 function themed(doc, themeName, highlight) {
   const theme = doc.themes[themeName] ?? doc.themes.light;
   const marked = (trace) => highlight != null && trace.y.includes(highlight);
-  const data = doc.plotly.data.map((trace) => {
+  // Dot plots colour each series from theme.series (each also has its own marker shape);
+  // bars use theme.mark. Dot whiskers take their series colour, bar whiskers the text colour.
+  const dots = doc.meta?.chart_type === 'dot';
+  const data = doc.plotly.data.map((trace, index) => {
+    const color = dots ? (theme.series?.[index] ?? theme.mark) : theme.mark;
+    const whisker = dots ? color : theme.text;
+    const errorX = trace.error_x ? { error_x: { ...trace.error_x, color: whisker } } : {};
     if (!marked(trace)) {
-      return { ...trace, marker: { ...trace.marker, color: theme.mark }, textfont: { color: theme.text } };
+      return {
+        ...trace,
+        ...errorX,
+        marker: { ...trace.marker, color },
+        textfont: { color: theme.text },
+      };
     }
     const on = trace.y.map((category) => category === highlight);
     return {
       ...trace,
+      ...errorX,
       marker: {
         ...trace.marker,
-        color: on.map((o) => (o ? (theme.highlight ?? theme.mark) : theme.mark)),
+        color: on.map((o) => (o ? (theme.highlight ?? color) : color)),
         line: { color: theme.text, width: on.map((o) => (o ? 3 : 0)) },
       },
-      text: trace.text.map((t, i) => (on[i] ? `<b>${t}</b>` : t)),
+      text: trace.text ? trace.text.map((t, i) => (on[i] && t ? `<b>${t}</b>` : t)) : trace.text,
       textfont: { color: theme.text },
     };
   });
@@ -66,6 +78,9 @@ function themed(doc, themeName, highlight) {
       title: { ...base.xaxis.title, font: { ...base.xaxis.title.font, color: theme.text } },
     },
     yaxis,
+    ...(base.legend
+      ? { legend: { ...base.legend, font: { ...base.legend.font, color: theme.text } } }
+      : {}),
     autosize: true,
   };
   return { data, layout };

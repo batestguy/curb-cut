@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 import duckdb
-from disability_access_charts.experimental import bar_chart
+from disability_access_charts import bar
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DATA = ROOT / "site" / "public" / "data"
@@ -29,7 +29,7 @@ def national_by_type(data_dir: Path) -> dict:
         "select disability_type_label, persons "
         f"from read_parquet('{parquet}') order by persons desc, sort_order"
     ).fetchall()
-    return bar_chart(
+    return bar(
         [str(label) for label, _ in rows],
         [int(persons) for _, persons in rows],
         title="Persons with disabilities by type, all 37 states (JONAPWD estimates)",
@@ -46,7 +46,7 @@ def national_by_state(data_dir: Path) -> dict:
         "select state, any_value(state_total) as total "
         f"from read_parquet('{parquet}') group by state order by total desc, state"
     ).fetchall()
-    return bar_chart(
+    return bar(
         [str(state) for state, _ in rows],
         [int(total) for _, total in rows],
         title="Persons with disabilities by state, all types (JONAPWD estimates)",
