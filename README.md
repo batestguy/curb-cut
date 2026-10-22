@@ -11,6 +11,16 @@
 
 [![The Curb Cut site: a chart of JONAPWD's 2025 figures by disability type, under a notice that they are assumed, not counted.](docs/images/site.png)](https://batestguy.github.io/curb-cut/)
 
+## Who's building it
+
+I'm Jerry Bannister, a statistician in Bauchi, Nigeria, and a wheelchair user. A curb cut is the small ramp cut into a kerb: made for wheelchair users like me, and used by everyone pushing a pram or pulling a suitcase. That's the idea behind this project.
+
+I rely on other people's help more than most, and I'd like that help to be easier to give. It starts with knowing who needs it and where. In Nigeria those numbers are mostly assumed, not counted, so Curb Cut puts measured figures in plain view, in charts that work by keyboard and screen reader, not just by mouse. I'm not a screen-reader user myself, so a regular screen-reader user tests the site before launch.
+
+For more than ten years I've turned incomplete Nigerian data into evidence institutions act on: as the statistician behind Abubakar Tafawa Balewa University's federal returns to the NUC, and through my consultancy, JJMB Datascience Hub. MSc Statistics (best in class); PhD in Statistics in progress.
+
+[GitHub](https://github.com/batestguy) · [ORCID](https://orcid.org/0009-0002-3302-9558) · [Google Scholar](https://scholar.google.com/citations?user=oKaejtMAAAAJ)
+
 ## Why
 
 JONAPWD's widely cited 2025 figures (about 35 million people) come from applying the global WHO 15% rate to population projections: no one was counted. National surveys (NBS MPI 2021, Nigeria DHS 2024) did measure disability with the Washington Group questions, but their results sit in PDF reports and licensed microdata. Curb Cut turns them into public, disclosure-checked state estimates, puts them next to the assumed figures, and says plainly how sure each number is.
