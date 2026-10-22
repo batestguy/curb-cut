@@ -2,7 +2,7 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-22 · **Current phase:** P2 built, awaiting the author's gate review. `disability-access-charts` 0.1.0 is committed but **not published**: publishing to PyPI needs the author's go-ahead (a version can't be reused). P1 is live; its NVDA check is deferred.
+**Last updated:** 2026-10-22 · **Current phase:** P2 done; P3 next. `disability-access-charts` 0.1.0 is on PyPI (2026-10-22). P1 is live; its NVDA check is deferred.
 
 ## Phases
 
@@ -10,7 +10,7 @@ The one page to read first. It says where things stand and what happens next. Th
 |---|---|---|
 | P0 Accounts, checks, bootstrap | ✅ done 2026-10-16 (author sign-off) | CI green ✅ · checks confirmed or decided ✅ · author review ✅ |
 | P1 Thin vertical slice | 🟡 built and live; keyboard pre-check passed 2026-10-17. **The author's NVDA check is deferred (author, 2026-10-17)**: do it before the P6 gate at the latest | Live URL works by keyboard and with NVDA (author, per `docs/accessibility-testing.md`) |
-| P2 disability-access-charts 0.1 | 🟡 built 2026-10-22 (executor, three reviewer rounds, final fixes inline); not yet published | Clean install reproduces examples; LLM mocked in tests |
+| P2 disability-access-charts 0.1 | ✅ done 2026-10-22: 0.1.0 published (tag `charts-v0.1.0`, pushed by the author); a clean install from PyPI ran all 3 examples and `check` | Clean install reproduces examples; LLM mocked in tests |
 | P3 Restricted zone + warehouse | ⚪ not started | `dbt build` green on fixtures; disclosure check passes |
 | P4 Prevalence | ⚪ not started | Map and comparison live |
 | P5 Poverty analysis | ⚪ not started | Pre-registration committed first; brief and results page live |
@@ -95,8 +95,7 @@ The one page to read first. It says where things stand and what happens next. Th
 
    Do it before the P6 gate at the latest. Automated Guidepup runs only work with every other window closed; the author's open apps took the keystrokes on 2026-10-17.
 3. ✅ DHS 2024 downloaded and checked (see Done in P1). The data for P3/P4 is now complete: MPI 2021, DHS 2024, GHS W4/W5.
-4. **P2 (built 2026-10-22, awaiting the author's gate review).**
-   - **Author:** review the gate (clean install reproduces the examples; tests mock the LLM) and decide on publishing: bump nothing, push tag `charts-v0.1.0`, and trusted publishing does the rest.
+4. **P2 done (2026-10-22).** 0.1.0 is on PyPI. Gate: a fresh Python 3.12 venv installed `disability-access-charts[plotly]==0.1.0` from PyPI, ran all 3 examples (exit 0) and `check` passed both chart files; the tests mock the LLM. The root README now has the author's story, a hiring table and a diagram; CI enforces 85% coverage. **Next: P3** (`PLAN.md` → P3), plus the author's user calls and the search for an outside statistician.
    - Built: `bar()`/`dot()` documents, the claim checker (interval-aware, warnings for what it can't check), `audit()` with `chart-matches-data`, `theme()`, `to_html`/`to_csv`, `figure()`, the `check` CLI, the LLM gate (no errors or warnings except independence; `disclosure_checked=True` required), English templates, 3 examples. Dot plots set series side by side with whiskers in each series' colour. README shortened; full rules in `packages/disability-access-charts/docs/claim-checker.md`.
    - Verified: 379 pytest, ruff, pyright, pre-commit; dbt build, export, charts, map; site 18/18 Playwright + axe; clean wheel on 3.12 (core and `[plotly]`) and 3.10; the live `national_by_type` chart is byte-identical.
    - **0.1.1 follow-ups** (from the third review; all are false rejects or warnings, never silent passes): "the two highest" as a top-N rank; parenthetical and apposition lists ("12.0% (Kano)"); relative clauses ("…, which is higher than"); "50% higher" / "3 points higher" / "above 10%"; the audit could check `title` and trace `text` labels; a CI job on Python 3.10.

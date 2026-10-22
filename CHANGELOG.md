@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. Entries follow [Conventional Commits](https://www.conventionalcommits.org/).
 
-## [Unreleased]
+## P2 — 2026-10-22 (disability-access-charts 0.1.0 on PyPI)
 
 ### Added
 - feat(charts): `disability-access-charts` 0.1.0, "charts that check their own words":
