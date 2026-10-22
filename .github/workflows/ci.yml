@@ -34,7 +34,7 @@ jobs:
       - name: Pyright
         run: uv run pyright
       - name: Pytest
-        run: uv run pytest --cov=packages --cov-report=xml
+        run: uv run pytest --cov=packages --cov-report=xml --cov-report=term --cov-fail-under=85
 
   data:
     runs-on: ubuntu-latest
