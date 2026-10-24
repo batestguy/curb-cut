@@ -25,3 +25,46 @@ sources:
             data_tests: [not_null]
           - name: persons
             data_tests: [not_null]
+
+  - name: survey_aggregates
+    description: >
+      Survey aggregates written by the disclosure gate (packages/ingest/src/curbcut_ingest/
+      disclosure.py), one CSV per source and level. Every cell with fewer than 30
+      unweighted respondents is suppressed, and every row carries an NCHS precision flag.
+      Provenance (dataset version, terms, SHA-256, script commit) is in
+      data/public/aggregates/manifest.json. The folder is a var, so the fixture build reads
+      synthetic files with the same schema from fixtures/aggregates.
+    tables:
+      - name: dhs2024_state
+        description: DHS 2024, WG-SS DISABILITY3 and each domain at level 3+, by state, ages 18+ and 5-17.
+        meta:
+          external_location: "read_csv('{{ var('aggregates_dir') }}/dhs2024_state.csv', header = true, all_varchar = true)"
+      - name: dhs2024_national
+        description: DHS 2024 national, including the 4-level distribution per domain and breakdowns by sex.
+        meta:
+          external_location: "read_csv('{{ var('aggregates_dir') }}/dhs2024_national.csv', header = true, all_varchar = true)"
+      - name: ghs_w4_national_zone
+        description: GHS-Panel W4, adults 18+, national (DISABILITY3 and domains) and zone (DISABILITY3). Never by state.
+        meta:
+          external_location: "read_csv('{{ var('aggregates_dir') }}/ghs_w4_national_zone.csv', header = true, all_varchar = true)"
+      - name: ghs_w5_national_zone
+        description: GHS-Panel W5, as W4.
+        meta:
+          external_location: "read_csv('{{ var('aggregates_dir') }}/ghs_w5_national_zone.csv', header = true, all_varchar = true)"
+      - name: mpi2021_state_national
+        description: >
+          MPI 2021 measures under MPI's own (non-WG) definitions. Held, git-ignored, read only
+          when include_mpi is true (locally, or the fixture build).
+        meta:
+          external_location: "read_csv('{{ var('mpi_aggregates_path') }}', header = true, all_varchar = true)"
+
+  - name: worldpop
+    description: >
+      WorldPop (2025). Bottom-up gridded population estimates for Nigeria, version 3.0.
+      Nnanatu et al., University of Southampton, doi:10.5258/SOTON/WP00782. CC BY 4.0.
+      Used only to cross-check the NBS 2023 state denominators (docs/verification.md D44).
+    tables:
+      - name: states_pop_total_scaled
+        description: State totals scaled to the UN WPP July 2025 median (file as published, LF line endings).
+        meta:
+          external_location: "read_csv('../../data/public/worldpop/states_pop_total_scaled.csv', header = true, all_varchar = true)"

@@ -45,9 +45,31 @@ jobs:
           enable-cache: true
       - name: Install
         run: uv sync --locked
+      - name: dbt deps (metaplane dbt_expectations)
+        working-directory: packages/transform
+        run: uv run dbt deps --profiles-dir .
       - name: dbt build (seeds, models, tests)
         working-directory: packages/transform
         run: uv run dbt build --profiles-dir .
+      # Synthetic fixture aggregates (same schema; edge cases: a suppressed cell, a state
+      # with no rows, the held MPI source) in a separate warehouse file.
+      - name: dbt build on fixtures
+        working-directory: packages/transform
+        run: >-
+          uv run dbt build --profiles-dir . --target fixtures
+          --vars '{aggregates_dir: fixtures/aggregates, include_mpi: true,
+          mpi_aggregates_path: fixtures/aggregates/mpi2021_state_national.csv, fixtures: true}'
+      - name: dbt docs generate (artifact only, not published)
+        working-directory: packages/transform
+        run: uv run dbt docs generate --profiles-dir .
+      - uses: actions/upload-artifact@v7
+        with:
+          name: dbt-docs
+          path: |
+            packages/transform/target/index.html
+            packages/transform/target/manifest.json
+            packages/transform/target/catalog.json
+          if-no-files-found: error
       - name: Export marts to Parquet
         run: uv run python packages/transform/scripts/export_marts.py
       - name: Build chart JSON (fails on a failed accessibility audit)

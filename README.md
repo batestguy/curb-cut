@@ -23,7 +23,7 @@ For more than ten years I've turned incomplete Nigerian data into evidence insti
 
 ## Why
 
-JONAPWD's widely cited 2025 figures (about 35 million people) come from applying the global WHO 15% rate to population projections: no one was counted. National surveys (NBS MPI 2021, Nigeria DHS 2024) did measure disability with the Washington Group questions, but their results sit in PDF reports and licensed microdata. Curb Cut turns them into public, disclosure-checked state estimates, puts them next to the assumed figures, and says plainly how sure each number is.
+JONAPWD's widely cited 2025 figures (about 35 million people) come from applying the global WHO 15% rate to population projections: no one was counted. National surveys did measure it: Nigeria DHS 2024 with the Washington Group questions, and NBS MPI 2021 with its own disability items. But their results sit in PDF reports and licensed microdata. Curb Cut turns them into public, disclosure-checked state estimates, puts them next to the assumed figures, and says plainly how sure each number is.
 
 ## What's built so far
 
@@ -33,7 +33,8 @@ JONAPWD's widely cited 2025 figures (about 35 million people) come from applying
 | ✅ | **`disability-access-charts` 0.1:** chart descriptions whose numbers *and comparisons* are checked against the data and its confidence intervals; a WCAG audit that runs in CI; LLM rewording accepted only if it passes | [`packages/disability-access-charts/`](packages/disability-access-charts/) |
 | ✅ | **Ingest and warehouse:** PDF text extraction checked by hand, dbt on DuckDB with data tests, Parquet marts | [`packages/ingest/`](packages/ingest/), [`packages/transform/`](packages/transform/) |
 | ✅ | **CI:** ruff, pyright, ~380 tests (90%+ coverage), dbt build, Playwright + axe accessibility tests, deploy to GitHub Pages | [`ci.yml`](.github/workflows/ci.yml) |
-| 🔜 | **Survey-weighted state prevalence** with small-area estimation and a map (P3–P4) | [`PLAN.md`](PLAN.md) |
+| ✅ | **Restricted zone (P3):** licensed microdata stays local; survey-weighted estimates (R `survey`) pass one disclosure gate and an NCHS precision flag before anything is public; reproducible by anyone with their own access | [`packages/ingest/`](packages/ingest/), [`data/public/aggregates/`](data/public/aggregates/), [`docs/reproduce.md`](docs/reproduce.md) |
+| 🔜 | **State prevalence on the site** with small-area estimation and a map (P4) | [`PLAN.md`](PLAN.md) |
 | 🔜 | **Disability and poverty:** a pre-registered adjusted association (DoubleML, sensitivity analysis) (P5) | [`PLAN.md`](PLAN.md) |
 
 ## Start here if you're hiring for…

@@ -160,14 +160,26 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 - **Gate:** clean-environment install reproduces the examples (example 2: a dot plot with intervals showing one claim that passes and one that is rejected); tests mock the LLM.
 
 ### P3 — Restricted zone + warehouse (weeks 4–6)
-- Load MPI 2021, GHS W3–W5, NBS 2023 projections, WorldPop and geoBoundaries (CC BY).
-- **Measure extraction accuracy:** hand-check a sample of the JONAPWD state pages against the rendered charts and report the accuracy.
-- **Warehouse:** alias seed, manifest, dbt tests with metaplane dbt-expectations, synthetic fixtures, dbt docs.
-- **Precision flag** (added 2026-10-21): keep the ≥30-respondent disclosure rule and also store a precision flag (relative standard error or interval width) with every aggregate. The 30 rule protects privacy; it does not make an estimate reliable.
+Detailed plan agreed 2026-10-24 (the author accepted every recommendation). Steps in order:
+
+0. **Data-handling rule for every session and subagent:** microdata never enters an LLM's context. No `head()`, row prints or value dumps; scripts print only variable metadata, routing counts with cells under 30 shown as "<30", or aggregates that passed the disclosure check.
+1. **MPI routing check (first; it decides MPI's role).** MPI 2021's disability module is not the standard WG-SS (`verification.md` D39): seeing, hearing and walking start with a yes/no screener, and the four-level question asks "even when wearing glasses / using a hearing aid / using equipment". A local script cross-tabulates screener against severity answers. **Decision:** if severity was asked of everyone, MPI is a second prevalence source next to DHS; if only after "yes", DHS 2024 is the main prevalence source and MPI is used for P5 (with its definition stated), not for headline prevalence. **Result (2026-10-24, D43): severity was asked only after a "yes" screener *and* aid use, so DHS 2024 is the main prevalence source.** MPI aggregates are still produced, but labelled with MPI's own (non-WG) definition, and never as DISABILITY3.
+2. **Restricted ingest** (`packages/ingest`): one harmonisation module each for MPI 2021, DHS 2024, GHS W4 and W5. Each writes person-level Parquet to the git-ignored `data/restricted/derived/` with a common schema: state, zone, sector, sex, age band, weight, stratum, cluster, the six WG domains (1–4) and DISABILITY3. **GHS W3 is dropped** (not downloaded; seeing and walking only). GHS stays national/zone only.
+3. **Aggregation, disclosure check, precision flag.** Weighted estimates with R `survey`. **One Python disclosure gate** that every output passes before it is written to `data/public/aggregates/`: cells with fewer than 30 unweighted respondents are suppressed and counted. **Precision flag:** the NCHS data presentation standards for proportions (Parker et al. 2017; effective sample size and interval width), not relative SE alone, which fails for small proportions (`verification.md` D42). The 30 rule protects privacy; it does not make an estimate reliable. A manifest entry per output: source, version, licence, file hash, script commit, suppression count. Tests use invented synthetic person rows only.
+   - Design: DHS strata `hv023`, PSU `hv021`, weight `hv005`/10⁶. MPI has no strata variable: use senatorial district (`a1b`) × sector (`a3`) as strata and EA as PSU, recorded as an assumption (D40).
+   - **Ages:** the headline figure is adults 18+; ages 5–17 are reported separately (both surveys ask from age 5).
+4. **First public aggregates** (proves the pipeline end to end): DISABILITY3 and each domain by state × source, with SE, interval, unweighted n and precision flag. Committed, but not shown on the site until P4.
+5. **Denominators:** extend the NBS Annex 3 seed to state × sex; cross-check WorldPop v3.0 (CC BY), with a D-row.
+6. **Warehouse:** sources are the committed aggregates; alias seed; metaplane dbt-expectations (0.10.10, dbt ≥1.7 <3; DuckDB support to be tested, D41); tests for "no unsuppressed cell under 30", "every row has a precision flag", "all 37 states map"; synthetic fixtures for edge cases (suppressed cells, empty states); dbt docs built in CI.
+7. **Measure extraction accuracy:** hand-check a random sample of JONAPWD state pages against the rendered PDF and report the accuracy in `data/public/jonapwd/README.md`.
+8. **Reproducible from licensed data:** `docs/reproduce.md` and the published scripts take a researcher with their own NBS or DHS access from the raw `.dta` files to every published aggregate (the microdata never leaves `data/restricted/`).
+9. **Bookkeeping:** D-rows, `CLAUDE.md` current state, CHANGELOG, README hero links.
+
+Delegation: step 1 inline in the main session; steps 2–8 to `executor` (with the step 0 rule in its brief), then `reviewer`.
 - **User conversations** (added 2026-10-21; before P4 is designed): 15-minute calls with 3–5 people from the first audience (`Positioning` → Audience): someone from JONAPWD or another disability organisation, a journalist, a researcher, a disabled user. One question: "What would you want to look up?" Record the answers (no names without consent) in `docs/user-research.md`; they decide what the P4 state pages show.
 - **Reproducible from licensed data:** publish the aggregation scripts so a researcher with their own NBS or DHS access can reproduce every published figure (the microdata never leaves `data/restricted/`).
-- **Disability definition:** WG-SS DISABILITY3 (any domain "a lot of difficulty" or "cannot do at all"); ages 5–17 reported separately. Confirm against WG Doc 7A first (`verification.md` D23).
-- **Gate:** `dbt build` green on the fixtures, and the public aggregates pass the disclosure check.
+- **Disability definition:** WG-SS DISABILITY3 (any domain "a lot of difficulty" or "cannot do at all"), confirmed against WG Doc 7A (`verification.md` D23). Headline 18+; ages 5–17 reported separately.
+- **Gate:** `dbt build` green on the fixtures and the committed aggregates, and every public cell passes the disclosure check. The `nigeria-states` package decision is taken at this gate.
 
 ### P4 — Prevalence (weeks 6–7)
 - Survey-weighted state prevalence by difficulty type and sex, with SEs (R `survey`, cross-checked with `svy`).
@@ -207,12 +219,12 @@ Full-time, about 11 weeks. **Every gate needs the author's review before the nex
 ### P5 — Poverty analysis (weeks 7–9)
 - **Pre-registration:** DAG, estimand and analysis plan committed *before* outcomes are examined.
   - Also registered on OSF (free) for a public timestamp (added 2026-10-21).
-  - One outside statistician or academic, ideally at a Nigerian university, reads it before any outcome is examined; record who and when (with consent) in `docs/STATUS.md`.
+  - ~~An outside statistician reads it first~~ Dropped 2026-10-24: the author is the statistician. The OSF timestamp before any outcome is examined carries the credibility; an outside read is welcome but optional.
 - **Primary (MPI):**
   - Estimate the poverty gap between households with and without a disabled member using DoubleML, controlling for confounders, with SEs.
   - Robustness: sensemakr / E-values, a placebo treatment, DoWhy refutations.
   - Reported as an **adjusted association**, not a causal effect.
-- **Exploratory (GHS):** event study on onset of difficulty between W4 and W5 (all six WG-SS domains; W3→W5 for seeing/walking only), using pyfixest checked against R `did`, with power stated honestly.
+- **Exploratory (GHS):** event study on onset of difficulty between W4 and W5 (all six WG-SS domains; W3 dropped on 2026-10-24), using pyfixest checked against R `did`, with power stated honestly.
 - **Brief:** policy brief written via pandoc.
 - **Methods on show** (added 2026-10-21): the results page explains, with worked examples, survey weights, intervals, adjusted association versus effect, and sensitivity analysis, modelled on the UK Ethnicity Facts and Figures "how to read survey data" page (D32).
 - **Gate:** the brief is committed and the results page is live.

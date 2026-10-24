@@ -22,6 +22,7 @@ curbcut-ingest = { workspace = true }
 dev = [
     "curbcut-ingest",
     "disability-access-charts",
+    "pandas-stubs==3.0.5.260914",
     "plotly>=6",
     "pre-commit>=4",
     "pypdfium2==5.14.0",

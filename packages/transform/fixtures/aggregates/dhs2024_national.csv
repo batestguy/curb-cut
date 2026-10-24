@@ -1,0 +1,4 @@
+source,dataset_version,measure,geography_level,geography,age_group,sex,estimate,se,ci_low,ci_high,n_unweighted,n_effective,df,precision_flag,precision_reason,suppressed
+dhs2024,FIXTURE (invented),disability3,national,NG,18+,all,0.05,0.01,0.03,0.07,80000,40000.0,30,reliable,,False
+dhs2024,FIXTURE (invented),disability3,national,NG,18+,female,0.06,0.01,0.04,0.08,40000,20000.0,30,reliable,,False
+dhs2024,FIXTURE (invented),seeing_level_4,national,NG,5-17,all,0.001,0.01,0,0.021,60000,30000.0,30,review,zero_events,False

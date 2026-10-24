@@ -7,3 +7,8 @@ curbcut:
       type: duckdb
       path: ../../data/curbcut.duckdb  # git-ignored (*.duckdb); rebuilt by `dbt build`
       threads: 1
+    # Synthetic fixture aggregates only (CI): a separate, git-ignored warehouse file.
+    fixtures:
+      type: duckdb
+      path: ../../data/fixtures.duckdb
+      threads: 1
