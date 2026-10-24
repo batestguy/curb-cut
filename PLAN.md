@@ -242,7 +242,7 @@ Delegation: step 1 inline in the main session; steps 2–8 to `executor` (with t
 - **Languages** (added 2026-10-21): chart descriptions in Hausa, Yoruba, Igbo and Pidgin (templates and glossaries translated, reusing NCPWD's Disability Act terms, D26), reviewed by the author's native reviewers. A language selector with `lang` attributes (`ha`, `yo`, `ig`, `pcm`). Say on the page that no screen-reader voice was found for these languages (D27), so the descriptions serve readers, not listeners; test by hand what NVDA does with `lang="yo"`.
 - **Look:** an adire-inspired decorative band (`aria-hidden`, at least 3:1 in both themes) next to the flag band, reviewed by a Nigerian designer or textile practitioner before launch (D31).
 - **Type:** check that Atkinson Hyperlegible Next or Noto Sans covers ẹ̀ ọ́ ṣ ɓ ɗ ƙ ƴ ị ụ ṅ (fontTools plus a browser render, D29); self-host a woff2 subset and record its size.
-- **Gate:** accessibility score 100 in CI, the walkthrough video recorded, and **feedback from at least one regular screen-reader user collected and acted on**. Start looking for that tester (JONAPWD, a blind persons' association, NVDA user communities) during P4–P5, so the feedback lands before launch.
+- **Gate:** accessibility score 100 in CI, the walkthrough video recorded, and the author's keyboard + NVDA check. **Feedback from a regular screen-reader user is sought but not blocking** (author, 2026-10-24): until it arrives, the site states that it hasn't yet been tested by a regular screen-reader user and offers a "report a problem" link; feedback is acted on when it comes.
 
 ### P7 — Launch (weeks 10–11)
 - README with the role table, the author's story, a Mermaid diagram and a GIF.
@@ -278,4 +278,4 @@ The HF dataset, conda-forge, Streamlit, committing the DuckDB file, the Monte Ca
   - the disclosure check passes on every public Parquet file
   - the live site loads in under 3 s with no backend
   - `pip install disability-access-charts` works in a fresh venv
-  - the author completes the keyboard and NVDA script (`docs/accessibility-testing.md`) at each site gate, and a regular screen-reader user's feedback is in before launch
+  - the author completes the keyboard and NVDA script (`docs/accessibility-testing.md`) at each site gate, and the site states honestly whether a regular screen-reader user has tested it yet

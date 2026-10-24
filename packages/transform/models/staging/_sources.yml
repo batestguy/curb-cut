@@ -53,8 +53,8 @@ sources:
           external_location: "read_csv('{{ var('aggregates_dir') }}/ghs_w5_national_zone.csv', header = true, all_varchar = true)"
       - name: mpi2021_state_national
         description: >
-          MPI 2021 measures under MPI's own (non-WG) definitions. Held, git-ignored, read only
-          when include_mpi is true (locally, or the fixture build).
+          MPI 2021 measures under MPI's own (non-WG) definitions, never DISABILITY3. Read when
+          include_mpi is true (the default).
         meta:
           external_location: "read_csv('{{ var('mpi_aggregates_path') }}', header = true, all_varchar = true)"
 

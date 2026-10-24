@@ -2,7 +2,7 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-24 · **Current phase:** P3 in progress: steps 1–8 built and reviewed 2026-10-24 (uncommitted at the time of writing); step 9 bookkeeping and the gate remain. `disability-access-charts` 0.1.0 is on PyPI (2026-10-22). P1 is live; its NVDA check is deferred.
+**Last updated:** 2026-10-24 · **Current phase:** P3 done 2026-10-24 (PR #1 merged); P4 next. `disability-access-charts` 0.1.0 is on PyPI (2026-10-22). P1 is live; its NVDA check is deferred.
 
 ## Phases
 
@@ -11,10 +11,10 @@ The one page to read first. It says where things stand and what happens next. Th
 | P0 Accounts, checks, bootstrap | ✅ done 2026-10-16 (author sign-off) | CI green ✅ · checks confirmed or decided ✅ · author review ✅ |
 | P1 Thin vertical slice | 🟡 built and live; keyboard pre-check passed 2026-10-17. **The author's NVDA check is deferred (author, 2026-10-17)**: do it before the P6 gate at the latest | Live URL works by keyboard and with NVDA (author, per `docs/accessibility-testing.md`) |
 | P2 disability-access-charts 0.1 | ✅ done 2026-10-22: 0.1.0 published (tag `charts-v0.1.0`, pushed by the author); a clean install from PyPI ran all 3 examples and `check` | Clean install reproduces examples; LLM mocked in tests |
-| P3 Restricted zone + warehouse | 🟡 in progress: plan agreed 2026-10-24 (`PLAN.md` → P3, steps 0–9); steps 1–8 built, reviewed (merge after fixes; fixes applied) | `dbt build` green on fixtures; disclosure check passes |
+| P3 Restricted zone + warehouse | ✅ done 2026-10-24 (author): PR #1 merged, CI green; all aggregates incl. MPI 2021 public | `dbt build` green on fixtures; disclosure check passes |
 | P4 Prevalence | ⚪ not started | Map and comparison live |
 | P5 Poverty analysis | ⚪ not started | Pre-registration committed first; brief and results page live |
-| P6 API + site polish | ⚪ not started | Accessibility 100 in CI; walkthrough video recorded; feedback from a regular screen-reader user acted on |
+| P6 API + site polish | ⚪ not started | Accessibility 100 in CI; walkthrough video recorded; author's NVDA check; regular screen-reader user's feedback sought, not blocking (2026-10-24); acted on |
 | P7 Launch | ⚪ not started | — |
 
 ## Done so far (P0)
@@ -83,10 +83,38 @@ The one page to read first. It says where things stand and what happens next. Th
 | Item | Waiting on | Since |
 |---|---|---|
 | **P1 gate: keyboard + NVDA check of the live site (`docs/accessibility-testing.md`)** | **Author** | 2026-10-17 |
-| NBS reply on publishing aggregates (email sent 2026-10-16; no follow-up: the author dropped it on 2026-10-24). **MPI aggregates are git-ignored until the P4 gate**; DHS and GHS aggregates are committed | NBS | 2026-10-16 |
 | Gemini / Groq real quotas | Accounts (P2) | 2026-10-16 |
 
 ## Next actions (pick up here)
+
+### Start here next session (handoff written 2026-10-24)
+
+**Where things stand:** P3 passed its gate on 2026-10-24 (PR #1 merged). The public aggregates are in `data/public/aggregates/`: DHS 2024 by state and nationally, MPI 2021 by state and nationally on its own definitions, and GHS W4/W5 nationally and by zone. They are in dbt marts (`mart_prevalence_state`, `mart_prevalence_national_zone`), but **nothing is on the site yet**: `export_marts.py` doesn't export them. **P4 is next:** read `PLAN.md` → P4 and draft its detailed plan for the author, as was done for P3.
+
+**Rules learned this session (keep them):**
+- **Microdata never enters an LLM's context** (CLAUDE.md, two data zones). Print only metadata, counts with "<30" masking, or gated aggregates. Brief every subagent with this rule.
+- **Nothing waits on outside replies.** The author works alone (memory `no-external-dependencies`). Outside input is optional; say so openly when that weakens a guarantee.
+- The author is the statistician: there is no outside reviewer for the P5 pre-registration, so the OSF timestamp carries the credibility.
+
+**P4 first steps:**
+1. **The "first" check** (`PLAN.md` P4, item 7 below): do DHS 2024, MPI 2021 or DHS 2018 reports already publish disability prevalence by state? Record the answer in `verification.md` before any claim of "first".
+2. **Design from the data we have:** DHS 2024 DISABILITY3 is the headline. 335 of the 518 DHS state cells are `review` (fewer than 10 events, or none), mostly single domains. Plan the Fay-Herriot small-area step and the hedged wording around this. The claim checker must treat `review` cells as hedged.
+3. **The state pages** are designed from the profile list in `PLAN.md` P4 → "Light state pages". The user calls are optional (`docs/user-research.md`).
+4. **`disability-access-charts` 0.2:** statistical findings and patterns (`PLAN.md` P4).
+5. **The P4 map** goes through the chart library (Handoff notes → Maps).
+
+**Obligations that start when figures go on the site (P4):**
+- Send a PDF of each publication to references@dhsprogram.com (DHS).
+- Send an electronic copy to the NBS National Data Archive (MPI).
+- Cite each dataset as the manifest says.
+
+**Open decisions for the author:**
+- **P5 exposure source:** MPI's non-WG measure misses people with difficulty who use no aid. The alternative is DHS 2024 with a global-MPI-style deprivation measure. Decide before the pre-registration (item 4a).
+- **The P1 NVDA check:** still deferred; due before the P6 gate.
+- **Outside people still named in the plan:** a Nigerian designer reviews the adire motifs (D31), and native-language reviewers check the P6 descriptions. Under the "nothing waits" rule, decide whether these become optional too.
+
+**Regenerating the aggregates** (local only): `uv run python -I -m curbcut_ingest.aggregate`, after the harmonisers. Full steps are in `docs/reproduce.md`. Commit first, so that `script_commit` in the manifest names a real commit; otherwise it ends in `-dirty`.
+
 
 1. ✅ Pushed and deployed 2026-10-17 (CI run 39004343042 green). **Author:** judge the look on the live page.
 2. **Deferred (author, 2026-10-17): the NVDA part of the P1 gate.** The keyboard part passed a pre-check (see Done in P1). When picking it up, follow section 2 of `docs/accessibility-testing.md` on https://batestguy.github.io/curb-cut/ and listen for:
@@ -128,10 +156,10 @@ The one page to read first. It says where things stand and what happens next. Th
    - **Open for P5 (not decided):** P5's exposure would come from MPI's non-WG measure, which misses people with difficulty who use no aid. Before the pre-registration, weigh using DHS 2024 with a global-MPI-style deprivation measure (OPHI's global MPI is built from DHS surveys) against MPI with its own definition.
    - ✅ Steps 2–8 built by `executor`, reviewed by `reviewer` (merge after fixes), fixes applied (2026-10-24):
      - Harmonisers (DHS 2024, MPI 2021, GHS W4/W5) → git-ignored `data/restricted/derived/`; R `survey` estimates (Korn–Graubard, checked against `svyciprop`); one disclosure gate; NCHS precision flag plus a project rule (fewer than 10 unweighted events → "review"; `n_events` never published); manifest.
-     - Aggregates: `dhs2024_state` 518 rows (183 reliable, 335 review), `dhs2024_national` 90 (89/1), GHS W4 and W5 national/zone 13 each (all reliable); 0 suppressed (smallest DHS state denominator 799). MPI 532 rows held in git-ignored `data/public/aggregates/mpi2021/`.
+     - Aggregates: `dhs2024_state` 518 rows (183 reliable, 335 review), `dhs2024_national` 90 (89/1), GHS W4 and W5 national/zone 13 each (all reliable); 0 suppressed (smallest DHS state denominator 799). MPI 532 rows (192 reliable, 340 review), released 2026-10-24.
      - dbt: metaplane `dbt_expectations` 0.10.10, prevalence marts, a fixtures target, 128 tests (129 on fixtures); `dbt docs` as a CI artifact. WorldPop committed (D44); Annex 3 state × sex seed. JONAPWD: 80/80 sampled cells match (150 of 370 checked overall). `docs/reproduce.md`.
      - Checks: ruff, pyright 0 errors, 427 pytest (94%), dbt, site 18/18, pre-commit.
-   - **Before the gate:** commit, then re-run `curbcut_ingest.aggregate` so `script_commit` in the manifest names a real commit (it reads `-dirty` now; CSVs don't change); confirm the first CI run passes (the R tests should skip on the runner: unconfirmed); D43 counts stay public and the Annex 3 figures stay committed (author, 2026-10-24).
+   - ✅ Gate (2026-10-24): committed, manifest records clean commits, PR #1 CI green (R tests skip cleanly on the runner), merged by the author's go-ahead.
    - Not blocking, from the review: no numerator rule for disclosure (reasoning in `data/public/aggregates/README.md`: same as DHS and NCHS).
 5. **P3–P5 follow-ups (2026-10-21):**
    - P3: a precision flag (RSE or interval width) with every aggregate; confirm the WG-SS DISABILITY3 cut-off against WG Doc 7A (`verification.md` D23).
@@ -199,4 +227,5 @@ The one page to read first. It says where things stand and what happens next. Th
 | 2026-10-24 | **No outside statistician:** the author (a statistician) does the statistical work and review. The pre-registration still goes on OSF with a timestamp before any outcome is examined. The NBS follow-up email is dropped; MPI aggregates stay held until the author decides at the P4 gate. User-call kit in `docs/user-research.md`. |
 | 2026-10-24 | P3 goes to `main` through a PR (branch `p3-restricted-zone`). The MPI routing counts stay public in D43; the Annex 3 figures (37 totals + 74 by sex) stay committed as cited figures. |
 | 2026-10-24 | **Nothing waits on outside replies** (author: "I am on my own, no one replies anything till we are done"). User calls become optional; the MPI hold is the author's own call at the P4 gate. The P6 requirement of feedback from a regular screen-reader user is still open: see Next actions. |
+| 2026-10-24 | **P3 gate passed** (author): PR #1 merged. **MPI 2021 aggregates released** by the author without waiting for NBS (the access terms allow aggregated reporting; a copy of each publication still goes to the National Data Archive). **P6:** a regular screen-reader user's feedback is kept as a goal but no longer blocks the gate; the site says it hasn't been tested by one yet. |
 | 2026-10-16 | **P0 gate passed.** Nigeria DHS 2024 is adopted as a second prevalence source next to MPI 2021. The exploratory panel uses GHS W4→W5 (all six WG-SS domains). |

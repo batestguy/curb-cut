@@ -84,7 +84,7 @@ models:
 
   - name: mart_prevalence_state
     description: >
-      Survey prevalence by state (DHS 2024; MPI 2021 when include_mpi), one row per state
+      Survey prevalence by state (DHS 2024; MPI 2021), one row per state
       for every source, measure, age group and sex, so all 37 states are always present.
       has_data is false where a source has no cell for a state. Not on the site until P4.
     data_tests:
@@ -109,7 +109,7 @@ models:
         data_tests: [not_null, non_negative]
 
   - name: mart_prevalence_national_zone
-    description: National and zone survey cells (DHS 2024, GHS W4/W5; MPI 2021 when include_mpi).
+    description: National and zone survey cells (DHS 2024, GHS W4/W5; MPI 2021).
     columns:
       - name: precision_flag
         data_tests: [not_null]

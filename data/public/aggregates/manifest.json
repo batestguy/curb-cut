@@ -77,14 +77,25 @@
       "source": "Nigeria General Household Survey-Panel 2023-2024, Wave 5",
       "suppressed_cells": 0,
       "terms": "World Bank Microdata Library public-use terms: aggregates only, cite the dataset."
-    }
-  },
-  "held": {
-    "mpi2021/mpi2021_state_national.csv": {
+    },
+    "mpi2021_state_national.csv": {
+      "citation": "National Bureau of Statistics, Multidimentional Poverty index Survey 2021 v1.0",
       "dataset_version": "NGA-NBS-MPI-2021-v1.0",
-      "reason": "Held until NBS replies about publishing aggregates and the P4 gate (docs/STATUS.md); produced and checked locally only.",
+      "design": "NOT the WG-SS (verification.md D39, D43): seeing/hearing/walking are yes/no screeners (mpi_screener_*_any); 1-4 items for self-care d11a, cognition d12a, communication = worse of d9a/d10a, upper body = worse of d13a/d14a (*_3plus). Weight pop_wgt/hhsize; strata a1 x a1b x a3 and PSU a4 are assumptions (D40).",
+      "disclosure_threshold": 30,
+      "generated_on": "2026-10-24",
+      "precision_flags": {
+        "reliable": 192,
+        "review": 340,
+        "suppressed": 0,
+        "unreliable": 0
+      },
+      "rows": 532,
+      "script_commit": "ab08e0de2de9ecbb356e90c1ac51b200123fd2f9-dirty",
+      "sha256": "d660f40b9d3d1bac33b5b0c24a919c0021f52e520b200130769225796d191859",
       "source": "NBS Multidimensional Poverty Index Survey 2021",
-      "status": "held (not published)"
+      "suppressed_cells": 0,
+      "terms": "NBS access terms: aggregated reporting only; an electronic copy of every publication goes to the National Data Archive."
     }
   },
   "interval": "95% Korn-Graubard (Clopper-Pearson with effective n and design df).",

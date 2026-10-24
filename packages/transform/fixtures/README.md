@@ -6,7 +6,7 @@
 - a state with no rows at all (Zamfara is missing from `dhs2024_state.csv`), which must still appear in `mart_prevalence_state` with `has_data = false`;
 - `review` (zero events) and `unreliable` (effective n under 30) flags;
 - a suppressed zone cell in each GHS file;
-- an MPI 2021 file, so the held source's model path is built and tested in CI without the real (git-ignored) file.
+- an MPI 2021 file, so the MPI model path is tested with edge cases too.
 
 `tests/assert_fixture_edge_cases.sql` runs only in this build (`fixtures: true`). Command (from `packages/transform`):
 

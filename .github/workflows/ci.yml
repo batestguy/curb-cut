@@ -52,7 +52,7 @@ jobs:
         working-directory: packages/transform
         run: uv run dbt build --profiles-dir .
       # Synthetic fixture aggregates (same schema; edge cases: a suppressed cell, a state
-      # with no rows, the held MPI source) in a separate warehouse file.
+      # with no rows, MPI 2021) in a separate warehouse file.
       - name: dbt build on fixtures
         working-directory: packages/transform
         run: >-

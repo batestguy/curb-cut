@@ -1,7 +1,5 @@
 # --- Restricted zone: licensed microdata must never be committed ---
 data/restricted/
-# MPI 2021 aggregates: held until NBS reply / P4 gate, see docs/STATUS.md
-data/public/aggregates/mpi2021/
 
 # Python
 __pycache__/

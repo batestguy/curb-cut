@@ -1,5 +1,5 @@
--- Every gated survey cell in one typed relation. MPI 2021 joins only when include_mpi is
--- true: its files are held (git-ignored) until NBS replies, so CI builds without them.
+-- Every gated survey cell in one typed relation. MPI 2021 joins when include_mpi is true
+-- (the default since its release on 2026-10-24).
 {% set tables = ['dhs2024_state', 'dhs2024_national', 'ghs_w4_national_zone', 'ghs_w5_national_zone'] %}
 {% if var('include_mpi') %}
     {% do tables.append('mpi2021_state_national') %}

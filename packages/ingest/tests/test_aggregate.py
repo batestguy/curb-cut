@@ -81,7 +81,7 @@ def test_jobs_shape() -> None:
     # GHS never goes below zone level.
     assert {g.labels["geography_level"] for g in ghs.groups} == {"national", "zone"}
     assert all(g.by != "state_code" for g in ghs.groups)
-    assert aggregate.DATASETS["mpi2021"].held
+    assert not aggregate.DATASETS["mpi2021"].held  # released 2026-10-24
     assert not aggregate.DATASETS["dhs2024"].held
 
 

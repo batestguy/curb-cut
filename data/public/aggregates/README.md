@@ -14,7 +14,7 @@ How to rebuild them from your own copy of the microdata: `docs/reproduce.md`.
 | `dhs2024_national.csv` | Nigeria DHS 2024 | 90 | 0 | National, ages 18+ and 5–17: DISABILITY3, each domain at 3+, the 4-level distribution per domain; DISABILITY3 and domains by sex |
 | `ghs_w4_national_zone.csv` | GHS-Panel W4 (2018/19) | 13 | 0 | Adults 18+: national DISABILITY3 and domains; DISABILITY3 by zone |
 | `ghs_w5_national_zone.csv` | GHS-Panel W5 (2023/24) | 13 | 0 | As W4 |
-| `mpi2021/…` | NBS MPI 2021 | — | — | **Held, git-ignored.** Produced and tested locally only, until NBS replies about publishing aggregates and the P4 gate (`docs/STATUS.md`). The committed manifest lists it under `held`. |
+| `mpi2021_state_national.csv` | NBS MPI 2021 | 532 | 0 | MPI's own measures (never DISABILITY3) by state and nationally; released 2026-10-24 |
 
 GHS is representative only nationally and by zone, so it never has state rows.
 
@@ -42,7 +42,7 @@ GHS is representative only nationally and by zone, so it never has state rows.
 - `<domain>_3plus`: the domain alone at "a lot of difficulty" or worse. Domains: `seeing`, `hearing`, `walking`, `cognition` (remembering or concentrating), `selfcare`, `communication`.
 - `<domain>_level_1` … `_level_4`: share at each level (no difficulty, some, a lot, cannot do at all). National only.
 - "Don't know" and, in GHS W4, "too young" are missing.
-- MPI 2021 (held) uses its own names, **never DISABILITY3**, because its module is not the WG-SS (`verification.md` D39, D43): `mpi_screener_<seeing|hearing|walking>_any` (yes to "does (name) have difficulty …?") and `mpi_<selfcare|cognition|communication|upper_body>_3plus` (communication = the worse of understanding and being understood; upper body = the worse of lifting a 2-litre bottle and using hands).
+- MPI 2021 uses its own names, **never DISABILITY3**, because its module is not the WG-SS (`verification.md` D39, D43): `mpi_screener_<seeing|hearing|walking>_any` (yes to "does (name) have difficulty …?") and `mpi_<selfcare|cognition|communication|upper_body>_3plus` (communication = the worse of understanding and being understood; upper body = the worse of lifting a 2-litre bottle and using hands).
 
 ## Disclosure check and precision flag
 
@@ -58,7 +58,7 @@ GHS is representative only nationally and by zone, so it never has state rows.
 
 - **DHS 2024:** de facto household members aged 5+ asked the WG-SS (`hdis2`–`hdis8`); weight `hv005`/10⁶, strata `hv023`, PSU `hv021`.
 - **GHS W4/W5:** members 5+; cross-section household weights (`wt_wave4`, `wt_cross_wave5`); strata `strata`; PSU `cluster`. A few households sit in a stratum other than their zone, so a zone estimate can touch a stratum with one PSU; R reports these and adjusts them (below).
-- **MPI 2021 (held):** person weight `pop_wgt / hhsize` (the household weight with a per-state calibration factor, checked from the data); strata state × senatorial district × sector and PSU = EA, an assumption since no strata variable is shipped (`verification.md` D40).
+- **MPI 2021:** person weight `pop_wgt / hhsize` (the household weight with a per-state calibration factor, checked from the data); strata state × senatorial district × sector and PSU = EA, an assumption since no strata variable is shipped (`verification.md` D40).
 - **Lonely PSUs:** `options(survey.lonely.psu = "adjust", survey.adjust.domain.lonely = TRUE)`.
 
 ## Terms and citation

@@ -198,11 +198,7 @@ DATASETS = {
             "communication = worse of d9a/d10a, upper body = worse of d13a/d14a (*_3plus). "
             "Weight pop_wgt/hhsize; strata a1 x a1b x a3 and PSU a4 are assumptions (D40)."
         ),
-        held=True,
-        held_reason=(
-            "Held until NBS replies about publishing aggregates and the P4 gate "
-            "(docs/STATUS.md); produced and checked locally only."
-        ),
+        # Released 2026-10-24 by the author (NBS access terms allow aggregated reporting).
     ),
 }
 

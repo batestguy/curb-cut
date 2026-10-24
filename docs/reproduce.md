@@ -63,8 +63,6 @@ uv run python -I -m curbcut_ingest.aggregate
 
 For each source this adds the 0/1 indicators, runs `packages/ingest/R/estimate.R` (R `survey`: weighted proportions, Taylor-linearised SEs, Korn–Graubard intervals, design df), keeps the raw cells in `data/restricted/derived/estimates/`, then passes them through the disclosure gate (`curbcut_ingest.disclosure`): cells under 30 unweighted respondents are suppressed, every row gets the NCHS precision flag, and `data/public/aggregates/manifest.json` is updated with each file's SHA-256 and the script commit. One source at a time: `--sources dhs2024` (choices `dhs2024`, `ghs_w4`, `ghs_w5`, `mpi2021`).
 
-MPI 2021 output goes to `data/public/aggregates/mpi2021/`, which is git-ignored for now (held until NBS replies and the P4 gate); the committed manifest only lists it as held.
-
 **Check:** your CSVs should have the same SHA-256 as `manifest.json` → `files`. Different R or package versions can change the last printed digit of an estimate; the row counts, suppression counts and flags should still agree.
 
 ## 6. Load into the warehouse and test
@@ -73,7 +71,7 @@ MPI 2021 output goes to `data/public/aggregates/mpi2021/`, which is git-ignored 
 cd packages/transform
 uv run dbt deps --profiles-dir .
 uv run dbt build --profiles-dir .
-uv run dbt build --profiles-dir . --vars '{include_mpi: true}'   # optional: include the held MPI file
+uv run dbt build --profiles-dir . --vars '{include_mpi: false}'  # optional: leave MPI 2021 out
 ```
 
 The tests re-check the disclosure rule (no unsuppressed cell under 30), that every row has a precision flag, that all 37 states resolve, that estimates and intervals lie in [0, 1] with `ci_low ≤ estimate ≤ ci_high`, that GHS has no state rows and that MPI is never labelled DISABILITY3.

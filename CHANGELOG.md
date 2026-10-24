@@ -7,7 +7,7 @@ All notable changes to this project are documented here. Entries follow [Convent
 ### Added
 - feat(ingest): restricted-zone harmonisers for Nigeria DHS 2024, NBS MPI 2021 and GHS-Panel W4/W5 (person-level Parquet, local only); MPI is kept on its own non-WG definitions and never reported as DISABILITY3 (`verification.md` D39, D43).
 - feat(ingest): survey estimation in R (`survey`, Korn–Graubard intervals with design df), one disclosure gate (cells under 30 unweighted respondents suppressed), an NCHS precision flag plus a 10-event rule, and a provenance manifest.
-- feat(data): first public aggregates: DHS 2024 by state (18+ and 5–17) and nationally, GHS W4/W5 nationally and by zone. MPI aggregates are built but held until the NBS reply / P4 gate.
+- feat(data): first public aggregates: DHS 2024 by state (18+ and 5–17) and nationally, GHS W4/W5 nationally and by zone. MPI 2021 by state and nationally, under MPI's own definitions (released 2026-10-24).
 - feat(transform): metaplane `dbt_expectations`, prevalence marts, a synthetic fixtures target run in CI, disclosure and scope tests, `dbt docs` artifact; WorldPop v3.0 state totals (CC BY 4.0) and the NBS Annex 3 state × sex seed.
 - docs: `docs/reproduce.md`; JONAPWD extraction accuracy (80/80 sampled cells).
 

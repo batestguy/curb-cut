@@ -45,7 +45,7 @@ models:
 
   - name: stg_survey__aggregates
     description: >
-      All gated survey cells (DHS 2024, GHS W4/W5; MPI 2021 when include_mpi), typed.
+      All gated survey cells (DHS 2024, GHS W4/W5; MPI 2021), typed.
       state is filled for state-level rows from dim_states via state_code.
     data_tests:
       - unique_combination:
