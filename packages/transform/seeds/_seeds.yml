@@ -63,3 +63,32 @@ seeds:
         data_tests: [not_null]
       - name: population_2023
         data_tests: [not_null, non_negative]
+
+  - name: state_population_by_sex_2023
+    description: >
+      NBS Demographic Bulletin 2023, Annex 3: 2023 projections by state and sex (source:
+      National Population Commission), 74 cited figures copied by
+      packages/ingest/src/curbcut_ingest/nbs_annex3.py from the git-ignored datasheet.
+      Males + females equal state_facts.population_2023 (tested). See docs/verification.md D8.
+    config:
+      meta:
+        population_source_url: https://microdata.nigerianstat.gov.ng/index.php/catalog/182
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [state, sex]
+    columns:
+      - name: state
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_states')
+                field: state
+      - name: sex
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [male, female]
+      - name: population_2023
+        data_tests: [not_null, non_negative]

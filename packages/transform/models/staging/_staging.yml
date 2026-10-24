@@ -42,3 +42,97 @@ models:
         data_tests: [not_null, non_negative]
       - name: source_page
         data_tests: [not_null]
+
+  - name: stg_survey__aggregates
+    description: >
+      All gated survey cells (DHS 2024, GHS W4/W5; MPI 2021), typed.
+      state is filled for state-level rows from dim_states via state_code.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [source, measure, geography_level, geography, age_group, sex]
+      - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+          arguments:
+            column_A: estimate
+            column_B: ci_low
+            or_equal: true
+            row_condition: "not suppressed"
+      - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+          arguments:
+            column_A: ci_high
+            column_B: estimate
+            or_equal: true
+            row_condition: "not suppressed"
+    columns:
+      - name: source
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [dhs2024, ghs_w4, ghs_w5, mpi2021]
+      - name: measure
+        data_tests: [not_null]
+      - name: geography_level
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [national, zone, state]
+      - name: age_group
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["18+", "5-17"]
+      - name: sex
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [all, male, female]
+      - name: estimate
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: ci_low
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: ci_high
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: n_unweighted
+        data_tests: [not_null, non_negative]
+      - name: precision_flag
+        description: NCHS standard (reliable / review / unreliable), or suppressed by the disclosure check.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [reliable, review, unreliable, suppressed]
+      - name: suppressed
+        data_tests: [not_null]
+      - name: state
+        description: Canonical state name; must resolve for every state-level row.
+        data_tests:
+          - not_null:
+              config:
+                where: "geography_level = 'state'"
+
+  - name: stg_worldpop__state_population
+    description: WorldPop v3.0 state totals with canonical names.
+    columns:
+      - name: state
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('dim_states')
+                field: state
+      - name: population_2025
+        data_tests: [not_null, non_negative]

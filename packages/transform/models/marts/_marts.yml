@@ -81,3 +81,45 @@ models:
         description: Null where two sources did not agree; the card then leaves the line out.
       - name: slogan_source_url
         description: Present exactly when slogan is present.
+
+  - name: mart_prevalence_state
+    description: >
+      Survey prevalence by state (DHS 2024; MPI 2021), one row per state
+      for every source, measure, age group and sex, so all 37 states are always present.
+      has_data is false where a source has no cell for a state. Not on the site until P4.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [state, source, measure, age_group, sex]
+    columns:
+      - name: state
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_states')
+                field: state
+      - name: precision_flag
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [reliable, review, unreliable, suppressed, no_data]
+      - name: population_2023
+        data_tests: [not_null, non_negative]
+
+  - name: mart_prevalence_national_zone
+    description: National and zone survey cells (DHS 2024, GHS W4/W5; MPI 2021).
+    columns:
+      - name: precision_flag
+        data_tests: [not_null]
+
+  - name: mart_state_population_check
+    description: NBS 2023 Annex 3 state projections against WorldPop v3.0 2025 (D44).
+    columns:
+      - name: state
+        data_tests: [unique, not_null]
+      - name: worldpop_2025
+        data_tests: [not_null]
+      - name: nbs_2023_male
+        data_tests: [not_null]

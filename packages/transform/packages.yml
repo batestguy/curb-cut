@@ -1,0 +1,4 @@
+packages:
+  # metaplane fork of dbt-expectations (the calogica original is unmaintained); D41.
+  - package: metaplane/dbt_expectations
+    version: 0.10.10

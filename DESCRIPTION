@@ -7,3 +7,7 @@ Description: R side of Curb Cut (survey estimates, small-area estimation, DiD
     renv snapshots only what is listed here (snapshot.type = "explicit").
 License: MIT + file LICENSE
 Encoding: UTF-8
+Imports:
+    jsonlite,
+    nanoparquet,
+    survey

@@ -10,6 +10,16 @@ macro-paths: ["macros"]
 target-path: "target"
 clean-targets: ["target", "dbt_packages"]
 
+vars:
+  # Folder of gated survey aggregates (relative to packages/transform). CI's fixture build
+  # points this at fixtures/aggregates (synthetic rows, same schema).
+  aggregates_dir: ../../data/public/aggregates
+  # MPI 2021 aggregates (released 2026-10-24). The switch stays so a build can leave MPI out.
+  include_mpi: true
+  mpi_aggregates_path: ../../data/public/aggregates/mpi2021_state_national.csv
+  # True only for the fixture build: enables the edge-case assertions.
+  fixtures: false
+
 models:
   curbcut:
     staging:
@@ -22,3 +32,6 @@ seeds:
     disability_types:
       +column_types:
         sort_order: integer
+    state_population_by_sex_2023:
+      +column_types:
+        population_2023: bigint
