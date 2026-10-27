@@ -87,6 +87,12 @@ The one page to read first. It says where things stand and what happens next. Th
 
 ## Next actions (pick up here)
 
+### P4a progress (2026-10-27)
+
+**Step 1 (direct estimates) done.** Commits 2de1589 (code), 59e1e02 (data). Every aggregate CSV now has `breakdown` / `breakdown_level` (`all` / `all` where there is none). New DHS cells: state × sex, a zone file (`dhs2024_zone.csv`: overall, by sex), and urban/rural and wealth quintile (`hv270`) at national, zone and state level, plus age bands (DISABILITY3, national and zone). Earlier cells are unchanged to the byte. `dhs2024_state.csv` 5,138 cells (168 suppressed, all state × wealth quintile); `dhs2024_national.csv` 197; `dhs2024_zone.csv` 894. `validate_ndhs` still reproduces all 1,087 report cells; `crosscheck_svy` now covers all 6,061 published DHS cells (estimates equal, SEs within 2.2%). dbt: new `mart_prevalence_breakdowns`; the existing marts keep `breakdown = 'all'`; the site data are byte-identical. State × wealth is mostly `review`/`unreliable` (DISABILITY3 18+: 84 of 185 cells reliable), so the state pages should show wealth by zone and say why.
+
+**Step 2 (Fay-Herriot) needs:** the direct DISABILITY3 18+ state estimates and SEs (`dhs2024_state.csv`, `breakdown = 'all'`, `sex = 'all'`; all 37 reliable) as inputs; the covariate candidate table with a D-row per covariate written down **before** fitting (share 60+, urban share, MPI poverty headcount, female literacy or schooling, density); a GVF for the sampling variances; and the `sae` / `emdi` fitness check (D47). Sex-specific FH and 5–17 only after the 18+ diagnostics pass.
+
 ### Start here next session (handoff written 2026-10-24)
 
 **Where things stand:** P3 passed its gate on 2026-10-24 (PR #1 merged). The public aggregates are in `data/public/aggregates/`: DHS 2024 by state and nationally, MPI 2021 by state and nationally on its own definitions, and GHS W4/W5 nationally and by zone. They are in dbt marts (`mart_prevalence_state`, `mart_prevalence_national_zone`), but **nothing is on the site yet**: `export_marts.py` doesn't export them. **P4 is next:** read `PLAN.md` → P4 and draft its detailed plan for the author, as was done for P3.
