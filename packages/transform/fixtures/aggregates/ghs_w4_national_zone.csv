@@ -1,4 +1,4 @@
 source,dataset_version,measure,geography_level,geography,age_group,sex,breakdown,breakdown_level,estimate,se,ci_low,ci_high,n_unweighted,n_effective,df,precision_flag,precision_reason,suppressed
 ghs_w4,FIXTURE (invented),disability3,national,NG,18+,all,all,all,0.04,0.01,0.02,0.06,13000,6500.0,30,reliable,,False
-ghs_w4,FIXTURE (invented),disability3,zone,North West,18+,all,all,all,0.05,0.01,0.03,0.07,3000,1500.0,30,reliable,,False
-ghs_w4,FIXTURE (invented),disability3,zone,South East,18+,all,all,all,,,,,25,,,suppressed,n<30 (disclosure),True
+ghs_w4,FIXTURE (invented),disability3,zone,North West,18+,all,all,all,,,,,,,,suppressed,complementary suppression (disclosure),True
+ghs_w4,FIXTURE (invented),disability3,zone,South East,18+,all,all,all,,,,,,,,suppressed,n<30 (disclosure),True

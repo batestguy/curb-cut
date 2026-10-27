@@ -29,6 +29,7 @@ import pandas as pd
 
 from curbcut_ingest import disclosure
 from curbcut_ingest.restricted import common as c
+from curbcut_ingest.states import StateLookup
 
 R_SCRIPT = c.ROOT / "packages" / "ingest" / "R" / "estimate.R"
 WORK = c.DERIVED / "estimates"
@@ -326,17 +327,39 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--sources", nargs="+", choices=sorted(JOBS), default=sorted(JOBS))
     parser.add_argument("--derived", type=Path, default=c.DERIVED)
     parser.add_argument("--out-root", type=Path, default=disclosure.AGGREGATES)
+    parser.add_argument(
+        "--reuse-raw",
+        action="store_true",
+        help="re-gate the raw R estimates already in <derived>/estimates instead of re-running R",
+    )
     args = parser.parse_args(argv)
+    zone_of = {s.state_code: s.zone for s in StateLookup.from_seeds().states.values()}
     for source in args.sources:
         c.log(f"{source}: reading harmonised file")
         frame = pd.read_parquet(args.derived / f"{source}.parquet")
-        for job in JOBS[source](frame):
-            raw = run_job(source, frame, job, args.derived / "estimates")
-            path, entry = disclosure.publish(raw, DATASETS[source], job.filename, args.out_root)
+        jobs = JOBS[source](frame)
+        work = args.derived / "estimates"
+        raws = [
+            pd.read_csv(work / f"{job.filename.removesuffix('.csv')}.raw.csv")
+            if args.reuse_raw
+            else run_job(source, frame, job, work)
+            for job in jobs
+        ]
+        # Secondary suppression must see every file of the source at once: a state cell can
+        # be recovered from the zone or national cell in another file.
+        combined = pd.concat(raws, keys=range(len(raws)), names=["job", "row"])
+        suppress = disclosure.complementary(combined, zone_of)
+        for i, (job, raw) in enumerate(zip(jobs, raws, strict=True)):
+            mask = pd.Series(suppress.loc[i].to_numpy(), index=raw.index)
+            path, entry = disclosure.publish(
+                raw, DATASETS[source], job.filename, args.out_root, suppress=mask
+            )
             where = "held, git-ignored" if DATASETS[source].held else "public"
             c.log(
                 f"  gate: {path.name} ({where}): {entry['rows']} cells, "
-                f"{entry['suppressed_cells']} suppressed, flags {entry['precision_flags']}"
+                f"{entry['suppressed_cells']} suppressed "
+                f"({entry['secondary_suppressed_cells']} secondary), "
+                f"flags {entry['precision_flags']}"
             )
     return 0
 

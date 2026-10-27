@@ -1,11 +1,11 @@
 source,dataset_version,measure,geography_level,geography,age_group,sex,breakdown,breakdown_level,estimate,se,ci_low,ci_high,n_unweighted,n_effective,df,precision_flag,precision_reason,suppressed
 dhs2024,FIXTURE (invented),disability3,state,NG-AB,18+,all,all,all,0.03,0.01,0.01,0.05,1000,500.0,30,reliable,,False
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-AB,18+,all,all,all,0.03,0.01,0.01,0.05,1000,500.0,30,reliable,,False
-dhs2024,FIXTURE (invented),disability3,state,NG-AB,5-17,all,all,all,,,,,12,,,suppressed,n<30 (disclosure),True
+dhs2024,FIXTURE (invented),disability3,state,NG-AB,5-17,all,all,all,,,,,,,,suppressed,n<30 (disclosure),True
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-AB,5-17,all,all,all,0.03,0.01,0.01,0.05,1000,500.0,30,reliable,,False
 dhs2024,FIXTURE (invented),disability3,state,NG-AD,18+,all,all,all,0.031,0.01,0.011,0.051,1001,500.5,30,reliable,,False
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-AD,18+,all,all,all,0.0,0.01,0,0.02,800,400.0,30,review,zero_events,False
-dhs2024,FIXTURE (invented),disability3,state,NG-AD,5-17,all,all,all,0.031,0.01,0.011,0.051,1001,500.5,30,reliable,,False
+dhs2024,FIXTURE (invented),disability3,state,NG-AD,5-17,all,all,all,,,,,,,,suppressed,complementary suppression (disclosure),True
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-AD,5-17,all,all,all,0.0,0.01,0,0.02,800,400.0,30,review,zero_events,False
 dhs2024,FIXTURE (invented),disability3,state,NG-AK,18+,all,all,all,0.032,0.01,0.012,0.052,1002,501.0,30,reliable,,False
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-AK,18+,all,all,all,0.05,0.01,0.03,0.07,40,20.0,30,unreliable,n_effective<30,False
@@ -13,11 +13,11 @@ dhs2024,FIXTURE (invented),disability3,state,NG-AK,5-17,all,all,all,0.032,0.01,0
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-AK,5-17,all,all,all,0.05,0.01,0.03,0.07,40,20.0,30,unreliable,n_effective<30,False
 dhs2024,FIXTURE (invented),disability3,state,NG-AN,18+,all,all,all,0.033,0.01,0.013,0.053,1003,501.5,30,reliable,,False
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-AN,18+,all,all,all,0.033,0.01,0.013,0.053,1003,501.5,30,reliable,,False
-dhs2024,FIXTURE (invented),disability3,state,NG-AN,5-17,all,all,all,0.033,0.01,0.013,0.053,1003,501.5,30,reliable,,False
+dhs2024,FIXTURE (invented),disability3,state,NG-AN,5-17,all,all,all,,,,,,,,suppressed,complementary suppression (disclosure),True
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-AN,5-17,all,all,all,0.033,0.01,0.013,0.053,1003,501.5,30,reliable,,False
 dhs2024,FIXTURE (invented),disability3,state,NG-BA,18+,all,all,all,0.034,0.01,0.014,0.054,1004,502.0,30,reliable,,False
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-BA,18+,all,all,all,0.034,0.01,0.014,0.054,1004,502.0,30,reliable,,False
-dhs2024,FIXTURE (invented),disability3,state,NG-BA,5-17,all,all,all,0.034,0.01,0.014,0.054,1004,502.0,30,reliable,,False
+dhs2024,FIXTURE (invented),disability3,state,NG-BA,5-17,all,all,all,,,,,,,,suppressed,complementary suppression (disclosure),True
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-BA,5-17,all,all,all,0.034,0.01,0.014,0.054,1004,502.0,30,reliable,,False
 dhs2024,FIXTURE (invented),disability3,state,NG-BY,18+,all,all,all,0.035,0.01,0.015,0.055,1005,502.5,30,reliable,,False
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-BY,18+,all,all,all,0.035,0.01,0.015,0.055,1005,502.5,30,reliable,,False
@@ -143,8 +143,8 @@ dhs2024,FIXTURE (invented),disability3,state,NG-YO,18+,all,all,all,0.065,0.01,0.
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-YO,18+,all,all,all,0.065,0.01,0.045,0.085,1035,517.5,30,reliable,,False
 dhs2024,FIXTURE (invented),disability3,state,NG-YO,5-17,all,all,all,0.065,0.01,0.045,0.085,1035,517.5,30,reliable,,False
 dhs2024,FIXTURE (invented),seeing_3plus,state,NG-YO,5-17,all,all,all,0.065,0.01,0.045,0.085,1035,517.5,30,reliable,,False
-dhs2024,FIXTURE (invented),disability3,state,NG-AB,18+,all,sector,urban,0.05,0.01,0.03,0.07,1000,500.0,30,reliable,,False
-dhs2024,FIXTURE (invented),disability3,state,NG-AB,18+,all,sector,rural,,,,,12,,,suppressed,n<30 (disclosure),True
+dhs2024,FIXTURE (invented),disability3,state,NG-AB,18+,all,sector,urban,,,,,,,,suppressed,complementary suppression (disclosure),True
+dhs2024,FIXTURE (invented),disability3,state,NG-AB,18+,all,sector,rural,,,,,,,,suppressed,n<30 (disclosure),True
 dhs2024,FIXTURE (invented),disability3,state,NG-AB,18+,all,wealth_quintile,lowest,0.05,0.01,0.03,0.07,1000,500.0,30,reliable,,False
 dhs2024,FIXTURE (invented),disability3,state,NG-AB,18+,female,all,all,0.030,0.01,0.010,0.050,500,250.0,30,reliable,,False
 dhs2024,FIXTURE (invented),disability3,state,NG-AB,18+,male,all,all,0.030,0.01,0.010,0.050,500,250.0,30,reliable,,False

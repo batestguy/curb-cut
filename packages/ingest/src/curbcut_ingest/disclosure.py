@@ -3,9 +3,14 @@
 Every survey aggregate passes through :func:`publish` on its way out of the restricted zone:
 
 1. **Disclosure check.** A cell (one estimate) with fewer than 30 unweighted respondents
-   in its denominator has its estimate, SE, interval, effective n and df set to null and
-   ``suppressed = true``. The number of suppressed cells goes in the manifest. The rule
-   protects privacy; it says nothing about reliability.
+   in its denominator is suppressed (*primary* suppression). Because published cells add
+   up (quintiles to their state, states to their zone and to Nigeria, women and men to
+   both sexes, severity levels to 100%), one suppressed cell among published siblings
+   could be recovered by subtraction; :func:`complementary` then also suppresses the
+   smallest sibling (*secondary* suppression), repeating until no partition has exactly
+   one suppressed cell. A suppressed cell has its estimate, SE, interval, unweighted and
+   effective n and df set to null and ``suppressed = true``. The counts go in the
+   manifest. The rule protects privacy; it says nothing about reliability.
 2. **Precision flag.** Every row gets ``precision_flag`` (NCHS standard plus the project's
    fewer-than-10-events rule, see :mod:`curbcut_ingest.precision`): reliable / review /
    unreliable, or "suppressed" when the disclosure check removed the estimate.
@@ -84,6 +89,17 @@ PUBLIC_COLUMNS = (
     "suppressed",
 )
 NULLED = ("estimate", "se", "ci_low", "ci_high", "n_effective", "df")
+KEY = (
+    "measure",
+    "geography_level",
+    "geography",
+    "age_group",
+    "sex",
+    "breakdown",
+    "breakdown_level",
+)
+"""One cell. Within a source, no two cells share a key."""
+SECONDARY_REASON = "complementary suppression (disclosure)"
 DECIMALS = {"estimate": 6, "se": 6, "ci_low": 6, "ci_high": 6, "n_effective": 1, "df": 0}
 
 
@@ -104,8 +120,7 @@ class Dataset:
     extra: Mapping[str, Any] = field(default_factory=dict)
 
 
-def gate(raw: pd.DataFrame, dataset: Dataset, threshold: int = THRESHOLD) -> pd.DataFrame:
-    """Apply the disclosure check and precision flag. Returns public rows only."""
+def _checked(raw: pd.DataFrame) -> pd.DataFrame:
     missing = [c for c in RAW_COLUMNS if c not in raw.columns]
     if missing:
         raise GateError(f"raw estimates lack columns {missing}")
@@ -114,14 +129,104 @@ def gate(raw: pd.DataFrame, dataset: Dataset, threshold: int = THRESHOLD) -> pd.
     if n.isna().any() or (n < 0).any():
         raise GateError("n_unweighted must be present and non-negative on every row")
     out["n_unweighted"] = n.astype("int64")
-    small = out["n_unweighted"] < threshold
+    if out.duplicated(list(KEY)).any():
+        raise GateError("two raw cells share a key")
+    return out
+
+
+def _partitions(cells: pd.DataFrame, zone_of: Mapping[str, str]) -> list[list[int]]:
+    """Groups of sibling cells whose estimates combine into a published (or known) total.
+
+    - a breakdown's levels (quintiles, sectors, age bands) within one geography/sex/age;
+    - women and men within one geography/breakdown level/age;
+    - states within Nigeria and within their zone, and zones within Nigeria;
+    - the four severity levels of one domain (``<domain>_level_1`` .. ``_4``), which sum
+      to 100%.
+
+    The parent need not be published: a partition is protected as if its total were known.
+    """
+    groups: list[list[int]] = []
+
+    def add(frame: pd.DataFrame, by: list[str]) -> None:
+        if frame.empty:
+            return
+        for _, part in frame.groupby(by, dropna=False, sort=True):
+            groups.append(sorted(int(i) for i in part.index))
+
+    add(cells[cells["breakdown"] != "all"], [k for k in KEY if k != "breakdown_level"])
+    add(cells[cells["sex"] != "all"], [k for k in KEY if k != "sex"])
+    no_geo = [k for k in KEY if k not in ("geography_level", "geography")]
+    states = cells[cells["geography_level"] == "state"]
+    add(states, no_geo)
+    if zone_of and not states.empty:
+        zones = states["geography"].map(zone_of)
+        if zones.isna().any():
+            raise GateError("a state code has no zone")
+        add(states.assign(_zone=zones), [*no_geo, "_zone"])
+    add(cells[cells["geography_level"] == "zone"], no_geo)
+    domain = cells["measure"].str.extract(r"^(?P<domain>.+)_level_[1-4]$")["domain"]
+    levels = cells[domain.notna()].assign(_domain=domain[domain.notna()])
+    add(levels, ["_domain", *[k for k in KEY if k != "measure"]])
+    return groups
+
+
+def complementary(
+    cells: pd.DataFrame,
+    zone_of: Mapping[str, str] | None = None,
+    threshold: int = THRESHOLD,
+) -> pd.Series:
+    """Primary plus secondary suppression over all of one source's cells (every file).
+
+    Returns a boolean Series on ``cells.index``. Run it on the cells of every file of a
+    source together, since a state cell can be recovered from the national one.
+    """
+    frame = _checked(cells.reset_index(drop=True))
+    n = frame["n_unweighted"].to_numpy()
+    suppressed = n < threshold
+    groups = _partitions(frame, zone_of or {})
+    changed = True
+    while changed:
+        changed = False
+        for group in groups:
+            hidden = [i for i in group if suppressed[i]]
+            if len(hidden) != 1:
+                continue
+            shown = [i for i in group if not suppressed[i]]
+            if not shown:
+                # No published sibling to subtract. (If the cell is its total's only part,
+                # the total has the same n and is suppressed too.)
+                continue
+            pick = min(shown, key=lambda i: (n[i], tuple(str(frame.at[i, k]) for k in KEY)))
+            suppressed[pick] = True
+            changed = True
+    return pd.Series(suppressed, index=cells.index)
+
+
+def gate(
+    raw: pd.DataFrame,
+    dataset: Dataset,
+    threshold: int = THRESHOLD,
+    suppress: pd.Series | None = None,
+) -> pd.DataFrame:
+    """Apply the disclosure check and precision flag. Returns public rows only.
+
+    ``suppress`` (aligned to ``raw.index``) comes from :func:`complementary` run over all of
+    the source's files; without it, complementary suppression runs on ``raw`` alone.
+    """
+    out = _checked(raw)
+    if suppress is None:
+        suppress = complementary(raw, threshold=threshold)
+    hide = pd.Series(suppress.to_numpy(dtype=bool), index=out.index)
+    if ((out["n_unweighted"] < threshold) & ~hide).any():
+        raise GateError("a cell under the threshold is not marked for suppression")
 
     flags, reasons = [], []
     records = cast(list[dict[str, Any]], out.to_dict("records"))
-    for row in records:
-        if row["n_unweighted"] < threshold:
+    for row, hidden in zip(records, hide, strict=True):
+        if hidden:
             flags.append(SUPPRESSED)
-            reasons.append(f"n<{threshold} (disclosure)")
+            primary = row["n_unweighted"] < threshold
+            reasons.append(f"n<{threshold} (disclosure)" if primary else SECONDARY_REASON)
             continue
         events = int(row["n_events"])
         result = precision.nchs_flag(
@@ -140,10 +245,11 @@ def gate(raw: pd.DataFrame, dataset: Dataset, threshold: int = THRESHOLD) -> pd.
     out["precision_reason"] = reasons
     for column in NULLED:
         out[column] = pd.to_numeric(out[column], errors="coerce").astype("float64")
-        out.loc[small, column] = math.nan
+        out.loc[hide, column] = math.nan
         out[column] = out[column].round(DECIMALS[column])
     out["df"] = out["df"].astype("Int64")
-    out["suppressed"] = small
+    out["n_unweighted"] = out["n_unweighted"].astype("Int64").mask(hide)
+    out["suppressed"] = hide
     out["source"] = dataset.source
     out["dataset_version"] = dataset.version
     return out.loc[:, list(PUBLIC_COLUMNS)].reset_index(drop=True)
@@ -203,8 +309,12 @@ MANIFEST_HEADER = {
         "(packages/ingest/src/curbcut_ingest/disclosure.py)."
     ),
     "disclosure_rule": (
-        "Cells with fewer than 30 unweighted respondents in the denominator are suppressed: "
-        "estimate, se, interval, n_effective and df are null and suppressed = true."
+        "Cells with fewer than 30 unweighted respondents in the denominator are suppressed "
+        "(primary). Where a partition of cells that add up (breakdown levels, women and men, "
+        "states within a zone or Nigeria, zones, severity levels) would then hold exactly one "
+        "suppressed cell, its smallest other cell is suppressed too (secondary), until none "
+        "does. Suppressed cells have estimate, se, interval, n_unweighted, n_effective and df "
+        "null and suppressed = true."
     ),
     "precision_standard": (
         "NCHS Data Presentation Standards for Proportions (Parker et al. 2017, Vital Health "
@@ -221,9 +331,10 @@ def publish(
     filename: str,
     out_root: Path = AGGREGATES,
     threshold: int = THRESHOLD,
+    suppress: pd.Series | None = None,
 ) -> tuple[Path, dict[str, Any]]:
     """Gate ``raw`` and write it under ``out_root``; record it in the manifest(s)."""
-    public = gate(raw, dataset, threshold)
+    public = gate(raw, dataset, threshold, suppress)
     folder = out_root / dataset.source if dataset.held else out_root
     path = folder / filename
     write_csv(public, path)
@@ -237,6 +348,7 @@ def publish(
         "sha256": sha256(path),
         "rows": len(public),
         "suppressed_cells": int(public["suppressed"].sum()),
+        "secondary_suppressed_cells": int((public["precision_reason"] == SECONDARY_REASON).sum()),
         "disclosure_threshold": threshold,
         "precision_flags": {
             flag: int((public["precision_flag"] == flag).sum())

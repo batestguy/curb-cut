@@ -116,7 +116,12 @@ models:
                 min_value: 0
                 max_value: 1
       - name: n_unweighted
-        data_tests: [not_null, non_negative]
+        description: Unweighted respondents; null on suppressed cells, since a count could be recovered by subtraction.
+        data_tests:
+          - not_null:
+              config:
+                where: "not suppressed"
+          - non_negative
       - name: precision_flag
         description: NCHS standard (reliable / review / unreliable), or suppressed by the disclosure check.
         data_tests:

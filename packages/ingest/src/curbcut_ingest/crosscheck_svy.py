@@ -101,7 +101,7 @@ def svy_estimates(frame: pd.DataFrame, public: pd.DataFrame) -> pd.DataFrame:
             assert isinstance(est, svy.Estimate)  # one measure in, one Estimate out
             out = est.to_polars().to_pandas().rename(columns={name: "key"})
             out["kind"], out["measure"], out["age_group"] = str(kind), measure, age
-            rows.append(out[["kind", "measure", "age_group", "key", "est", "se"]])
+            rows.append(out[["kind", "measure", "age_group", "key", "est", "se", "n"]])
     return pd.concat(rows, ignore_index=True)
 
 
@@ -118,12 +118,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     public["key"] = public.apply(published_key, axis=1)
 
     ours = svy_estimates(pd.read_parquet(args.persons), public)
-    ours = ours.rename(columns={"est": "svy_estimate", "se": "svy_se"})
+    ours = ours.rename(columns={"est": "svy_estimate", "se": "svy_se", "n": "svy_n"})
     merged = public.merge(ours, on=["kind", "measure", "age_group", "key"], how="left")
     missing = int(merged["svy_estimate"].isna().to_numpy().sum())
     est_gap = (merged["estimate"] - merged["svy_estimate"]).abs()
     has_se = merged["se"] > 0
     se_gap = ((merged["se"] - merged["svy_se"]).abs() / merged["se"]).where(has_se)
+    # A cell with an SE in R but none from svy is a failure, not a pass.
+    se_missing = int((has_se & merged["svy_se"].isna()).to_numpy().sum())
+    n_differs = int((merged["n_unweighted"] != merged["svy_n"]).to_numpy().sum())
     by_level = merged.groupby("geography_level").size().to_dict()
     c.log(
         f"{len(merged)} published DHS cells compared {by_level} "
@@ -131,7 +134,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         f"  estimate: largest absolute difference {est_gap.max():.2e}; "
         f"{int((est_gap > ESTIMATE_TOL).to_numpy().sum())} above {ESTIMATE_TOL:.0e}\n"
         f"  SE: median relative difference {se_gap.median():.2%}, largest {se_gap.max():.2%}; "
-        f"{int((se_gap > SE_TOL).to_numpy().sum())} above {SE_TOL:.0%}"
+        f"{int((se_gap > SE_TOL).to_numpy().sum())} above {SE_TOL:.0%}; "
+        f"{se_missing} without an svy SE\n"
+        f"  unweighted n: {n_differs} cells differ"
     )
     worst = merged.assign(se_gap=se_gap).nlargest(5, "se_gap")
     for _, row in worst.iterrows():
@@ -140,7 +145,13 @@ def main(argv: Sequence[str] | None = None) -> int:
             f"{row['sex']} / {row['breakdown']}={row['breakdown_level']}: "
             f"R {row['se']:.5f}, svy {row['svy_se']:.5f}"
         )
-    ok = missing == 0 and (est_gap <= ESTIMATE_TOL).all() and (se_gap.fillna(0) <= SE_TOL).all()
+    ok = (
+        missing == 0
+        and se_missing == 0
+        and n_differs == 0
+        and bool((est_gap <= ESTIMATE_TOL).all())
+        and bool((se_gap.dropna() <= SE_TOL).all())
+    )
     return 0 if ok else 1
 
 
