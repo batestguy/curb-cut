@@ -65,6 +65,15 @@ For each source this adds the 0/1 indicators, runs `packages/ingest/R/estimate.R
 
 **Check:** your CSVs should have the same SHA-256 as `manifest.json` → `files`. Different R or package versions can change the last printed digit of an estimate; the row counts, suppression counts and flags should still agree.
 
+## 5a. Validate against the published report and a second implementation (DHS)
+
+```
+uv run python -I -m curbcut_ingest.validate_ndhs
+uv run python -I -m curbcut_ingest.crosscheck_svy
+```
+
+`validate_ndhs` recomputes NDHS 2024 Tables 14.1, 14.2.1 and 14.2.2 from the PR file on the report's own conventions and compares them with the transcription in `data/public/ndhs_report/`; every cell should match to the published decimal (exit 0). It counts 148,226 people: the 148,177 above plus 49 whose age is "don't know", whom the report counts as 15+. `crosscheck_svy` re-estimates every published DHS state cell with Python `svy` and compares it with the R output: estimates equal, SEs within 5% (in practice under 0.5%). Both print only the comparison, never a recomputed cell on its own. Results: `docs/verification.md` D48.
+
 ## 6. Load into the warehouse and test
 
 ```
