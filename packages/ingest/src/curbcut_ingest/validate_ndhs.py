@@ -38,7 +38,20 @@ from curbcut_ingest.states import StateLookup
 
 BENCHMARK = c.ROOT / "data" / "public" / "ndhs_report"
 OUT = c.DERIVED / "validation"
-COLUMNS = ["hv005", "hv103", "hv104", "hv105", "shstate", *DOMAIN_VARS.values(), "hdis9"]
+COLUMNS = [
+    "hv005",
+    "hv025",
+    "hv103",
+    "hv104",
+    "hv105",
+    "hv270",
+    "shstate",
+    *DOMAIN_VARS.values(),
+    "hdis9",
+]
+RESIDENCE = {1: "urban", 2: "rural"}
+WEALTH = {1: "lowest", 2: "second", 3: "middle", 4: "fourth", 5: "highest"}
+"""``hv270``: 1 = poorest ... 5 = richest (value labels); checked against the report's rows."""
 AGE_UNKNOWN = 98
 AGE_ROWS = {
     "age_5_9": (5, 9),
@@ -66,6 +79,8 @@ def prepare(raw: pd.DataFrame) -> pd.DataFrame:
     out["age"] = age
     out["sex"] = c.to_num(raw["hv104"]).map(SEX)
     out["state_code"] = c.to_num(raw["shstate"])
+    out["residence"] = c.to_num(raw["hv025"]).map(RESIDENCE)
+    out["wealth"] = c.to_num(raw["hv270"]).map(WEALTH)
     for domain, var in DOMAIN_VARS.items():
         out[domain] = c.to_num(raw[var])
     out["highest"] = c.to_num(raw["hdis9"])
@@ -132,11 +147,23 @@ def _row_14_2(sub: pd.DataFrame) -> dict[str, float]:
     return row
 
 
-def table_14_2(people: pd.DataFrame, state_names: dict[int, str]) -> pd.DataFrame:
+def table_14_2(
+    people: pd.DataFrame, state_names: dict[int, str], zone_of: dict[str, str] | None = None
+) -> pd.DataFrame:
+    """Rows by sex: each state, and "zone: <zone>", "residence: <urban|rural>",
+    "wealth: <quintile>" and "Total", as the report's row labels."""
     adults = people[people["age"] >= 15].assign(state=lambda f: f["state_code"].map(state_names))
+    labels = {
+        "zone": adults["state"].map(zone_of or {}),
+        "residence": adults["residence"],
+        "wealth": adults["wealth"],
+    }
     rows = []
     for (sex, state), sub in adults.groupby(["sex", "state"]):
         rows.append({"sex": sex, "state": state} | _row_14_2(sub))
+    for name, values in labels.items():
+        for (sex, level), sub in adults.assign(_level=values).groupby(["sex", "_level"]):
+            rows.append({"sex": sex, "state": f"{name}: {level}"} | _row_14_2(sub))
     for sex, sub in adults.groupby("sex"):
         rows.append({"sex": sex, "state": "Total"} | _row_14_2(sub))
     return pd.DataFrame(rows)
@@ -202,11 +229,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     published_1 = pd.read_csv(args.benchmark / "fr395_table14_1.csv")
     published_2 = pd.read_csv(args.benchmark / "fr395_table14_2.csv")
     published_2["state"] = [
-        name if name == "Total" else lookup.resolve(name).state for name in published_2["state"]
+        name if name == "Total" or ": " in name else lookup.resolve(name).state
+        for name in published_2["state"]
     ]
 
     result_1 = compare(table_14_1(people), published_1, ["row"])
-    result_2 = compare(table_14_2(people, states), published_2, ["sex", "state"])
+    zone_of = {s.state: s.zone for s in lookup.states.values()}
+    result_2 = compare(table_14_2(people, states, zone_of), published_2, ["sex", "state"])
     args.out_dir.mkdir(parents=True, exist_ok=True)
     result_1.to_csv(args.out_dir / "ndhs_table14_1.csv", index=False)
     result_2.to_csv(args.out_dir / "ndhs_table14_2.csv", index=False)

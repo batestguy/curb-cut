@@ -11,7 +11,8 @@ from curbcut_ingest import validate_ndhs as v
 
 def _raw(rows: Sequence[Mapping[str, float]]) -> pd.DataFrame:
     base = {
-        "hv005": 1_000_000, "hv103": 1, "hv104": 2, "hv105": 30, "shstate": 1,
+        "hv005": 1_000_000, "hv025": 1, "hv103": 1, "hv104": 2, "hv105": 30, "hv270": 3,
+        "shstate": 1,
         "hdis2": 1, "hdis4": 1, "hdis5": 1, "hdis6": 1, "hdis7": 1, "hdis8": 1, "hdis9": 1,
     }  # fmt: skip
     return pd.DataFrame([base | dict(row) for row in rows]).astype("float64")
@@ -65,3 +66,14 @@ def test_compare_allows_rounding_only() -> None:
     assert not ok[("b", "rate")]
     assert ok[("a", "number")]
     assert not ok[("b", "number")]
+
+
+def test_table_14_2_has_zone_residence_and_wealth_rows() -> None:
+    rows = [{"hv025": 2, "hv270": 1}, {"hv025": 1, "hv270": 5, "hdis2": 3, "hdis9": 3}]
+    table = v.table_14_2(v.prepare(_raw(rows)), {1: "Kano"}, {"Kano": "North West"})
+    rate = dict(zip(table["state"], table["a_lot_or_cannot"], strict=True))
+    assert rate["zone: North West"] == pytest.approx(50.0)
+    assert rate["residence: urban"] == 100
+    assert rate["residence: rural"] == 0
+    assert rate["wealth: highest"] == 100  # hv270 = 5 is the richest quintile
+    assert rate["wealth: lowest"] == 0

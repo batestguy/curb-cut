@@ -67,13 +67,15 @@ What it writes (every file has `breakdown` and `breakdown_level`, which are `all
 
 | File | Cells | Suppressed | Contents |
 |---|---|---|---|
-| `dhs2024_state.csv` | 5,138 | 168 | By state: overall, by sex, by urban/rural, by wealth quintile |
+| `dhs2024_state.csv` | 5,138 | 413 (168 under 30, 245 secondary) | By state: overall, by sex, by urban/rural, by wealth quintile |
 | `dhs2024_national.csv` | 197 | 0 | National: overall (with 4-level distributions), by sex, urban/rural, wealth quintile, age band |
 | `dhs2024_zone.csv` | 894 | 0 | By zone: overall, by sex, urban/rural, wealth quintile, age band |
 | `ghs_w4_national_zone.csv`, `ghs_w5_national_zone.csv` | 13 each | 0 | Unchanged |
 | `mpi2021_state_national.csv` | 532 | 0 | Unchanged |
 
-The DHS harmoniser carries `wealth_quintile` (`hv270`, 1 = lowest … 5 = highest); age bands (5-9, 10-14, 15-17 inside 5-17; 18-29 … 60-69, 70+ inside 18+) are made from `age` in `curbcut_ingest.aggregate`.
+Secondary suppression runs over all files of a source together (a state cell could otherwise be recovered from the zone or national file); see `data/public/aggregates/README.md`. To re-gate without re-running R (when only the gate changed), add `--reuse-raw`: it reads the raw cells already in `data/restricted/derived/estimates/`.
+
+The DHS harmoniser carries `wealth_quintile` (`hv270`, 1 = lowest … 5 = highest; the direction is confirmed by `validate_ndhs` against the report's wealth rows); age bands (5-9, 10-14, 15-17 inside 5-17; 18-29 … 60-69, 70+ inside 18+) are made from `age` in `curbcut_ingest.aggregate`.
 
 **Check:** your CSVs should have the same SHA-256 as `manifest.json` → `files`. Different R or package versions can change the last printed digit of an estimate; the row counts, suppression counts and flags should still agree.
 
@@ -84,7 +86,7 @@ uv run python -I -m curbcut_ingest.validate_ndhs
 uv run python -I -m curbcut_ingest.crosscheck_svy
 ```
 
-`validate_ndhs` recomputes NDHS 2024 Tables 14.1, 14.2.1 and 14.2.2 from the PR file on the report's own conventions and compares them with the transcription in `data/public/ndhs_report/`; every cell should match to the published decimal (exit 0). It counts 148,226 people: the 148,177 above plus 49 whose age is "don't know", whom the report counts as 15+. `crosscheck_svy` re-estimates every published (unsuppressed) DHS cell in the state, national and zone files, for every sex and breakdown, with Python `svy` and compares it with the R output: estimates equal, SEs within 5%. On 2026-10-27: 6,061 cells, largest estimate difference 5×10⁻⁷ (CSV rounding), SE median relative difference 0.01%, largest 2.19% (a state × wealth quintile cell). Both print only the comparison, never a recomputed cell on its own. Results: `docs/verification.md` D48.
+`validate_ndhs` recomputes NDHS 2024 Tables 14.1, 14.2.1 and 14.2.2 (states, zones, urban/rural and the men's wealth quintiles) from the PR file on the report's own conventions and compares them with the transcription in `data/public/ndhs_report/`; every cell should match to the published decimal (exit 0). It counts 148,226 people: the 148,177 above plus 49 whose age is "don't know", whom the report counts as 15+. `crosscheck_svy` re-estimates every published (unsuppressed) DHS cell in the state, national and zone files, for every sex and breakdown, with Python `svy` and compares it with the R output: estimates and unweighted n must be equal, and SEs within the 5% tolerance (a cell with no `svy` SE fails). On 2026-10-27: 5,816 cells, largest estimate difference 5×10⁻⁷ (CSV rounding), unweighted n equal everywhere, SE median relative difference 0.01%, largest 2.19% (a state × wealth quintile cell). Both print only the comparison, never a recomputed cell on its own. Results: `docs/verification.md` D48.
 
 ## 6. Load into the warehouse and test
 
