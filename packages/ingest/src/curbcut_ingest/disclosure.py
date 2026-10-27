@@ -41,13 +41,18 @@ AGGREGATES = ROOT / "data" / "public" / "aggregates"
 THRESHOLD = 30
 SUPPRESSED = "suppressed"
 
-# Columns the R step must provide (``packages/ingest/R/estimate.R``).
+# Columns the R step must provide (``packages/ingest/R/estimate.R``). ``breakdown`` names an
+# extra dimension (sector, wealth_quintile, age_band) and ``breakdown_level`` its level;
+# both are "all" on rows without one. One cell = source, measure, geography_level,
+# geography, age_group, sex, breakdown, breakdown_level.
 RAW_COLUMNS = (
     "measure",
     "geography_level",
     "geography",
     "age_group",
     "sex",
+    "breakdown",
+    "breakdown_level",
     "estimate",
     "se",
     "ci_low",
@@ -65,6 +70,8 @@ PUBLIC_COLUMNS = (
     "geography",
     "age_group",
     "sex",
+    "breakdown",
+    "breakdown_level",
     "estimate",
     "se",
     "ci_low",

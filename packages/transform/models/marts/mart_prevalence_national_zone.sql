@@ -1,4 +1,5 @@
--- National and zone cells from every source (GHS is national/zone only by design).
+-- National and zone cells from every source (GHS is national/zone only by design), with no
+-- extra breakdown (those are in mart_prevalence_breakdowns).
 select
     source,
     dataset_version,
@@ -18,5 +19,5 @@ select
     precision_reason,
     suppressed
 from {{ ref('stg_survey__aggregates') }}
-where geography_level in ('national', 'zone')
+where geography_level in ('national', 'zone') and breakdown = 'all'
 order by source, geography_level, geography, measure, age_group, sex

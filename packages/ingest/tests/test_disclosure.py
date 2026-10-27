@@ -36,6 +36,8 @@ def _cell(geo: str, n: int, p: float = 0.1, events: int | None = None, **over) -
         "geography": geo,
         "age_group": "18+",
         "sex": "all",
+        "breakdown": "all",
+        "breakdown_level": "all",
         "estimate": p,
         "se": 0.01,
         "ci_low": p - 0.02,

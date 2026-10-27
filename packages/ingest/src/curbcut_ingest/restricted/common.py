@@ -55,6 +55,20 @@ COMMON_COLUMNS = (
 AGE_BANDS = ((5, 9, "5-9"), (10, 17, "10-17"), (18, 29, "18-29"), (30, 49, "30-49"))
 AGE_BANDS_OPEN = ((50, 64, "50-64"), (65, 200, "65+"))
 
+PREVALENCE_AGE_BANDS = (
+    (5, 9, "5-9"),
+    (10, 14, "10-14"),
+    (15, 17, "15-17"),
+    (18, 29, "18-29"),
+    (30, 39, "30-39"),
+    (40, 49, "40-49"),
+    (50, 59, "50-59"),
+    (60, 69, "60-69"),
+    (70, 200, "70+"),
+)
+"""Age bands for the published prevalence breakdown (P4a): they nest inside age_group
+(5-9, 10-14, 15-17 in 5-17; the rest in 18+). :func:`age_band` keeps its own edges."""
+
 
 def to_num(values: pd.Series) -> pd.Series:
     """Numeric codes as a float Series (anything non-numeric becomes NaN)."""
@@ -154,6 +168,15 @@ def age_band(age: pd.Series) -> pd.Series:
     age = to_num(age)
     out = pd.Series(pd.NA, index=age.index, dtype="string")
     for lo, hi, label in AGE_BANDS + AGE_BANDS_OPEN:
+        out[(age >= lo) & (age <= hi)] = label
+    return out
+
+
+def prevalence_age_band(age: pd.Series) -> pd.Series:
+    """Age band of :data:`PREVALENCE_AGE_BANDS`; missing under 5 or unknown."""
+    age = to_num(age)
+    out = pd.Series(pd.NA, index=age.index, dtype="string")
+    for lo, hi, label in PREVALENCE_AGE_BANDS:
         out[(age >= lo) & (age <= hi)] = label
     return out
 

@@ -86,6 +86,7 @@ models:
     description: >
       Survey prevalence by state (DHS 2024; MPI 2021), one row per state
       for every source, measure, age group and sex, so all 37 states are always present.
+      Only cells with no extra breakdown (breakdown = 'all'); see mart_prevalence_breakdowns.
       has_data is false where a source has no cell for a state. Not on the site until P4.
     data_tests:
       - unique_combination:
@@ -109,10 +110,45 @@ models:
         data_tests: [not_null, non_negative]
 
   - name: mart_prevalence_national_zone
-    description: National and zone survey cells (DHS 2024, GHS W4/W5; MPI 2021).
+    description: >
+      National and zone survey cells with no extra breakdown (DHS 2024, GHS W4/W5;
+      MPI 2021), overall and by sex.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [source, measure, geography_level, geography, age_group, sex]
     columns:
       - name: precision_flag
         data_tests: [not_null]
+
+  - name: mart_prevalence_breakdowns
+    description: >
+      DHS 2024 cells broken down by urban/rural (sector), wealth quintile, or age band
+      (DISABILITY3 only, national and zone), at national, zone and state level. Same
+      disclosure rule and precision flag as every survey cell. Not on the site yet.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [source, measure, geography_level, geography, age_group, sex, breakdown, breakdown_level]
+    columns:
+      - name: breakdown
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [sector, wealth_quintile, age_band]
+      - name: state
+        description: Canonical state name on state rows.
+        data_tests:
+          - not_null:
+              config:
+                where: "geography_level = 'state'"
+      - name: precision_flag
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [reliable, review, unreliable, suppressed]
 
   - name: mart_state_population_check
     description: NBS 2023 Annex 3 state projections against WorldPop v3.0 2025 (D44).

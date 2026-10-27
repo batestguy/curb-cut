@@ -33,16 +33,29 @@ sources:
       unweighted respondents is suppressed, and every row carries an NCHS precision flag.
       Provenance (dataset version, terms, SHA-256, script commit) is in
       data/public/aggregates/manifest.json. The folder is a var, so the fixture build reads
-      synthetic files with the same schema from fixtures/aggregates.
+      synthetic files with the same schema from fixtures/aggregates. Every file has
+      breakdown and breakdown_level ("all" on rows without an extra breakdown); one cell is
+      source, measure, geography_level, geography, age_group, sex, breakdown,
+      breakdown_level.
     tables:
       - name: dhs2024_state
-        description: DHS 2024, WG-SS DISABILITY3 and each domain at level 3+, by state, ages 18+ and 5-17.
+        description: >
+          DHS 2024, WG-SS DISABILITY3 and each domain at level 3+, by state, ages 18+ and
+          5-17: overall, by sex, and by urban/rural and wealth quintile (breakdown column).
         meta:
           external_location: "read_csv('{{ var('aggregates_dir') }}/dhs2024_state.csv', header = true, all_varchar = true)"
       - name: dhs2024_national
-        description: DHS 2024 national, including the 4-level distribution per domain and breakdowns by sex.
+        description: >
+          DHS 2024 national, including the 4-level distribution per domain, breakdowns by
+          sex, and by urban/rural, wealth quintile and age band (breakdown column).
         meta:
           external_location: "read_csv('{{ var('aggregates_dir') }}/dhs2024_national.csv', header = true, all_varchar = true)"
+      - name: dhs2024_zone
+        description: >
+          DHS 2024 by geopolitical zone: overall and by sex, urban/rural, wealth quintile
+          and age band (DISABILITY3 only), ages 18+ and 5-17.
+        meta:
+          external_location: "read_csv('{{ var('aggregates_dir') }}/dhs2024_zone.csv', header = true, all_varchar = true)"
       - name: ghs_w4_national_zone
         description: GHS-Panel W4, adults 18+, national (DISABILITY3 and domains) and zone (DISABILITY3). Never by state.
         meta:

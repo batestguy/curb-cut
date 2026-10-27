@@ -14,6 +14,10 @@
 # its deviation from the grand mean), and survey.adjust.domain.lonely = TRUE applies the
 # same adjustment when a domain has one PSU in a stratum.
 #
+# Each spec group crosses one or more `by` columns (e.g. state x sex, zone x sector); the
+# output columns geography, sex and breakdown_level take their levels, and breakdown names
+# the extra dimension ("all" when there is none).
+#
 # Per cell (NCHS Data Presentation Standards for Proportions, docs/verification.md D42):
 #   estimate, se       svymean of the 0/1 indicator over the domain (Taylor linearisation)
 #   n_unweighted       respondents in the domain with the indicator answered
@@ -42,8 +46,12 @@ korn_graubard <- function(p, n_eff, n, df, level = 0.95) {
 }
 
 estimate_group <- function(design, data, group) {
-  by <- group$by
-  keep <- !is.na(data[[by]])
+  # group$by: one or more columns to cross; group$targets: the output column that takes
+  # each one's levels (geography, sex or breakdown_level), in the same order.
+  by <- unlist(group$by)
+  targets <- unlist(group$targets)
+  keep <- rep(TRUE, nrow(data))
+  for (column in by) keep <- keep & !is.na(data[[column]])
   for (column in names(group$filter)) {
     keep <- keep & !is.na(data[[column]]) & data[[column]] == group$filter[[column]]
   }
@@ -52,27 +60,32 @@ estimate_group <- function(design, data, group) {
     ok <- keep & !is.na(data[[y]])
     if (!any(ok)) next
     sub <- subset(design, ok)
-    fit <- svyby(as.formula(paste0("~", y)), as.formula(paste0("~", by)), sub, svymean,
-                 keep.var = TRUE)
-    levels <- as.character(fit[[by]])
+    fit <- svyby(as.formula(paste0("~", y)), as.formula(paste0("~", paste(by, collapse = "+"))),
+                 sub, svymean, keep.var = TRUE)
     p <- unname(coef(fit))
     se <- unname(SE(fit))
-    for (i in seq_along(levels)) {
-      cell <- ok & data[[by]] == levels[i]
+    for (i in seq_len(nrow(fit))) {
+      cell <- ok
+      labels <- group$labels
+      for (j in seq_along(by)) {
+        level <- as.character(fit[[by[j]]][i])
+        cell <- cell & data[[by[j]]] == level
+        labels[[targets[j]]] <- level
+      }
       n <- sum(cell)
       events <- sum(data[[y]][cell] == 1)
       psus <- unique(data[cell, c("stratum", "psu")])
       df <- nrow(psus) - length(unique(psus$stratum))
       n_eff <- if (p[i] <= 0 || p[i] >= 1 || se[i] <= 0) n else min(n, p[i] * (1 - p[i]) / se[i]^2)
       ci <- korn_graubard(p[i], n_eff, n, df)
-      labels <- group$labels
-      labels[[group$target]] <- levels[i]
       rows[[length(rows) + 1]] <- data.frame(
         measure = y,
         geography_level = labels$geography_level,
         geography = labels$geography,
         age_group = labels$age_group,
         sex = labels$sex,
+        breakdown = labels$breakdown,
+        breakdown_level = labels$breakdown_level,
         estimate = p[i],
         se = se[i],
         ci_low = ci[1],

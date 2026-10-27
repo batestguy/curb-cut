@@ -33,7 +33,7 @@ def _write(path: Path, rows: list[dict], labels: dict[str, dict[int, str]] | Non
 def _dhs_row(**over: float | None) -> dict:
     row: dict[str, float | None] = {
         "hv001": 1, "hv002": 1, "hvidx": 1, "hv005": 2_000_000, "hv021": 1, "hv023": 1,
-        "hv025": 1, "hv103": 1, "hv104": 2, "hv105": 30, "shstate": CODE_OF["Kano"],
+        "hv025": 1, "hv103": 1, "hv104": 2, "hv105": 30, "hv270": 3, "shstate": CODE_OF["Kano"],
         "hdis2": 1, "hdis4": 1, "hdis5": 1, "hdis6": 1, "hdis7": 1, "hdis8": 1, "hdis9": 1,
     }  # fmt: skip
     row.update(over)
@@ -42,12 +42,12 @@ def _dhs_row(**over: float | None) -> dict:
 
 DHS_ROWS = [
     _dhs_row(hvidx=1),  # no difficulty
-    _dhs_row(hvidx=2, hdis7=3, hdis9=3),  # a lot of difficulty walking
-    _dhs_row(hvidx=3, hdis2=8),  # don't know seeing -> missing, disability3 missing
+    _dhs_row(hvidx=2, hdis7=3, hdis9=3, hv270=5, hv025=2),  # a lot of difficulty walking
+    _dhs_row(hvidx=3, hdis2=8, hv270=None),  # don't know seeing; wealth missing
     _dhs_row(hvidx=4, hv103=0),  # not de facto: dropped
     _dhs_row(hvidx=5, hv105=4),  # under 5: dropped
     _dhs_row(hvidx=6, hv105=98),  # age unknown: dropped
-    _dhs_row(hvidx=7, hv105=12, hdis4=4, hdis9=4),  # child, cannot hear
+    _dhs_row(hvidx=7, hv105=12, hdis4=4, hdis9=4, hv270=1),  # child, cannot hear, poorest
     {**_dhs_row(hvidx=8), **{f"hdis{i}": None for i in (2, 4, 5, 6, 7, 8, 9)}},  # not asked
 ]
 
@@ -63,6 +63,8 @@ def test_dhs_harmonise_rules() -> None:
     assert out["weight"].tolist() == [2.0] * 4
     assert set(out["state_code"]) == {"NG-KN"}
     assert set(out["zone"]) == {"North West"}
+    assert out["wealth_quintile"].tolist() == ["middle", "highest", NA, "lowest"]
+    assert out["sector"].tolist() == ["urban", "rural", "urban", "urban"]
     assert out["stratum"].iloc[0] == "dhs2024-1"
     assert list(out.columns[: len(c.COMMON_COLUMNS)]) == list(c.COMMON_COLUMNS)
 

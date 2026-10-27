@@ -1,9 +1,10 @@
 -- One row per state x source x measure x age group x sex, for all 37 states even where a
 -- source has no cell for a state (has_data = false). Suppressed cells keep null estimates.
--- Not shown on the site until P4.
+-- Not shown on the site until P4. Cells with an extra breakdown (urban/rural, wealth,
+-- age band) are in mart_prevalence_breakdowns.
 with cells as (
     select * from {{ ref('stg_survey__aggregates') }}
-    where geography_level = 'state'
+    where geography_level = 'state' and breakdown = 'all'
 ),
 
 combos as (

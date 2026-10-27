@@ -26,7 +26,10 @@ def _people(n: int = 400, seed: int = 7) -> pd.DataFrame:
             "state": np.where(np.arange(n) % 2 == 0, "Kano", "Lagos"),
             "state_code": np.where(np.arange(n) % 2 == 0, "NG-KN", "NG-LA"),
             "zone": np.where(np.arange(n) % 2 == 0, "North West", "South West"),
-            "sector": "urban",
+            "sector": np.where(np.arange(n) % 5 == 0, "rural", "urban"),
+            "wealth_quintile": np.array(["lowest", "second", "middle", "fourth", "highest"])[
+                np.arange(n) % 5
+            ],
             "sex": np.where(np.arange(n) % 3 == 0, "female", "male"),
             "age": rng.integers(5, 80, n),
             "weight": rng.uniform(0.5, 2.0, n),
@@ -75,12 +78,34 @@ def test_mpi_indicators_never_disability3() -> None:
 def test_jobs_shape() -> None:
     frame = _people(20)
     dhs = aggregate.dhs_jobs(frame)
-    assert [j.filename for j in dhs] == ["dhs2024_state.csv", "dhs2024_national.csv"]
-    assert {g.labels["age_group"] for g in dhs[0].groups} == {"18+", "5-17"}
+    assert [j.filename for j in dhs] == [
+        "dhs2024_state.csv",
+        "dhs2024_national.csv",
+        "dhs2024_zone.csv",
+    ]
+    for job in dhs:
+        assert {g.labels["age_group"] for g in job.groups} == {"18+", "5-17"}
+        assert all(len(g.by) == len(g.targets) for g in job.groups)
+    levels = [{g.labels["geography_level"] for g in job.groups} for job in dhs]
+    assert levels == [{"state"}, {"national"}, {"zone"}]
+    state, national, zone = dhs
+    # The P3 groups come first and are unchanged: no extra breakdown on them.
+    assert state.groups[0].by == ["state_code"] and state.groups[0].targets == ["geography"]
+    assert national.groups[2].by == ["national", "sex"]
+    breakdowns = [{g.labels["breakdown"] for g in job.groups} for job in dhs]
+    assert breakdowns[0] == {"all", "sector", "wealth_quintile"}  # no age bands by state
+    assert breakdowns[1] == breakdowns[2] == {"all", "sector", "wealth_quintile", "age_band"}
+    for job in (national, zone):
+        bands = [g for g in job.groups if g.labels["breakdown"] == "age_band"]
+        assert all(g.outcomes == ["disability3"] for g in bands)
+        assert all(g.targets[-1] == "breakdown_level" for g in bands)
+    assert any(g.by == ["state_code", "sex"] for g in state.groups)
+    assert any(g.by == ["zone", "sex"] for g in zone.groups)
     ghs = aggregate.ghs_jobs("ghs_w4")(frame)[0]
     # GHS never goes below zone level.
     assert {g.labels["geography_level"] for g in ghs.groups} == {"national", "zone"}
-    assert all(g.by != "state_code" for g in ghs.groups)
+    assert all("state_code" not in g.by for g in ghs.groups)
+    assert {g.labels["breakdown"] for g in ghs.groups} == {"all"}
     assert not aggregate.DATASETS["mpi2021"].held  # released 2026-10-24
     assert not aggregate.DATASETS["dhs2024"].held
 
@@ -91,6 +116,22 @@ def test_analysis_frame() -> None:
     assert set(out["national"]) == {"NG"}
     assert out["disability3"].dtype == "float64"
     assert "person_id" not in out.columns
+    assert "wealth_quintile" in out.columns
+    assert out["prevalence_age_band"].notna().all()  # every invented person is 5+
+    no_wealth = aggregate.analysis_frame(frame.drop(columns="wealth_quintile"), {})
+    assert "wealth_quintile" not in no_wealth.columns
+
+
+def test_prevalence_age_band_nests_in_age_group() -> None:
+    ages = pd.Series([4, 5, 9, 10, 14, 15, 17, 18, 29, 30, 69, 70, 97, None])
+    bands = c.prevalence_age_band(ages)
+    assert bands.tolist() == [NA, "5-9", "5-9", "10-14", "10-14", "15-17", "15-17", "18-29",
+                              "18-29", "30-39", "60-69", "70+", "70+", NA]  # fmt: skip
+    groups = c.age_group(ages)
+    child = {"5-9", "10-14", "15-17"}
+    for band, group in zip(bands, groups, strict=True):
+        if pd.notna(band):
+            assert (group == "5-17") == (band in child)
 
 
 def _fake_r(raw: pd.DataFrame):
@@ -109,11 +150,13 @@ def test_main_with_fake_r(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> No
     raw = pd.DataFrame(
         [
             {"measure": "disability3", "geography_level": "national", "geography": "NG",
-             "age_group": "18+", "sex": "all", "estimate": 0.1, "se": 0.01, "ci_low": 0.08,
+             "age_group": "18+", "sex": "all", "breakdown": "all", "breakdown_level": "all",
+             "estimate": 0.1, "se": 0.01, "ci_low": 0.08,
              "ci_high": 0.12, "n_unweighted": 300, "n_events": 30, "n_effective": 250.0,
              "df": 6},
             {"measure": "disability3", "geography_level": "zone", "geography": "North West",
-             "age_group": "18+", "sex": "all", "estimate": 0.2, "se": 0.05, "ci_low": 0.1,
+             "age_group": "18+", "sex": "all", "breakdown": "all", "breakdown_level": "all",
+             "estimate": 0.2, "se": 0.05, "ci_low": 0.1,
              "ci_high": 0.3, "n_unweighted": 12, "n_events": 2, "n_effective": 10.0,
              "df": 3},
         ]
@@ -179,6 +222,43 @@ def test_estimate_r_against_hand_calculation(r_ready: str, tmp_path: Path) -> No
     assert cell.df == 4 - 1  # four PSUs in one stratum
     public = disclosure.gate(raw, aggregate.DATASETS["dhs2024"])
     assert public["precision_flag"].notna().all()
+    assert set(raw.breakdown) == {"all", "sector", "wealth_quintile"}
+    unique = ["measure", "geography", "age_group", "sex", "breakdown", "breakdown_level"]
+    assert not raw.duplicated(unique).any()
+
+    # State x sex and state x wealth cells, checked by hand.
+    cell = raw[(raw.measure == "disability3") & (raw.geography == "NG-LA")]
+    cell = cell[(cell.age_group == "18+") & (cell.sex == "female") & (cell.breakdown == "all")]
+    sub = frame[(frame.state_code == "NG-LA") & (frame.age_group == "18+")]
+    sub = sub[(sub.sex == "female") & sub.disability3.notna()]
+    assert len(cell) == 1
+    assert cell.iloc[0].estimate == pytest.approx(
+        np.average(sub.disability3.astype(float), weights=sub.weight), rel=1e-9
+    )
+    assert cell.iloc[0].n_unweighted == len(sub)
+    cell = raw[(raw.measure == "disability3") & (raw.geography == "NG-KN")]
+    cell = cell[(cell.age_group == "18+") & (cell.breakdown == "wealth_quintile")]
+    cell = cell[cell.breakdown_level == "middle"]
+    sub = frame[(frame.state_code == "NG-KN") & (frame.age_group == "18+")]
+    sub = sub[(sub.wealth_quintile == "middle") & sub.disability3.notna()]
+    assert len(cell) == 1 and cell.iloc[0].sex == "all"
+    assert cell.iloc[0].estimate == pytest.approx(
+        np.average(sub.disability3.astype(float), weights=sub.weight), rel=1e-9
+    )
+
+
+def test_estimate_r_age_bands(r_ready: str, tmp_path: Path) -> None:
+    """National age-band cells: DISABILITY3 only, bands nested in their age group."""
+    frame = _people(400)
+    job = aggregate.dhs_jobs(frame)[1]
+    raw = aggregate.run_job("dhs2024", frame, job, tmp_path)
+    bands = raw[raw.breakdown == "age_band"]
+    assert set(bands.measure) == {"disability3"}
+    child = {"5-9", "10-14", "15-17"}
+    assert set(bands[bands.age_group == "5-17"].breakdown_level) <= child
+    assert not set(bands[bands.age_group == "18+"].breakdown_level) & child
+    adults = frame[(frame.age_group == "18+") & frame.disability3.notna()]
+    assert bands[bands.age_group == "18+"].n_unweighted.sum() == len(adults)
 
 
 def _clustered_people(seed: int = 11) -> pd.DataFrame:
@@ -199,6 +279,8 @@ def _clustered_people(seed: int = 11) -> pd.DataFrame:
     frame["state_code"] = "NG-KN"
     frame["zone"] = "North West"
     frame["sex"] = "male"
+    frame["sector"] = "urban"
+    frame["age"] = 40
     frame["age_group"] = "18+"
     return frame
 

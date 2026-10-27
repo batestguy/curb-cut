@@ -50,7 +50,7 @@ models:
     data_tests:
       - unique_combination:
           arguments:
-            columns: [source, measure, geography_level, geography, age_group, sex]
+            columns: [source, measure, geography_level, geography, age_group, sex, breakdown, breakdown_level]
       - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
           arguments:
             column_A: estimate
@@ -87,6 +87,16 @@ models:
           - accepted_values:
               arguments:
                 values: [all, male, female]
+      - name: breakdown
+        description: Extra dimension of the cell, or "all" when there is none.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [all, sector, wealth_quintile, age_band]
+      - name: breakdown_level
+        description: Level of the breakdown ("all" exactly when breakdown is "all").
+        data_tests: [not_null]
       - name: estimate
         data_tests:
           - dbt_expectations.expect_column_values_to_be_between:
