@@ -10,8 +10,7 @@ The report itself is not redistributed here.
   household members 15+, state rows. Domain columns are "some difficulty, a lot of difficulty
   or cannot do at all"; `some` / `a_lot` / `cannot` / `a_lot_or_cannot` are the highest level
   in at least one domain; `multi_domain` is "a lot of difficulty or cannot function at all in
-  more than one domain"; `number` is weighted. The men's North East rows (Adamawa, Bauchi,
-  Borno, Gombe, Taraba, Yobe) are not yet transcribed.
+  more than one domain"; `number` is weighted. All 37 states for both sexes, plus the men's total.
 
 Used by `curbcut_ingest.validate_ndhs` (P4a step 0, `PLAN.md`) to check that our pipeline
 reproduces the published tables. See `docs/verification.md` D46.
