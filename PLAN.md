@@ -182,6 +182,32 @@ Delegation: step 1 inline in the main session; steps 2–8 to `executor` (with t
 - **Gate:** `dbt build` green on the fixtures and the committed aggregates, and every public cell passes the disclosure check. The `nigeria-states` package decision is taken at this gate.
 
 ### P4 — Prevalence (weeks 6–7)
+Detailed plan agreed 2026-10-27 (the author: "use all that will make this a top tier project"). P4 is split at a mid-point gate: **P4a** builds the numbers, the map and the comparison; **P4b** releases `disability-access-charts` 0.2 and builds the state pages. Nothing in the scope list below is cut. The step 0 data-handling rule from P3 applies to every session and subagent.
+
+**Positioning (`verification.md` D46):** the NDHS 2024 report already publishes disability for adults 15+ by state, separately by sex, with no intervals. The site never claims the first state figures. What is new: both sexes together with intervals and a precision flag, each domain at the WG cut-off by state, ages 5–17, small-area estimates, spatial analysis, and an accessible, queryable presentation.
+
+**P4a: numbers, map, comparison**
+0. **Reproduce the published report first.** Re-run our pipeline on the report's definitions (de facto members, 15+, by sex × state, plus Table 14.1) and match Tables 14.1, 14.2.1 and 14.2.2 to the published decimal. Explain any difference before going on. Decide de facto vs de jure for the site (our 5+ count is about 148,100 against the report's 153,094) and record it. Cross-check the headline state estimates with Python `svy` (CLAUDE.md).
+1. **Direct estimates.** By state: both sexes and each sex. 18+ headline, 5–17 separate. Breakdowns (domain, severity, sex, age band, urban/rural, wealth quintile) wherever the precision flag allows. Every figure carries its SE, interval, unweighted n and flag.
+2. **Small-area estimates (Fay-Herriot).**
+   - **Covariates:** a candidate set written down *before* any model is fitted, all state-level and public, each with a D-row: the share aged 60+ (age structure drives disability), urban share, MPI 2021 poverty headcount, female literacy or schooling, population density. GRID3 facilities are **not** a covariate, because step 3 tests them against need, and using them in the model would be circular. Selection by a pre-declared criterion (BIC), at most 2–3 covariates for 37 areas; the full candidate table and the choice are published.
+   - **Model:** arcsine-transformed FH, standard for small proportions, with a bias-corrected back-transform. Sampling variances smoothed with a generalised variance function, because many state cells have few or no events. Estimates benchmarked so the states agree with the national direct estimate. MSE by parametric bootstrap.
+   - **Spatial FH** (`sae::eblupSFH`, pinned, D47) compared with plain FH on MSE/CV. Check whether `emdi` (arcsine, benchmarking, bootstrap MSE) is fit for use before adding it; its maintainer email is reported undeliverable (D47).
+   - **Diagnostics published:** residual normality, shrinkage per state, direct vs model estimates (they should agree where samples are large), and the CV gain. Where FH fails for a state, show the direct estimate with its CV.
+   - **Coverage:** DISABILITY3 18+ first; single domains and 5–17 only if they have enough events and pass the diagnostics. Otherwise 5–17 stays at the levels where precision passes.
+3. **Spatial analysis** as in the scope list below: queen contiguity from geoBoundaries, Moran's I per domain (permutation p), LISA with FDR control labelled exploratory, profile clustering, and services vs needs with GRID3 v2.0 (licence version confirmed on HDX first) labelled ecological.
+4. **Data out.** `export_marts.py` exports the prevalence marts and the model outputs to `site/public/data/`; dbt tests extend to the new marts (every SAE row has an MSE; states sum to the national benchmark).
+5. **Main page.** The prevalence map (through the chart library; hotspots carry a pattern or outline, never colour alone), the comparison (JONAPWD's 15%, our survey estimates, the NDHS report and the 10–18% grid), and the methodology note (WHO definitions checked against the reports themselves).
+6. **P4a gate:** the map and comparison are live; CI green; the author's keyboard and NVDA check of the new section.
+
+**P4b: chart library 0.2 and state pages**
+7. **`disability-access-charts` 0.2:** statistical findings (FDR, "N checked, K supported"; findings from `review` cells hedged or suppressed), adire-inspired patterns, and map support. Published to PyPI the same way as 0.1.
+8. **37 light state pages:** every public source for the state (DHS with intervals and the model estimate; MPI labelled as its own non-WG measure, never the headline; JONAPWD with its caveat; population; breakdowns), a share image, and the law panel with primary-sourced facts only (no count of states with their own law).
+9. **P4b gate:** pages live; keyboard and NVDA check; then send the publication copies to DHS and NBS, and do the bookkeeping (D-rows, CLAUDE.md, CHANGELOG, README hero links).
+
+Delegation: steps 0–2 inline in the main session (they need the author's judgement and touch restricted data through scripts only); steps 3–5 and 7–8 to `executor` with the step 0 rule in its brief, then `reviewer`.
+
+**Scope reference** (agreed 2026-10-17 to 2026-10-21; the steps above implement it):
 - Survey-weighted state prevalence by difficulty type and sex, with SEs (R `survey`, cross-checked with `svy`).
 - Fay-Herriot small-area estimation for small-sample states.
 - **Spatial analysis (on measured prevalence only)** (added 2026-10-17):
