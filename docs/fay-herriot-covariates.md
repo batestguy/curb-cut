@@ -27,13 +27,30 @@ All covariates are state level and public, and none comes from the NDHS 2024 sam
 ## Selection rule (pre-declared)
 
 1. Each covariate is standardised to mean 0, SD 1 across the 37 states.
-2. Sampling variances are smoothed first with a generalised variance function (GVF) on the arcsine scale: the log of the direct variance regressed on the log of the effective sample size. The fitted variances are used in every model.
-3. Candidate models are every subset of C1–C5 with **at most 3 covariates** (25 models plus the intercept-only model), fitted as arcsine Fay-Herriot by REML.
+2. Sampling variances are smoothed first with a generalised variance function (GVF) on the arcsine scale: the log of the direct variance regressed on the log of the unweighted sample size (corrected from "effective sample size"; see below). The fitted variances are used in every model.
+3. Candidate models are every subset of C1–C5 with **at most 3 covariates** (25 models plus the intercept-only model), fitted as arcsine Fay-Herriot (ML for the selection, REML for the final fit; see below).
 4. The model with the **lowest BIC** is chosen. Ties within 2 BIC points go to the model with fewer covariates.
 5. The full table goes into the methodology note: every model's BIC, coefficients and the R² of the area-level fit.
 6. If the chosen model fails its diagnostics (residual normality, or direct vs model estimates disagreeing where the samples are large), the next model by BIC is used and the failure is reported.
 7. The covariates are frozen here. None is added or swapped after the outcome is examined. If a source fails, only its listed fallback is used.
 
+## Technical corrections (2026-10-28, before any fit)
+
+These were found while writing the fitting script, before any model was fitted and before any covariate value existed. They fix how steps 2, 3 and 6 are carried out. The covariates are unchanged.
+
+- **Step 2, the GVF.** On the arcsine scale, the direct variance is exactly 1 / (4 × effective n), so regressing it on effective n would fit perfectly and smooth nothing. The GVF instead regresses log(direct variance on the arcsine scale) on log(unweighted n). That smooths the noisy design effects, and the smearing factor exp(σ²/2) corrects the back-transform from logs.
+- **Steps 3–4, BIC.** REML likelihoods can't be compared across models with different covariates. So BIC is computed from **ML** fits for the selection, and the chosen model is then refitted by **REML** for the estimates.
+- **Step 6, what counts as a failure, defined before fitting.** A model fails its diagnostics if either of these holds:
+  - Shapiro-Wilk p < 0.05 on the standardised residuals, (y − Xβ) / √(σ²ᵤ + ψ);
+  - more than 2 of the 12 states with the largest unweighted n have a model estimate outside their direct Korn-Graubard 95% interval.
+
+  Separately, any single state whose model estimate falls outside its own direct 95% interval shows the direct estimate with its CV, and is listed.
+
 ## Then
 
-The bias-corrected back-transform, benchmarking to the national direct estimate, parametric bootstrap MSE, spatial FH (`sae::eblupSFH`) compared on MSE/CV, and the published diagnostics, all as set out in `PLAN.md` P4a step 2.
+As set out in `PLAN.md` P4a step 2:
+- **Back-transform**, bias-corrected: p = E[sin²(θ)] with θ ~ N(θ̂, γψ), which has the closed form (1 − e^(−2γψ) cos 2θ̂) / 2.
+- **Benchmarking**: a ratio benchmark to the national direct 18+ estimate, weighted by the WorldPop 2020 state population aged 18+. The weights are not covariates.
+- **MSE**: parametric bootstrap, B = 1,000, with a fixed seed.
+- **Spatial FH**: `sae::eblupSFH` with row-standardised queen contiguity from the geoBoundaries polygons, compared with plain FH on analytic MSE on the arcsine scale.
+- The published diagnostics.
