@@ -10,7 +10,7 @@ permissions:
 
 # CI never sees licensed data: data/restricted/ and data/sources/ (the JONAPWD PDF) are
 # git-ignored, so they are not in the checkout. The data job builds only from the committed
-# public CSV in data/public/.
+# public files in data/public/ (aggregates, spatial results, report transcriptions).
 
 jobs:
   python:
@@ -76,6 +76,8 @@ jobs:
         run: uv run python packages/transform/scripts/build_charts.py
       - name: Build locator map (from the committed geoBoundaries file; fails if a state is missing)
         run: uv run python packages/transform/scripts/build_map.py
+      - name: Audit every chart document, warnings included (e.g. an empty map class)
+        run: uv run disability-access-charts check --strict site/public/data/charts/*.json
       - uses: actions/upload-artifact@v7
         with:
           name: site-data

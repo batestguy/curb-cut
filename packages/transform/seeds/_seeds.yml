@@ -92,3 +92,25 @@ seeds:
                 values: [male, female]
       - name: population_2023
         data_tests: [not_null, non_negative]
+
+  - name: reference_figures
+    description: >
+      Cited figures for the main page's comparison that are not survey estimates: JONAPWD's
+      assumed 15% and WHO's global 16%, each with its own wording, population and source
+      (docs/verification.md D17, D59). The spec's unsourced "10-18%" range is left out on
+      purpose (author, 2026-10-28).
+    config:
+      column_types:
+        sort_order: integer
+        value_percent: double
+    columns:
+      - name: figure_id
+        data_tests: [unique, not_null]
+      - name: sort_order
+        data_tests: [unique, not_null]
+      - name: value_percent
+        data_tests: [not_null, non_negative]
+      - name: definition
+        data_tests: [not_null]
+      - name: source_url
+        data_tests: [not_null]

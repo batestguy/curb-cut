@@ -159,3 +159,94 @@ models:
         data_tests: [not_null]
       - name: nbs_2023_male
         data_tests: [not_null]
+
+  - name: mart_prevalence_comparison
+    description: >
+      The main page's comparison, verified figures only (author, 2026-10-28): JONAPWD's
+      assumed 15%, WHO's global 16% (as WHO words it), the NDHS 2024 report's Table 14.1
+      for ages 15+ ("any difficulty", computed from the transcription, against the WG
+      cut-off), and our DHS 2024 DISABILITY3 estimate for adults 18+ with its 95% interval.
+      Exported into prevalence.json.
+    columns:
+      - name: figure_id
+        data_tests: [unique, not_null]
+      - name: sort_order
+        data_tests: [unique, not_null]
+      - name: value_percent
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 100
+      - name: kind
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [assumed, global estimate, measured]
+      - name: source
+        data_tests: [not_null]
+      - name: source_url
+        data_tests: [not_null]
+
+  - name: mart_spatial_state
+    description: >
+      One row per state: exploratory LISA class for DISABILITY3 18+, descriptive profile
+      cluster, and GRID3 health facilities per 100,000 people. DHS 2024 direct estimates
+      only; never JONAPWD (docs/verification.md D17, D58). Exported to Parquet.
+    columns:
+      - name: state
+        data_tests:
+          - unique
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_states')
+                field: state
+      - name: state_code
+        data_tests: [unique, not_null]
+      - name: lisa_class
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [High-High, Low-Low, High-Low, Low-High, Not significant]
+      - name: lisa_q_bh
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: profile_cluster
+        data_tests: [not_null]
+      - name: facilities_per_100k
+        data_tests: [not_null, non_negative]
+
+  - name: mart_spatial_moran
+    description: Global Moran's I per measure, with a plain label (DISABILITY3 18+ first). Exported to Parquet.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [measure, age_group]
+    columns:
+      - name: measure_label
+        data_tests: [not_null]
+      - name: n_states
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [37]
+                quote: false
+      - name: p_perm
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: p_bh
+        data_tests:
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
