@@ -138,6 +138,10 @@ main <- function(spec_path) {
       stringsAsFactors = FALSE
     )
   }))
+  # Area-level R^2: the share of the intercept-only model's between-state variance that the
+  # covariates explain, floored at 0 (rule 5 of docs/fay-herriot-covariates.md).
+  s2u_null <- table$sigma2_u[table$n_terms == 0]
+  table$r2_area <- pmax(0, 1 - table$sigma2_u / s2u_null)
   # Ranking: BIC, with a model within bic_tie of a better one losing to it only if larger.
   table <- table[order(table$bic, table$n_terms), ]
   best <- table$bic[1]
@@ -175,13 +179,36 @@ main <- function(spec_path) {
     top_fit <- fit_fh(model_formula(top_terms), data, "REML")
     gamma <- top_fit$fit$refvar / (top_fit$fit$refvar + data$psi)
     mse <- mseFH(model_formula(top_terms), vardir = psi, method = "REML", data = data)$mse
+    p_top <- back_transform(drop(top_fit$eblup), gamma * data$psi)
+    relative <- p_top / data$estimate - 1
+    # Sensitivity, not part of the declared rule: the same model with the raw direct
+    # variances in place of the GVF. The GVF barely varies between states, so comparing
+    # its MSE with the raw variance mixes two variance models; this fit compares like with like.
+    raw <- data
+    raw$psi <- raw$var_direct
+    raw_fit <- fit_fh(model_formula(top_terms), raw, "REML")
+    raw_gamma <- raw_fit$fit$refvar / (raw_fit$fit$refvar + raw$psi)
+    raw_mse <- mseFH(model_formula(top_terms), vardir = psi, method = "REML", data = raw)$mse
+    raw_x <- model.matrix(model_formula(top_terms), raw)
+    raw_resid <- (raw$y - drop(raw_x %*% raw_fit$fit$estcoef$beta)) / sqrt(raw_fit$fit$refvar + raw$psi)
     failed <- list(
       rule = "Shapiro-Wilk p >= 0.05 and at most 2 of the 12 largest-n states outside their direct 95% CI",
       top_model = top,
       gvf_r2 = summary(gvf)$r.squared,
       top_model_gamma = list(min = min(gamma), median = median(gamma), max = max(gamma)),
       top_model_mse_over_psi_median = median(mse / data$psi),
-      top_model_mse_over_direct_var_median = median(mse / data$var_direct),
+      top_model_relative_change = list(
+        min = min(relative), q25 = unname(quantile(relative, 0.25)), median = median(relative),
+        q75 = unname(quantile(relative, 0.75)), max = max(relative)
+      ),
+      raw_variance_sensitivity = list(
+        gamma = list(min = min(raw_gamma), median = median(raw_gamma), max = max(raw_gamma)),
+        mse_over_direct_var = list(
+          min = min(raw_mse / raw$psi), median = median(raw_mse / raw$psi), max = max(raw_mse / raw$psi)
+        ),
+        states_mse_below_direct_var = sum(raw_mse < raw$psi),
+        shapiro_p = shapiro.test(raw_resid)$p.value
+      ),
       models = tried
     )
     write_json_lf(failed, file.path(spec$out_dir, "fh_diagnostics_failed.json"))
@@ -216,7 +243,9 @@ main <- function(spec_path) {
   shapes <- st_read(spec$boundaries, quiet = TRUE)
   shapes$geography <- shapes[[spec$boundary_key]]
   stopifnot(!any(is.na(shapes$geography)))
-  shapes <- shapes[match(data$geography, shapes$geography), ]
+  idx <- match(data$geography, shapes$geography)
+  stopifnot(!anyNA(idx))
+  shapes <- shapes[idx, ]
   nb <- poly2nb(shapes, queen = TRUE)
   W <- nb2mat(nb, style = "W", zero.policy = TRUE)
   formula <- model_formula(chosen$terms)
@@ -236,7 +265,9 @@ main <- function(spec_path) {
     fh_rmse = sqrt(data$fh_mse), fh_cv = data$fh_cv,
     use_direct = data$use_direct,
     mse_theta_fh = data$mse_theta_fh, mse_theta_sfh = data$mse_theta_sfh,
-    sfh = back_transform(data$theta_sfh, data$gamma * data$psi)
+    # The spatial model has its own shrinkage, so its back-transform uses its own analytic
+    # MSE on the arcsine scale as the variance (an approximation, stated in the README).
+    sfh = back_transform(data$theta_sfh, data$mse_theta_sfh)
   )
   dir.create(spec$out_dir, showWarnings = FALSE, recursive = TRUE)
   write_csv_lf(out, file.path(spec$out_dir, "fh_state.csv"))

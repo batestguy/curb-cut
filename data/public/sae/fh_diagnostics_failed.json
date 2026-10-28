@@ -8,7 +8,27 @@
     "max": 0.96262698
   },
   "top_model_mse_over_psi_median": 0.95548741,
-  "top_model_mse_over_direct_var_median": 1.09155545,
+  "top_model_relative_change": {
+    "min": -0.05084311,
+    "q25": -0.0131574,
+    "median": 0.01402454,
+    "q75": 0.03903812,
+    "max": 0.1113436
+  },
+  "raw_variance_sensitivity": {
+    "gamma": {
+      "min": 0.86594422,
+      "median": 0.95482968,
+      "max": 0.97451132
+    },
+    "mse_over_direct_var": {
+      "min": 0.88138821,
+      "median": 0.96103026,
+      "max": 0.97814128
+    },
+    "states_mse_below_direct_var": 37,
+    "shapiro_p": 0.00809858
+  },
   "models": [
     {
       "terms": "(intercept only)",

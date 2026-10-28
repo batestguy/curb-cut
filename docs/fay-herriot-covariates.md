@@ -59,12 +59,32 @@ As set out in `PLAN.md` P4a step 2:
 - **Spatial FH**: `sae::eblupSFH` with row-standardised queen contiguity from the geoBoundaries polygons, compared with plain FH on analytic MSE on the arcsine scale.
 - The published diagnostics.
 
-## Result (2026-10-28, after the fit)
+## Result (2026-10-28, after the fit; wording corrected after review)
 
 Everything above this section was written before any model was fitted. Run: `uv run python -I -m curbcut_ingest.sae`. Outputs are in `data/public/sae/`.
 
-- **Selection.** The intercept-only model has BIC −97.3. The lowest BIC is −97.6, for urban share + literacy (C2 + C4). The two are within 2 points, so under the tie rule the intercept-only model ranks first. **The covariates add no predictive value.** The full table is in `fh_model_selection.csv`.
-- **Diagnostics.** **No model passes.** All 26 fail Shapiro-Wilk on the standardised residuals: the largest p is 0.032. The cause is two states far above the rest: Taraba at 11.3% (standardised residual 2.9) and Abia at 10.6% (2.7). The large-state test passes for every model: no model estimate falls outside any large state's direct 95% interval. The record is in `fh_diagnostics_failed.json`.
-- **FH would change almost nothing anyway.** For the top-ranked model, the shrinkage factor γ runs from 0.93 to 0.96: the states differ far more than sampling error can account for, so each model estimate stays within a few percent of the direct one. The median analytic MSE on the arcsine scale is 0.96 of the smoothed sampling variance and **1.09 of the direct variance**, so there is no precision gain. The GVF explains only 10% of the variation in the direct variances (R² 0.10), because unweighted sample size varies little between states.
-- **Decision (author, 2026-10-28):** the pre-declared rule didn't say what to do if every model failed. The author chose to make **the direct estimates the headline**. The FH attempt is published as a result: candidates, BIC table, failed diagnostics and shrinkage. No model was amended after the failure; the log-scale and robust alternatives were considered and not run. The spatial FH comparison is dropped with it. The step 3 spatial analysis (Moran's I, LISA) runs on the direct estimates.
-- **What the site says:** model-based small-area estimates were tried and add nothing here. The states differ far more than the survey's sampling error, and the direct estimates are already reliable in all 37 states (CV 10–27%).
+- **Selection.**
+  - The intercept-only model has BIC −97.3. The lowest BIC is −97.6, for urban share + literacy (C2 + C4).
+  - That model explains 19% of the between-state variance (area-level R², `r2_area`).
+  - The two are within 2 points, so under the tie rule the intercept-only model ranks first. **The covariates explain too little to earn a place.**
+  - Full table: `fh_model_selection.csv`.
+- **Diagnostics.** **No arcsine-normal model passes.**
+  - All 26 fail Shapiro-Wilk on the standardised residuals; the largest p is 0.032.
+  - The failure is real, not an artefact. With the raw direct variances in place of the GVF, p = 0.008. Adjusting for leverage changes nothing. An independent review found the test correctly calibrated under simulation.
+  - The cause: two states sit far above the rest, Taraba at 11.3% (standardised residual 2.9) and Abia at 10.6% (2.7). Without them, p ≈ 0.30.
+  - On the log or logit scale the direct estimates look normal (p ≈ 0.7). A log-scale FH would probably pass, but it was not run (see the decision below).
+  - The large-state test passes for every model, but with this little shrinkage it could hardly fail, so it is no evidence either way.
+  - Record: `fh_diagnostics_failed.json`.
+- **FH would barely change the estimates.**
+  - For the top-ranked model, the shrinkage factor γ is 0.93–0.96: states differ far more than the survey's sampling error.
+  - The model estimates are mostly within about 4% of the direct ones (interquartile range −1.3% to +3.9%), and at most 11% away.
+  - Precision gain, judged like for like:
+    - With the GVF variances, the median MSE on the arcsine scale is 0.96 of the smoothed sampling variance.
+    - Refitting with the raw direct variances (a sensitivity check, `raw_variance_sensitivity`), the MSE falls below the direct variance in all 37 states, by 4% at the median and 12% at most (ratio 0.88).
+    - That gain is negligible. The same holds on the log scale: there, sampling variance (mean CV² 0.03) is also small against between-state variance (0.43), which implies γ ≈ 0.93.
+  - The GVF explains only 10% of the variation in the direct variances (R² 0.10), because unweighted sample size varies little between states. Smoothing therefore removes real differences in design effects. This was declared in advance, and the conclusion doesn't depend on it.
+- **Decision (author, 2026-10-28):** the pre-declared rule didn't say what to do if every model failed.
+  - The author chose to make **the direct estimates the headline** and to publish the FH attempt as a result: candidates, BIC table, failed diagnostics and shrinkage.
+  - No model was amended after the failure. The log-scale and robust alternatives were considered and not run, because any of them would change the estimates by only a few per cent.
+  - The spatial FH comparison is dropped with it. The step 3 spatial analysis (Moran's I, LISA) runs on the direct estimates.
+- **What the site says:** model-based small-area estimates were tried and change little here. The states differ far more than the survey's sampling error can account for, and the direct estimates are already reliable in all 37 states (CV 10–27%).
