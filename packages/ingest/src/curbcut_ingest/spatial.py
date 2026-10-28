@@ -24,6 +24,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from curbcut_ingest.aggregate import rscript
+from curbcut_ingest.states import StateLookup
 
 ROOT = Path(__file__).resolve().parents[4]
 R_SCRIPT = ROOT / "packages" / "ingest" / "R" / "spatial.R"
@@ -57,6 +58,11 @@ KNOWN_PAIRS = (("NG-LA", "NG-OG"), ("NG-KN", "NG-JI"), ("NG-FC", "NG-NI"), ("NG-
 NSIM = 9999
 SEED = 20261028
 FDR_Q = 0.05
+HEDGE_SHARE = 0.25
+"""The precision hedge goes on a Moran sentence when at least this share of states is
+flagged review/unreliable or has a zero estimate."""
+DRIVER_Z = 2.5
+"""A state "drives" the profile split if a domain is at least this many SDs above the mean."""
 K_RANGE = (2, 6)
 
 
@@ -90,6 +96,11 @@ def moran_measures() -> list[dict[str, str]]:
     return rows
 
 
+def state_names() -> dict[str, str]:
+    """ISO code -> state name from the ``dim_states`` seed, for the plain-English sentences."""
+    return {s.state_code: s.state for s in StateLookup.from_seeds().states.values()}
+
+
 def spec(out_dir: Path, facilities: Path = FACILITIES) -> dict[str, object]:
     return {
         "outcome_csv": OUTCOME.as_posix(),
@@ -102,8 +113,11 @@ def spec(out_dir: Path, facilities: Path = FACILITIES) -> dict[str, object]:
         "domains": list(DOMAINS),
         "cluster_age_group": "18+",
         "k_range": list(K_RANGE),
+        "driver_z": DRIVER_Z,
+        "hedge_share": HEDGE_SHARE,
         "services": {"measure": "disability3", "age_group": "18+"},
         "facilities_csv": facilities.as_posix(),
+        "state_names": state_names(),
         "nsim": NSIM,
         "seed": SEED,
         "out_dir": out_dir.as_posix(),

@@ -37,6 +37,7 @@ CSV_COLUMNS = [
     "population_2023",
     "facilities",
     "facilities_public",
+    "facilities_ownership_unknown",
     "facilities_primary",
     "facilities_secondary_tertiary",
     "facilities_per_100k",
@@ -74,6 +75,7 @@ def aggregate(
     """
     total: Counter[str] = Counter()
     public: Counter[str] = Counter()
+    unknown: Counter[str] = Counter()
     primary: Counter[str] = Counter()
     higher: Counter[str] = Counter()
     for state_label, ownership, level in records:
@@ -83,6 +85,7 @@ def aggregate(
             raise Grid3Error(str(exc)) from None
         total[state] += 1
         public[state] += ownership == "Public"
+        unknown[state] += ownership == "Unknown"
         primary[state] += level == "Primary"
         higher[state] += level in ("Secondary", "Tertiary")
     missing = sorted(set(lookup.states) - set(total))
@@ -104,6 +107,7 @@ def aggregate(
                 "population_2023": pop,
                 "facilities": total[name],
                 "facilities_public": public[name],
+                "facilities_ownership_unknown": unknown[name],
                 "facilities_primary": primary[name],
                 "facilities_secondary_tertiary": higher[name],
                 "facilities_per_100k": round(total[name] / pop * 100_000, 4),

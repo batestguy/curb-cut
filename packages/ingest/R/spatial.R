@@ -73,6 +73,11 @@ neighbours <- function(spec, codes) {
   list(nb = nb, checks = checks)
 }
 
+and_list <- function(x) {
+  if (length(x) <= 1) return(x)
+  paste(paste(x[-length(x)], collapse = ", "), "and", x[length(x)])
+}
+
 benjamini_hochberg <- function(p) p.adjust(p, method = "BH")
 
 global_moran <- function(spec, direct, codes, lw) {
@@ -90,6 +95,7 @@ global_moran <- function(spec, direct, codes, lw) {
       n_review = sum(d$precision_flag == "review"),
       n_unreliable = sum(d$precision_flag == "unreliable"),
       n_zero_estimate = sum(d$estimate == 0),
+      n_imprecise = sum(d$precision_flag != "reliable" | d$estimate == 0),
       median_cv_nonzero = median(d$se[d$estimate > 0] / d$estimate[d$estimate > 0]),
       stringsAsFactors = FALSE
     )
@@ -174,34 +180,44 @@ services <- function(spec, direct, codes) {
     supply = "GRID3 NGA - Health Facilities v2.0, all facilities per 100,000 people (NBS 2023 population)",
     n_states = length(codes), spearman_rho = rho, p_perm_two_sided = p, nsim = spec$nsim, seed = spec$seed,
     facilities_total = sum(fac$facilities),
+    facilities_ownership_unknown = sum(fac$facilities_ownership_unknown),
     facilities_per_100k = list(min = min(x), median = median(x), max = max(x),
       min_state = codes[which.min(x)], max_state = codes[which.max(x)]),
     caveats = c(
       "Ecological association between state averages: no causal claim and no inference about individuals.",
       "General health facilities are not disability services; the count says nothing about rehabilitation, assistive technology or accessibility.",
-      "GRID3 v2.0 is non-exhaustive and not validated by government; private facilities in particular may be under-counted."
+      "GRID3 v2.0 is non-exhaustive and not validated by government; private facilities in particular may be under-counted.",
+      sprintf("%s of the %s facilities have Unknown ownership in the source.", format(sum(fac$facilities_ownership_unknown), big.mark = ","), format(sum(fac$facilities), big.mark = ",")),
+      "The supply rate uses total population (all ages), while prevalence is for adults 18+; states with younger populations have more adults per facility than the all-ages rate suggests."
     )
   )
 }
 
-sentence_moran <- function(r, label, n_tests) {
-  hedge <- if (r$n_review > 0) {
-    sprintf(" %d of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern.", r$n_review)
+sentence_moran <- function(r, label, n_tests, hedge_share) {
+  hedge <- if (r$n_imprecise >= hedge_share * r$n_states) {
+    sprintf(" %d of the %d state estimates are imprecise (flagged for review, or zero), and noisy estimates pull I towards 0, so a weak result is not evidence of no pattern.", r$n_imprecise, r$n_states)
+  } else if (r$n_imprecise > 0) {
+    sprintf(" %d of the %d state estimates are flagged for review; the rest are reliable.", r$n_imprecise, r$n_states)
   } else {
-    " All 37 state estimates are flagged reliable."
+    sprintf(" All %d state estimates are flagged reliable.", r$n_states)
   }
-  verdict <- if (r$p_bh < 0.05) "is geographically clustered" else "shows no clear geographic clustering"
+  verdict <- if (r$p_bh < 0.05) {
+    "is geographically clustered"
+  } else {
+    "shows no geographic pattern that survives correction for multiple tests"
+  }
   borderline <- if (r$p_perm < 0.05 && r$p_bh >= 0.05) {
     " The uncorrected p-value is below 0.05, but not after correcting for multiple tests."
   } else {
     ""
   }
-  sprintf("%s %s across Nigeria's states (Moran's I = %.2f, permutation p %s; adjusted p %s across %d tests).%s%s",
+  sprintf("%s %s across Nigeria's states (Moran's I = %.2f, one-sided permutation p %s, testing for positive clustering only; adjusted p %s across %d tests).%s%s",
     label, verdict, r$moran_i, fmt_p(r$p_perm), fmt_p(r$p_bh), n_tests, borderline, hedge)
 }
 
 main <- function(spec_path) {
   spec <- fromJSON(spec_path)
+  name_of <- function(code) vapply(code, function(x) spec$state_names[[x]], character(1), USE.NAMES = FALSE)
   direct <- read.csv(spec$outcome_csv, stringsAsFactors = FALSE)
   direct <- direct[direct$sex == "all" & direct$breakdown == "all", ]
   codes <- sort(unique(direct$geography))
@@ -237,32 +253,51 @@ main <- function(spec_path) {
   labels <- setNames(spec$moran_measures$label, paste(spec$moran_measures$measure, spec$moran_measures$age_group))
   moran_out <- lapply(seq_len(nrow(moran)), function(i) {
     r <- moran[i, ]
-    c(as.list(r), sentence = sentence_moran(r, labels[[paste(r$measure, r$age_group)]], nrow(moran)))
+    c(as.list(r), sentence = sentence_moran(r, labels[[paste(r$measure, r$age_group)]], nrow(moran), spec$hedge_share))
   })
   sig <- local[local$lisa_class != "Not significant", ]
   lisa_sentence <- if (nrow(sig) == 0) {
-    sprintf("Exploratory: no state is a significant local hotspot or coldspot of disability among adults 18+ after correcting for 37 tests (false discovery rate %.2f).", spec$lisa$q)
+    sprintf("Exploratory: no state is a significant local hotspot or coldspot of disability among adults 18+ after correcting for 37 tests (false discovery rate %.2f). With only 37 states, local tests have low power, so this does not rule out local patterns.", spec$lisa$q)
   } else {
-    sprintf("Exploratory: after correcting for 37 tests (false discovery rate %.2f), %s. With 37 states this is a lead to look into, not a finding.",
-      spec$lisa$q, paste(sprintf("%s is %s", sig$geography, sig$lisa_class), collapse = "; "))
+    sprintf("Exploratory: after correcting for 37 tests (false discovery rate %.2f), %s. With only 37 states, local tests have low power; this is a lead to look into, not a finding.",
+      spec$lisa$q, paste(sprintf("%s is %s", name_of(sig$geography), sig$lisa_class), collapse = "; "))
   }
   group_text <- paste(vapply(clusters$profiles, function(g) {
-    sprintf("group %d (%d states: %s) is above the state average in %d of 6 domains",
-      g$cluster, g$n_states, paste(g$states, collapse = ", "), sum(unlist(g$mean_z) > 0))
+    above <- sum(unlist(g$mean_z) > 0)
+    n_domains <- length(g$mean_z)
+    where <- if (above == n_domains) {
+      "above the state average in every domain"
+    } else if (above == 0) {
+      "below the state average in every domain"
+    } else {
+      sprintf("above the state average in %d of %d domains", above, n_domains)
+    }
+    sprintf("group %d (%d states: %s) is, on average, %s",
+      g$cluster, g$n_states, paste(name_of(g$states), collapse = ", "), where)
   }, character(1)), collapse = "; ")
+  zmat <- as.matrix(clusters$members[, paste0("z_", spec$domains)])
+  max_z <- apply(zmat, 1, max)
+  is_driver <- max_z >= spec$driver_z
+  drivers <- clusters$members$geography[is_driver][order(-max_z[is_driver])]
+  driver_text <- if (length(drivers) > 0) {
+    sprintf(" It is driven by a few high-prevalence states: %s each have at least one domain %.1f or more standard deviations above the state average (up to %.1f).",
+      and_list(name_of(drivers)), spec$driver_z, max(max_z))
+  } else {
+    ""
+  }
   cluster_sentence <- sprintf(
-    "Descriptive only: grouping states by their six-domain disability profile (adults 18+) gives %d groups (Ward clustering, best mean silhouette %.2f of k = 2-6): %s. Many single-domain estimates are flagged for review, so the groups are rough and carry no inference.",
-    clusters$k, max(clusters$silhouette$mean_silhouette), group_text)
+    "Descriptive only: grouping states by their six-domain disability profile (adults 18+) gives %d groups (Ward clustering, best mean silhouette %.2f of k = 2-6): %s. Here the state average is the unweighted mean of the 37 state estimates, not the national figure. The split mostly reflects the overall level of reported difficulty, not a different mix of difficulties.%s Many single-domain estimates are flagged for review, so the groups are rough and carry no inference.",
+    clusters$k, max(clusters$silhouette$mean_silhouette), group_text, driver_text)
   svc_sentence <- sprintf(
-    "Ecological and descriptive: across the 37 states, health facilities per 100,000 people and adult disability prevalence have a Spearman correlation of %.2f (permutation p %s). This compares state averages only; it says nothing about individuals or causes, and general health facilities are not disability services.",
-    svc$spearman_rho, fmt_p(svc$p_perm_two_sided))
+    "Ecological and descriptive: across the 37 states, health facilities per 100,000 people (all ages) and disability prevalence among adults 18+ have a Spearman correlation of %.2f (two-sided permutation p %s). This compares state averages only; it says nothing about individuals or causes, and general health facilities are not disability services. The facility list is incomplete and %s of its %s facilities have unknown ownership.",
+    svc$spearman_rho, fmt_p(svc$p_perm_two_sided), format(svc$facilities_ownership_unknown, big.mark = ","), format(svc$facilities_total, big.mark = ","))
   summary <- list(
     source = "DHS 2024 direct state estimates (data/public/aggregates/dhs2024_state.csv), sex = all, breakdown = all",
     note = "Fay-Herriot failed its pre-declared diagnostics (docs/verification.md D56); every result here uses the direct estimates. No spatial method is run on JONAPWD (D17).",
     seed = spec$seed, nsim = spec$nsim,
     neighbours = nbr$checks,
     moran = list(alternative = "greater (positive spatial autocorrelation)", multiple_testing = "Benjamini-Hochberg across the 8 tests",
-      precision_note = "Noisy state estimates add independent error, which biases Moran's I towards 0; results for measures with many review-flagged states are conservative.",
+      precision_note = "Sampling noise in the state estimates biases Moran's I towards 0 if that noise is independent between states; only under that assumption are results for measures with many imprecise states conservative. The precision hedge is added to a sentence when at least 25% of states are flagged review/unreliable or have a zero estimate.",
       results = moran_out),
     lisa = list(exploratory = TRUE, measure = spec$lisa$measure, age_group = spec$lisa$age_group,
       alternative = "two-sided, conditional permutation", fdr_q = spec$lisa$q,

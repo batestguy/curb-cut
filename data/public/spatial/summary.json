@@ -35,7 +35,7 @@
   "moran": {
     "alternative": "greater (positive spatial autocorrelation)",
     "multiple_testing": "Benjamini-Hochberg across the 8 tests",
-    "precision_note": "Noisy state estimates add independent error, which biases Moran's I towards 0; results for measures with many review-flagged states are conservative.",
+    "precision_note": "Sampling noise in the state estimates biases Moran's I towards 0 if that noise is independent between states; only under that assumption are results for measures with many imprecise states conservative. The precision hedge is added to a sentence when at least 25% of states are flagged review/unreliable or have a zero estimate.",
     "results": [
       {
         "measure": "disability3",
@@ -50,9 +50,10 @@
         "n_review": 0,
         "n_unreliable": 0,
         "n_zero_estimate": 0,
+        "n_imprecise": 0,
         "median_cv_nonzero": 0.1559938,
         "p_bh": 0.1052,
-        "sentence": "Disability among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.13, permutation p = 0.071; adjusted p = 0.105 across 8 tests). All 37 state estimates are flagged reliable."
+        "sentence": "Disability among adults 18+ shows no geographic pattern that survives correction for multiple tests across Nigeria's states (Moran's I = 0.13, one-sided permutation p = 0.071, testing for positive clustering only; adjusted p = 0.105 across 8 tests). All 37 state estimates are flagged reliable."
       },
       {
         "measure": "seeing_3plus",
@@ -67,9 +68,10 @@
         "n_review": 4,
         "n_unreliable": 0,
         "n_zero_estimate": 0,
+        "n_imprecise": 4,
         "median_cv_nonzero": 0.25,
         "p_bh": 0.25142857,
-        "sentence": "Difficulty seeing among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.03, permutation p = 0.220; adjusted p = 0.251 across 8 tests). 4 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+        "sentence": "Difficulty seeing among adults 18+ shows no geographic pattern that survives correction for multiple tests across Nigeria's states (Moran's I = 0.03, one-sided permutation p = 0.220, testing for positive clustering only; adjusted p = 0.251 across 8 tests). 4 of the 37 state estimates are flagged for review; the rest are reliable."
       },
       {
         "measure": "hearing_3plus",
@@ -84,9 +86,10 @@
         "n_review": 21,
         "n_unreliable": 0,
         "n_zero_estimate": 0,
+        "n_imprecise": 21,
         "median_cv_nonzero": 0.43605412,
         "p_bh": 0.06746667,
-        "sentence": "Difficulty hearing among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.20, permutation p = 0.025; adjusted p = 0.067 across 8 tests). The uncorrected p-value is below 0.05, but not after correcting for multiple tests. 21 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+        "sentence": "Difficulty hearing among adults 18+ shows no geographic pattern that survives correction for multiple tests across Nigeria's states (Moran's I = 0.20, one-sided permutation p = 0.025, testing for positive clustering only; adjusted p = 0.067 across 8 tests). The uncorrected p-value is below 0.05, but not after correcting for multiple tests. 21 of the 37 state estimates are imprecise (flagged for review, or zero), and noisy estimates pull I towards 0, so a weak result is not evidence of no pattern."
       },
       {
         "measure": "walking_3plus",
@@ -101,9 +104,10 @@
         "n_review": 2,
         "n_unreliable": 0,
         "n_zero_estimate": 0,
+        "n_imprecise": 2,
         "median_cv_nonzero": 0.21059837,
         "p_bh": 0.06746667,
-        "sentence": "Difficulty walking or climbing steps among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.20, permutation p = 0.020; adjusted p = 0.067 across 8 tests). The uncorrected p-value is below 0.05, but not after correcting for multiple tests. 2 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+        "sentence": "Difficulty walking or climbing steps among adults 18+ shows no geographic pattern that survives correction for multiple tests across Nigeria's states (Moran's I = 0.20, one-sided permutation p = 0.020, testing for positive clustering only; adjusted p = 0.067 across 8 tests). The uncorrected p-value is below 0.05, but not after correcting for multiple tests. 2 of the 37 state estimates are flagged for review; the rest are reliable."
       },
       {
         "measure": "cognition_3plus",
@@ -118,9 +122,10 @@
         "n_review": 25,
         "n_unreliable": 0,
         "n_zero_estimate": 1,
+        "n_imprecise": 25,
         "median_cv_nonzero": 0.50082353,
         "p_bh": 0.082,
-        "sentence": "Difficulty remembering or concentrating among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.14, permutation p = 0.041; adjusted p = 0.082 across 8 tests). The uncorrected p-value is below 0.05, but not after correcting for multiple tests. 25 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+        "sentence": "Difficulty remembering or concentrating among adults 18+ shows no geographic pattern that survives correction for multiple tests across Nigeria's states (Moran's I = 0.14, one-sided permutation p = 0.041, testing for positive clustering only; adjusted p = 0.082 across 8 tests). The uncorrected p-value is below 0.05, but not after correcting for multiple tests. 25 of the 37 state estimates are imprecise (flagged for review, or zero), and noisy estimates pull I towards 0, so a weak result is not evidence of no pattern."
       },
       {
         "measure": "selfcare_3plus",
@@ -135,9 +140,10 @@
         "n_review": 20,
         "n_unreliable": 0,
         "n_zero_estimate": 0,
+        "n_imprecise": 20,
         "median_cv_nonzero": 0.39046027,
         "p_bh": 0.1052,
-        "sentence": "Difficulty with self-care among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.10, permutation p = 0.079; adjusted p = 0.105 across 8 tests). 20 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+        "sentence": "Difficulty with self-care among adults 18+ shows no geographic pattern that survives correction for multiple tests across Nigeria's states (Moran's I = 0.10, one-sided permutation p = 0.079, testing for positive clustering only; adjusted p = 0.105 across 8 tests). 20 of the 37 state estimates are imprecise (flagged for review, or zero), and noisy estimates pull I towards 0, so a weak result is not evidence of no pattern."
       },
       {
         "measure": "communication_3plus",
@@ -152,9 +158,10 @@
         "n_review": 28,
         "n_unreliable": 0,
         "n_zero_estimate": 1,
+        "n_imprecise": 28,
         "median_cv_nonzero": 0.5000067,
         "p_bh": 0.06746667,
-        "sentence": "Difficulty communicating among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.27, permutation p = 0.009; adjusted p = 0.067 across 8 tests). The uncorrected p-value is below 0.05, but not after correcting for multiple tests. 28 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+        "sentence": "Difficulty communicating among adults 18+ shows no geographic pattern that survives correction for multiple tests across Nigeria's states (Moran's I = 0.27, one-sided permutation p = 0.009, testing for positive clustering only; adjusted p = 0.067 across 8 tests). The uncorrected p-value is below 0.05, but not after correcting for multiple tests. 28 of the 37 state estimates are imprecise (flagged for review, or zero), and noisy estimates pull I towards 0, so a weak result is not evidence of no pattern."
       },
       {
         "measure": "disability3",
@@ -169,9 +176,10 @@
         "n_review": 23,
         "n_unreliable": 0,
         "n_zero_estimate": 0,
+        "n_imprecise": 23,
         "median_cv_nonzero": 0.42379928,
         "p_bh": 0.3619,
-        "sentence": "Disability among children 5-17 (secondary analysis) shows no clear geographic clustering across Nigeria's states (Moran's I = -0.02, permutation p = 0.362; adjusted p = 0.362 across 8 tests). 23 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+        "sentence": "Disability among children 5-17 (secondary analysis) shows no geographic pattern that survives correction for multiple tests across Nigeria's states (Moran's I = -0.02, one-sided permutation p = 0.362, testing for positive clustering only; adjusted p = 0.362 across 8 tests). 23 of the 37 state estimates are imprecise (flagged for review, or zero), and noisy estimates pull I towards 0, so a weak result is not evidence of no pattern."
       }
     ]
   },
@@ -189,7 +197,7 @@
       "Not significant": 37
     },
     "significant_states": [],
-    "sentence": "Exploratory: no state is a significant local hotspot or coldspot of disability among adults 18+ after correcting for 37 tests (false discovery rate 0.05)."
+    "sentence": "Exploratory: no state is a significant local hotspot or coldspot of disability among adults 18+ after correcting for 37 tests (false discovery rate 0.05). With only 37 states, local tests have low power, so this does not rule out local patterns."
   },
   "clusters": {
     "descriptive": true,
@@ -266,7 +274,7 @@
         }
       }
     ],
-    "sentence": "Descriptive only: grouping states by their six-domain disability profile (adults 18+) gives 2 groups (Ward clustering, best mean silhouette 0.56 of k = 2-6): group 1 (7 states: NG-AB, NG-AD, NG-BE, NG-EN, NG-IM, NG-KN, NG-TA) is above the state average in 6 of 6 domains; group 2 (30 states: NG-AK, NG-AN, NG-BA, NG-BO, NG-BY, NG-CR, NG-DE, NG-EB, NG-ED, NG-EK, NG-FC, NG-GO, NG-JI, NG-KD, NG-KE, NG-KO, NG-KT, NG-KW, NG-LA, NG-NA, NG-NI, NG-OG, NG-ON, NG-OS, NG-OY, NG-PL, NG-RI, NG-SO, NG-YO, NG-ZA) is above the state average in 0 of 6 domains. Many single-domain estimates are flagged for review, so the groups are rough and carry no inference."
+    "sentence": "Descriptive only: grouping states by their six-domain disability profile (adults 18+) gives 2 groups (Ward clustering, best mean silhouette 0.56 of k = 2-6): group 1 (7 states: Abia, Adamawa, Benue, Enugu, Imo, Kano, Taraba) is, on average, above the state average in every domain; group 2 (30 states: Akwa Ibom, Anambra, Bauchi, Borno, Bayelsa, Cross River, Delta, Ebonyi, Edo, Ekiti, Federal Capital Territory, Gombe, Jigawa, Kaduna, Kebbi, Kogi, Katsina, Kwara, Lagos, Nasarawa, Niger, Ogun, Ondo, Osun, Oyo, Plateau, Rivers, Sokoto, Yobe, Zamfara) is, on average, below the state average in every domain. Here the state average is the unweighted mean of the 37 state estimates, not the national figure. The split mostly reflects the overall level of reported difficulty, not a different mix of difficulties. It is driven by a few high-prevalence states: Taraba, Enugu, Abia and Benue each have at least one domain 2.5 or more standard deviations above the state average (up to 4.9). Many single-domain estimates are flagged for review, so the groups are rough and carry no inference."
   },
   "services": {
     "measure": "disability3",
@@ -278,6 +286,7 @@
     "nsim": 9999,
     "seed": 20261028,
     "facilities_total": 51022,
+    "facilities_ownership_unknown": 4626,
     "facilities_per_100k": {
       "min": 10.3849,
       "median": 21.9299,
@@ -285,7 +294,7 @@
       "min_state": "NG-RI",
       "max_state": "NG-NA"
     },
-    "caveats": ["Ecological association between state averages: no causal claim and no inference about individuals.", "General health facilities are not disability services; the count says nothing about rehabilitation, assistive technology or accessibility.", "GRID3 v2.0 is non-exhaustive and not validated by government; private facilities in particular may be under-counted."],
-    "sentence": "Ecological and descriptive: across the 37 states, health facilities per 100,000 people and adult disability prevalence have a Spearman correlation of 0.29 (permutation p = 0.078). This compares state averages only; it says nothing about individuals or causes, and general health facilities are not disability services."
+    "caveats": ["Ecological association between state averages: no causal claim and no inference about individuals.", "General health facilities are not disability services; the count says nothing about rehabilitation, assistive technology or accessibility.", "GRID3 v2.0 is non-exhaustive and not validated by government; private facilities in particular may be under-counted.", "4,626 of the 51,022 facilities have Unknown ownership in the source.", "The supply rate uses total population (all ages), while prevalence is for adults 18+; states with younger populations have more adults per facility than the all-ages rate suggests."],
+    "sentence": "Ecological and descriptive: across the 37 states, health facilities per 100,000 people (all ages) and disability prevalence among adults 18+ have a Spearman correlation of 0.29 (two-sided permutation p = 0.078). This compares state averages only; it says nothing about individuals or causes, and general health facilities are not disability services. The facility list is incomplete and 4,626 of its 51,022 facilities have unknown ownership."
   }
 }

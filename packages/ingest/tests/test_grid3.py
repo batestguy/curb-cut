@@ -38,6 +38,7 @@ def test_aggregate_counts_and_rate() -> None:
     abia = rows["Abia"]
     assert (abia["facilities"], abia["facilities_public"], abia["facilities_primary"]) == (3, 2, 1)
     assert abia["facilities_secondary_tertiary"] == 1
+    assert abia["facilities_ownership_unknown"] == 1
     assert abia["facilities_per_100k"] == 3.0
 
 
@@ -68,9 +69,10 @@ def test_committed_output() -> None:
         assert int(r["population_2023"]) == population[r["state"]]
         n = int(r["facilities"])
         assert n > 0
-        assert int(r["facilities_public"]) <= n
+        assert int(r["facilities_public"]) + int(r["facilities_ownership_unknown"]) <= n
         assert int(r["facilities_primary"]) + int(r["facilities_secondary_tertiary"]) <= n
         assert float(r["facilities_per_100k"]) == pytest.approx(
             n / int(r["population_2023"]) * 1e5, abs=1e-4
         )
     assert sum(int(r["facilities"]) for r in rows) == 51_022  # GRID3 v2.0 record count (D57)
+    assert sum(int(r["facilities_ownership_unknown"]) for r in rows) == 4_626
