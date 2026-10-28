@@ -58,3 +58,13 @@ As set out in `PLAN.md` P4a step 2:
 - **MSE**: parametric bootstrap, B = 1,000, with a fixed seed.
 - **Spatial FH**: `sae::eblupSFH` with row-standardised queen contiguity from the geoBoundaries polygons, compared with plain FH on analytic MSE on the arcsine scale.
 - The published diagnostics.
+
+## Result (2026-10-28, after the fit)
+
+Everything above this section was written before any model was fitted. Run: `uv run python -I -m curbcut_ingest.sae`. Outputs are in `data/public/sae/`.
+
+- **Selection.** The intercept-only model has BIC −97.3. The lowest BIC is −97.6, for urban share + literacy (C2 + C4). The two are within 2 points, so under the tie rule the intercept-only model ranks first. **The covariates add no predictive value.** The full table is in `fh_model_selection.csv`.
+- **Diagnostics.** **No model passes.** All 26 fail Shapiro-Wilk on the standardised residuals: the largest p is 0.032. The cause is two states far above the rest: Taraba at 11.3% (standardised residual 2.9) and Abia at 10.6% (2.7). The large-state test passes for every model: no model estimate falls outside any large state's direct 95% interval. The record is in `fh_diagnostics_failed.json`.
+- **FH would change almost nothing anyway.** For the top-ranked model, the shrinkage factor γ runs from 0.93 to 0.96: the states differ far more than sampling error can account for, so each model estimate stays within a few percent of the direct one. The median analytic MSE on the arcsine scale is 0.96 of the smoothed sampling variance and **1.09 of the direct variance**, so there is no precision gain. The GVF explains only 10% of the variation in the direct variances (R² 0.10), because unweighted sample size varies little between states.
+- **Decision (author, 2026-10-28):** the pre-declared rule didn't say what to do if every model failed. The author chose to make **the direct estimates the headline**. The FH attempt is published as a result: candidates, BIC table, failed diagnostics and shrinkage. No model was amended after the failure; the log-scale and robust alternatives were considered and not run. The spatial FH comparison is dropped with it. The step 3 spatial analysis (Moran's I, LISA) runs on the direct estimates.
+- **What the site says:** model-based small-area estimates were tried and add nothing here. The states differ far more than the survey's sampling error, and the direct estimates are already reliable in all 37 states (CV 10–27%).

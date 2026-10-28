@@ -169,8 +169,26 @@ main <- function(spec_path) {
   if (is.null(chosen)) {
     dir.create(spec$out_dir, showWarnings = FALSE, recursive = TRUE)
     write_csv_lf(table, file.path(spec$out_dir, "fh_model_selection.csv"))
-    write_json_lf(tried, file.path(spec$out_dir, "fh_diagnostics_failed.json"))
-    stop("no model passed the diagnostics")
+    # How much FH would change anything: shrinkage and analytic MSE of the top-ranked model.
+    top <- tried[[1]]$terms
+    top_terms <- if (top == "(intercept only)") character(0) else paste0("z_", strsplit(top, " + ", fixed = TRUE)[[1]])
+    top_fit <- fit_fh(model_formula(top_terms), data, "REML")
+    gamma <- top_fit$fit$refvar / (top_fit$fit$refvar + data$psi)
+    mse <- mseFH(model_formula(top_terms), vardir = psi, method = "REML", data = data)$mse
+    failed <- list(
+      rule = "Shapiro-Wilk p >= 0.05 and at most 2 of the 12 largest-n states outside their direct 95% CI",
+      top_model = top,
+      gvf_r2 = summary(gvf)$r.squared,
+      top_model_gamma = list(min = min(gamma), median = median(gamma), max = max(gamma)),
+      top_model_mse_over_psi_median = median(mse / data$psi),
+      top_model_mse_over_direct_var_median = median(mse / data$var_direct),
+      models = tried
+    )
+    write_json_lf(failed, file.path(spec$out_dir, "fh_diagnostics_failed.json"))
+    # A recorded outcome, not a crash: the author decided on 2026-10-28 that the direct
+    # estimates stay the headline when no model passes (docs/fay-herriot-covariates.md).
+    cat("fay_herriot: no model passed the diagnostics; wrote fh_diagnostics_failed.json\n")
+    return(invisible(NULL))
   }
 
   # 5. Final estimates.
