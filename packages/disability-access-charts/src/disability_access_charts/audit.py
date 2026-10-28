@@ -3,7 +3,9 @@
 :func:`audit` takes one of:
 
 * a chart document from :func:`~disability_access_charts.plots.bar` or
-  :func:`~disability_access_charts.plots.dot` (it has ``plotly`` and ``themes``);
+  :func:`~disability_access_charts.plots.dot` (it has ``plotly`` and ``themes``), or an
+  experimental choropleth document from :func:`disability_access_charts.maps.choropleth`
+  (``meta.chart_type`` is "choropleth"; see :func:`~disability_access_charts.maps.map_checks`);
 * a Plotly figure as a dict (``data`` and ``layout``);
 * a Plotly ``Figure`` (anything with ``to_plotly_json`` or ``to_dict``).
 
@@ -643,13 +645,23 @@ def is_document(obj: Any) -> bool:
     return isinstance(obj, Mapping) and "plotly" in obj and "themes" in obj
 
 
+def is_map_document(obj: Any) -> bool:
+    """An (experimental) choropleth document: no Plotly spec, its own map and themes."""
+    meta = obj.get("meta") if isinstance(obj, Mapping) else None
+    return isinstance(meta, Mapping) and meta.get("chart_type") == "choropleth" and "map" in obj
+
+
 def audit(fig: Any, *, alt_text: str | None = None, has_table: bool = False) -> dict[str, Any]:
     """Audit a chart document or a Plotly figure (see the module docstring).
 
     For a plain figure, pass its ``alt_text`` and say whether the page shows the data in
     a table (``has_table``); a chart document carries both.
     """
-    if is_document(fig):
+    if is_map_document(fig):
+        from disability_access_charts.maps import map_checks  # experimental; imports audit
+
+        checks = map_checks(fig, alt_text)
+    elif is_document(fig):
         checks = _audit_document(fig, alt_text)
     else:
         figure = _figure_dict(fig)
