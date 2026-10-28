@@ -2,7 +2,7 @@
 
 `state_covariates.csv` holds the state-level covariates frozen in `docs/fay-herriot-covariates.md` (approved by the author on 2026-10-28, before any model was fitted), one row per state (36 + FCT). Values are raw, not standardised. They were built without looking at any disability figure: nothing here was joined, correlated or plotted against the outcome.
 
-**C4 (literacy of women 15–24) is not in the file.** The MICS6 2021 report has no state table for that age group (see C4 below and `docs/verification.md` D53). It waits on the author's decision.
+C4 is literacy of **women 15–49**, not 15–24 as first listed: MICS publishes 15–24 only nationally, and the author approved the change on 2026-10-28, before any fit (see C4 below and `docs/verification.md` D53).
 
 Built on 2026-10-28 by `uv run python -I -m curbcut_ingest.covariates` (`packages/ingest/src/curbcut_ingest/covariates.py`), which reads the downloaded files from the git-ignored `data/sources/covariates/`, checks each against `source_sha256.txt`, and refuses to write if any check fails. `manifest.json` records the build checks.
 
@@ -14,6 +14,7 @@ Built on 2026-10-28 by `uv run python -I -m curbcut_ingest.covariates` (`package
 | `c1_share_60plus` | **C1.** Share of the 2020 population aged 60+ (WorldPop) |
 | `c2_urban_share` | **C2.** Share of the 2020 GHS-POP population in GHS-SMOD classes 21–30 |
 | `c3_mpi_headcount` | **C3.** MPI incidence H as a proportion (NBS MPI 2022, Table D6) |
+| `c4_female_literacy` | **C4.** Share of women 15–49 who are literate (MICS6 2021, Table SR.6.1W) |
 | `c5_log_density` | **C5.** ln(`population_2023` / `area_km2`), people per km² |
 | `population_2023` | NBS Demographic Bulletin 2023 Annex 3 total (seed `state_facts`, `docs/verification.md` D14); input to C5 |
 | `area_km2` | Area of the geoBoundaries ADM1 polygon in EPSG:6933; input to C5 |
@@ -48,23 +49,28 @@ Built on 2026-10-28 by `uv run python -I -m curbcut_ingest.covariates` (`package
 
 - NBS, *Nigeria Multidimensional Poverty Index (2022)* (survey November 2021 – February 2022), **Table D6 "Multidimensional poverty by State (Nigeria MPI)"**, printed pp. 100–101 (PDF pp. 122–123). PDF from the OPHI mirror: https://ophi.org.uk/sites/default/files/2024-05/Nigeria_MPI_2022_report.pdf (linked from https://ophi.org.uk/node/3733), 184 pages, SHA-256 `0fcfe91740781bbd0f4755fc08e24a7c69c5d65c3dd1ee181e362eac67a02111`. Figures are cited; the PDF is not redistributed.
 - `nbs_mpi2022_table_d6.csv` is the full table as printed (MPI, H and A with their 95% confidence intervals, population share, number of poor), with the PDF page of each row. State labels are as printed ("FCT Abuja" matches through the alias seed).
-- **Hand validation:** both pages were rendered (pypdfium2, not committed) and every row of the CSV was compared by eye with the rendered table on 2026-10-28: 37 of 37 state labels and their H values matched. The script also checks that MPI = H × A for every row (within rounding), that every value lies inside its confidence interval, that Ondo (27.2%) and Sokoto (90.5%) are the lowest and highest, as in the press release, and that the population-share-weighted mean of H is within 1 point of the national 62.9% (Table D4, printed p. 99).
+- **Hand validation:** both pages were rendered (pypdfium2, not committed) and compared with the CSV by eye on 2026-10-28. An independent review then found every value of all 37 rows in the PDF text layer of those pages. The script also checks that MPI = H × A for every row (within rounding), that every value lies inside its confidence interval, that Ondo (27.2%) and Sokoto (90.5%) are the lowest and highest, as in the press release, and that the population-share-weighted mean of H is within 1 point of the national 62.9% (Table D4, printed p. 99).
 - The report notes that results are representative at state level for every state except Borno.
 
 ### C5: population density (D54)
 
 - Population: NBS Demographic Bulletin 2023, Annex 3, 2023 projection (seed `state_facts.population_2023`, D14).
-- Area: the committed geoBoundaries ADM1 polygons (simplified file, D11, CC BY 4.0) reprojected to EPSG:6933 (equal area) with GDAL, then the planar area of each polygon. The 37 areas sum to 912,729 km². Areas come from the simplified boundaries, so each is approximate; no official state-area table was found.
+- Area: the committed geoBoundaries ADM1 polygons (simplified file, D11; CC BY 4.0; Runfola et al. 2020, "geoBoundaries: A global database of political administrative boundaries", PLoS ONE 15(4): e0231866; boundaries from GRID3, 2022; attribution in `data/public/geoboundaries/README.md`) reprojected to EPSG:6933 (equal area) with GDAL, then the planar area of each polygon. The 37 areas sum to 912,729 km². Areas come from the simplified boundaries, so each is approximate; no official state-area table was found.
 - Lagos is the densest state (ln density 8.20, about 3,640 people per km²) and Taraba the least dense (4.14).
 
-### C4: literacy of women 15–24 (D53), not built
+### C4: literacy of women 15–49 (D53)
 
-The MICS6 2021 Survey Findings Report (NBS/UNICEF, August 2022) was obtained from UNICEF Nigeria (https://www.unicef.org/nigeria/media/6316/file/2021%20MICS%20full%20report%20.pdf, 804 pages, SHA-256 `a09c74cb7f7c7439297b56626a206824aacc4add4db8686b1c3291399a42cf23`) because the MICS S3 link returns 403. Its only state literacy table is **Table SR.6.1W "Literacy (women)"**, printed p. 46 (PDF p. 61), which covers **women aged 15–49**. The 15–24 rate (MICS indicator SR.2) is printed only nationally (50.5%, Table SR.6.1W, printed p. 45). The covariate as frozen can therefore not be read from MICS, and no other source has been substituted.
+- NBS/UNICEF, *Nigeria Multiple Indicator Cluster Survey 2021 (MICS6), Survey Findings Report* (August 2022), **Table SR.6.1W "Literacy (women)" (continued), printed p. 46 (PDF p. 61)**: total percentage literate among women aged 15–49, by state. Obtained from UNICEF Nigeria (https://www.unicef.org/nigeria/media/6316/file/2021%20MICS%20full%20report%20.pdf, 804 pages, SHA-256 `a09c74cb7f7c7439297b56626a206824aacc4add4db8686b1c3291399a42cf23`), because the MICS S3 link returns 403. Figures are cited; the PDF is not redistributed. Women who attended higher or tertiary school count as literate without a test; the others read a sentence aloud.
+- **Change from the frozen list, approved by the author on 2026-10-28.** The list named women aged **15–24** (MICS indicator SR.2), but MICS publishes that rate only nationally (50.5%, printed p. 45). The author chose the same table's **15–49** state figures over the pre-declared fallback (NDHS 2024 literacy), because NDHS literacy shares the outcome's sample. The choice was made before any model was fitted.
+- `mics2021_table_sr61w.csv` is the full state block of the table as printed (the distribution by school level and literacy, the total literate and the number of women). The script checks that every row adds to 100 and that the literate columns add to the total literate, within rounding. The page was rendered and compared by eye with the transcription on 2026-10-28.
+- **Borno caveat:** MICS surveyed only 7 LGAs of Borno ("Borno (7 LGAs)"), so its value is not state-representative.
+- Values range from 0.067 (Jigawa) to 0.835 (Imo).
 
 ## Files
 
 - `state_covariates.csv`: the covariates (37 rows).
 - `nbs_mpi2022_table_d6.csv`: transcription of NBS MPI 2022 Table D6.
+- `mics2021_table_sr61w.csv`: transcription of the state rows of MICS6 2021 Table SR.6.1W.
 - `source_sha256.txt`: SHA-256 of every downloaded file (36 WorldPop rasters, 2 GHSL rasters, the MPI and MICS reports and the GHSL Data Package), paths relative to `data/sources/covariates/`.
 - `manifest.json`: build date and checks, written by the script.
 

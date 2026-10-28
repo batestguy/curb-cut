@@ -13,8 +13,11 @@ joined or compared (the selection stays blind until the model is fitted).
 - C3 ``c3_mpi_headcount``: NBS "Nigeria Multidimensional Poverty Index (2022)", Table D6,
   incidence H as a proportion, read from the committed transcription
   ``nbs_mpi2022_table_d6.csv`` and checked here (D52).
-- C4 (literacy of women 15-24) is **not built**: the MICS6 2021 report has no state table
-  for that age group (D53). It waits on the author's decision.
+- C4 ``c4_female_literacy``: Nigeria MICS6 2021, Table SR.6.1W (printed p. 46), total
+  percentage literate among **women 15-49** as a proportion, read from the committed
+  transcription ``mics2021_table_sr61w.csv`` and checked here (D53). The frozen list named
+  women 15-24, which MICS publishes only nationally; the author chose 15-49 on 2026-10-28.
+  MICS covered only 7 LGAs of Borno, so Borno's value is not state-representative.
 - C5 ``c5_log_density``: natural log of NBS 2023 Annex 3 population (seed ``state_facts``)
   per km2 of the geoBoundaries polygon, area computed in EPSG:6933 (D54).
 
@@ -51,6 +54,7 @@ SOURCES = ROOT / "data" / "sources" / "covariates"
 PUBLIC = ROOT / "data" / "public" / "covariates"
 GEOJSON = ROOT / "data" / "public" / "geoboundaries" / "geoBoundaries-NGA-ADM1_simplified.geojson"
 MPI_TABLE = PUBLIC / "nbs_mpi2022_table_d6.csv"
+MICS_TABLE = PUBLIC / "mics2021_table_sr61w.csv"
 OUT_CSV = PUBLIC / "state_covariates.csv"
 OUT_MANIFEST = PUBLIC / "manifest.json"
 
@@ -90,6 +94,7 @@ CSV_COLUMNS = [
     "c1_share_60plus",
     "c2_urban_share",
     "c3_mpi_headcount",
+    "c4_female_literacy",
     "c5_log_density",
     "population_2023",
     "area_km2",
@@ -212,6 +217,45 @@ def check_mpi_table(table: Mapping[str, Mapping[str, float]], states: set[str]) 
     # Population shares are printed to 0.1 point, so the weighted mean is approximate.
     if abs(weighted - MPI_NATIONAL_H) > 1.0:
         raise CovariateError(f"MPI table: share-weighted H {weighted:.1f} far from national")
+
+
+MICS_LITERATE = (
+    "none_literate",
+    "primary_literate",
+    "junior_secondary_literate",
+    "senior_secondary_literate",
+    "higher_tertiary",
+    "missing_literate",
+)
+"""Columns of Table SR.6.1W that add up to the total percentage literate."""
+
+
+def read_mics_table(path: Path, lookup: StateLookup) -> dict[str, dict[str, float]]:
+    """Read the Table SR.6.1W transcription and check it (pure apart from the read; tested)."""
+    with path.open(encoding="utf-8", newline="") as f:
+        rows = list(csv.DictReader(f))
+    table: dict[str, dict[str, float]] = {}
+    for row in rows:
+        # The report labels Borno "Borno (7 LGAs)": only 7 LGAs were surveyed there.
+        state = lookup.resolve(row["state"].removesuffix(" (7 LGAs)")).state
+        if state in table:
+            raise CovariateError(f"MICS table: {state} appears twice")
+        table[state] = {k: float(v) for k, v in row.items() if k != "state"}
+    check_mics_table(table, set(lookup.states))
+    return table
+
+
+def check_mics_table(table: Mapping[str, Mapping[str, float]], states: set[str]) -> None:
+    if set(table) != states:
+        raise CovariateError(f"MICS table: states differ: {sorted(states ^ set(table))}")
+    for state, r in table.items():
+        parts = [v for k, v in r.items() if k not in ("total", "total_literate_pct", "n_women")]
+        # Each cell is printed to 0.1, so a sum of n cells may be off by up to 0.05 n.
+        if abs(sum(parts) - r["total"]) > 0.05 * len(parts) or r["total"] != 100.0:
+            raise CovariateError(f"MICS table: {state}: row does not add to 100")
+        literate = sum(r[k] for k in MICS_LITERATE)
+        if abs(literate - r["total_literate_pct"]) > 0.05 * len(MICS_LITERATE):
+            raise CovariateError(f"MICS table: {state}: literate columns != total literate")
 
 
 # --- geometry ------------------------------------------------------------------
@@ -343,6 +387,7 @@ def assemble(
     ghs_total: np.ndarray,
     ghs_urban: np.ndarray,
     mpi: Mapping[str, Mapping[str, float]],
+    mics: Mapping[str, Mapping[str, float]],
     population: Mapping[str, int],
     area: Mapping[str, float],
 ) -> list[dict[str, Any]]:
@@ -363,6 +408,7 @@ def assemble(
                 "c1_share_60plus": round(aged_60 / total, 6),
                 "c2_urban_share": round(float(ghs_urban[z] / ghs_total[z]), 6),
                 "c3_mpi_headcount": round(mpi[s.state]["h_pct"] / 100, 3),
+                "c4_female_literacy": round(mics[s.state]["total_literate_pct"] / 100, 3),
                 "c5_log_density": round(math.log(population[s.state] / area[s.state]), 6),
                 "population_2023": population[s.state],
                 "area_km2": round(area[s.state], 1),
@@ -378,7 +424,7 @@ def check_rows(rows: Sequence[Mapping[str, Any]]) -> None:
     if len(rows) != 37:
         raise CovariateError(f"expected 37 rows, got {len(rows)}")
     for r in rows:
-        for col in ("c1_share_60plus", "c2_urban_share", "c3_mpi_headcount"):
+        for col in ("c1_share_60plus", "c2_urban_share", "c3_mpi_headcount", "c4_female_literacy"):
             if not 0 <= r[col] <= 1:
                 raise CovariateError(f"{r['state']}: {col} {r[col]} outside [0, 1]")
         if not 0 < r["wp2020_pop_18plus"] < r["wp2020_pop_total"]:
@@ -396,7 +442,7 @@ def write_csv(rows: Iterable[Mapping[str, Any]], path: Path) -> None:
 
 
 def main(argv: Sequence[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Build the FH state covariates (C1-C3, C5).")
+    parser = argparse.ArgumentParser(description="Build the FH state covariates C1-C5.")
     parser.add_argument("--sources", type=Path, default=SOURCES)
     parser.add_argument("--out", type=Path, default=OUT_CSV)
     parser.add_argument("--manifest", type=Path, default=OUT_MANIFEST)
@@ -408,11 +454,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         with GEOJSON.open(encoding="utf-8") as f:
             shapes = load_shapes(json.load(f), lookup)
         mpi = read_mpi_table(MPI_TABLE, lookup)
+        mics = read_mics_table(MICS_TABLE, lookup)
         population = read_population()
         area = areas_km2(shapes)
         wp, wp_totals = worldpop_sums(args.sources, shapes)
         ghs_total, ghs_urban = ghsl_sums(args.sources, shapes)
-        rows = assemble(shapes, wp, ghs_total, ghs_urban, mpi, population, area)
+        rows = assemble(shapes, wp, ghs_total, ghs_urban, mpi, mics, population, area)
     except CovariateError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -426,6 +473,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "ghsl_url": GHSL_URL,
         "mpi_table": MPI_TABLE.name,
         "mpi_table_sha256": sha256(MPI_TABLE),
+        "mics_table": MICS_TABLE.name,
+        "mics_table_sha256": sha256(MICS_TABLE),
         "geoboundaries_sha256": sha256(GEOJSON),
         "checks": {
             "worldpop_raster_total": round(float(wp_totals.sum())),

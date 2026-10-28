@@ -88,7 +88,7 @@ sources:
       built by packages/ingest/src/curbcut_ingest/covariates.py from public sources: C1
       WorldPop 2020 age structures (CC BY 4.0), C2 JRC GHSL R2023A (CC BY 4.0), C3 NBS
       Nigeria MPI 2022 Table D6 (figures cited), C5 NBS 2023 population over geoBoundaries
-      area. C4 is not built yet (docs/verification.md D53). Provenance and hashes are in
+      area, C4 MICS6 2021 Table SR.6.1W literacy of women 15-49 (figures cited). Provenance and hashes are in
       data/public/covariates/README.md and manifest.json.
     tables:
       - name: state_covariates

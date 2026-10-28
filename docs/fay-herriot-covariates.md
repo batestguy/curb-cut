@@ -15,7 +15,7 @@ All covariates are state level and public, and none comes from the NDHS 2024 sam
 | C1 | Share of population aged 60+ | WorldPop, "Nigeria 100m Age structures", constrained, UN-adjusted (Bondarenko et al., doi:10.5258/SOTON/WP00699) | 2020 | CC BY 4.0 (stated on the hub page) | Zonal sums of the age-sex rasters over the geoBoundaries ADM1 polygons: bands 60–80+ for both sexes, divided by all bands | Disability rises steeply with age | D50 |
 | C2 | Urban share of population | JRC GHSL GHS-SMOD R2023A with GHS-POP R2023A (Schiavina et al. 2023) | 2020 epoch | To confirm: the AWS registry says CC BY 4.0, while the JRC page cites Decision 2011/833/EU | Share of GHS-POP in SMOD classes 21–30 (Degree of Urbanisation level 1: towns, semi-dense areas and cities) | Access to care and the type of work differ between urban and rural areas | D51 |
 | C3 | MPI poverty headcount (H) | NBS, "Nigeria Multidimensional Poverty Index (2022)", state table | Survey 2021–22 | NBS terms; cite figures only | Read from the report's state table and checked against the press range (Ondo 27%, Sokoto 91%) | Poverty and disability go together, in both directions | D52 |
-| C4 | Literacy rate, women 15–24 | NBS/UNICEF, Nigeria MICS6 2021 Survey Findings Report, state table | 2021 | Report terms; cite figures only | Read from the report's literacy table | Proxy for education and access to services | D53 |
+| C4 | Literacy rate, women 15–49 (changed from 15–24, see below) | NBS/UNICEF, Nigeria MICS6 2021 Survey Findings Report, state table | 2021 | Report terms; cite figures only | Read from Table SR.6.1W (printed p. 46) | Proxy for education and access to services | D53 |
 | C5 | Population density (log) | NBS 2023 Demographic Bulletin Annex 3 population ÷ land area of the geoBoundaries ADM1 polygons (CC BY 4.0, already committed) | 2023 | NBS: cite figures; geoBoundaries: CC BY 4.0 | Area in an equal-area projection (EPSG:6933), then log(people per km²) | Remoteness and service reach | D54 |
 
 **Fallbacks**, used only if a source above can't be read, and recorded in its D-row:
@@ -33,6 +33,10 @@ All covariates are state level and public, and none comes from the NDHS 2024 sam
 5. The full table goes into the methodology note: every model's BIC, coefficients and the R² of the area-level fit.
 6. If the chosen model fails its diagnostics (residual normality, or direct vs model estimates disagreeing where the samples are large), the next model by BIC is used and the failure is reported.
 7. The covariates are frozen here. None is added or swapped after the outcome is examined. If a source fails, only its listed fallback is used.
+
+## C4 change (2026-10-28, before any fit)
+
+MICS 2021 publishes the literacy of women aged 15–24 only nationally. Its only state table, SR.6.1W, covers women aged **15–49**. The author chose that table over the pre-declared fallback (NDHS 2024 literacy), which shares the outcome's sample. The change was made before any model was fitted and is recorded in `docs/verification.md` D53. MICS covered only 7 LGAs in Borno, so Borno's C4 value isn't state-representative.
 
 ## Technical corrections (2026-10-28, before any fit)
 

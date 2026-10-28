@@ -187,6 +187,13 @@ models:
               arguments:
                 min_value: 0
                 max_value: 1
+      - name: c4_female_literacy
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
       - name: c5_log_density
         data_tests: [not_null]
       - name: area_km2

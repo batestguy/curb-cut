@@ -13,16 +13,21 @@ import pytest
 from curbcut_ingest.covariates import (
     AGES,
     CSV_COLUMNS,
+    MICS_TABLE,
     MPI_TABLE,
     OUT_CSV,
     CovariateError,
     StateShape,
+    areas_km2,
     assemble,
+    check_mics_table,
     check_mpi_table,
     polygon_area,
+    read_mics_table,
     read_mpi_table,
     read_population,
     zonal_sum,
+    zone_grid,
 )
 from curbcut_ingest.states import StateLookup
 
@@ -59,21 +64,23 @@ def test_assemble_on_invented_sums() -> None:
     wp = {f"{sex}_{a}": np.full(n, 100.0) for sex in ("f", "m") for a in AGES}
     ghs_total, ghs_urban = np.full(n, 1000.0), np.full(n, 250.0)
     mpi = {s.state: {"h_pct": 50.0} for s in shapes}
+    mics = {s.state: {"total_literate_pct": 40.0} for s in shapes}
     population = {s.state: 1_000_000 for s in shapes}
     area = {s.state: 10_000.0 for s in shapes}
     area["Lagos"] = 1_000.0
-    rows = assemble(shapes, wp, ghs_total, ghs_urban, mpi, population, area)
+    rows = assemble(shapes, wp, ghs_total, ghs_urban, mpi, mics, population, area)
     first = rows[0]
     assert first["c1_share_60plus"] == round(10 / 36, 6)
     assert first["c2_urban_share"] == 0.25
     assert first["c3_mpi_headcount"] == 0.5
+    assert first["c4_female_literacy"] == 0.4
     assert first["c5_log_density"] == round(math.log(100), 6)
     assert first["wp2020_pop_total"] == 3600
     assert first["wp2020_pop_18plus"] == 2 * (13 * 100 + 40)
     area["Lagos"] = 10_000.0
     area["Kano"] = 500.0
     with pytest.raises(CovariateError, match="densest"):
-        assemble(shapes, wp, ghs_total, ghs_urban, mpi, population, area)
+        assemble(shapes, wp, ghs_total, ghs_urban, mpi, mics, population, area)
 
 
 def test_check_mpi_table_rejects_a_swapped_value() -> None:
@@ -105,7 +112,7 @@ def test_covariates_shape_and_ranges() -> None:
     for r in rows:
         assert all(v != "" for v in r.values()), r["state"]
         assert LOOKUP.states[r["state"]].state_code == r["state_code"]
-        for col in ("c1_share_60plus", "c2_urban_share", "c3_mpi_headcount"):
+        for col in ("c1_share_60plus", "c2_urban_share", "c3_mpi_headcount", "c4_female_literacy"):
             assert 0 <= float(r[col]) <= 1, (r["state"], col)
         # 60+ is about 4-6% nationally; no state should be far outside 2-10%.
         assert 0.02 < float(r["c1_share_60plus"]) < 0.10, r["state"]
@@ -133,3 +140,38 @@ def test_covariates_mpi_matches_transcription() -> None:
     table = read_mpi_table(MPI_TABLE, LOOKUP)
     for r in _committed():
         assert float(r["c3_mpi_headcount"]) == pytest.approx(table[r["state"]]["h_pct"] / 100)
+
+
+def test_covariates_mics_matches_transcription() -> None:
+    table = read_mics_table(MICS_TABLE, LOOKUP)
+    assert len(table) == 37
+    for r in _committed():
+        assert float(r["c4_female_literacy"]) == pytest.approx(
+            table[r["state"]]["total_literate_pct"] / 100
+        )
+
+
+def test_mics_table_rejects_a_bad_row() -> None:
+    table = read_mics_table(MICS_TABLE, LOOKUP)
+    broken = {s: dict(r) for s, r in table.items()}
+    broken["Kano"]["total_literate_pct"] += 5
+    with pytest.raises(CovariateError, match="Kano"):
+        check_mics_table(broken, set(LOOKUP.states))
+
+
+def test_zone_grid_assigns_cells_by_centre() -> None:
+    from rasterio.transform import from_origin
+
+    # A 4 x 4 grid of 1-degree cells from (0, 4) to (4, 0); the square covers x 1-3, y 1-3,
+    # so exactly the four central cell centres fall inside it.
+    square = {"type": "Polygon", "coordinates": [[[1, 1], [3, 1], [3, 3], [1, 3], [1, 1]]]}
+    shapes = [StateShape("Lagos", "NG-LA", square)]
+    zones = zone_grid(shapes, "EPSG:4326", from_origin(0, 4, 1, 1), (4, 4))
+    assert zones.tolist() == [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]
+
+
+def test_areas_km2_equal_area_at_the_equator() -> None:
+    # A 1 x 1 degree square at the equator is about 12,309 km2 on the WGS 84 ellipsoid.
+    square = {"type": "Polygon", "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 1], [0, 0]]]}
+    area = areas_km2([StateShape("Lagos", "NG-LA", square)])["Lagos"]
+    assert area == pytest.approx(12_309, rel=0.005)
