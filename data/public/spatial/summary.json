@@ -1,0 +1,291 @@
+{
+  "source": "DHS 2024 direct state estimates (data/public/aggregates/dhs2024_state.csv), sex = all, breakdown = all",
+  "note": "Fay-Herriot failed its pre-declared diagnostics (docs/verification.md D56); every result here uses the direct estimates. No spatial method is run on JONAPWD (D17).",
+  "seed": 20261028,
+  "nsim": 9999,
+  "neighbours": {
+    "snap": "default (sqrt of machine epsilon)",
+    "min_neighbours": 1,
+    "max_neighbours": 10,
+    "links": 172,
+    "symmetric": true,
+    "known_pairs": [
+      {
+        "a": "NG-LA",
+        "b": "NG-OG",
+        "adjacent": true
+      },
+      {
+        "a": "NG-KN",
+        "b": "NG-JI",
+        "adjacent": true
+      },
+      {
+        "a": "NG-FC",
+        "b": "NG-NI",
+        "adjacent": true
+      },
+      {
+        "a": "NG-BO",
+        "b": "NG-YO",
+        "adjacent": true
+      }
+    ]
+  },
+  "moran": {
+    "alternative": "greater (positive spatial autocorrelation)",
+    "multiple_testing": "Benjamini-Hochberg across the 8 tests",
+    "precision_note": "Noisy state estimates add independent error, which biases Moran's I towards 0; results for measures with many review-flagged states are conservative.",
+    "results": [
+      {
+        "measure": "disability3",
+        "age_group": "18+",
+        "role": "primary",
+        "moran_i": 0.12788828,
+        "expected_i": -0.02777778,
+        "p_perm": 0.0713,
+        "nsim": 9999,
+        "n_states": 37,
+        "n_reliable": 37,
+        "n_review": 0,
+        "n_unreliable": 0,
+        "n_zero_estimate": 0,
+        "median_cv_nonzero": 0.1559938,
+        "p_bh": 0.1052,
+        "sentence": "Disability among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.13, permutation p = 0.071; adjusted p = 0.105 across 8 tests). All 37 state estimates are flagged reliable."
+      },
+      {
+        "measure": "seeing_3plus",
+        "age_group": "18+",
+        "role": "domain",
+        "moran_i": 0.0349274,
+        "expected_i": -0.02777778,
+        "p_perm": 0.22,
+        "nsim": 9999,
+        "n_states": 37,
+        "n_reliable": 33,
+        "n_review": 4,
+        "n_unreliable": 0,
+        "n_zero_estimate": 0,
+        "median_cv_nonzero": 0.25,
+        "p_bh": 0.25142857,
+        "sentence": "Difficulty seeing among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.03, permutation p = 0.220; adjusted p = 0.251 across 8 tests). 4 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+      },
+      {
+        "measure": "hearing_3plus",
+        "age_group": "18+",
+        "role": "domain",
+        "moran_i": 0.19759759,
+        "expected_i": -0.02777778,
+        "p_perm": 0.0253,
+        "nsim": 9999,
+        "n_states": 37,
+        "n_reliable": 16,
+        "n_review": 21,
+        "n_unreliable": 0,
+        "n_zero_estimate": 0,
+        "median_cv_nonzero": 0.43605412,
+        "p_bh": 0.06746667,
+        "sentence": "Difficulty hearing among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.20, permutation p = 0.025; adjusted p = 0.067 across 8 tests). The uncorrected p-value is below 0.05, but not after correcting for multiple tests. 21 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+      },
+      {
+        "measure": "walking_3plus",
+        "age_group": "18+",
+        "role": "domain",
+        "moran_i": 0.20004847,
+        "expected_i": -0.02777778,
+        "p_perm": 0.0205,
+        "nsim": 9999,
+        "n_states": 37,
+        "n_reliable": 35,
+        "n_review": 2,
+        "n_unreliable": 0,
+        "n_zero_estimate": 0,
+        "median_cv_nonzero": 0.21059837,
+        "p_bh": 0.06746667,
+        "sentence": "Difficulty walking or climbing steps among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.20, permutation p = 0.020; adjusted p = 0.067 across 8 tests). The uncorrected p-value is below 0.05, but not after correcting for multiple tests. 2 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+      },
+      {
+        "measure": "cognition_3plus",
+        "age_group": "18+",
+        "role": "domain",
+        "moran_i": 0.13653072,
+        "expected_i": -0.02777778,
+        "p_perm": 0.041,
+        "nsim": 9999,
+        "n_states": 37,
+        "n_reliable": 12,
+        "n_review": 25,
+        "n_unreliable": 0,
+        "n_zero_estimate": 1,
+        "median_cv_nonzero": 0.50082353,
+        "p_bh": 0.082,
+        "sentence": "Difficulty remembering or concentrating among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.14, permutation p = 0.041; adjusted p = 0.082 across 8 tests). The uncorrected p-value is below 0.05, but not after correcting for multiple tests. 25 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+      },
+      {
+        "measure": "selfcare_3plus",
+        "age_group": "18+",
+        "role": "domain",
+        "moran_i": 0.10269124,
+        "expected_i": -0.02777778,
+        "p_perm": 0.0789,
+        "nsim": 9999,
+        "n_states": 37,
+        "n_reliable": 17,
+        "n_review": 20,
+        "n_unreliable": 0,
+        "n_zero_estimate": 0,
+        "median_cv_nonzero": 0.39046027,
+        "p_bh": 0.1052,
+        "sentence": "Difficulty with self-care among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.10, permutation p = 0.079; adjusted p = 0.105 across 8 tests). 20 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+      },
+      {
+        "measure": "communication_3plus",
+        "age_group": "18+",
+        "role": "domain",
+        "moran_i": 0.26501784,
+        "expected_i": -0.02777778,
+        "p_perm": 0.009,
+        "nsim": 9999,
+        "n_states": 37,
+        "n_reliable": 9,
+        "n_review": 28,
+        "n_unreliable": 0,
+        "n_zero_estimate": 1,
+        "median_cv_nonzero": 0.5000067,
+        "p_bh": 0.06746667,
+        "sentence": "Difficulty communicating among adults 18+ shows no clear geographic clustering across Nigeria's states (Moran's I = 0.27, permutation p = 0.009; adjusted p = 0.067 across 8 tests). The uncorrected p-value is below 0.05, but not after correcting for multiple tests. 28 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+      },
+      {
+        "measure": "disability3",
+        "age_group": "5-17",
+        "role": "secondary",
+        "moran_i": -0.01726493,
+        "expected_i": -0.02777778,
+        "p_perm": 0.3619,
+        "nsim": 9999,
+        "n_states": 37,
+        "n_reliable": 14,
+        "n_review": 23,
+        "n_unreliable": 0,
+        "n_zero_estimate": 0,
+        "median_cv_nonzero": 0.42379928,
+        "p_bh": 0.3619,
+        "sentence": "Disability among children 5-17 (secondary analysis) shows no clear geographic clustering across Nigeria's states (Moran's I = -0.02, permutation p = 0.362; adjusted p = 0.362 across 8 tests). 23 of the 37 state estimates are flagged for review (few events), which pulls I towards 0, so a weak result is not evidence of no pattern."
+      }
+    ]
+  },
+  "lisa": {
+    "exploratory": true,
+    "measure": "disability3",
+    "age_group": "18+",
+    "alternative": "two-sided, conditional permutation",
+    "fdr_q": 0.05,
+    "classes": {
+      "High-High": 0,
+      "Low-Low": 0,
+      "High-Low": 0,
+      "Low-High": 0,
+      "Not significant": 37
+    },
+    "significant_states": [],
+    "sentence": "Exploratory: no state is a significant local hotspot or coldspot of disability among adults 18+ after correcting for 37 tests (false discovery rate 0.05)."
+  },
+  "clusters": {
+    "descriptive": true,
+    "method": "Ward.D2 on Euclidean distance of standardised 18+ domain prevalences",
+    "k": 2,
+    "silhouette": [
+      {
+        "k": 2,
+        "mean_silhouette": 0.55744261,
+        "chosen": true
+      },
+      {
+        "k": 3,
+        "mean_silhouette": 0.53497829,
+        "chosen": false
+      },
+      {
+        "k": 4,
+        "mean_silhouette": 0.50506883,
+        "chosen": false
+      },
+      {
+        "k": 5,
+        "mean_silhouette": 0.27654282,
+        "chosen": false
+      },
+      {
+        "k": 6,
+        "mean_silhouette": 0.29231622,
+        "chosen": false
+      }
+    ],
+    "profiles": [
+      {
+        "cluster": 1,
+        "n_states": 7,
+        "states": ["NG-AB", "NG-AD", "NG-BE", "NG-EN", "NG-IM", "NG-KN", "NG-TA"],
+        "mean_prevalence": {
+          "seeing_3plus": 0.02795071,
+          "hearing_3plus": 0.00936843,
+          "walking_3plus": 0.03434886,
+          "cognition_3plus": 0.01184243,
+          "selfcare_3plus": 0.00928614,
+          "communication_3plus": 0.00659057
+        },
+        "mean_z": {
+          "seeing_3plus": 1.2628577,
+          "hearing_3plus": 1.54589927,
+          "walking_3plus": 1.51684225,
+          "cognition_3plus": 1.38931896,
+          "selfcare_3plus": 1.23629349,
+          "communication_3plus": 1.54337655
+        }
+      },
+      {
+        "cluster": 2,
+        "n_states": 30,
+        "states": ["NG-AK", "NG-AN", "NG-BA", "NG-BO", "NG-BY", "NG-CR", "NG-DE", "NG-EB", "NG-ED", "NG-EK", "NG-FC", "NG-GO", "NG-JI", "NG-KD", "NG-KE", "NG-KO", "NG-KT", "NG-KW", "NG-LA", "NG-NA", "NG-NI", "NG-OG", "NG-ON", "NG-OS", "NG-OY", "NG-PL", "NG-RI", "NG-SO", "NG-YO", "NG-ZA"],
+        "mean_prevalence": {
+          "seeing_3plus": 0.0099506,
+          "hearing_3plus": 0.00310627,
+          "walking_3plus": 0.01103633,
+          "cognition_3plus": 0.00201727,
+          "selfcare_3plus": 0.0033325,
+          "communication_3plus": 0.001857
+        },
+        "mean_z": {
+          "seeing_3plus": -0.2946668,
+          "hearing_3plus": -0.36070983,
+          "walking_3plus": -0.35392986,
+          "cognition_3plus": -0.32417442,
+          "selfcare_3plus": -0.28846848,
+          "communication_3plus": -0.36012119
+        }
+      }
+    ],
+    "sentence": "Descriptive only: grouping states by their six-domain disability profile (adults 18+) gives 2 groups (Ward clustering, best mean silhouette 0.56 of k = 2-6): group 1 (7 states: NG-AB, NG-AD, NG-BE, NG-EN, NG-IM, NG-KN, NG-TA) is above the state average in 6 of 6 domains; group 2 (30 states: NG-AK, NG-AN, NG-BA, NG-BO, NG-BY, NG-CR, NG-DE, NG-EB, NG-ED, NG-EK, NG-FC, NG-GO, NG-JI, NG-KD, NG-KE, NG-KO, NG-KT, NG-KW, NG-LA, NG-NA, NG-NI, NG-OG, NG-ON, NG-OS, NG-OY, NG-PL, NG-RI, NG-SO, NG-YO, NG-ZA) is above the state average in 0 of 6 domains. Many single-domain estimates are flagged for review, so the groups are rough and carry no inference."
+  },
+  "services": {
+    "measure": "disability3",
+    "age_group": "18+",
+    "supply": "GRID3 NGA - Health Facilities v2.0, all facilities per 100,000 people (NBS 2023 population)",
+    "n_states": 37,
+    "spearman_rho": 0.29421527,
+    "p_perm_two_sided": 0.0783,
+    "nsim": 9999,
+    "seed": 20261028,
+    "facilities_total": 51022,
+    "facilities_per_100k": {
+      "min": 10.3849,
+      "median": 21.9299,
+      "max": 40.9312,
+      "min_state": "NG-RI",
+      "max_state": "NG-NA"
+    },
+    "caveats": ["Ecological association between state averages: no causal claim and no inference about individuals.", "General health facilities are not disability services; the count says nothing about rehabilitation, assistive technology or accessibility.", "GRID3 v2.0 is non-exhaustive and not validated by government; private facilities in particular may be under-counted."],
+    "sentence": "Ecological and descriptive: across the 37 states, health facilities per 100,000 people and adult disability prevalence have a Spearman correlation of 0.29 (permutation p = 0.078). This compares state averages only; it says nothing about individuals or causes, and general health facilities are not disability services."
+  }
+}
