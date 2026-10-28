@@ -81,3 +81,17 @@ sources:
         description: State totals scaled to the UN WPP July 2025 median (file as published, LF line endings).
         meta:
           external_location: "read_csv('../../data/public/worldpop/states_pop_total_scaled.csv', header = true, all_varchar = true)"
+
+  - name: covariates
+    description: >
+      Fay-Herriot state covariates frozen in docs/fay-herriot-covariates.md (P4a step 2),
+      built by packages/ingest/src/curbcut_ingest/covariates.py from public sources: C1
+      WorldPop 2020 age structures (CC BY 4.0), C2 JRC GHSL R2023A (CC BY 4.0), C3 NBS
+      Nigeria MPI 2022 Table D6 (figures cited), C5 NBS 2023 population over geoBoundaries
+      area. C4 is not built yet (docs/verification.md D53). Provenance and hashes are in
+      data/public/covariates/README.md and manifest.json.
+    tables:
+      - name: state_covariates
+        description: One row per state; raw (unstandardised) covariates plus two WorldPop benchmark-weight columns that are not covariates.
+        meta:
+          external_location: "read_csv('../../data/public/covariates/state_covariates.csv', header = true, all_varchar = true)"
