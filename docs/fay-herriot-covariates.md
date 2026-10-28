@@ -1,6 +1,6 @@
 # Fay-Herriot covariates (P4a step 2)
 
-Written 2026-10-28, **before any model is fitted** (`PLAN.md` → P4a step 2). Nothing below has been looked at against the outcome. This file is the record that the candidate list and the selection rule came first. Status: **draft, awaiting the author's sign-off.**
+Written 2026-10-28, **before any model is fitted** (`PLAN.md` → P4a step 2). Nothing below has been looked at against the outcome. This file is the record that the candidate list and the selection rule came first. Status: **approved by the author on 2026-10-28** (all five covariates and the selection rule, unchanged). The covariates and the rule are frozen as of that date.
 
 ## Outcome
 
