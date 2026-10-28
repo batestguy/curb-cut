@@ -272,8 +272,9 @@ main <- function(spec_path) {
     } else {
       sprintf("above the state average in %d of %d domains", above, n_domains)
     }
+    # Members by name, so a reader can scan the list (the codes stay in ISO order).
     sprintf("group %d (%d states: %s) is, on average, %s",
-      g$cluster, g$n_states, paste(name_of(g$states), collapse = ", "), where)
+      g$cluster, g$n_states, paste(sort(name_of(g$states)), collapse = ", "), where)
   }, character(1)), collapse = "; ")
   zmat <- as.matrix(clusters$members[, paste0("z_", spec$domains)])
   max_z <- apply(zmat, 1, max)

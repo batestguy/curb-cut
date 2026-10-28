@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import csv
 import json
+import re
 from pathlib import Path
 
 import numpy as np
@@ -101,6 +102,10 @@ def test_summary_and_services() -> None:
     assert sum(summary["lisa"]["classes"].values()) == 37
     assert summary["lisa"]["sentence"].startswith("Exploratory")
     assert summary["clusters"]["sentence"].startswith("Descriptive only")
+    # Each group's members are listed by name (alphabetically), not by ISO code.
+    for listed in re.findall(r"\(\d+ states: ([^)]*)\)", summary["clusters"]["sentence"]):
+        names = listed.split(", ")
+        assert names == sorted(names)
     services = json.loads((OUT / "services_vs_need.json").read_text(encoding="utf-8"))
     assert services["n_states"] == 37
     assert -1 <= services["spearman_rho"] <= 1
