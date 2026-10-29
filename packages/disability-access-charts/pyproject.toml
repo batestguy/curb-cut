@@ -1,6 +1,6 @@
 [project]
 name = "disability-access-charts"
-version = "0.1.0"
+version = "0.2.0"
 description = "Built for Curb Cut, an accessible platform for Nigerian disability data: charts that check their own words, with alt-text tested against the data, a CI-ready audit and a data-table fallback"
 readme = "README.md"
 requires-python = ">=3.10"
