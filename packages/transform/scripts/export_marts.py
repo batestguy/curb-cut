@@ -126,9 +126,20 @@ def spatial_payload(con: duckdb.DuckDBPyConnection, summary: dict[str, Any]) -> 
     Cluster members and LISA states get their names and are sorted by name.
     """
     names = dict(con.execute("select state_code, state from dim_states").fetchall())
+    labels = {
+        (measure, age): label
+        for measure, age, label in con.execute(
+            "select measure, age_group, measure_label from mart_spatial_moran"
+        ).fetchall()
+    }
     keep = ("measure", "age_group", "role", "moran_i", "p_perm", "p_bh", "n_imprecise")
     moran = [
-        {**{k: r[k] for k in keep}, "sentence": r["sentence"]} for r in summary["moran"]["results"]
+        {
+            **{k: r[k] for k in keep},
+            "label": labels[(r["measure"], r["age_group"])],
+            "sentence": r["sentence"],
+        }
+        for r in summary["moran"]["results"]
     ]
     groups = [
         {
