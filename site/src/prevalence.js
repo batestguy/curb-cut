@@ -16,7 +16,7 @@ export function renderHeadline(el, prevalence) {
   const n = prevalence.national;
   el.textContent =
     `The DHS 2024 survey estimates that ${pct(100 * n.estimate)} of adults aged 18 and over ` +
-    `in Nigeria (${interval(100 * n.ci_low, 100 * n.ci_high)}) have a lot of difficulty with, ` +
+    `living in households in Nigeria (${interval(100 * n.ci_low, 100 * n.ci_high)}) have a lot of difficulty with, ` +
     'or cannot do at all, at least one of six everyday activities.';
 }
 
