@@ -199,6 +199,7 @@ Detailed plan agreed 2026-10-27 (the author: "use all that will make this a top 
 3. **Spatial analysis** as in the scope list below: queen contiguity from geoBoundaries, Moran's I per domain (permutation p), LISA with FDR control labelled exploratory, profile clustering, and services vs needs with GRID3 v2.0 (licence version confirmed on HDX first) labelled ecological.
 4. **Data out.** `export_marts.py` exports the prevalence marts and the model outputs to `site/public/data/`; dbt tests extend to the new marts (every SAE row has an MSE; states sum to the national benchmark).
 5. **Main page.** The prevalence map (through the chart library; hotspots carry a pattern or outline, never colour alone), the comparison (JONAPWD's 15%, our survey estimates, the NDHS report and the 10–18% grid), and the methodology note (WHO definitions checked against the reports themselves).
+   - **Superseded (2026-10-28, `docs/STATUS.md` decisions log):** the unsourced 10–18% grid was dropped from the comparison, and the map has no hotspot outlines because LISA found no hotspots (D58); the page says so.
 6. **P4a gate:** the map and comparison are live; CI green; the author's keyboard and NVDA check of the new section.
 
 **P4b: chart library 0.2 and state pages**
