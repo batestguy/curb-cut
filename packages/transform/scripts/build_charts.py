@@ -6,10 +6,12 @@ Run after ``export_marts.py``, from the repo root:
 Each chart goes through ``disability_access_charts`` so it carries data-derived alt-text,
 a data table and an accessibility audit. The build fails if any audit fails.
 
-* ``prevalence_map``: DHS 2024 DISABILITY3, adults 18+, by state, in fixed classes, as an
-  experimental choropleth document (``disability_access_charts.maps``) drawn with the same
-  projected paths as the locator map (``build_map.py``);
-* ``prevalence_by_state``: the same 37 estimates with their 95% intervals, as a dot plot;
+* ``prevalence_map``: DHS 2024 DISABILITY3, adults 18+, by state, in fixed classes, as a
+  choropleth document with a pattern per class (``disability_access_charts.choropleth``)
+  drawn with the same projected paths as the locator map (``build_map.py``);
+* ``prevalence_by_state``: the same 37 estimates with their 95% intervals and precision
+  flags, as a dot plot, with the library's statistical findings (each state against the
+  next in the ranking and against the national estimate, false discovery rate 5%);
 * ``national_by_type`` and ``national_by_state``: JONAPWD's assumed figures, as bars.
 """
 
@@ -23,8 +25,7 @@ from pathlib import Path
 from types import ModuleType
 
 import duckdb
-from disability_access_charts import Series, bar, dot
-from disability_access_charts.maps import choropleth
+from disability_access_charts import Reference, Series, bar, choropleth, dot
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DATA = ROOT / "site" / "public" / "data"
@@ -38,6 +39,9 @@ DHS_SOURCE = "Nigeria DHS 2024 (NPC and ICF), Curb Cut estimates"
 MAP_BREAKS = (2, 3, 4, 6)
 
 PREVALENCE_LABEL = "Adults with disability (%)"
+# The overall value each state is compared with in the findings. "Nigeria as a whole" rather
+# than "national estimate": the claim checker reads "estimate" as a hedge word.
+NATIONAL_LABEL = "Nigeria as a whole"
 FLAG_LABELS = {
     "reliable": "Reliable",
     "review": "Review: few events",
@@ -106,6 +110,31 @@ def headline_rows(data_dir: Path) -> list[tuple]:
     ).fetchall()
 
 
+def withheld_states(data_dir: Path) -> list[str]:
+    """States with no published DISABILITY3 18+ cell (suppressed or no data), by name."""
+    parquet = (data_dir / "dhs2024_state_prevalence.parquet").as_posix()
+    rows = duckdb.sql(
+        "select state from read_parquet('" + parquet + "') "
+        "where measure = 'disability3' and age_group = '18+' and sex = 'all' "
+        "and not (has_data and not suppressed) order by state"
+    ).fetchall()
+    return [str(r[0]) for r in rows]
+
+
+def national_reference(data_dir: Path) -> Reference:
+    """The national DISABILITY3 18+ estimate, as percentages, for the findings."""
+    parquet = (data_dir / "dhs2024_national_zone.parquet").as_posix()
+    row = duckdb.sql(
+        "select 100 * estimate, 100 * ci_low, 100 * ci_high "
+        f"from read_parquet('{parquet}') "
+        "where geography_level = 'national' and measure = 'disability3' "
+        "and age_group = '18+' and sex = 'all' and not suppressed"
+    ).fetchone()
+    if row is None:
+        raise SystemExit("no national DISABILITY3 18+ estimate in the export")
+    return Reference(NATIONAL_LABEL, float(row[0]), float(row[1]), float(row[2]))
+
+
 def prevalence_by_state(data_dir: Path) -> dict:
     rows = headline_rows(data_dir)
     return dot(
@@ -116,6 +145,7 @@ def prevalence_by_state(data_dir: Path) -> dict:
                 tuple(float(r[2]) for r in rows),
                 tuple(float(r[3]) for r in rows),
                 tuple(float(r[4]) for r in rows),
+                tuple(str(r[5]) for r in rows),
             )
         ],
         title="Disability among adults 18+ by state, with 95% confidence intervals",
@@ -125,6 +155,9 @@ def prevalence_by_state(data_dir: Path) -> dict:
         unit="percent",
         decimals=1,
         chart_id="prevalence_by_state",
+        findings=True,
+        reference=national_reference(data_dir),
+        withheld=withheld_states(data_dir),
     )
 
 

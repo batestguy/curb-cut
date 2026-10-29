@@ -138,3 +138,42 @@ export function renderSpatial(spatial, els) {
     }),
   );
 }
+
+/**
+ * The statistical findings for the state dot plot (disability_access_charts 0.2). Every
+ * sentence comes from the chart document, where the library built it from the data and its
+ * audit held it to the claim checker; the page only lays it out. Nothing here is a live
+ * region: the block is ordinary text after the chart, read in document order.
+ */
+export function renderFindings(findings, source, els) {
+  const strong = document.createElement('strong');
+  strong.textContent = findings.lines.count;
+  els.count.replaceChildren(strong);
+  const items = findings.statements.map((s) => {
+    const li = document.createElement('li');
+    li.textContent = s.text;
+    return li;
+  });
+  els.list.replaceChildren(...items);
+  els.list.hidden = items.length === 0;
+  const notes = [findings.lines.none, findings.lines.dropped, findings.lines.withheld].filter(Boolean);
+  els.notes.replaceChildren(
+    ...notes.map((text) => {
+      const p = document.createElement('p');
+      p.textContent = text;
+      return p;
+    }),
+  );
+  els.families.replaceChildren(
+    ...findings.families
+      .filter((f) => f.checked + f.dropped > 0)
+      .map((f) => {
+        const li = document.createElement('li');
+        const dropped = f.dropped ? `, ${f.dropped} not tested` : '';
+        li.textContent = `${f.label}: ${f.checked} checked, ${f.supported} supported${dropped}.`;
+        return li;
+      }),
+  );
+  const caveats = findings.caveats.filter((c) => c.id !== 'descriptive').map((c) => c.text);
+  els.method.textContent = [findings.lines.method, ...caveats, `Source: ${source}.`].join(' ');
+}

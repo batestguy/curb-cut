@@ -547,6 +547,15 @@ table:focus-visible {
   stroke-width: 3;
 }
 
+/* Pattern tiles (inside <pattern> elements): ink only, no boundary stroke. The ink colour is
+   the document's pattern ink for the scheme, 3:1 against every class fill (audited). */
+.choropleth path.tile,
+.map-legend path.tile {
+  fill: var(--map-ink);
+  stroke: none;
+  cursor: default;
+}
+
 .choropleth .map-ring {
   pointer-events: none;
   fill: none;
@@ -572,10 +581,14 @@ table:focus-visible {
 
 .map-legend .swatch {
   display: inline-block;
-  width: 1.4rem;
+  width: 1.5rem;
   height: 1rem;
   border: 1px solid var(--map-edge);
   flex: none;
+}
+
+.findings-count {
+  margin-top: 0.75rem;
 }
 
 details.more {

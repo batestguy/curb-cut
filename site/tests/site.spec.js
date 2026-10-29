@@ -37,7 +37,10 @@ for (const colorScheme of ['light', 'dark']) {
     await page.emulateMedia({ colorScheme });
     await loaded(page);
     await chooseState(page, 'Kano');
-    await page.locator('details.more summary').click(); // the Moran table too
+    // The Moran table and the findings' method too.
+    for (const summary of await page.locator('details.more summary').all()) {
+      await summary.click();
+    }
     const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
     expect(results.violations).toEqual([]);
   });

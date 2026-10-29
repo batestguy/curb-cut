@@ -1,7 +1,7 @@
 import { renderChart } from './chart.js';
 import { setUpExplorer } from './explore.js';
 import { renderChoropleth } from './map.js';
-import { renderComparison, renderHeadline, renderSpatial } from './prevalence.js';
+import { renderComparison, renderFindings, renderHeadline, renderSpatial } from './prevalence.js';
 
 const DATA_URL = `${import.meta.env.BASE_URL}data/`;
 
@@ -27,6 +27,16 @@ async function showChart(name, id) {
   const titleEl = document.getElementById(`${id}-title`);
   try {
     const doc = await getJson(`charts/${name}.json`);
+    const findingsEl = document.getElementById(`${id}-findings`);
+    if (findingsEl && doc.findings) {
+      renderFindings(doc.findings, doc.meta.source, {
+        count: findingsEl.querySelector('.findings-count'),
+        list: findingsEl.querySelector('.findings-list'),
+        notes: findingsEl.querySelector('.findings-notes'),
+        families: findingsEl.querySelector('.findings-families'),
+        method: findingsEl.querySelector('.findings-method'),
+      });
+    }
     return await renderChart(doc, {
       container: document.getElementById(id),
       titleEl,
@@ -36,6 +46,8 @@ async function showChart(name, id) {
     });
   } catch (error) {
     const message = `The chart could not be loaded: ${error.message}.`;
+    const count = document.querySelector(`#${id}-findings .findings-count`);
+    if (count) count.textContent = 'The findings are unavailable because the chart could not be loaded.';
     titleEl.textContent = 'Chart unavailable';
     const chart = document.getElementById(id);
     chart.removeAttribute('aria-labelledby'); // it would override aria-label

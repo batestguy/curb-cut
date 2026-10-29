@@ -5,6 +5,10 @@
 // Tab stops; the table after the map holds every figure, and the state picker below is the
 // keyboard route to one state. The legend gives each class's range in words.
 //
+// Each class also has its own pattern (disability_access_charts 0.2): the document's tiles are
+// drawn as SVG <pattern> fills over the class colour, and the legend shows the same pattern in
+// each swatch, so neighbouring classes differ by more than a shade (WCAG 2.2 SC 1.4.1).
+//
 // A tooltip shows a state's figure on hover (mouse), on tap or click, and on keyboard focus
 // of the map (the state chosen in the explorer, or a hint). Esc closes it, the pointer can
 // move onto it, and it stays until the pointer leaves the map (WCAG 2.2 SC 1.4.13). It is
@@ -24,9 +28,65 @@ function pct(value, decimals) {
 // Colours come from the document's themes, as CSS custom properties on the figure, so the
 // map and its legend switch with the colour scheme and never disagree.
 function applyTheme(figure, doc) {
-  const theme = darkQuery.matches ? (doc.themes.dark ?? doc.themes.light) : doc.themes.light;
+  const scheme = darkQuery.matches && doc.themes.dark ? 'dark' : 'light';
+  const theme = doc.themes[scheme];
   figure.style.setProperty('--map-edge', theme.edge);
   theme.classes.forEach((fill, k) => figure.style.setProperty(`--map-c${k}`, fill));
+  if (doc.patterns) figure.style.setProperty('--map-ink', doc.patterns.ink[scheme]);
+}
+
+// One <pattern> for class k: the class colour behind, the tile in the theme's ink in front.
+// Colours are CSS custom properties, so the pattern follows the colour scheme.
+function makePattern(id, tile, k, scale) {
+  const pattern = document.createElementNS(SVG_NS, 'pattern');
+  pattern.id = id;
+  pattern.setAttribute('patternUnits', 'userSpaceOnUse');
+  pattern.setAttribute('width', tile.size);
+  pattern.setAttribute('height', tile.size);
+  pattern.setAttribute('patternTransform', `scale(${scale})`);
+  const back = document.createElementNS(SVG_NS, 'rect');
+  back.setAttribute('width', tile.size);
+  back.setAttribute('height', tile.size);
+  back.style.fill = `var(--map-c${k})`;
+  const ink = document.createElementNS(SVG_NS, 'path');
+  ink.setAttribute('d', tile.path);
+  ink.classList.add('tile');
+  pattern.append(back, ink);
+  return pattern;
+}
+
+function patternDefs(doc, prefix, scale) {
+  const defs = document.createElementNS(SVG_NS, 'defs');
+  doc.classes.forEach((c, k) => {
+    defs.append(makePattern(`${prefix}-${k}`, doc.patterns.tiles[c.pattern], k, scale));
+  });
+  return defs;
+}
+
+function swatchFor(doc, k) {
+  if (!doc.patterns) {
+    const swatch = document.createElement('span');
+    swatch.className = 'swatch';
+    swatch.style.background = `var(--map-c${k})`;
+    swatch.setAttribute('aria-hidden', 'true');
+    return swatch;
+  }
+  // The legend draws the tile at its own size (12px), so two repeats show in a swatch.
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.classList.add('swatch');
+  svg.setAttribute('viewBox', '0 0 24 16');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('focusable', 'false');
+  svg.dataset.pattern = doc.classes[k].pattern;
+  const id = `${doc.id}-legend-pattern-${k}`;
+  const defs = document.createElementNS(SVG_NS, 'defs');
+  defs.append(makePattern(id, doc.patterns.tiles[doc.classes[k].pattern], k, 1));
+  const rect = document.createElementNS(SVG_NS, 'rect');
+  rect.setAttribute('width', '24');
+  rect.setAttribute('height', '16');
+  rect.style.fill = `url(#${id})`;
+  svg.append(defs, rect);
+  return svg;
 }
 
 function renderLegend(legendEl, doc) {
@@ -34,10 +94,7 @@ function renderLegend(legendEl, doc) {
   legendEl.replaceChildren(
     ...doc.classes.map((c, k) => {
       const li = document.createElement('li');
-      const swatch = document.createElement('span');
-      swatch.className = 'swatch';
-      swatch.style.background = `var(--map-c${k})`;
-      swatch.setAttribute('aria-hidden', 'true');
+      const swatch = swatchFor(doc, k);
       const text = document.createElement('span');
       text.textContent = `${c.label}: ${c.count} ${c.count === 1 ? label : `${label}s`}`;
       li.append(swatch, text);
@@ -81,12 +138,15 @@ export function renderChoropleth(doc, { figure, holder, legendEl, titleEl, table
   svg.setAttribute('viewBox', doc.map.viewBox);
   svg.setAttribute('aria-hidden', 'true');
   svg.setAttribute('focusable', 'false');
+  const prefix = `${doc.id}-pattern`;
+  if (doc.patterns) svg.append(patternDefs(doc, prefix, doc.patterns.scale));
   const paths = new Map();
   for (const region of doc.regions) {
     const path = document.createElementNS(SVG_NS, 'path');
     path.setAttribute('d', doc.map.paths[region.code]);
     path.dataset.state = region.code;
     path.classList.add(`c${region.class}`);
+    if (doc.patterns) path.style.fill = `url(#${prefix}-${region.class})`;
     svg.append(path);
     paths.set(region.code, path);
   }
@@ -137,12 +197,12 @@ export function renderChoropleth(doc, { figure, holder, legendEl, titleEl, table
   // to the state under the pointer once the tip disappears, which would reopen it at once.
   let hoverOff = false;
   holder.addEventListener('pointerover', (event) => {
-    if (event.pointerType === 'mouse' && !hoverOff && event.target.matches('path')) {
+    if (event.pointerType === 'mouse' && !hoverOff && event.target.matches('path[data-state]')) {
       show(event.target.dataset.state);
     }
   });
   holder.addEventListener('click', (event) => {
-    if (event.target.matches('path')) show(event.target.dataset.state);
+    if (event.target.matches('path[data-state]')) show(event.target.dataset.state);
   });
   // Touch pointers "leave" when the finger lifts, so only a mouse leaving closes the tip;
   // the tip is inside the figure, so moving onto it keeps it open.
