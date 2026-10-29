@@ -207,10 +207,10 @@ Detailed plan agreed 2026-10-27 (the author: "use all that will make this a top 
 8. **37 light state pages:** every public source for the state (DHS with intervals and the model estimate; MPI labelled as its own non-WG measure, never the headline; JONAPWD with its caveat; population; breakdowns), a share image, and the law panel with primary-sourced facts only (no count of states with their own law).
 9. **P4b gate:** pages live; keyboard and NVDA check; then send the publication copies to DHS and NBS, and do the bookkeeping (D-rows, CLAUDE.md, CHANGELOG, README hero links).
 
-**P4b detailed plan (drafted 2026-10-29, awaiting the author's approval; steps 10–14 expand steps 7–9 above).** Author decisions of 2026-10-29: the map gets pattern fills; the adire review (D31) is optional and not blocking; Claude pushes the `charts-v0.2.0` tag after the author approves; assistive-technology unmet need (D24) is deferred out of P4b.
+**P4b detailed plan (agreed 2026-10-29; steps 10–14 expand steps 7–9 above).** Author decisions of 2026-10-29: the map gets pattern fills; the adire review (D31) is optional and not blocking; Claude pushes the `charts-v0.2.0` tag after the author approves; assistive-technology unmet need (D24) is deferred out of P4b.
 
 - **10. Law facts first (main session).** Settle D25 from primary text before any page uses it:
-  - CRPD: signed 2007-03-30, ratified 2010-09-24 (UN Treaty Collection, checked 2026-10-29). Done.
+  - **Done 2026-10-29 (D25):** the gazetted Act commenced on 17 January 2019; s.6 gives the five-year transition; s.29 sets the 5% quota for public employers only, "as much as possible"; s.31 establishes NCPWD. CRPD: signed 2007-03-30, ratified 2010-09-24.
   - The Act: find a primary copy (Official Gazette, National Assembly or NCPWD). Confirm the commencement date (sources say 17 or 23 January 2019), the section 6 five-year transition for public buildings (PLAC factsheet, July 2020), the exact wording and scope of the 5% employment provision (public employers only, or all?), and NCPWD's establishment (section 31).
   - No count of states with their own law.
   - Any fact without a primary source stays off the page.

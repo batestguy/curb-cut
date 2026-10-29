@@ -2,7 +2,7 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-29 · **Current phase:** **P4a gate passed 2026-10-29** (PR #2 merged); P4b (chart library 0.2, state pages) next; P4 planned 2026-10-27 (`PLAN.md` → P4: P4a numbers, map and comparison; P4b chart library 0.2 and state pages); P4a step 0 done 2026-10-27 (the pipeline reproduces the NDHS report tables; R and svy agree, `verification.md` D48); step 1 (direct estimates) next. `disability-access-charts` 0.1.0 is on PyPI (2026-10-22). P1 is live; its NVDA check is deferred.
+**Last updated:** 2026-10-29 · **Current phase:** **P4a gate passed 2026-10-29** (PR #2 merged); P4b plan agreed 2026-10-29, step 10 (law facts, D25) done, step 11 (chart library 0.2) next; P4 planned 2026-10-27 (`PLAN.md` → P4: P4a numbers, map and comparison; P4b chart library 0.2 and state pages); P4a step 0 done 2026-10-27 (the pipeline reproduces the NDHS report tables; R and svy agree, `verification.md` D48); step 1 (direct estimates) next. `disability-access-charts` 0.1.0 is on PyPI (2026-10-22). P1 is live; its NVDA check is deferred.
 
 ## Phases
 
@@ -254,4 +254,5 @@ The one page to read first. It says where things stand and what happens next. Th
 | 2026-10-28 | **FH result: direct estimates stay the headline** (author). No arcsine-normal model passes; FH would change estimates by ~4% (D56, reviewed). Published as a result; no amended model; spatial FH dropped. |
 | 2026-10-28 | **Main page design (author):** measured prevalence leads (new H1), JONAPWD moves below as "what was assumed"; the comparison uses verified figures only (JONAPWD 15% assumed, NDHS 2024 15+: 15.5% any difficulty vs 2.8% at the WG cut-off, our DHS 18+ with CI, WHO's 16% quoted as WHO words it) and drops the spec's unsourced 10–18% grid; the map uses fixed rounded classes plus a dot chart of all 37 estimates with 95% intervals. No LISA hotspots, so no outlines; the map says so. |
 | 2026-10-29 | **P4a gate passed** (author: "passed"). Evidence: CI, review fixes, the Guidepup NVDA transcript, and the author's own check of the state card with NVDA. PR #2 merged. |
+| 2026-10-29 | **P4b plan agreed** (author: "yes"; `PLAN.md` steps 10–14). Map classes get pattern fills; the adire review is optional (D31); Claude pushes `charts-v0.2.0` after the author approves; AT unmet need deferred (D24). Step 10 done the same day: law facts from the gazetted Act (D25). It commenced on 17 January 2019, not on the 23rd; the 5% quota (s.29) covers public employers only, "as much as possible". |
 | 2026-10-16 | **P0 gate passed.** Nigeria DHS 2024 is adopted as a second prevalence source next to MPI 2021. The exploratory panel uses GHS W4→W5 (all six WG-SS domains). |
