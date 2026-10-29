@@ -5,10 +5,16 @@ import { expect, test } from '@playwright/test';
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
-// No claim to be first (docs/verification.md D46); 'the first query' is not a claim.
-const FIRST_CLAIM = /first\s+(?:measured|state|estimates?|figures?|time)|the\s+first\s+to/i;
+// No claim to be first (docs/verification.md D46): "the first", "first of", "first-ever",
+// "world's first" and the like. "The first query" (the explorer's loading note) is not a claim.
+const FIRST_CLAIM =
+  /\b(?:the|world['’]s)\s+first\b(?!\s+query\b)|\bfirst[\s-]+ever\b|\bfirst\s+of\b|\bfirst\s+(?:measured|state|estimates?|figures?)\b/i;
 
-const pct = (x, d = 1) => `${x.toFixed(d)}%`;
+// Expected figures hard-coded from data/public/aggregates/dhs2024_*.csv (DISABILITY3, 18+,
+// both sexes), so a wrong export cannot pass by agreeing with itself.
+// National: 0.030087 (0.028315 to 0.031938). Kano (NG-KN): 0.045929 (0.036115 to 0.057482).
+const NATIONAL = { estimate: '3.0%', low: '2.8%', high: '3.2%' };
+const KANO = { estimate: '4.6%', low: '3.6%', high: '5.7%' };
 
 async function ready(page) {
   await page.goto('./');
@@ -25,19 +31,17 @@ async function chooseState(page, state) {
   await expect(page.locator('#state-table table')).toBeVisible({ timeout: 30_000 });
 }
 
-test('the page leads with the measured national figure, with its interval', async ({
-  page,
-  request,
-}) => {
-  const { national } = await (await request.get('data/prevalence.json')).json();
+test('the page leads with the measured national figure, with its interval', async ({ page }) => {
   await ready(page);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(
     "Disability in Nigeria's states, as measured by the DHS 2024 survey",
   );
   const headline = page.locator('#headline');
-  await expect(headline).toContainText(`${pct(100 * national.estimate)} of adults aged 18`);
   await expect(headline).toContainText(
-    `95% confidence interval ${pct(100 * national.ci_low)} to ${pct(100 * national.ci_high)}`,
+    `${NATIONAL.estimate} of adults aged 18 and over living in households in Nigeria`,
+  );
+  await expect(headline).toContainText(
+    `95% confidence interval ${NATIONAL.low} to ${NATIONAL.high}`,
   );
   // JONAPWD's assumed figures come after the measured ones, framed as an assumption.
   const order = await page.evaluate(() => {
@@ -49,7 +53,7 @@ test('the page leads with the measured national figure, with its interval', asyn
   await expect(page.locator('#jonapwd-heading')).toHaveText(
     "What was assumed: JONAPWD's 2025 estimates",
   );
-  await expect(page.locator('main')).not.toContainText(/\bthe first\b/i);
+  await expect(page.locator('body')).not.toContainText(FIRST_CLAIM);
 });
 
 test('the comparison uses verified figures only, each with a source', async ({ page }) => {
@@ -198,21 +202,15 @@ test('the spatial findings are sentences, with cluster members sorted by name', 
   await expect(jonapwd).not.toContainText(/Moran|hotspot|clustered/i);
 });
 
-test('the state card adds the DHS 2024 figure and the national one', async ({
-  page,
-  request,
-}) => {
-  const states = await (await request.get('data/states.json')).json();
-  const { national } = await (await request.get('data/prevalence.json')).json();
-  const kano = states.find((s) => s.state === 'Kano').dhs2024;
+test('the state card adds the DHS 2024 figure and the national one', async ({ page }) => {
   await ready(page);
   await chooseState(page, 'Kano');
   const facts = page.locator('#state-card .facts');
   await expect(facts).toContainText(
-    `${pct(100 * kano.estimate)} (95% confidence interval ${pct(100 * kano.ci_low)} to ${pct(100 * kano.ci_high)}); precision: reliable`,
+    `${KANO.estimate} (95% confidence interval ${KANO.low} to ${KANO.high}); precision: reliable`,
   );
   await expect(facts).toContainText('Nigeria, for comparison');
-  await expect(facts).toContainText(pct(100 * national.estimate));
+  await expect(facts).toContainText(NATIONAL.estimate);
   await expect(page.getByRole('heading', { level: 3, name: 'Kano' })).toBeFocused();
 });
 
@@ -304,5 +302,5 @@ test('the methodology page is linked from the page and the footer, and covers th
   await expect(main).toContainText('complementary suppression');
   await expect(main).toContainText('49 people');
   await expect(main).toContainText('No spatial analysis is made of JONAPWD');
-  await expect(main).not.toContainText(/\bthe first\b/i);
+  await expect(page.locator('body')).not.toContainText(FIRST_CLAIM);
 });

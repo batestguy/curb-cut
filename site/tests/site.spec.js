@@ -55,10 +55,13 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   await page.keyboard.press('Enter');
   await expect(page.locator('main')).toBeFocused();
 
-  // Tab from <main> until the select is reached (bounded, so a trap fails the test).
+  // Tab from <main> until the select is reached (bounded, so a trap or a run of new stops
+  // fails the test). At desktop width it is the 11th stop: the methodology link, five
+  // comparison source links, the map, the two spatial links ("Why", "Methods and limits"),
+  // the <summary> of the details, then the select. The bound allows a small margin.
   const select = page.locator('#state-select');
   let reached = false;
-  for (let i = 0; i < 60 && !reached; i += 1) {
+  for (let i = 0; i < 15 && !reached; i += 1) {
     await page.keyboard.press('Tab');
     reached = await select.evaluate((el) => el === document.activeElement);
   }
