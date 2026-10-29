@@ -1,0 +1,242 @@
+{
+  "rule": "Shapiro-Wilk p >= 0.05 and at most 2 of the 12 largest-n states outside their direct 95% CI",
+  "top_model": "(intercept only)",
+  "gvf_r2": 0.0986456,
+  "top_model_gamma": {
+    "min": 0.93433183,
+    "median": 0.94852102,
+    "max": 0.96262698
+  },
+  "top_model_mse_over_psi_median": 0.95548741,
+  "top_model_relative_change": {
+    "min": -0.05084311,
+    "q25": -0.0131574,
+    "median": 0.01402454,
+    "q75": 0.03903812,
+    "max": 0.1113436
+  },
+  "raw_variance_sensitivity": {
+    "gamma": {
+      "min": 0.86594422,
+      "median": 0.95482968,
+      "max": 0.97451132
+    },
+    "mse_over_direct_var": {
+      "min": 0.88138821,
+      "median": 0.96103026,
+      "max": 0.97814128
+    },
+    "states_mse_below_direct_var": 37,
+    "shapiro_p": 0.00809858
+  },
+  "models": [
+    {
+      "terms": "(intercept only)",
+      "bic": -97.27791245,
+      "shapiro_p": 0.00580299,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c2_urban_share + c4_female_literacy",
+      "bic": -97.61112612,
+      "shapiro_p": 0.01918022,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c1_share_60plus + c2_urban_share + c4_female_literacy",
+      "bic": -95.95304121,
+      "shapiro_p": 0.01141114,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c1_share_60plus",
+      "bic": -95.72262369,
+      "shapiro_p": 0.01580731,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c4_female_literacy",
+      "bic": -95.20047221,
+      "shapiro_p": 0.01643495,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c2_urban_share + c3_mpi_headcount + c4_female_literacy",
+      "bic": -94.76455228,
+      "shapiro_p": 0.00361438,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c2_urban_share + c4_female_literacy + c5_log_density",
+      "bic": -94.01675776,
+      "shapiro_p": 0.01843281,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c3_mpi_headcount + c4_female_literacy",
+      "bic": -93.98055491,
+      "shapiro_p": 0.00070045,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c3_mpi_headcount",
+      "bic": -93.79155046,
+      "shapiro_p": 0.00268738,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c1_share_60plus + c2_urban_share",
+      "bic": -93.72554545,
+      "shapiro_p": 0.03154842,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c2_urban_share",
+      "bic": -93.68537818,
+      "shapiro_p": 0.00504282,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c5_log_density",
+      "bic": -93.67836616,
+      "shapiro_p": 0.00672347,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c1_share_60plus + c3_mpi_headcount",
+      "bic": -93.38435261,
+      "shapiro_p": 0.00446178,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c4_female_literacy + c5_log_density",
+      "bic": -93.07616868,
+      "shapiro_p": 0.01924444,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c1_share_60plus + c5_log_density",
+      "bic": -92.36428432,
+      "shapiro_p": 0.02390197,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c1_share_60plus + c4_female_literacy",
+      "bic": -92.32601112,
+      "shapiro_p": 0.01485834,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c3_mpi_headcount + c4_female_literacy + c5_log_density",
+      "bic": -91.42661146,
+      "shapiro_p": 0.00121466,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c1_share_60plus + c3_mpi_headcount + c4_female_literacy",
+      "bic": -91.38540525,
+      "shapiro_p": 0.00076517,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c1_share_60plus + c2_urban_share + c5_log_density",
+      "bic": -90.62683201,
+      "shapiro_p": 0.01639267,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c1_share_60plus + c2_urban_share + c3_mpi_headcount",
+      "bic": -90.35698735,
+      "shapiro_p": 0.01326211,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c3_mpi_headcount + c5_log_density",
+      "bic": -90.31232426,
+      "shapiro_p": 0.00327002,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c2_urban_share + c3_mpi_headcount",
+      "bic": -90.20076428,
+      "shapiro_p": 0.00244767,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c2_urban_share + c5_log_density",
+      "bic": -90.19979849,
+      "shapiro_p": 0.00766585,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c1_share_60plus + c4_female_literacy + c5_log_density",
+      "bic": -90.0052654,
+      "shapiro_p": 0.02896237,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c1_share_60plus + c3_mpi_headcount + c5_log_density",
+      "bic": -89.77365242,
+      "shapiro_p": 0.00433513,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    },
+    {
+      "terms": "c2_urban_share + c3_mpi_headcount + c5_log_density",
+      "bic": -86.72309945,
+      "shapiro_p": 0.00398103,
+      "outside_large": 0,
+      "outside_states": [],
+      "pass": false
+    }
+  ]
+}

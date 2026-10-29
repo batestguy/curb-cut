@@ -1,6 +1,8 @@
 -- Disclosure check, re-tested in the warehouse: no cell under 30 unweighted respondents
 -- may carry an estimate, and every suppressed cell must have its numbers nulled.
-select source, measure, geography_level, geography, age_group, sex, n_unweighted
+select
+    source, measure, geography_level, geography, age_group, sex, breakdown, breakdown_level,
+    n_unweighted
 from {{ ref('stg_survey__aggregates') }}
 where (n_unweighted < 30 and not suppressed)
     or (

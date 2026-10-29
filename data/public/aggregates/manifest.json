@@ -1,22 +1,23 @@
 {
   "description": "Survey aggregates that passed the Curb Cut disclosure gate (packages/ingest/src/curbcut_ingest/disclosure.py).",
-  "disclosure_rule": "Cells with fewer than 30 unweighted respondents in the denominator are suppressed: estimate, se, interval, n_effective and df are null and suppressed = true.",
+  "disclosure_rule": "Cells with fewer than 30 unweighted respondents in the denominator are suppressed (primary). Where a partition of cells that add up (breakdown levels, women and men, states within a zone or Nigeria, zones, severity levels) would then hold exactly one suppressed cell, its smallest other cell is suppressed too (secondary), until none does. Suppressed cells have estimate, se, interval, n_unweighted, n_effective and df null and suppressed = true.",
   "files": {
     "dhs2024_national.csv": {
       "citation": "National Population Commission (NPC) [Nigeria] and ICF. Nigeria Demographic and Health Survey 2024. Abuja, Nigeria, and Rockville, Maryland, USA: NPC and ICF.",
       "dataset_version": "NG2024DHS, recode 8B (NGPR8BFL)",
       "design": "De facto household members aged 5+ asked the WG-SS (hdis2-hdis8; 8 = don't know -> missing). Weight hv005/1e6, strata hv023, PSU hv021.",
       "disclosure_threshold": 30,
-      "generated_on": "2026-10-24",
+      "generated_on": "2026-10-27",
       "precision_flags": {
-        "reliable": 89,
-        "review": 1,
+        "reliable": 192,
+        "review": 5,
         "suppressed": 0,
         "unreliable": 0
       },
-      "rows": 90,
-      "script_commit": "ae8cee8686b5871ce93d1a9c7a5cd5f37ab2c920",
-      "sha256": "fa02e610ec50ee324610672036a5cc4afecfd956ed16792b2996b5c0674a6f48",
+      "rows": 197,
+      "script_commit": "f95b475ebd3fe7c47c8cb587c3644925dfd3dee1",
+      "secondary_suppressed_cells": 0,
+      "sha256": "56b41ce56a3ac4c7000ef1189f0b3eda1860e9c8f71f5c910ac173738aff5e98",
       "source": "Nigeria Demographic and Health Survey 2024",
       "suppressed_cells": 0,
       "terms": "DHS Program terms: registered project only ('Curb Cut: disability prevalence and poverty in Nigeria'); aggregates only, no microdata; a PDF of every publication goes to references@dhsprogram.com."
@@ -26,16 +27,37 @@
       "dataset_version": "NG2024DHS, recode 8B (NGPR8BFL)",
       "design": "De facto household members aged 5+ asked the WG-SS (hdis2-hdis8; 8 = don't know -> missing). Weight hv005/1e6, strata hv023, PSU hv021.",
       "disclosure_threshold": 30,
-      "generated_on": "2026-10-24",
+      "generated_on": "2026-10-27",
       "precision_flags": {
-        "reliable": 183,
-        "review": 335,
-        "suppressed": 0,
-        "unreliable": 0
+        "reliable": 789,
+        "review": 3761,
+        "suppressed": 413,
+        "unreliable": 175
       },
-      "rows": 518,
-      "script_commit": "ae8cee8686b5871ce93d1a9c7a5cd5f37ab2c920",
-      "sha256": "f6e60998fc70c1336f9bd93e80be835c4ed2165ba59101aa335a7615670f5480",
+      "rows": 5138,
+      "script_commit": "f95b475ebd3fe7c47c8cb587c3644925dfd3dee1",
+      "secondary_suppressed_cells": 245,
+      "sha256": "dc2a21f01bd373a4c7656beecebac3b15a5df43b2e99acc6e2cd815d6f3308a7",
+      "source": "Nigeria Demographic and Health Survey 2024",
+      "suppressed_cells": 413,
+      "terms": "DHS Program terms: registered project only ('Curb Cut: disability prevalence and poverty in Nigeria'); aggregates only, no microdata; a PDF of every publication goes to references@dhsprogram.com."
+    },
+    "dhs2024_zone.csv": {
+      "citation": "National Population Commission (NPC) [Nigeria] and ICF. Nigeria Demographic and Health Survey 2024. Abuja, Nigeria, and Rockville, Maryland, USA: NPC and ICF.",
+      "dataset_version": "NG2024DHS, recode 8B (NGPR8BFL)",
+      "design": "De facto household members aged 5+ asked the WG-SS (hdis2-hdis8; 8 = don't know -> missing). Weight hv005/1e6, strata hv023, PSU hv021.",
+      "disclosure_threshold": 30,
+      "generated_on": "2026-10-27",
+      "precision_flags": {
+        "reliable": 526,
+        "review": 361,
+        "suppressed": 0,
+        "unreliable": 7
+      },
+      "rows": 894,
+      "script_commit": "f95b475ebd3fe7c47c8cb587c3644925dfd3dee1",
+      "secondary_suppressed_cells": 0,
+      "sha256": "5beac038ef25a37166f88a222c0b954e67c2e424c830a5a6f57a62e719f49237",
       "source": "Nigeria Demographic and Health Survey 2024",
       "suppressed_cells": 0,
       "terms": "DHS Program terms: registered project only ('Curb Cut: disability prevalence and poverty in Nigeria'); aggregates only, no microdata; a PDF of every publication goes to references@dhsprogram.com."
@@ -45,7 +67,7 @@
       "dataset_version": "NGA_2018_GHSP-W4_v03_M",
       "design": "Post-harvest sect4a, WG-SS s4aq23-s4aq33 (-1 too young -> missing), members 5+. Weight wt_wave4 (cross-section), strata 'strata', PSU 'cluster'. National and zone only (not representative by state).",
       "disclosure_threshold": 30,
-      "generated_on": "2026-10-24",
+      "generated_on": "2026-10-27",
       "precision_flags": {
         "reliable": 13,
         "review": 0,
@@ -53,8 +75,9 @@
         "unreliable": 0
       },
       "rows": 13,
-      "script_commit": "ae8cee8686b5871ce93d1a9c7a5cd5f37ab2c920",
-      "sha256": "ecfba181bfc0b35bd442cf426b18044097e36c8e0855bfb2dcb8ca1f440a7cde",
+      "script_commit": "f95b475ebd3fe7c47c8cb587c3644925dfd3dee1",
+      "secondary_suppressed_cells": 0,
+      "sha256": "99ffc95e3fe3d7dd8d17286d1886945799b179dd567f6c54678c6b5a7da1acf9",
       "source": "Nigeria General Household Survey-Panel 2018-2019, Wave 4",
       "suppressed_cells": 0,
       "terms": "World Bank Microdata Library public-use terms: aggregates only, cite the dataset."
@@ -64,7 +87,7 @@
       "dataset_version": "NGA_2023_GHSP-W5_v02_M",
       "design": "Post-planting sect3, WG-SS s3q23-s3q28, members 5+. Weight wt_cross_wave5 (cross-section), strata 'strata', PSU 'cluster'. National and zone only.",
       "disclosure_threshold": 30,
-      "generated_on": "2026-10-24",
+      "generated_on": "2026-10-27",
       "precision_flags": {
         "reliable": 13,
         "review": 0,
@@ -72,8 +95,9 @@
         "unreliable": 0
       },
       "rows": 13,
-      "script_commit": "ae8cee8686b5871ce93d1a9c7a5cd5f37ab2c920",
-      "sha256": "2e78513455df8cf6c0f6971103db92e95af236a99ad1bbfd83b8fcfd58d17e6e",
+      "script_commit": "f95b475ebd3fe7c47c8cb587c3644925dfd3dee1",
+      "secondary_suppressed_cells": 0,
+      "sha256": "52d7b69faea241afab491c23214fd5d35d2a5ab79d2d18ef169851f4ef82cac6",
       "source": "Nigeria General Household Survey-Panel 2023-2024, Wave 5",
       "suppressed_cells": 0,
       "terms": "World Bank Microdata Library public-use terms: aggregates only, cite the dataset."
@@ -83,7 +107,7 @@
       "dataset_version": "NGA-NBS-MPI-2021-v1.0",
       "design": "NOT the WG-SS (verification.md D39, D43): seeing/hearing/walking are yes/no screeners (mpi_screener_*_any); 1-4 items for self-care d11a, cognition d12a, communication = worse of d9a/d10a, upper body = worse of d13a/d14a (*_3plus). Weight pop_wgt/hhsize; strata a1 x a1b x a3 and PSU a4 are assumptions (D40).",
       "disclosure_threshold": 30,
-      "generated_on": "2026-10-24",
+      "generated_on": "2026-10-27",
       "precision_flags": {
         "reliable": 192,
         "review": 340,
@@ -91,8 +115,9 @@
         "unreliable": 0
       },
       "rows": 532,
-      "script_commit": "221397d44b16600226bfc509df925501074cefcd",
-      "sha256": "d660f40b9d3d1bac33b5b0c24a919c0021f52e520b200130769225796d191859",
+      "script_commit": "f95b475ebd3fe7c47c8cb587c3644925dfd3dee1",
+      "secondary_suppressed_cells": 0,
+      "sha256": "2a8cf8eabd2e300011d8d040bc3aece35ec7b83d212fd844d047c8b640de8172",
       "source": "NBS Multidimensional Poverty Index Survey 2021",
       "suppressed_cells": 0,
       "terms": "NBS access terms: aggregated reporting only; an electronic copy of every publication goes to the National Data Archive."

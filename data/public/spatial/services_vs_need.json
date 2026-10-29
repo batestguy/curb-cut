@@ -1,0 +1,20 @@
+{
+  "measure": "disability3",
+  "age_group": "18+",
+  "supply": "GRID3 NGA - Health Facilities v2.0, all facilities per 100,000 people (NBS 2023 population)",
+  "n_states": 37,
+  "spearman_rho": 0.29421527,
+  "p_perm_two_sided": 0.0783,
+  "nsim": 9999,
+  "seed": 20261028,
+  "facilities_total": 51022,
+  "facilities_ownership_unknown": 4626,
+  "facilities_per_100k": {
+    "min": 10.3849,
+    "median": 21.9299,
+    "max": 40.9312,
+    "min_state": "NG-RI",
+    "max_state": "NG-NA"
+  },
+  "caveats": ["Ecological association between state averages: no causal claim and no inference about individuals.", "General health facilities are not disability services; the count says nothing about rehabilitation, assistive technology or accessibility.", "GRID3 v2.0 is non-exhaustive and not validated by government; private facilities in particular may be under-counted.", "4,626 of the 51,022 facilities have Unknown ownership in the source.", "The supply rate uses total population (all ages), while prevalence is for adults 18+; states with younger populations have more adults per facility than the all-ages rate suggests."]
+}

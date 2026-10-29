@@ -33,16 +33,29 @@ sources:
       unweighted respondents is suppressed, and every row carries an NCHS precision flag.
       Provenance (dataset version, terms, SHA-256, script commit) is in
       data/public/aggregates/manifest.json. The folder is a var, so the fixture build reads
-      synthetic files with the same schema from fixtures/aggregates.
+      synthetic files with the same schema from fixtures/aggregates. Every file has
+      breakdown and breakdown_level ("all" on rows without an extra breakdown); one cell is
+      source, measure, geography_level, geography, age_group, sex, breakdown,
+      breakdown_level.
     tables:
       - name: dhs2024_state
-        description: DHS 2024, WG-SS DISABILITY3 and each domain at level 3+, by state, ages 18+ and 5-17.
+        description: >
+          DHS 2024, WG-SS DISABILITY3 and each domain at level 3+, by state, ages 18+ and
+          5-17: overall, by sex, and by urban/rural and wealth quintile (breakdown column).
         meta:
           external_location: "read_csv('{{ var('aggregates_dir') }}/dhs2024_state.csv', header = true, all_varchar = true)"
       - name: dhs2024_national
-        description: DHS 2024 national, including the 4-level distribution per domain and breakdowns by sex.
+        description: >
+          DHS 2024 national, including the 4-level distribution per domain, breakdowns by
+          sex, and by urban/rural, wealth quintile and age band (breakdown column).
         meta:
           external_location: "read_csv('{{ var('aggregates_dir') }}/dhs2024_national.csv', header = true, all_varchar = true)"
+      - name: dhs2024_zone
+        description: >
+          DHS 2024 by geopolitical zone: overall and by sex, urban/rural, wealth quintile
+          and age band (DISABILITY3 only), ages 18+ and 5-17.
+        meta:
+          external_location: "read_csv('{{ var('aggregates_dir') }}/dhs2024_zone.csv', header = true, all_varchar = true)"
       - name: ghs_w4_national_zone
         description: GHS-Panel W4, adults 18+, national (DISABILITY3 and domains) and zone (DISABILITY3). Never by state.
         meta:
@@ -68,3 +81,56 @@ sources:
         description: State totals scaled to the UN WPP July 2025 median (file as published, LF line endings).
         meta:
           external_location: "read_csv('../../data/public/worldpop/states_pop_total_scaled.csv', header = true, all_varchar = true)"
+
+  - name: covariates
+    description: >
+      Fay-Herriot state covariates frozen in docs/fay-herriot-covariates.md (P4a step 2),
+      built by packages/ingest/src/curbcut_ingest/covariates.py from public sources: C1
+      WorldPop 2020 age structures (CC BY 4.0), C2 JRC GHSL R2023A (CC BY 4.0), C3 NBS
+      Nigeria MPI 2022 Table D6 (figures cited), C5 NBS 2023 population over geoBoundaries
+      area, C4 MICS6 2021 Table SR.6.1W literacy of women 15-49 (figures cited). Provenance and hashes are in
+      data/public/covariates/README.md and manifest.json.
+    tables:
+      - name: state_covariates
+        description: One row per state; raw (unstandardised) covariates plus two WorldPop benchmark-weight columns that are not covariates.
+        meta:
+          external_location: "read_csv('../../data/public/covariates/state_covariates.csv', header = true, all_varchar = true)"
+
+  - name: ndhs_report
+    description: >
+      Figures cited from the Nigeria DHS 2023-24 final report (NPC and ICF, FR395), chapter
+      14, transcribed by hand (data/public/ndhs_report/README.md). The report is not
+      redistributed. Used for the main page's comparison; checked against our pipeline by
+      curbcut_ingest.validate_ndhs (docs/verification.md D46, D48).
+    tables:
+      - name: fr395_table14_1
+        description: Table 14.1 (p. 443), household population 5+ (de facto), by domain and age. Percentages.
+        meta:
+          external_location: "read_csv('../../data/public/ndhs_report/fr395_table14_1.csv', header = true, all_varchar = true)"
+        columns:
+          - name: row
+            data_tests: [unique, not_null]
+
+  - name: spatial
+    description: >
+      Spatial analysis of the DHS 2024 direct state estimates (P4a step 3,
+      docs/verification.md D57, D58), committed by curbcut_ingest.spatial and
+      curbcut_ingest.grid3 from public inputs only. Never run on JONAPWD (D17). The fixture
+      build reads the same committed files: they hold no microdata.
+    tables:
+      - name: moran_global
+        description: Global Moran's I per measure (one-sided permutation p, Benjamini-Hochberg across the 8).
+        meta:
+          external_location: "read_csv('../../data/public/spatial/moran_global.csv', header = true, all_varchar = true)"
+      - name: lisa_disability3_18plus
+        description: Exploratory local Moran's I for DISABILITY3 18+, with BH q across the 37 states.
+        meta:
+          external_location: "read_csv('../../data/public/spatial/lisa_disability3_18plus.csv', header = true, all_varchar = true)"
+      - name: profile_clusters
+        description: Descriptive Ward clusters of the six 18+ domain prevalences.
+        meta:
+          external_location: "read_csv('../../data/public/spatial/profile_clusters.csv', header = true, all_varchar = true)"
+      - name: facilities_state
+        description: GRID3 NGA Health Facilities v2.0 (CC BY 4.0) counted by state, per 100,000 people (NBS 2023).
+        meta:
+          external_location: "read_csv('../../data/public/spatial/facilities_state.csv', header = true, all_varchar = true)"

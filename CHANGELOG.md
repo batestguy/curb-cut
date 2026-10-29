@@ -2,6 +2,20 @@
 
 All notable changes to this project are documented here. Entries follow [Conventional Commits](https://www.conventionalcommits.org/).
 
+## P4a — 2026-10-29 (measured prevalence, map and comparison live)
+
+### Added
+- feat(ingest): DHS 2024 direct estimates by state with complementary suppression (D49); reproduction of NDHS 2024 Tables 14.1 and 14.2.x and an R `survey` vs Python `svy` cross-check (D48).
+- feat(ingest): Fay-Herriot attempt with a pre-declared covariate set; no model passed its diagnostics and the gain was negligible, so direct estimates lead and the result is published (D56).
+- feat(ingest): spatial analysis (Moran's I, LISA, clustering, health facilities) on the direct estimates, with hedged sentences (D58).
+- feat(charts): experimental `choropleth()` map document with its own audit (boundaries and legend at 3:1; colour never the only cue).
+- feat(transform): marts for the comparison and spatial results; export of DHS prevalence, comparison and spatial data for the site; `check --strict` in CI.
+- feat(site): the main page leads with measured prevalence (DHS 2024, Washington Group cut-off): a map and interval chart for all 37 states, a sourced comparison of the 15% and 3% figures, spatial findings, the state's DHS figure on the state card, and a methodology page. JONAPWD's figures move below as "what was assumed".
+- test: colour tokens checked against the CSS; headline figures hard-coded; a tighter Tab-stop bound.
+
+### Verified
+- P4a gate passed (author, 2026-10-29): automated tests, a scripted NVDA transcript (Guidepup) and the author's own NVDA check of the state card.
+
 ## P3 — in progress (2026-10-24)
 
 ### Added

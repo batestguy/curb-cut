@@ -10,8 +10,9 @@ How to rebuild them from your own copy of the microdata: `docs/reproduce.md`.
 
 | File | Source | Rows | Suppressed | Contents |
 |---|---|---|---|---|
-| `dhs2024_state.csv` | Nigeria DHS 2024 | 518 | 0 | DISABILITY3 and each of the six domains at "a lot of difficulty" or worse, by state (37), for ages 18+ and 5–17 |
-| `dhs2024_national.csv` | Nigeria DHS 2024 | 90 | 0 | National, ages 18+ and 5–17: DISABILITY3, each domain at 3+, the 4-level distribution per domain; DISABILITY3 and domains by sex |
+| `dhs2024_state.csv` | Nigeria DHS 2024 | 5,138 | 168 | DISABILITY3 and each of the six domains at "a lot of difficulty" or worse, by state (37), for ages 18+ and 5–17: overall, by sex, by urban/rural and by wealth quintile |
+| `dhs2024_national.csv` | Nigeria DHS 2024 | 197 | 0 | National, ages 18+ and 5–17: DISABILITY3, each domain at 3+, the 4-level distribution per domain; DISABILITY3 and domains by sex, urban/rural and wealth quintile; DISABILITY3 by age band |
+| `dhs2024_zone.csv` | Nigeria DHS 2024 | 894 | 0 | By zone (6), ages 18+ and 5–17: DISABILITY3 and domains overall, by sex, urban/rural and wealth quintile; DISABILITY3 by age band |
 | `ghs_w4_national_zone.csv` | GHS-Panel W4 (2018/19) | 13 | 0 | Adults 18+: national DISABILITY3 and domains; DISABILITY3 by zone |
 | `ghs_w5_national_zone.csv` | GHS-Panel W5 (2023/24) | 13 | 0 | As W4 |
 | `mpi2021_state_national.csv` | NBS MPI 2021 | 532 | 0 | MPI's own measures (never DISABILITY3) by state and nationally; released 2026-10-24 |
@@ -27,6 +28,8 @@ GHS is representative only nationally and by zone, so it never has state rows.
 | `geography_level`, `geography` | `national` (`NG`), `zone` (zone name), or `state` (ISO 3166-2 code, e.g. `NG-KN`; names in `packages/transform/seeds/dim_states.csv`) |
 | `age_group` | `18+` (the headline) or `5-17` (reported separately) |
 | `sex` | `all`, `male` or `female` |
+| `breakdown` | `all` (no extra dimension), `sector` (urban/rural), `wealth_quintile` or `age_band` (DHS only) |
+| `breakdown_level` | `all` when `breakdown` is `all`; else `urban`/`rural`; `lowest`, `second`, `middle`, `fourth`, `highest`; or an age band (`5-9`, `10-14`, `15-17` inside 5–17; `18-29`, `30-39`, `40-49`, `50-59`, `60-69`, `70+` inside 18+). Age bands are DISABILITY3 only, national and zone only |
 | `estimate` | Weighted proportion, 0–1 |
 | `se` | Standard error (Taylor linearisation, R `survey`) |
 | `ci_low`, `ci_high` | 95% Korn–Graubard interval: Clopper–Pearson with the effective sample size scaled by (t<sub>n−1</sub> / t<sub>df</sub>)² |
@@ -46,17 +49,17 @@ GHS is representative only nationally and by zone, so it never has state rows.
 
 ## Disclosure check and precision flag
 
-- **Disclosure (privacy).** The rule is on the denominator: a cell with fewer than 30 unweighted respondents is suppressed (`estimate`, `se`, the interval, `n_effective` and `df` are empty and `suppressed` is `True`). There is no rule on the numerator, which is consistent with DHS practice (DHS final-report tables apply a denominator rule, suppressing figures based on fewer than 25 unweighted cases) and with NCHS (no minimum number of events, Parker et al. 2017 p. 5). The unweighted number of people with the difficulty (`n_events`) is used inside the gate and is **never published**. None of the current files needed suppression.
+- **Disclosure (privacy).** The rule is on the denominator: a cell with fewer than 30 unweighted respondents is suppressed (`estimate`, `se`, the interval, `n_unweighted`, `n_effective` and `df` are empty and `suppressed` is `True`). Published cells add up (wealth quintiles to their state, states to their zone and to Nigeria, women and men to both sexes, severity levels to 100%), so one suppressed cell among published siblings could be worked out by subtraction. Wherever a set of cells that add up would hold exactly one suppressed cell, its smallest other cell is suppressed too (*secondary* suppression, `precision_reason` = "complementary suppression (disclosure)"), repeated until no set does. The warehouse re-checks this (`assert_no_lone_suppressed_sibling`). One cell is source × measure × geography level × geography × age group × sex × breakdown × breakdown level. There is no rule on the numerator, which is consistent with DHS practice (DHS final-report tables apply a denominator rule, suppressing figures based on fewer than 25 unweighted cases) and with NCHS (no minimum number of events, Parker et al. 2017 p. 5). The unweighted number of people with the difficulty (`n_events`) is used inside the gate and is **never published**. The only suppressed cells are 413 state × wealth quintile cells in 16 states (168 under 30, 245 secondary); 42 possible state × quintile cells (across measures and age groups) have no respondents at all and so have no row.
 - **Precision (reliability).** `precision_flag` follows the NCHS Data Presentation Standards for Proportions (Parker et al. 2017, `verification.md` D42) plus one stricter project rule:
   - `unreliable`: n or effective n under 30; or the interval is 0.30 wide or more; or it is wider than 0.05 and wider than 130% of the estimate.
   - `review`: it would be shown, but it rests on 0 events (or all events), or has fewer than 8 degrees of freedom (NCHS), or rests on 1–9 unweighted events (project rule, reason `low_events<10`).
   - `reliable`: passes the NCHS proportion standards **and** the 10-event rule. It is a screening label, not a guarantee that the estimate is accurate: the standards say nothing about measurement error, non-response or a wrong design assumption.
 - The flag labels estimates; it does not remove them. `precision_reason` gives the rule that fired.
-- Current files: `dhs2024_state.csv` 183 reliable, 335 review (288 `low_events<10`, 47 `zero_events`); `dhs2024_national.csv` 89 reliable, 1 review (`low_events<10`); both GHS files all 13 reliable. Many state-by-domain cells are `review` because single-domain difficulty at level 3+ is rare: read them with their intervals.
+- Current files: `dhs2024_state.csv` 789 reliable, 3,761 review, 175 unreliable, 413 suppressed (the 518 overall cells: 183 reliable, 335 review, as before; by wealth quintile most cells are review or unreliable, and even DISABILITY3 18+ is reliable in only 82 of 183 state × quintile cells, with 30 suppressed); `dhs2024_national.csv` 192 reliable, 5 review (`low_events<10`); `dhs2024_zone.csv` 526 reliable, 361 review, 7 unreliable; both GHS files all 13 reliable; MPI 192 reliable, 340 review. Many state-by-domain cells are `review` because single-domain difficulty at level 3+ is rare: read them with their intervals.
 
 ## Design and assumptions
 
-- **DHS 2024:** de facto household members aged 5+ asked the WG-SS (`hdis2`–`hdis8`); weight `hv005`/10⁶, strata `hv023`, PSU `hv021`.
+- **DHS 2024:** de facto household members aged 5+ asked the WG-SS (`hdis2`–`hdis8`); weight `hv005`/10⁶, strata `hv023`, PSU `hv021`. Urban/rural is `hv025`; wealth quintile is the DHS combined wealth index `hv270` (1 poorest … 5 richest, published as `lowest` … `highest`).
 - **GHS W4/W5:** members 5+; cross-section household weights (`wt_wave4`, `wt_cross_wave5`); strata `strata`; PSU `cluster`. A few households sit in a stratum other than their zone, so a zone estimate can touch a stratum with one PSU; R reports these and adjusts them (below).
 - **MPI 2021:** person weight `pop_wgt / hhsize` (the household weight with a per-state calibration factor, checked from the data); strata state × senatorial district × sector and PSU = EA, an assumption since no strata variable is shipped (`verification.md` D40).
 - **Lonely PSUs:** `options(survey.lonely.psu = "adjust", survey.adjust.domain.lonely = TRUE)`.

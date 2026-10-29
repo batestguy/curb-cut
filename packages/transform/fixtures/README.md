@@ -7,6 +7,7 @@
 - `review` (zero events) and `unreliable` (effective n under 30) flags;
 - a suppressed zone cell in each GHS file;
 - an MPI 2021 file, so the MPI model path is tested with edge cases too.
+- the `breakdown` / `breakdown_level` columns on every file (`all` / `all` where there is no extra breakdown), with state-by-sex rows for 36 states (Zamfara still missing), a DHS zone file (`dhs2024_zone.csv`, including a suppressed zone cell), and at least one row per breakdown (`sector`, `wealth_quintile`, `age_band`), including a suppressed breakdown cell (Abia, rural).
 
 `tests/assert_fixture_edge_cases.sql` runs only in this build (`fixtures: true`). Command (from `packages/transform`):
 

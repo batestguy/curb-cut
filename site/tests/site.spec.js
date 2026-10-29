@@ -8,6 +8,10 @@ const LAGOS_PHYSICAL = '471,385';
 
 async function loaded(page) {
   await page.goto('./');
+  await expect(page.locator('#prevalence-map svg')).toBeVisible();
+  await expect(page.locator('#prevalence-chart svg').first()).toBeVisible();
+  await expect(page.locator('#comparison-list li')).toHaveCount(5);
+  await expect(page.locator('#moran-sentence')).not.toBeEmpty();
   await expect(page.locator('#national-table table')).toBeVisible();
   await expect(page.locator('#national-chart svg').first()).toBeVisible();
   await expect(page.locator('#state-chart svg').first()).toBeVisible();
@@ -33,6 +37,7 @@ for (const colorScheme of ['light', 'dark']) {
     await page.emulateMedia({ colorScheme });
     await loaded(page);
     await chooseState(page, 'Kano');
+    await page.locator('details.more summary').click(); // the Moran table too
     const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
     expect(results.violations).toEqual([]);
   });
@@ -50,10 +55,13 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   await page.keyboard.press('Enter');
   await expect(page.locator('main')).toBeFocused();
 
-  // Tab from <main> until the select is reached (bounded, so a trap fails the test).
+  // Tab from <main> until the select is reached (bounded, so a trap or a run of new stops
+  // fails the test). At desktop width it is the 11th stop: the methodology link, five
+  // comparison source links, the map, the two spatial links ("Why", "Methods and limits"),
+  // the <summary> of the details, then the select. The bound allows a small margin.
   const select = page.locator('#state-select');
   let reached = false;
-  for (let i = 0; i < 20 && !reached; i += 1) {
+  for (let i = 0; i < 15 && !reached; i += 1) {
     await page.keyboard.press('Tab');
     reached = await select.evaluate((el) => el === document.activeElement);
   }

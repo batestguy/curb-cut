@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en-NG">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Methodology: Curb Cut</title>
+    <meta
+      name="description"
+      content="How Curb Cut's disability figures were made: the Washington Group definition, data sources, disclosure and precision rules, the small-area attempt, the spatial methods and their limits."
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Cpath fill='%23008751' d='M0 0h3v2H0z'/%3E%3Cpath fill='%23fff' d='M1 0h1v2H1z'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <div class="flag-band" aria-hidden="true"></div>
+    <header class="site-header">
+      <p class="site-name"><a href="./">Curb Cut</a></p>
+    </header>
+
+    <main id="main" tabindex="-1" class="methodology">
+      <h1>Methodology: definitions, sources and limits</h1>
+      <p>
+        This page explains how the measured figures on the <a href="./">main page</a> were made,
+        what they can and cannot show, and where each choice is recorded. The project's full
+        check log is
+        <a href="https://github.com/batestguy/curb-cut/blob/main/docs/verification.md"
+          >docs/verification.md</a
+        >; references such as "D46" below are rows in it.
+      </p>
+
+      <section aria-labelledby="new-heading">
+        <h2 id="new-heading">What is new here, and what is not</h2>
+        <p>
+          The Nigeria DHS 2023-24 final report already publishes disability for people aged 15
+          and over in every state, separately for women and men, without confidence intervals
+          (Tables 14.2.1 and 14.2.2; D46). This site builds on those figures rather than
+          replacing them.
+        </p>
+        <p>What this site adds:</p>
+        <ul>
+          <li>both sexes together, by state, each with a 95% confidence interval and a precision flag;</li>
+          <li>each of the six activities at the Washington Group cut-off, by state, published as downloadable data (state pages come in a later phase);</li>
+          <li>adults 18 and over as the headline, with children 5–17 reported separately;</li>
+          <li>a check of whether neighbouring states look alike;</li>
+          <li>accessible charts, a map and tables, with the underlying aggregates downloadable.</li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="definition-heading">
+        <h2 id="definition-heading">The definition: Washington Group Short Set</h2>
+        <p>
+          The DHS 2024 household questionnaire asks the Washington Group Short Set (WG-SS) about
+          every household member aged 5 and over: how much difficulty they have seeing (even
+          with glasses), hearing (even with a hearing aid), walking or climbing steps,
+          remembering or concentrating, with self-care, and communicating. Each answer is "no
+          difficulty", "some difficulty", "a lot of difficulty" or "cannot do at all".
+        </p>
+        <dl>
+          <dt>DISABILITY3 (the disability figure on this site)</dt>
+          <dd>
+            "A lot of difficulty" or "cannot do at all" in at least one of the six activities.
+            This is the Washington Group's recommended cut-off (WG Document 7A; D23). Someone
+            with no answer at that level and a "don't know" in any activity is left out of the
+            denominator, as Document 7A says; the DHS report counts them as having no
+            disability. "Don't know" is 0.0% in every row of the report's Table 14.1, so the
+            difference is negligible (D48).
+          </dd>
+          <dt>"Any difficulty"</dt>
+          <dd>
+            At least "some difficulty" in at least one activity. This is a much wider group: in
+            the NDHS 2024 report, 15.5% of people aged 15 and over, against 2.8% at the cut-off
+            (Table 14.1, computed as 100% minus "no difficulty" minus "don't know").
+          </dd>
+        </dl>
+        <p>
+          Figures of about 15% and about 3% therefore describe different things. JONAPWD's 15%
+          applies the global disability rate to population projections; nobody was counted.
+          WHO's fact sheet says "An estimated 1.3 billion people experience significant
+          disability", 16% of the world's population, but it does not define "significant
+          disability" or cite a source report for the figure (D59), so it cannot be matched to
+          the Washington Group cut-off.
+        </p>
+      </section>
+
+      <section aria-labelledby="population-heading">
+        <h2 id="population-heading">Who is counted</h2>
+        <p>
+          The figures cover the de facto household population: people who slept in the
+          household the night before the interview, as in the DHS report (D48). People living
+          in institutions, and people without a household, are not in the survey. The headline
+          is adults aged 18 and over; children 5–17 are reported separately. 49 people whose
+          age is recorded as "don't know" belong to no age group, so they are outside the 18+
+          and 5–17 figures; the report counts them as 15+. Our pipeline reproduces every
+          transcribed cell of the report's Tables 14.1 and 14.2 to the published decimal when it
+          uses the report's own conventions (D48).
+        </p>
+      </section>
+
+      <section aria-labelledby="disclosure-heading">
+        <h2 id="disclosure-heading">Privacy: only checked aggregates are published</h2>
+        <p>
+          The survey microdata are licensed and never leave the author's computer. Only
+          weighted aggregates leave it, through one disclosure check: any cell based on fewer
+          than 30 respondents is suppressed. Because published cells add up (states to zones,
+          women and men to both sexes, wealth groups to their state), a lone suppressed cell
+          could be worked out by subtraction, so wherever a set of cells that add up would hold
+          exactly one suppressed cell, a second one is suppressed too (complementary
+          suppression; D49). The number of people with a difficulty in a cell is never published.
+        </p>
+      </section>
+
+      <section aria-labelledby="precision-heading">
+        <h2 id="precision-heading">Precision flags</h2>
+        <p>
+          Every estimate carries a flag based on the US National Center for Health Statistics
+          data presentation standards for proportions (Parker et al. 2017; D42), with 95%
+          Korn–Graubard confidence intervals:
+        </p>
+        <dl>
+          <dt>Reliable</dt>
+          <dd>
+            Meets the standards: enough respondents and effective sample size, and an interval
+            that is not too wide for the estimate. The project adds a stricter rule: at least 10
+            people with the difficulty in the sample.
+          </dd>
+          <dt>Review</dt>
+          <dd>
+            Shown, but read with care: it rests on fewer than 10 people with the difficulty (or
+            none), or on few degrees of freedom. Many single-activity state figures are in this
+            group.
+          </dd>
+          <dt>Unreliable</dt>
+          <dd>Too few respondents, or an interval too wide to be useful.</dd>
+        </dl>
+        <p>
+          A flag is a screening label, not a guarantee: it says nothing about measurement error,
+          non-response or a wrong design assumption. All 37 state headline estimates (adults
+          18+) are flagged reliable.
+        </p>
+      </section>
+
+      <section aria-labelledby="small-area">
+        <h2 id="small-area">Small-area estimates were tried and change little</h2>
+        <p>
+          A Fay-Herriot model borrows strength from state characteristics to make small-sample
+          state estimates more precise. Five candidate characteristics, and the rule for
+          choosing among them, were written down and frozen before any model was fitted (share
+          aged 60 and over, urban share, poverty, women's literacy, population density;
+          <a href="https://github.com/batestguy/curb-cut/blob/main/docs/fay-herriot-covariates.md"
+            >the pre-declared plan and its result</a
+          >).
+        </p>
+        <p>
+          The result (D56): no model passed its pre-declared checks, and the characteristics
+          explained too little to be chosen. More importantly, the states differ far more than
+          the survey's sampling error, so most estimates would move by less than about 4%, and
+          none by more than 11%; the precision gain is about 4% at the median. The survey's direct
+          estimates are already reliable in all 37 states, so they are what this site shows. The
+          full record is in
+          <a href="https://github.com/batestguy/curb-cut/tree/main/data/public/sae"
+            >data/public/sae on GitHub</a
+          >.
+        </p>
+      </section>
+
+      <section aria-labelledby="spatial">
+        <h2 id="spatial">Spatial methods and their limits</h2>
+        <p>All of these use the 37 direct state estimates, never individuals (D58).</p>
+        <ul>
+          <li>
+            <strong>Neighbours</strong>: states that share a border or a corner (queen
+            contiguity), from the geoBoundaries state boundaries.
+          </li>
+          <li>
+            <strong>Clustering across the country</strong>: global Moran's I for each measure,
+            with a permutation p-value (9,999 permutations) and a Benjamini-Hochberg correction
+            across the 8 tests. It tests only whether similar states sit next to each other.
+            Imprecise estimates pull Moran's I towards zero, so "no pattern" for a measure with
+            many imprecise states is not evidence that there is none.
+          </li>
+          <li>
+            <strong>Local hotspots</strong> (exploratory): local Moran's I for each state with a
+            false-discovery-rate correction across 37 tests. With only 37 states these tests
+            have little power.
+          </li>
+          <li>
+            <strong>Profile groups</strong> (descriptive): states grouped by their pattern across
+            the six activities (Ward clustering of standardised estimates). The groups mostly
+            reflect the overall level of reported difficulty and carry no inference.
+          </li>
+          <li>
+            <strong>Health facilities</strong> (ecological, descriptive): a rank correlation
+            between facilities per 100,000 people and disability among adults. It compares state
+            averages only; it says nothing about individuals or causes, and general health
+            facilities are not disability services.
+          </li>
+        </ul>
+        <p>
+          <strong>No spatial analysis is made of JONAPWD's figures</strong>: they are 15% of
+          each state's projected population (correlation 0.998 with population), so any map or
+          spatial test would only show where people live (D17).
+        </p>
+      </section>
+
+      <section aria-labelledby="sources-heading">
+        <h2 id="sources-heading">Data sources and citations</h2>
+        <dl>
+          <dt>Disability (the headline)</dt>
+          <dd>
+            The DHS Program, Nigeria Demographic and Health Survey 2024 (National Population
+            Commission and ICF), household member recode (NGPR8BFL). Used only for the
+            registered project "Curb Cut: disability prevalence and poverty in Nigeria". Report:
+            <a href="https://dhsprogram.com/pubs/pdf/FR395/FR395.pdf">NDHS 2023-24 final report (FR395)</a>,
+            chapter 14.
+          </dd>
+          <dt>WHO comparison figure</dt>
+          <dd>
+            World Health Organization,
+            <a href="https://www.who.int/news-room/fact-sheets/detail/disability-and-health"
+              >fact sheet "Disability"</a
+            >, 7 March 2023.
+          </dd>
+          <dt>Population</dt>
+          <dd>
+            National Bureau of Statistics (NBS),
+            <a href="https://microdata.nigerianstat.gov.ng/index.php/catalog/182"
+              >Demographic Bulletin 2023</a
+            >, Annex 3 (source: National Population Commission); cross-checked with WorldPop
+            v3.0 (CC BY 4.0).
+          </dd>
+          <dt>Small-area candidate characteristics</dt>
+          <dd>
+            WorldPop 2020 age structures (Bondarenko et al. 2020, doi:10.5258/SOTON/WP00699, CC
+            BY 4.0); JRC GHSL GHS-SMOD and GHS-POP R2023A (Schiavina et al. 2023); NBS,
+            Nigeria Multidimensional Poverty Index 2022, Table D6; NBS and UNICEF, Nigeria MICS
+            2021 (MICS6), Table SR.6.1W. Details:
+            <a href="https://github.com/batestguy/curb-cut/blob/main/data/public/covariates/README.md"
+              >covariates README</a
+            >.
+          </dd>
+          <dt>Health facilities</dt>
+          <dd>
+            CIESIN, Columbia University (2024), GRID3 NGA - Health Facilities v2.0, CC BY 4.0,
+            doi:10.7916/kv1n-0743 (D57). Non-exhaustive and not validated by government.
+          </dd>
+          <dt>Boundaries</dt>
+          <dd>
+            Runfola, D. et al. (2020), geoBoundaries: A global database of political
+            administrative boundaries, <cite>PLoS ONE</cite> 15(4): e0231866 (CC BY 4.0; source
+            GRID3, 2022).
+          </dd>
+          <dt>Assumed figures</dt>
+          <dd>
+            Joint National Association of Persons with Disabilities (JONAPWD),
+            <a href="https://jonapwdng.org/10865-2/">2025 Assumptive Disability Disaggregated Data</a>.
+          </dd>
+        </dl>
+        <p>
+          The scripts that turn the microdata into the published aggregates are public, so anyone
+          with their own DHS access can reproduce every figure:
+          <a href="https://github.com/batestguy/curb-cut/blob/main/docs/reproduce.md">docs/reproduce.md</a>.
+        </p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <h2 class="footer-heading">More</h2>
+      <p>
+        <a href="./">Back to the main page</a>. Source code and data notes:
+        <a href="https://github.com/batestguy/curb-cut">github.com/batestguy/curb-cut</a>.
+      </p>
+    </footer>
+  </body>
+</html>

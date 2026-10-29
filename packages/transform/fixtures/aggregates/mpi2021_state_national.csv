@@ -1,4 +1,4 @@
-source,dataset_version,measure,geography_level,geography,age_group,sex,estimate,se,ci_low,ci_high,n_unweighted,n_effective,df,precision_flag,precision_reason,suppressed
-mpi2021,FIXTURE (invented),mpi_screener_seeing_any,state,NG-LA,18+,all,0.04,0.01,0.02,0.06,3000,1500.0,30,reliable,,False
-mpi2021,FIXTURE (invented),mpi_screener_seeing_any,state,NG-KN,18+,all,,,,,20,,,suppressed,n<30 (disclosure),True
-mpi2021,FIXTURE (invented),mpi_selfcare_3plus,national,NG,18+,all,0.01,0.01,0,0.03,120000,60000.0,30,reliable,,False
+source,dataset_version,measure,geography_level,geography,age_group,sex,breakdown,breakdown_level,estimate,se,ci_low,ci_high,n_unweighted,n_effective,df,precision_flag,precision_reason,suppressed
+mpi2021,FIXTURE (invented),mpi_screener_seeing_any,state,NG-LA,18+,all,all,all,,,,,,,,suppressed,complementary suppression (disclosure),True
+mpi2021,FIXTURE (invented),mpi_screener_seeing_any,state,NG-KN,18+,all,all,all,,,,,,,,suppressed,n<30 (disclosure),True
+mpi2021,FIXTURE (invented),mpi_selfcare_3plus,national,NG,18+,all,all,all,0.01,0.01,0,0.03,120000,60000.0,30,reliable,,False

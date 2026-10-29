@@ -3,9 +3,11 @@
 // (about 8 MB) starts downloading when the user first focuses the picker, not on page load,
 // so visitors who never use the explorer don't pay for it.
 //
-// After "Show figures", a state card (facts from states.json, a locator map) appears above
-// the state's table, and focus moves to the card's heading; the table follows it.
+// After "Show figures", a state card (facts from states.json, the state's DHS 2024 figure with
+// the national one for comparison, a locator map) appears above the state's table, and focus
+// moves to the card's heading; the table follows it.
 import { formatValue, renderTable } from './format.js';
+import { interval, pct } from './prevalence.js';
 
 const PARQUET = 'jonapwd_state_by_type.parquet';
 const SQL = `select disability_type_label, persons, share_of_state * 100 as share
@@ -150,14 +152,29 @@ function renderMap(figure, map, profile, total) {
   figure.hidden = false;
 }
 
-function renderCard(card, profile, map, total) {
+const FLAGS = {
+  reliable: 'reliable',
+  review: 'flagged for review (few events)',
+  unreliable: 'unreliable',
+};
+
+// "4.6% (95% confidence interval 3.6% to 5.7%); precision: reliable".
+function dhsFigure(cell) {
+  if (!cell) return 'No published estimate';
+  const flag = FLAGS[cell.precision_flag] ?? cell.precision_flag;
+  return `${pct(100 * cell.estimate)} (${interval(100 * cell.ci_low, 100 * cell.ci_high)}); precision: ${flag}`;
+}
+
+function renderCard(card, profile, map, total, national) {
   card.querySelector('h3').textContent = profile.state;
   const facts = card.querySelector('.facts');
   const rows = [
     ['Capital', profile.capital],
     ['Geopolitical zone', profile.zone],
     ['Population, 2023 projection', formatValue(profile.population_2023, 'integer')],
+    ['Adults 18+ with disability, DHS 2024', dhsFigure(profile.dhs2024)],
   ];
+  if (national) rows.push(['Nigeria, for comparison', dhsFigure(national)]);
   if (profile.slogan) rows.push(['Slogan', `“${profile.slogan}”`]);
   facts.replaceChildren(
     ...rows.flatMap(([term, value]) => {
@@ -181,9 +198,12 @@ function renderCard(card, profile, map, total) {
     link(profile.capital_source_url, 'Wikipedia'),
     '; zone, ',
     link('https://en.wikipedia.org/wiki/Geopolitical_zones_of_Nigeria', 'Wikipedia'),
+    '; disability, Nigeria DHS 2024 (Curb Cut estimates, Washington Group cut-off; ',
+    link('./methodology.html', 'methodology'),
+    ')',
   ];
   if (profile.slogan) parts.push('; slogan, ', link(profile.slogan_source_url, 'Zikoko'));
-  parts.push('; map figures, JONAPWD 2025 (see Source at the foot of the page).');
+  parts.push('; map figures, JONAPWD 2025 (see Sources at the foot of the page).');
   sources.replaceChildren(...parts);
 
   const figure = card.querySelector('.locator');
@@ -201,6 +221,7 @@ export function setUpExplorer({
   dataUrl,
   extensionsUrl,
   states,
+  national = Promise.resolve(null),
   onStateShown = () => {},
 }) {
   select.replaceChildren(new Option('Choose a state', ''));
@@ -271,7 +292,7 @@ export function setUpExplorer({
     status.textContent = `Loading figures for ${state}. This can take a few seconds the first time.`;
     try {
       const query = await startEngine();
-      const [result, map] = await Promise.all([query(state), loadMap()]);
+      const [result, map, nationalCell] = await Promise.all([query(state), loadMap(), national]);
       if (request !== latest) return; // a newer request has superseded this one
       const rows = result.map((r) => [r.disability_type_label, r.persons, r.share]);
       const table = renderTable({
@@ -284,7 +305,7 @@ export function setUpExplorer({
         rows,
       });
       hideMapTip();
-      renderCard(card, profiles.get(state), map, total);
+      renderCard(card, profiles.get(state), map, total, nationalCell);
       tableEl.replaceChildren(table);
       status.textContent = `Showing ${rows.length} disability types for ${state}.`;
       onStateShown(state);

@@ -1,0 +1,19 @@
+{
+  "built_on": "2026-10-28",
+  "rows": 37,
+  "source_sha256_checked": 41,
+  "worldpop_url": "https://data.worldpop.org/GIS/AgeSex_structures/Global_2000_2020_Constrained_UNadj/2020/NGA/",
+  "ghsl_url": "https://jrc-ghsl.s3.amazonaws.com/",
+  "mpi_table": "nbs_mpi2022_table_d6.csv",
+  "mpi_table_sha256": "9f7d3f08a7a3db0eb8a933965503a569aa03abf665ef887afd89ff118da099cc",
+  "mics_table": "mics2021_table_sr61w.csv",
+  "mics_table_sha256": "b322b32ceab5880789ab2a961c09df89acfe595fa831becda465b8cb2d0a1dca",
+  "geoboundaries_sha256": "edd28050c7f1ae40471424605f74e4d2df83502e4f301089761ae18f8ae2fbbf",
+  "checks": {
+    "worldpop_raster_total": 206139587,
+    "worldpop_inside_polygons": 206102222,
+    "worldpop_outside_polygons_share": 0.000181,
+    "ghsl_pop_inside_polygons": 208715941,
+    "area_km2_total": 912729.1
+  }
+}

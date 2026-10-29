@@ -1,14 +1,14 @@
-source,dataset_version,measure,geography_level,geography,age_group,sex,estimate,se,ci_low,ci_high,n_unweighted,n_effective,df,precision_flag,precision_reason,suppressed
-ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,national,NG,18+,all,0.032367,0.00213,0.028308,0.036828,14296,6900.9,505,reliable,,False
-ghs_w5,NGA_2023_GHSP-W5_v02_M,seeing_3plus,national,NG,18+,all,0.011207,0.001165,0.009033,0.013741,14296,8163.4,505,reliable,,False
-ghs_w5,NGA_2023_GHSP-W5_v02_M,hearing_3plus,national,NG,18+,all,0.004236,0.000683,0.003002,0.005806,14296,9051.4,505,reliable,,False
-ghs_w5,NGA_2023_GHSP-W5_v02_M,walking_3plus,national,NG,18+,all,0.017563,0.00167,0.014432,0.021163,14296,6188.5,505,reliable,,False
-ghs_w5,NGA_2023_GHSP-W5_v02_M,cognition_3plus,national,NG,18+,all,0.005358,0.000826,0.003858,0.007246,14296,7803.2,505,reliable,,False
-ghs_w5,NGA_2023_GHSP-W5_v02_M,selfcare_3plus,national,NG,18+,all,0.007999,0.001018,0.006124,0.010263,14296,7663.4,505,reliable,,False
-ghs_w5,NGA_2023_GHSP-W5_v02_M,communication_3plus,national,NG,18+,all,0.004472,0.000837,0.002981,0.006444,14296,6361.3,505,reliable,,False
-ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,zone,North Central,18+,all,0.021958,0.004688,0.013626,0.0334,2499,977.1,91,reliable,,False
-ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,zone,North East,18+,all,0.021616,0.003685,0.014899,0.030267,3129,1557.4,83,reliable,,False
-ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,zone,North West,18+,all,0.022103,0.003562,0.015574,0.030395,2806,1703.3,81,reliable,,False
-ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,zone,South East,18+,all,0.0596,0.007253,0.045979,0.075782,2005,1065.5,87,reliable,,False
-ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,zone,South South,18+,all,0.043632,0.006471,0.03168,0.058436,2058,996.6,95,reliable,,False
-ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,zone,South West,18+,all,0.033489,0.005034,0.024218,0.045035,1799,1277.5,97,reliable,,False
+source,dataset_version,measure,geography_level,geography,age_group,sex,breakdown,breakdown_level,estimate,se,ci_low,ci_high,n_unweighted,n_effective,df,precision_flag,precision_reason,suppressed
+ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,national,NG,18+,all,all,all,0.032367,0.00213,0.028308,0.036828,14296,6900.9,505,reliable,,False
+ghs_w5,NGA_2023_GHSP-W5_v02_M,seeing_3plus,national,NG,18+,all,all,all,0.011207,0.001165,0.009033,0.013741,14296,8163.4,505,reliable,,False
+ghs_w5,NGA_2023_GHSP-W5_v02_M,hearing_3plus,national,NG,18+,all,all,all,0.004236,0.000683,0.003002,0.005806,14296,9051.4,505,reliable,,False
+ghs_w5,NGA_2023_GHSP-W5_v02_M,walking_3plus,national,NG,18+,all,all,all,0.017563,0.00167,0.014432,0.021163,14296,6188.5,505,reliable,,False
+ghs_w5,NGA_2023_GHSP-W5_v02_M,cognition_3plus,national,NG,18+,all,all,all,0.005358,0.000826,0.003858,0.007246,14296,7803.2,505,reliable,,False
+ghs_w5,NGA_2023_GHSP-W5_v02_M,selfcare_3plus,national,NG,18+,all,all,all,0.007999,0.001018,0.006124,0.010263,14296,7663.4,505,reliable,,False
+ghs_w5,NGA_2023_GHSP-W5_v02_M,communication_3plus,national,NG,18+,all,all,all,0.004472,0.000837,0.002981,0.006444,14296,6361.3,505,reliable,,False
+ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,zone,North Central,18+,all,all,all,0.021958,0.004688,0.013626,0.0334,2499,977.1,91,reliable,,False
+ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,zone,North East,18+,all,all,all,0.021616,0.003685,0.014899,0.030267,3129,1557.4,83,reliable,,False
+ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,zone,North West,18+,all,all,all,0.022103,0.003562,0.015574,0.030395,2806,1703.3,81,reliable,,False
+ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,zone,South East,18+,all,all,all,0.0596,0.007253,0.045979,0.075782,2005,1065.5,87,reliable,,False
+ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,zone,South South,18+,all,all,all,0.043632,0.006471,0.03168,0.058436,2058,996.6,95,reliable,,False
+ghs_w5,NGA_2023_GHSP-W5_v02_M,disability3,zone,South West,18+,all,all,all,0.033489,0.005034,0.024218,0.045035,1799,1277.5,97,reliable,,False

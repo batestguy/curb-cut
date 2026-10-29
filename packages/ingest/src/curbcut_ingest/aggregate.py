@@ -29,6 +29,7 @@ import pandas as pd
 
 from curbcut_ingest import disclosure
 from curbcut_ingest.restricted import common as c
+from curbcut_ingest.states import StateLookup
 
 R_SCRIPT = c.ROOT / "packages" / "ingest" / "R" / "estimate.R"
 WORK = c.DERIVED / "estimates"
@@ -68,10 +69,10 @@ def mpi_indicators(frame: pd.DataFrame) -> dict[str, pd.Series]:
 
 @dataclass(frozen=True)
 class Group:
-    """One family of cells: a filter, a variable to break down by, and the measures."""
+    """One family of cells: a filter, the variables to cross, and the measures."""
 
-    by: str
-    target: str  # output column that takes the breakdown's levels: geography or sex
+    by: list[str]  # analysis-frame columns crossed to form the cells
+    targets: list[str]  # output column taking each by-column's levels, in the same order
     labels: dict[str, str]
     outcomes: list[str]
     filter: dict[str, str]
@@ -79,33 +80,79 @@ class Group:
     def as_spec(self) -> dict[str, Any]:
         return {
             "by": self.by,
-            "target": self.target,
+            "targets": self.targets,
             "labels": self.labels,
             "outcomes": self.outcomes,
             "filter": self.filter,
         }
 
 
-def _group(level: str, by: str, age: str, outcomes: list[str], *, by_sex: bool = False) -> Group:
-    labels = {"geography_level": level, "geography": "NG", "age_group": age, "sex": "all"}
-    return Group(
-        by="sex" if by_sex else by,
-        target="sex" if by_sex else "geography",
-        labels=labels,
-        outcomes=outcomes,
-        filter={"age_group": age},
-    )
+BREAKDOWN_COLUMNS = {
+    "sector": "sector",
+    "wealth_quintile": "wealth_quintile",
+    "age_band": "prevalence_age_band",
+}
+"""Breakdown name (published in ``breakdown``) -> analysis-frame column of its levels."""
+
+
+def _group(
+    level: str,
+    by: str,
+    age: str,
+    outcomes: list[str],
+    *,
+    by_sex: bool = False,
+    breakdown: str | None = None,
+) -> Group:
+    """Cells of ``by`` (national, zone or state_code) for one age group, optionally crossed
+    with sex (into the ``sex`` column) and one breakdown (into ``breakdown_level``)."""
+    labels = {
+        "geography_level": level,
+        "geography": "NG",
+        "age_group": age,
+        "sex": "all",
+        "breakdown": "all",
+        "breakdown_level": "all",
+    }
+    columns, targets = [by], ["geography"]
+    if by_sex:
+        columns.append("sex")
+        targets.append("sex")
+    if breakdown is not None:
+        labels["breakdown"] = breakdown
+        columns.append(BREAKDOWN_COLUMNS[breakdown])
+        targets.append("breakdown_level")
+    return Group(by=columns, targets=targets, labels=labels, outcomes=outcomes,
+                 filter={"age_group": age})  # fmt: skip
+
+
+GEOGRAPHIES = {"national": "national", "zone": "zone", "state": "state_code"}
 
 
 def dhs_jobs(frame: pd.DataFrame) -> list[Job]:
     main = list(wg_indicators(frame))
     with_levels = list(wg_indicators(frame, levels=True))
-    state = [_group("state", "state_code", age, main) for age in AGES]
-    national = [_group("national", "national", age, with_levels) for age in AGES]
-    national += [_group("national", "national", age, main, by_sex=True) for age in AGES]
+    groups: dict[str, list[Group]] = {level: [] for level in GEOGRAPHIES}
+    # Unchanged since P3: state x age, national x age with levels, national x sex.
+    groups["state"] += [_group("state", "state_code", age, main) for age in AGES]
+    groups["national"] += [_group("national", "national", age, with_levels) for age in AGES]
+    groups["national"] += [_group("national", "national", age, main, by_sex=True) for age in AGES]
+    # P4a step 1: state and zone by sex, zone overall.
+    groups["state"] += [_group("state", "state_code", age, main, by_sex=True) for age in AGES]
+    groups["zone"] += [_group("zone", "zone", age, main) for age in AGES]
+    groups["zone"] += [_group("zone", "zone", age, main, by_sex=True) for age in AGES]
+    # Urban/rural and wealth quintile at every level; age bands (DISABILITY3) above state.
+    for level, column in GEOGRAPHIES.items():
+        for breakdown in ("sector", "wealth_quintile"):
+            groups[level] += [_group(level, column, age, main, breakdown=breakdown) for age in AGES]
+        if level != "state":
+            groups[level] += [
+                _group(level, column, age, ["disability3"], breakdown="age_band") for age in AGES
+            ]
     return [
-        Job("dhs2024_state.csv", state, wg_indicators),
-        Job("dhs2024_national.csv", national, lambda f: wg_indicators(f, levels=True)),
+        Job("dhs2024_state.csv", groups["state"], wg_indicators),
+        Job("dhs2024_national.csv", groups["national"], lambda f: wg_indicators(f, levels=True)),
+        Job("dhs2024_zone.csv", groups["zone"], wg_indicators),
     ]
 
 
@@ -210,9 +257,15 @@ JOBS: dict[str, Callable[[pd.DataFrame], list[Job]]] = {
 }
 
 
+DESIGN_COLUMNS = ["weight", "stratum", "psu", "state_code", "zone", "sex", "age_group", "sector"]
+
+
 def analysis_frame(frame: pd.DataFrame, indicators: dict[str, pd.Series]) -> pd.DataFrame:
-    design = frame[["weight", "stratum", "psu", "state_code", "zone", "sex", "age_group"]]
-    out = design.assign(national="NG")
+    """Design and breakdown columns plus the indicators (no identifiers, no raw answers).
+    ``wealth_quintile`` is carried when the source has it (DHS only)."""
+    columns = [*DESIGN_COLUMNS, *(["wealth_quintile"] if "wealth_quintile" in frame else [])]
+    out = frame[columns].assign(national="NG")
+    out["prevalence_age_band"] = c.prevalence_age_band(frame["age"])
     for name, values in indicators.items():
         out[name] = values.astype("float64")  # nanoparquet reads nullable ints poorly
     return out.reset_index(drop=True)
@@ -274,17 +327,39 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--sources", nargs="+", choices=sorted(JOBS), default=sorted(JOBS))
     parser.add_argument("--derived", type=Path, default=c.DERIVED)
     parser.add_argument("--out-root", type=Path, default=disclosure.AGGREGATES)
+    parser.add_argument(
+        "--reuse-raw",
+        action="store_true",
+        help="re-gate the raw R estimates already in <derived>/estimates instead of re-running R",
+    )
     args = parser.parse_args(argv)
+    zone_of = {s.state_code: s.zone for s in StateLookup.from_seeds().states.values()}
     for source in args.sources:
         c.log(f"{source}: reading harmonised file")
         frame = pd.read_parquet(args.derived / f"{source}.parquet")
-        for job in JOBS[source](frame):
-            raw = run_job(source, frame, job, args.derived / "estimates")
-            path, entry = disclosure.publish(raw, DATASETS[source], job.filename, args.out_root)
+        jobs = JOBS[source](frame)
+        work = args.derived / "estimates"
+        raws = [
+            pd.read_csv(work / f"{job.filename.removesuffix('.csv')}.raw.csv")
+            if args.reuse_raw
+            else run_job(source, frame, job, work)
+            for job in jobs
+        ]
+        # Secondary suppression must see every file of the source at once: a state cell can
+        # be recovered from the zone or national cell in another file.
+        combined = pd.concat(raws, keys=range(len(raws)), names=["job", "row"])
+        suppress = disclosure.complementary(combined, zone_of)
+        for i, (job, raw) in enumerate(zip(jobs, raws, strict=True)):
+            mask = pd.Series(suppress.loc[i].to_numpy(), index=raw.index)
+            path, entry = disclosure.publish(
+                raw, DATASETS[source], job.filename, args.out_root, suppress=mask
+            )
             where = "held, git-ignored" if DATASETS[source].held else "public"
             c.log(
                 f"  gate: {path.name} ({where}): {entry['rows']} cells, "
-                f"{entry['suppressed_cells']} suppressed, flags {entry['precision_flags']}"
+                f"{entry['suppressed_cells']} suppressed "
+                f"({entry['secondary_suppressed_cells']} secondary), "
+                f"flags {entry['precision_flags']}"
             )
     return 0
 

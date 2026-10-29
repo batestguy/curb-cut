@@ -61,9 +61,32 @@ Counts you should see with the releases above: DHS 148,177 people (de facto, age
 uv run python -I -m curbcut_ingest.aggregate
 ```
 
-For each source this adds the 0/1 indicators, runs `packages/ingest/R/estimate.R` (R `survey`: weighted proportions, Taylor-linearised SEs, Korn–Graubard intervals, design df), keeps the raw cells in `data/restricted/derived/estimates/`, then passes them through the disclosure gate (`curbcut_ingest.disclosure`): cells under 30 unweighted respondents are suppressed, every row gets the NCHS precision flag, and `data/public/aggregates/manifest.json` is updated with each file's SHA-256 and the script commit. One source at a time: `--sources dhs2024` (choices `dhs2024`, `ghs_w4`, `ghs_w5`, `mpi2021`).
+For each source this adds the 0/1 indicators, runs `packages/ingest/R/estimate.R` (R `survey`: weighted proportions, Taylor-linearised SEs, Korn–Graubard intervals, design df), keeps the raw cells in `data/restricted/derived/estimates/`, then passes them through the disclosure gate (`curbcut_ingest.disclosure`): cells under 30 unweighted respondents are suppressed, every row gets the NCHS precision flag, and `data/public/aggregates/manifest.json` is updated with each file's SHA-256 and the script commit. One source at a time: `--sources dhs2024` (choices `dhs2024`, `ghs_w4`, `ghs_w5`, `mpi2021`). The full run takes about 12 minutes, most of it the DHS state × wealth quintile cells.
+
+What it writes (every file has `breakdown` and `breakdown_level`, which are `all` where a cell has no extra dimension; one cell is source × measure × geography level × geography × age group × sex × breakdown × breakdown level):
+
+| File | Cells | Suppressed | Contents |
+|---|---|---|---|
+| `dhs2024_state.csv` | 5,138 | 413 (168 under 30, 245 secondary) | By state: overall, by sex, by urban/rural, by wealth quintile |
+| `dhs2024_national.csv` | 197 | 0 | National: overall (with 4-level distributions), by sex, urban/rural, wealth quintile, age band |
+| `dhs2024_zone.csv` | 894 | 0 | By zone: overall, by sex, urban/rural, wealth quintile, age band |
+| `ghs_w4_national_zone.csv`, `ghs_w5_national_zone.csv` | 13 each | 0 | Unchanged |
+| `mpi2021_state_national.csv` | 532 | 0 | Unchanged |
+
+Secondary suppression runs over all files of a source together (a state cell could otherwise be recovered from the zone or national file); see `data/public/aggregates/README.md`. To re-gate without re-running R (when only the gate changed), add `--reuse-raw`: it reads the raw cells already in `data/restricted/derived/estimates/`.
+
+The DHS harmoniser carries `wealth_quintile` (`hv270`, 1 = lowest … 5 = highest; the direction is confirmed by `validate_ndhs` against the report's wealth rows); age bands (5-9, 10-14, 15-17 inside 5-17; 18-29 … 60-69, 70+ inside 18+) are made from `age` in `curbcut_ingest.aggregate`.
 
 **Check:** your CSVs should have the same SHA-256 as `manifest.json` → `files`. Different R or package versions can change the last printed digit of an estimate; the row counts, suppression counts and flags should still agree.
+
+## 5a. Validate against the published report and a second implementation (DHS)
+
+```
+uv run python -I -m curbcut_ingest.validate_ndhs
+uv run python -I -m curbcut_ingest.crosscheck_svy
+```
+
+`validate_ndhs` recomputes NDHS 2024 Tables 14.1, 14.2.1 and 14.2.2 (states, zones, urban/rural and the men's wealth quintiles) from the PR file on the report's own conventions and compares them with the transcription in `data/public/ndhs_report/`; every cell should match to the published decimal (exit 0). It counts 148,226 people: the 148,177 above plus 49 whose age is "don't know", whom the report counts as 15+. `crosscheck_svy` re-estimates every published (unsuppressed) DHS cell in the state, national and zone files, for every sex and breakdown, with Python `svy` and compares it with the R output: estimates and unweighted n must be equal, and SEs within the 5% tolerance (a cell with no `svy` SE fails). On 2026-10-27: 5,816 cells, largest estimate difference 5×10⁻⁷ (CSV rounding), unweighted n equal everywhere, SE median relative difference 0.01%, largest 2.19% (a state × wealth quintile cell). Both print only the comparison, never a recomputed cell on its own. Results: `docs/verification.md` D48.
 
 ## 6. Load into the warehouse and test
 
@@ -74,7 +97,7 @@ uv run dbt build --profiles-dir .
 uv run dbt build --profiles-dir . --vars '{include_mpi: false}'  # optional: leave MPI 2021 out
 ```
 
-The tests re-check the disclosure rule (no unsuppressed cell under 30), that every row has a precision flag, that all 37 states resolve, that estimates and intervals lie in [0, 1] with `ci_low ≤ estimate ≤ ci_high`, that GHS has no state rows and that MPI is never labelled DISABILITY3.
+The tests re-check the disclosure rule (no unsuppressed cell under 30), that every row has a precision flag, that all 37 states resolve, that estimates and intervals lie in [0, 1] with `ci_low ≤ estimate ≤ ci_high`, that GHS has no state rows and that MPI is never labelled DISABILITY3, that each cell is unique on the full grain, and that breakdown levels are valid (age bands only for DISABILITY3, nested in their age group, never by state). `mart_prevalence_state` and `mart_prevalence_national_zone` keep only `breakdown = 'all'`; the breakdown rows are in `mart_prevalence_breakdowns`. On 2026-10-27 the real build passed 140 of 140 (the fixture build 141, including the fixture-only edge cases).
 
 ## Denominators (optional)
 

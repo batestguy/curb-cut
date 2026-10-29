@@ -181,7 +181,7 @@ a {
   padding: 0.25rem 1rem 0.5rem;
 }
 
-.caveat h2 {
+.caveat h3 {
   margin-top: 0.75rem;
   font-size: 1.1rem;
 }
@@ -472,4 +472,162 @@ table:focus-visible {
 
 .card-sources {
   margin-bottom: 0;
+}
+
+/* Visible to screen readers only (a heading that keeps the outline complete). */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.lead {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Wide data tables scroll sideways inside the page at narrow widths (WCAG 1.4.10 allows
+   two-dimensional scrolling for data tables); the page itself never scrolls sideways. */
+.table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.table-wrap:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* The prevalence map. Colours come from the chart document's themes (map.js sets the
+   --map-* properties), so they always match the audited values. Boundaries are the theme's
+   edge colour, 3:1 against the background and every fill; the chosen state also gets a thick
+   outline, so it is never marked by colour alone. */
+.choropleth-figure {
+  position: relative;
+  margin: 0;
+}
+
+.choropleth {
+  max-width: 40rem;
+}
+
+.choropleth:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.choropleth svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.choropleth path {
+  stroke: var(--map-edge);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+}
+
+.choropleth path.c0 { fill: var(--map-c0); }
+.choropleth path.c1 { fill: var(--map-c1); }
+.choropleth path.c2 { fill: var(--map-c2); }
+.choropleth path.c3 { fill: var(--map-c3); }
+.choropleth path.c4 { fill: var(--map-c4); }
+
+.choropleth path:hover,
+.choropleth path.selected {
+  stroke-width: 3;
+}
+
+.choropleth .map-ring {
+  pointer-events: none;
+  fill: none;
+  stroke: var(--map-edge);
+  stroke-width: 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.map-legend {
+  list-style: none;
+  margin: 0 0 0.75rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+}
+
+.map-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.map-legend .swatch {
+  display: inline-block;
+  width: 1.4rem;
+  height: 1rem;
+  border: 1px solid var(--map-edge);
+  flex: none;
+}
+
+details.more {
+  margin: 0.5rem 0 1rem;
+}
+
+details.more summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--link);
+}
+
+.sentences li {
+  margin-bottom: 0.4rem;
+}
+
+h4 {
+  font-size: 1rem;
+  margin: 1rem 0 0.25rem;
+}
+
+.state-list {
+  columns: 12rem;
+  margin-top: 0.25rem;
+}
+
+/* The methodology page. */
+.methodology dt {
+  font-weight: 700;
+  margin-top: 0.5rem;
+}
+
+.methodology dd {
+  margin-left: 1rem;
+}
+
+.comparison-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0;
+}
+
+.comparison-list li {
+  border-left: 0.3rem solid var(--border);
+  padding: 0.1rem 0 0.1rem 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.comparison-list p {
+  margin: 0.2rem 0;
+}
+
+.comparison-value {
+  font-size: 1.2rem;
 }

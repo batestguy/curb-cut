@@ -50,7 +50,7 @@ models:
     data_tests:
       - unique_combination:
           arguments:
-            columns: [source, measure, geography_level, geography, age_group, sex]
+            columns: [source, measure, geography_level, geography, age_group, sex, breakdown, breakdown_level]
       - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
           arguments:
             column_A: estimate
@@ -87,6 +87,16 @@ models:
           - accepted_values:
               arguments:
                 values: [all, male, female]
+      - name: breakdown
+        description: Extra dimension of the cell, or "all" when there is none.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [all, sector, wealth_quintile, age_band]
+      - name: breakdown_level
+        description: Level of the breakdown ("all" exactly when breakdown is "all").
+        data_tests: [not_null]
       - name: estimate
         data_tests:
           - dbt_expectations.expect_column_values_to_be_between:
@@ -106,7 +116,12 @@ models:
                 min_value: 0
                 max_value: 1
       - name: n_unweighted
-        data_tests: [not_null, non_negative]
+        description: Unweighted respondents; null on suppressed cells, since a count could be recovered by subtraction.
+        data_tests:
+          - not_null:
+              config:
+                where: "not suppressed"
+          - non_negative
       - name: precision_flag
         description: NCHS standard (reliable / review / unreliable), or suppressed by the disclosure check.
         data_tests:
@@ -135,4 +150,55 @@ models:
                 to: ref('dim_states')
                 field: state
       - name: population_2025
+        data_tests: [not_null, non_negative]
+
+  - name: stg_covariates__state
+    description: >
+      Fay-Herriot covariates by state (docs/fay-herriot-covariates.md), raw values. The
+      state names are already canonical. wp2020_pop_total and wp2020_pop_18plus are
+      benchmark weights for the FH step, not covariates.
+    columns:
+      - name: state
+        data_tests:
+          - not_null
+          - unique
+          - relationships:
+              arguments:
+                to: ref('dim_states')
+                field: state
+      - name: c1_share_60plus
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: c2_urban_share
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: c3_mpi_headcount
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: c4_female_literacy
+        data_tests:
+          - not_null
+          - dbt_expectations.expect_column_values_to_be_between:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: c5_log_density
+        data_tests: [not_null]
+      - name: area_km2
+        data_tests: [not_null, non_negative]
+      - name: wp2020_pop_total
+        data_tests: [not_null, non_negative]
+      - name: wp2020_pop_18plus
         data_tests: [not_null, non_negative]

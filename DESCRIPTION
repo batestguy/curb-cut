@@ -10,4 +10,6 @@ Encoding: UTF-8
 Imports:
     jsonlite,
     nanoparquet,
+    sae,
+    spdep,
     survey

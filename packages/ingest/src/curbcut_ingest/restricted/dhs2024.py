@@ -39,10 +39,14 @@ COLUMNS = [
     "hv103",
     "hv104",
     "hv105",
+    "hv270",
     "shstate",
     *DOMAIN_VARS.values(),
     "hdis9",
 ]
+WEALTH_QUINTILE = {1: "lowest", 2: "second", 3: "middle", 4: "fourth", 5: "highest"}
+"""hv270 (wealth index combined): 1 poorest, 2 poorer, 3 middle, 4 richer, 5 richest
+(value labels checked in the NGPR8BFL metadata, 2026-10-27)."""
 
 
 def harmonise(raw: pd.DataFrame, state_labels: dict[int, str], lookup: StateLookup) -> pd.DataFrame:
@@ -70,7 +74,9 @@ def harmonise(raw: pd.DataFrame, state_labels: dict[int, str], lookup: StateLook
         out[domain] = domains[domain]
     out["disability3"] = c.disability3(domains[list(c.WG_DOMAINS)])
     out["dhs_hdis9"] = c.wg_scale(raw["hdis9"])
-    return c.finish(out[keep], [*c.WG_DOMAINS, "disability3", "dhs_hdis9"])
+    out["wealth_quintile"] = c.recode(raw["hv270"], WEALTH_QUINTILE)
+    extra = [*c.WG_DOMAINS, "disability3", "dhs_hdis9", "wealth_quintile"]
+    return c.finish(out[keep], extra)
 
 
 @c.safe_main
@@ -87,6 +93,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     c.log(f"  de facto, aged 5+, asked the module: {c.masked(len(frame))}")
     c.report_counts("age_group", frame["age_group"])
     c.report_counts("disability3", frame["disability3"])
+    c.report_counts("wealth_quintile", frame["wealth_quintile"])
     # Cross-check against DHS's own summary variable (highest level in any domain).
     own = frame["dhs_hdis9"] >= 3
     mine = frame["disability3"] == 1

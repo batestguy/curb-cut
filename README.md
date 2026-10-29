@@ -34,7 +34,8 @@ JONAPWD's widely cited 2025 figures (about 35 million people) come from applying
 | ✅ | **Ingest and warehouse:** PDF text extraction checked by hand, dbt on DuckDB with data tests, Parquet marts | [`packages/ingest/`](packages/ingest/), [`packages/transform/`](packages/transform/) |
 | ✅ | **CI:** ruff, pyright, ~380 tests (90%+ coverage), dbt build, Playwright + axe accessibility tests, deploy to GitHub Pages | [`ci.yml`](.github/workflows/ci.yml) |
 | ✅ | **Restricted zone (P3):** licensed microdata stays local; survey-weighted estimates (R `survey`) pass one disclosure gate and an NCHS precision flag before anything is public; reproducible by anyone with their own access | [`packages/ingest/`](packages/ingest/), [`data/public/aggregates/`](data/public/aggregates/), [`docs/reproduce.md`](docs/reproduce.md) |
-| 🔜 | **State prevalence on the site** with small-area estimation and a map (P4) | [`PLAN.md`](PLAN.md) |
+| ✅ | **Measured prevalence on the site (P4a):** DHS 2024 disability by state with 95% intervals and precision flags, an accessible map and interval chart, a sourced comparison of the 15% and 3% figures, spatial analysis, and a methodology page; small-area (Fay-Herriot) estimation was tried and changes little, so direct estimates lead | [live](https://batestguy.github.io/curb-cut/), [methodology](https://batestguy.github.io/curb-cut/methodology.html) |
+| 🔜 | **State pages and `disability-access-charts` 0.2** with map support (P4b) | [`PLAN.md`](PLAN.md) |
 | 🔜 | **Disability and poverty:** a pre-registered adjusted association (DoubleML, sensitivity analysis) (P5) | [`PLAN.md`](PLAN.md) |
 
 ## Start here if you're hiring for…
@@ -43,7 +44,7 @@ JONAPWD's widely cited 2025 figures (about 35 million people) come from applying
 |---|---|
 | Accessibility / frontend | the [live site](https://batestguy.github.io/curb-cut/) by keyboard; [the chart library's README](packages/disability-access-charts/); [`site/tests/`](site/tests/) (Playwright + axe) |
 | Data / analytics engineering | [`packages/transform/`](packages/transform/) (dbt models and tests); the [two data zones](#how-its-built); [`docs/verification.md`](docs/verification.md), every source checked and dated |
-| Data science / statistics | [the claim checker's interval test](packages/disability-access-charts/docs/claim-checker.md); survey estimates arrive in P4 |
+| Data science / statistics | [the methodology page](https://batestguy.github.io/curb-cut/methodology.html) (survey estimates, Fay-Herriot attempt, spatial methods); [the claim checker's interval test](packages/disability-access-charts/docs/claim-checker.md) |
 | Python / library design | [`disability-access-charts`](packages/disability-access-charts/): zero dependencies, typed, 90%+ test coverage, trusted publishing |
 | Policy / communication | [the site](https://batestguy.github.io/curb-cut/)'s plain-language caveats; [`PLAN.md`](PLAN.md) |
 

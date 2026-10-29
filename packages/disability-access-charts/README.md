@@ -98,6 +98,7 @@ disability-access-charts check --strict charts/*.json   # warnings fail too
 ## More
 
 - **Languages:** one table of templates and claim words per language (`_lang/en.py`); only English ships in 0.1. Numbers stay as digits in every language, so the checker still works.
+- **Maps (experimental, not yet stable API):** `disability_access_charts.maps.choropleth` builds a shaded-map document in fixed classes, with the same alt-text checks, a table and an audit; `audit()` and `check` handle it. How its colours meet WCAG is in [the maps note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/maps.md). Stable map support is planned for 0.2.
 - **Python:** 3.10 or later. Tests and CI run on 3.12; 3.10 is checked by installing the wheel and running the examples.
 - **Examples** (in the source distribution and the repository's `examples/`): JONAPWD's 2025 *assumed* figures by disability type (a WHO 15% benchmark applied to population, not survey estimates), a synthetic dot plot with intervals, and an audit of a plain Plotly figure. The installed package holds no data.
 
