@@ -71,6 +71,39 @@ TEMPLATES: dict[str, str] = {
     "source": "Source: {source}.",
 }
 
+# Statistical findings (findings.py). Kept apart from TEMPLATES so they do not change which
+# names the alt-text checker reserves. The "finding_*" sentences must pass the claim
+# checker; the "findings_*" lines are counts and method, checked by the audit instead.
+FINDINGS: dict[str, str] = {
+    "series_lowest_ci": "{series}: lowest estimate {low}{low_difference}.",
+    "finding_item": "{name}, {value}",
+    "finding_one": "{prefix}{items}, is {direction} than {other}.",
+    "finding_many": "{prefix}{items}, are each {direction} than {other}.",
+    "finding_gap": "{name}: {a}, {va}, is {direction} than {b}, {vb}.",
+    "finding_prefix": "{series}: ",
+    "higher": "higher",
+    "lower": "lower",
+    "finding_review": "Read with care: {name}'s estimate is flagged for review.",
+    "finding_review_series": "Read with care: {name}'s {series} estimate is flagged for review.",
+    "findings_count": "{checked} {comparisons} checked, {supported} supported.",
+    "comparison": "comparison",
+    "comparisons": "comparisons",
+    "findings_method": (
+        "A comparison is supported when the difference between two estimates is larger than "
+        "their survey uncertainty allows, after allowing for every comparison checked "
+        "(Benjamini-Hochberg, false discovery rate {q}%). These describe the estimates; "
+        "they do not say why they differ."
+    ),
+    "findings_dropped": (
+        "{dropped} more {comparisons} not tested, because {they} involve an estimate that "
+        "is suppressed or too imprecise."
+    ),
+    "findings_withheld": (
+        "Not shown or compared ({count}): {names}; too few respondents or no data."
+    ),
+    "findings_none": "None of the comparisons is supported.",
+}
+
 AND = "and"
 
 
@@ -80,6 +113,15 @@ def join(names: Sequence[str]) -> str:
     if len(names) == 1:
         return names[0]
     return ", ".join(names[:-1]) + f" {AND} " + names[-1]
+
+
+def items(parts: Sequence[str]) -> str:
+    """'A, 1%', 'A, 1%, and B, 2%', 'A, 1%, B, 2%, and C, 3%' (commas keep names and
+    values apart)."""
+    parts = list(parts)
+    if len(parts) == 1:
+        return parts[0]
+    return ", ".join(parts[:-1]) + f", {AND} " + parts[-1]
 
 
 def label(category_label: str) -> str:

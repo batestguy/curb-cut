@@ -95,6 +95,8 @@ from disability_access_charts import _lang
 
 UNITS = ("count", "percent", "number")
 DEFAULT_INTERVAL_LABEL = "95% confidence interval"
+PRECISION_FLAGS = ("reliable", "review", "unreliable", "suppressed")
+"""Per-estimate precision flags a series may carry (see :class:`Series`)."""
 RATIO_TOLERANCE = 0.05
 TEST_Z = 1.96  # two-sided 5% test of a difference
 
@@ -111,12 +113,20 @@ _APOSTROPHES = "'" + chr(0x2019)  # straight and curly
 
 @dataclass(frozen=True)
 class Series:
-    """One series of values, one per category, with an optional interval."""
+    """One series of values, one per category, with an optional interval.
+
+    ``precision`` (optional) is a flag per estimate from :data:`PRECISION_FLAGS`:
+    "reliable", "review" (few events; read with care), "unreliable" or "suppressed".
+    The statistical findings (:mod:`disability_access_charts.findings`) hedge comparisons
+    that involve a "review" estimate and leave out those that involve an "unreliable" or
+    "suppressed" one. The alt-text and the claim checker do not read it.
+    """
 
     name: str
     values: tuple[float, ...]
     lower: tuple[float, ...] | None = None
     upper: tuple[float, ...] | None = None
+    precision: tuple[str, ...] | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "values", tuple(self.values))
@@ -124,6 +134,8 @@ class Series:
             object.__setattr__(self, "lower", tuple(self.lower))
         if self.upper is not None:
             object.__setattr__(self, "upper", tuple(self.upper))
+        if self.precision is not None:
+            object.__setattr__(self, "precision", tuple(self.precision))
 
     @property
     def has_interval(self) -> bool:
@@ -162,17 +174,20 @@ class ChartData:
         return any(s.has_interval for s in self.series)
 
     def to_dict(self) -> dict[str, Any]:
+        series: list[dict[str, Any]] = []
+        for s in self.series:
+            item: dict[str, Any] = {
+                "name": s.name,
+                "values": list(s.values),
+                "lower": None if s.lower is None else list(s.lower),
+                "upper": None if s.upper is None else list(s.upper),
+            }
+            if s.precision is not None:  # only when given, so 0.1 documents are unchanged
+                item["precision"] = list(s.precision)
+            series.append(item)
         out: dict[str, Any] = {
             "categories": list(self.categories),
-            "series": [
-                {
-                    "name": s.name,
-                    "values": list(s.values),
-                    "lower": None if s.lower is None else list(s.lower),
-                    "upper": None if s.upper is None else list(s.upper),
-                }
-                for s in self.series
-            ],
+            "series": series,
             "unit": self.unit,
             "decimals": self.decimals,
             "shares": self.shares,
@@ -194,6 +209,7 @@ class ChartData:
                     tuple(s["values"]),
                     None if s.get("lower") is None else tuple(s["lower"]),
                     None if s.get("upper") is None else tuple(s["upper"]),
+                    None if s.get("precision") is None else tuple(s["precision"]),
                 )
                 for s in d["series"]
             ),
@@ -243,6 +259,15 @@ def _validate(data: ChartData) -> None:
                     raise ValueError(f"series {s.name!r}: bounds must be finite numbers")
                 if not lo <= v <= hi:
                     raise ValueError(f"series {s.name!r}: need lower <= value <= upper")
+        if s.precision is not None:
+            if len(s.precision) != n:
+                raise ValueError(f"series {s.name!r}: one precision flag per category")
+            unknown = sorted(set(s.precision) - set(PRECISION_FLAGS))
+            if unknown:
+                raise ValueError(
+                    f"series {s.name!r}: unknown precision flag(s) {', '.join(unknown)}; "
+                    f"expected {', '.join(PRECISION_FLAGS)}"
+                )
         if data.unit == "count" and any(v < 0 for v in s.values):
             raise ValueError("counts must be non-negative")
         if data.shares and sum(s.values) <= 0:
@@ -488,15 +513,15 @@ class _Writer:
         parts.append(t["source"].format(source=source))
         return " ".join(parts)
 
-    def multi(self, title: str, source: str) -> str:
-        """Several series: a dot plot with one row per category."""
+    def multi(self, title: str, source: str, kind: str = "dot") -> str:
+        """Several series: a dot plot, or grouped bars, with one row per category."""
         data, t = self.data, self.t
         n = len(data.categories)
         ci = data.has_interval
         label = self.lang.label(data.category_label)
         names = self.lang.join([self.series_name(s) for s in range(len(data.series))])
         common = {
-            "kind": t["kind_dot"],
+            "kind": t[f"kind_{kind}"],
             "title": title,
             "n": n,
             "label": label,
@@ -526,7 +551,7 @@ class _Writer:
                 continue
             top, next_top, bottom, next_bottom = _groups(values)
             if len(top) == n:
-                things = t["things_estimates" if has else "things_dots"]
+                things = t["things_estimates" if has else f"things_{kind}s"]
                 parts.append(
                     t["series_all_equal"].format(
                         series=sname, n=n, things=things, value=format_value(values[0], data)
@@ -588,9 +613,9 @@ def describe(
     """
     writer = _Writer(data, lang)
     if chart_type == "bar":
-        if len(data.series) != 1:
-            raise ValueError("a bar chart has exactly one series")
-        return writer.single("bar", title, source, "bars")
+        if len(data.series) == 1:
+            return writer.single("bar", title, source, "bars")
+        return writer.multi(title, source, kind="bar")  # grouped bars
     if chart_type == "dot":
         if len(data.series) == 1:
             return writer.single("dot", title, source, "dots")

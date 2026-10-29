@@ -12,7 +12,7 @@ PYPROJECT = Path(__file__).resolve().parents[1] / "pyproject.toml"
 
 
 def test_version() -> None:
-    assert disability_access_charts.__version__ == "0.1.0"
+    assert disability_access_charts.__version__ == "0.2.0"
 
 
 def test_version_matches_pyproject() -> None:
