@@ -53,3 +53,6 @@ Thumbs.db
 
 # Third-party source files: kept out of git until their licence is confirmed
 data/sources/
+
+# Claude Code local settings and agent worktrees (personal, not shared)
+.claude/

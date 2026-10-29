@@ -207,6 +207,39 @@ Detailed plan agreed 2026-10-27 (the author: "use all that will make this a top 
 8. **37 light state pages:** every public source for the state (DHS with intervals and the model estimate; MPI labelled as its own non-WG measure, never the headline; JONAPWD with its caveat; population; breakdowns), a share image, and the law panel with primary-sourced facts only (no count of states with their own law).
 9. **P4b gate:** pages live; keyboard and NVDA check; then send the publication copies to DHS and NBS, and do the bookkeeping (D-rows, CLAUDE.md, CHANGELOG, README hero links).
 
+**P4b detailed plan (drafted 2026-10-29, awaiting the author's approval; steps 10–14 expand steps 7–9 above).** Author decisions of 2026-10-29: the map gets pattern fills; the adire review (D31) is optional and not blocking; Claude pushes the `charts-v0.2.0` tag after the author approves; assistive-technology unmet need (D24) is deferred out of P4b.
+
+- **10. Law facts first (main session).** Settle D25 from primary text before any page uses it:
+  - CRPD: signed 2007-03-30, ratified 2010-09-24 (UN Treaty Collection, checked 2026-10-29). Done.
+  - The Act: find a primary copy (Official Gazette, National Assembly or NCPWD). Confirm the commencement date (sources say 17 or 23 January 2019), the section 6 five-year transition for public buildings (PLAC factsheet, July 2020), the exact wording and scope of the 5% employment provision (public employers only, or all?), and NCPWD's establishment (section 31).
+  - No count of states with their own law.
+  - Any fact without a primary source stays off the page.
+- **11. `disability-access-charts` 0.2 (`executor`, then `reviewer`):**
+  - *Statistical findings:* a `findings` block in the chart document. The families are pre-declared: extremes, gaps between groups, rankings and outliers. Every comparison is counted and the false discovery rate is controlled (Benjamini-Hochberg), and the block prints "N comparisons checked, K supported". Findings that touch `review` cells are hedged, and findings that touch suppressed cells are dropped. The claim checker and the audit cover the block.
+  - *Patterns:* a `patterns` module of up to 5 abstract adire-inspired tiles drawn by us: rings and dots in the oniko style, checks and lines, never nsibidi or Ukara signs. Bars use Plotly `marker.pattern.path`; Plotly supports it on bar but not on scatter or choropleth (Plotly 7.1, checked 2026-10-29, D30). The map uses SVG `<pattern>` fills.
+    - Colour and direct labels stay.
+    - The audit checks that pattern and colour line up one to one, that the pattern ink has enough contrast against its fill in both themes, and that the legend shows each pattern.
+    - Dot plots keep marker shapes.
+  - *Map support:* `choropleth()` moves from experimental to the stable API, with patterns per class, docs and tests.
+  - *Release prep:* bump to 0.2.0 and update the library README and CHANGELOG. Add a map example. Check a clean install of the built wheel on Python 3.12 (core and `[plotly]`) and 3.10.
+  - *Site:* the main map uses the patterns, and the main page shows the findings block.
+- **12. Release:** review, the author's go-ahead, then Claude pushes `charts-v0.2.0`. Trusted publishing does the rest. Then check a clean install from PyPI.
+- **13. 37 state pages (`executor`, then `reviewer`):** built at build time as plain HTML at `site/states/<slug>.html`, with no DuckDB-WASM. A page should load in about a second on a phone, so each one gets a byte budget enforced by a test. Each page contains:
+  - **DHS 2024:** the 18+ DISABILITY3 figure with its CI and flag, next to the national figure; both sexes and each sex; the six domains at the cut-off as a dot plot with intervals through the library; ages 5–17 where precision passes; urban/rural and wealth where the flag allows. Suppressed cells are named as "not shown: too few respondents".
+  - **MPI 2021:** under its own non-WG definition, labelled as such, never the headline.
+  - **JONAPWD:** the figure with its "assumed, not counted" caveat, and no spatial wording.
+  - **Population:** NBS Annex 3 2023, by sex.
+  - **Locator map.**
+  - **Law panel:** national facts from step 10 only.
+  - **Share image:** an Open Graph PNG made at build time by screenshotting a template with Playwright. Playwright is already a dev dependency, so nothing new is added. Its text is the same sentence as the page and its alt text, it passes contrast checks, and the meta tags use absolute URLs.
+  - **Links in:** from the state card, the map table and a list of all 37 states.
+  - **Tests:** all 37 pages build. Playwright + axe in light and dark on 3 states, including one with suppressed cells. One state's figures are hard-coded. The "first" check covers every page.
+- **14. P4b gate:**
+  - Pages are live and CI is green.
+  - Keyboard + NVDA check: a scripted Guidepup transcript, plus the author's own check of whatever the script can't capture.
+  - Then the author emails the publication copies: a PDF to references@dhsprogram.com (DHS), and an electronic copy to the NBS National Data Archive (MPI). Claude can prepare Gmail drafts.
+  - Bookkeeping: D-rows (D25, D30, D31, D24 deferred), CLAUDE.md, CHANGELOG, README hero links.
+
 Delegation: steps 0–2 inline in the main session (they need the author's judgement and touch restricted data through scripts only); steps 3–5 and 7–8 to `executor` with the step 0 rule in its brief, then `reviewer`.
 
 **Scope reference** (agreed 2026-10-17 to 2026-10-21; the steps above implement it):
