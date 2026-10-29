@@ -2,7 +2,7 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-29 · **Current phase:** P4a steps 4–5 built 2026-10-29, awaiting the P4a gate (step 6); P4 planned 2026-10-27 (`PLAN.md` → P4: P4a numbers, map and comparison; P4b chart library 0.2 and state pages); P4a step 0 done 2026-10-27 (the pipeline reproduces the NDHS report tables; R and svy agree, `verification.md` D48); step 1 (direct estimates) next. `disability-access-charts` 0.1.0 is on PyPI (2026-10-22). P1 is live; its NVDA check is deferred.
+**Last updated:** 2026-10-29 · **Current phase:** **P4a gate passed 2026-10-29** (PR #2 merged); P4b (chart library 0.2, state pages) next; P4 planned 2026-10-27 (`PLAN.md` → P4: P4a numbers, map and comparison; P4b chart library 0.2 and state pages); P4a step 0 done 2026-10-27 (the pipeline reproduces the NDHS report tables; R and svy agree, `verification.md` D48); step 1 (direct estimates) next. `disability-access-charts` 0.1.0 is on PyPI (2026-10-22). P1 is live; its NVDA check is deferred.
 
 ## Phases
 
@@ -12,7 +12,7 @@ The one page to read first. It says where things stand and what happens next. Th
 | P1 Thin vertical slice | 🟡 built and live; keyboard pre-check passed 2026-10-17. **The author's NVDA check is deferred (author, 2026-10-17)**: do it before the P6 gate at the latest | Live URL works by keyboard and with NVDA (author, per `docs/accessibility-testing.md`) |
 | P2 disability-access-charts 0.1 | ✅ done 2026-10-22: 0.1.0 published (tag `charts-v0.1.0`, pushed by the author); a clean install from PyPI ran all 3 examples and `check` | Clean install reproduces examples; LLM mocked in tests |
 | P3 Restricted zone + warehouse | ✅ done 2026-10-24 (author): PR #1 merged, CI green; all aggregates incl. MPI 2021 public | `dbt build` green on fixtures; disclosure check passes |
-| P4 Prevalence | 🟡 planned 2026-10-27; split into P4a and P4b | P4a: map and comparison live · P4b: state pages live, 0.2 on PyPI |
+| P4 Prevalence | 🟡 P4a ✅ passed 2026-10-29 (author); P4b next | P4a: map and comparison live · P4b: state pages live, 0.2 on PyPI |
 | P5 Poverty analysis | ⚪ not started | Pre-registration committed first; brief and results page live |
 | P6 API + site polish | ⚪ not started | Accessibility 100 in CI; walkthrough video recorded; author's NVDA check; regular screen-reader user's feedback sought, not blocking (2026-10-24); acted on |
 | P7 Launch | ⚪ not started | — |
@@ -86,6 +86,10 @@ The one page to read first. It says where things stand and what happens next. Th
 | Gemini / Groq real quotas | Accounts (P2) | 2026-10-16 |
 
 ## Next actions (pick up here)
+
+### P4a gate passed (2026-10-29)
+
+**Gate evidence:** CI green on PR #2, review findings fixed, 481 Python and 33 site tests pass, `check --strict` passes on all 4 charts. A scripted NVDA transcript (Guidepup, NVDA 2026.2, Chrome) confirmed the skip link, 11 Tab stops to the state picker, the map's single stop and spoken description, Esc on the tip, the details toggle, the heading order on both pages, table captions and cells read with their headers, the state picker (K to Kano), and the map tip after Shift+Tab. The transcript could not capture what NVDA says when the state card loads; **the author checked that by hand and it reads fine.** The author did not report any problem with the map colours. **Next: P4b** (`PLAN.md` → P4b: chart library 0.2 with map support, 37 state pages). Still owed: P1's NVDA check (before P6), and a regular screen-reader user's feedback (P6, not blocking).
 
 ### P4a progress (2026-10-27)
 
@@ -249,4 +253,5 @@ The one page to read first. It says where things stand and what happens next. Th
 | 2026-10-28 | **FH covariates approved and frozen** (all five, BIC rule). C4 changed to MICS women 15–49 (the 15–24 rate is national only; author chose it over the NDHS fallback, D53). Pre-fit technical corrections: GVF on log n, ML for BIC, an explicit failure rule. |
 | 2026-10-28 | **FH result: direct estimates stay the headline** (author). No arcsine-normal model passes; FH would change estimates by ~4% (D56, reviewed). Published as a result; no amended model; spatial FH dropped. |
 | 2026-10-28 | **Main page design (author):** measured prevalence leads (new H1), JONAPWD moves below as "what was assumed"; the comparison uses verified figures only (JONAPWD 15% assumed, NDHS 2024 15+: 15.5% any difficulty vs 2.8% at the WG cut-off, our DHS 18+ with CI, WHO's 16% quoted as WHO words it) and drops the spec's unsourced 10–18% grid; the map uses fixed rounded classes plus a dot chart of all 37 estimates with 95% intervals. No LISA hotspots, so no outlines; the map says so. |
+| 2026-10-29 | **P4a gate passed** (author: "passed"). Evidence: CI, review fixes, the Guidepup NVDA transcript, and the author's own check of the state card with NVDA. PR #2 merged. |
 | 2026-10-16 | **P0 gate passed.** Nigeria DHS 2024 is adopted as a second prevalence source next to MPI 2021. The exploratory panel uses GHS W4→W5 (all six WG-SS domains). |
