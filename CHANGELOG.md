@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here. Entries follow [Conventional Commits](https://www.conventionalcommits.org/).
 
+## P4b — in progress (2026-10-29)
+
+### Added
+- feat(charts): `disability-access-charts` 0.2.0, prepared but **not yet published** (the author approves the release separately):
+  - statistical findings (`findings=True` on `bar()`, `grouped_bar()`, `dot()`; `statistical_findings()`): four pre-declared families (extremes against the next, gaps between series, neighbours in the ranking, each estimate against a `Reference`), every comparison counted, Benjamini-Hochberg false discovery rate at q = 0.05 over the claim checker's difference test written as p-values, "N comparisons checked, K supported"; findings that involve a `review` estimate are hedged, those that involve an `unreliable` or `suppressed` one are dropped and counted, and left-out categories are named. The sentences pass the claim checker; the audit checks the counts, the cited cells, a full recompute, the hedging and the sentences. Method and limits in `docs/findings.md`;
+  - `patterns` module: five abstract adire-inspired tiles drawn for the library (dots, rings, checks, lines, crosshatch; never nsibidi or Ukara signs, D31), a black-or-white ink rule, Plotly `marker.pattern` and SVG `<pattern>` renderers, and audit checks (one pattern and colour per series or class, ink at 3:1 against every fill in every theme, legend). `docs/patterns.md`;
+  - `grouped_bar()` (patterns on by default) and `bar(patterns=True)`; dot plots keep marker shapes (Plotly has no scatter patterns, D30);
+  - `choropleth()` is stable and exported, with a pattern per class by default; `patterns=False` gives the 0.1 document;
+  - `Series(precision=...)` flags, shown in the table;
+  - a patterned map example; 0.1 calls give the same documents (apart from the version) with the new options off.
+- feat(site): the prevalence map draws each class's pattern, and its legend shows each pattern with its range; the state dot plot shows its findings (73 comparisons checked, 20 supported, at q = 0.05) under the chart, in plain words.
+
 ## P4a — 2026-10-29 (measured prevalence, map and comparison live)
 
 ### Added

@@ -4,7 +4,16 @@
 
 Built for [Curb Cut](https://github.com/batestguy/curb-cut), an accessible platform for Nigerian disability data. Every chart ships with alt-text built from its data, and the library then **checks that text against the data**: every number, and every comparison it recognises ("highest", "higher than", "twice", "ranked 3rd"). With survey estimates, it tests whether the confidence intervals actually support the claim. The same checker gates any LLM rewording and runs on any Plotly figure in CI.
 
-**Status: 0.1 (alpha).** English only, built so other languages can be added.
+**Status: 0.2 (alpha).** English only, built so other languages can be added.
+
+## New in 0.2
+
+- **Statistical findings.** `findings=True` on `bar()`, `grouped_bar()` or `dot()` adds a block that compares the estimates in four families declared in advance (highest and lowest against the next, gaps between series, neighbours in the ranking, each estimate against an overall value), counts every comparison, and controls the false discovery rate (Benjamini-Hochberg, q = 0.05). It prints "N comparisons checked, K supported", hedges findings that involve an estimate flagged for review, and leaves out (and counts) those that involve a suppressed or unreliable one. The sentences go through the claim checker, and the audit recomputes the block from the data. It is descriptive, not causal: see [the findings method](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/findings.md).
+- **Patterns.** Five abstract tiles inspired by adire (dots and rings after *oniko*, checks, lines, crosshatch), drawn for this library; never nsibidi or Ukara signs. `grouped_bar()` (new) gives each series its own colour and pattern, shown in the legend; `bar(patterns=True)` and every map class get one too. The audit checks that patterns and colours line up one to one and that the pattern ink is 3:1 against every fill in both themes. See [the patterns note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/patterns.md).
+- **Maps are stable.** `choropleth()` is exported, with a pattern per class by default, so neighbouring classes differ by more than a shade.
+- **Precision flags.** `Series(..., precision=...)` takes a flag per estimate (`reliable`, `review`, `unreliable`, `suppressed`), shown in the table and used by the findings.
+
+Nothing from 0.1 changed: with patterns and findings off (the default for `bar()` and `dot()`), a 0.1 call gives the same document, apart from the version number.
 
 ```bash
 pip install disability-access-charts            # core: no dependencies
@@ -56,7 +65,7 @@ check_alt_text("Area A is higher than Area B.", data)
 
 ## What you get
 
-`bar()` and `dot()` return one JSON document per chart, with no Plotly import needed:
+`bar()`, `grouped_bar()`, `dot()` and `choropleth()` return one JSON document per chart, with no Plotly import needed:
 
 | key | what it holds |
 |---|---|
@@ -68,6 +77,8 @@ check_alt_text("Area A is higher than Area B.", data)
 | `keyboard` | how a keyboard user reaches the data (the table) |
 | `audit` | every check, each with a WCAG criterion and a severity |
 | `meta` | generator, library version, source, alt-text language and origin |
+| `findings` | with `findings=True`: the comparisons, their tests, the FDR result and the sentences |
+| `patterns` | with patterns on: the tiles, each series' or class's tile, and each theme's ink |
 
 Also: `audit(fig)` for a document or any Plotly figure, `theme(fig, "dark")`, `to_html(doc)` and `to_csv(doc)`, `figure(doc)` for a Plotly `Figure`, and a CLI for CI:
 
@@ -98,9 +109,9 @@ disability-access-charts check --strict charts/*.json   # warnings fail too
 ## More
 
 - **Languages:** one table of templates and claim words per language (`_lang/en.py`); only English ships in 0.1. Numbers stay as digits in every language, so the checker still works.
-- **Maps (experimental, not yet stable API):** `disability_access_charts.maps.choropleth` builds a shaded-map document in fixed classes, with the same alt-text checks, a table and an audit; `audit()` and `check` handle it. How its colours meet WCAG is in [the maps note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/maps.md). Stable map support is planned for 0.2.
+- **Maps:** `choropleth()` builds a shaded-map document in fixed classes, each with its own pattern, with the same alt-text checks, a table and an audit; `audit()` and `check` handle it. The page draws the SVG from the document. How its colours and patterns meet WCAG is in [the maps note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/maps.md).
 - **Python:** 3.10 or later. Tests and CI run on 3.12; 3.10 is checked by installing the wheel and running the examples.
-- **Examples** (in the source distribution and the repository's `examples/`): JONAPWD's 2025 *assumed* figures by disability type (a WHO 15% benchmark applied to population, not survey estimates), a synthetic dot plot with intervals, and an audit of a plain Plotly figure. The installed package holds no data.
+- **Examples** (in the source distribution and the repository's `examples/`): JONAPWD's 2025 *assumed* figures by disability type (a WHO 15% benchmark applied to population, not survey estimates), a synthetic dot plot with intervals and findings, a synthetic patterned map written out as a standalone SVG page, and an audit of a plain Plotly figure. The installed package holds no data.
 
 ## How it compares
 
@@ -109,6 +120,6 @@ We found no other library that checks the comparative claims in a chart descript
 - [a11yviz](https://pypi.org/project/a11yviz/) has WCAG-tagged palettes, alt-text scaffolds and audits for plotnine, plotly and Quarto.
 - [maidr](https://pypi.org/project/maidr/) makes charts explorable by keyboard, with sound, braille and text descriptions.
 
-Use maidr for multimodal exploration. Use this library to catch numbers and comparisons in a description that contradict the data.
+Use maidr for multimodal exploration. Use this library to catch numbers and comparisons in a description that contradict the data, and to report which differences in a chart survive a multiple-comparison correction. (Both descriptions checked against their PyPI pages on 2026-10-29: a11yviz 0.1.8, maidr 1.28.1.)
 
 MIT licensed.
