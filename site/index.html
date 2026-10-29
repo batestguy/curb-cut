@@ -7,7 +7,7 @@
     <title>Curb Cut: Nigerian disability data</title>
     <meta
       name="description"
-      content="Accessible charts and tables of Nigerian disability data. Every chart has a data table and a description checked against the data."
+      content="Measured disability in Nigeria's 36 states and the FCT from the DHS 2024 survey, with intervals, in accessible charts, a map and tables. Every chart has a data table and a description checked against the data."
     />
     <link
       rel="icon"
@@ -25,18 +25,117 @@
     </header>
 
     <main id="main" tabindex="-1">
-      <h1>How many Nigerians have each type of disability? JONAPWD's 2025 estimates</h1>
+      <h1>Disability in Nigeria's states, as measured by the DHS 2024 survey</h1>
 
-      <section class="caveat" aria-labelledby="caveat-heading">
-        <h2 id="caveat-heading">These are estimates built on an assumption</h2>
+      <section aria-labelledby="headline-heading">
+        <h2 id="headline-heading" class="visually-hidden">The national figure</h2>
+        <p id="headline" class="lead">Loading the national figure…</p>
+        <p id="headline-status" class="status" role="status"></p>
         <p>
-          No one was counted. JONAPWD applied the global 15% disability rate to 2025
-          population projections. Totals may differ from JONAPWD's by a few people (rounding).
+          The figures use the Washington Group's disability cut-off: "a lot of difficulty" or
+          "cannot do at all" in at least one of six everyday activities (seeing, hearing,
+          walking or climbing steps, remembering or concentrating, self-care, and
+          communicating). Every estimate here comes with its 95% confidence interval and a
+          precision flag. The NDHS 2024 report already publishes state figures for each sex;
+          this site adds both sexes together with intervals, each activity at the cut-off by
+          state, and accessible, queryable tables.
+          <a href="./methodology.html">How the figures were made</a>.
         </p>
       </section>
 
-      <section aria-labelledby="national-heading">
-        <h2 id="national-heading">All 37 states, by type of disability</h2>
+      <section aria-labelledby="comparison-heading">
+        <h2 id="comparison-heading">Why you may see 15% or 3%</h2>
+        <p id="comparison-message">Loading the comparison…</p>
+        <div id="comparison-list"></div>
+        <p id="comparison-status" class="status" role="status"></p>
+      </section>
+
+      <section aria-labelledby="map-heading">
+        <h2 id="map-heading">Disability among adults, by state</h2>
+        <figure class="choropleth-figure" aria-labelledby="prevalence-map-title">
+          <ul id="prevalence-map-legend" class="map-legend" aria-label="Map key"></ul>
+          <div class="choropleth-holder">
+            <div id="prevalence-map" class="choropleth" role="img" tabindex="0" aria-label="Loading the map…"></div>
+            <!-- Shown on hover, tap or focus; the same figures are in the table below, and
+                 screen readers get the map's description as its name. -->
+            <div class="map-tip" aria-hidden="true" hidden>
+              <strong class="map-tip-state"></strong>
+              <span class="map-tip-figure"></span>
+            </div>
+          </div>
+          <figcaption>
+            <span id="prevalence-map-title" class="chart-title">Loading map…</span>
+            <span class="chart-desc">
+              Hover over or tap a state to see its figure. By keyboard, every state's figure
+              is in the table below the map, and the state picker under "Explore by state"
+              shows one state at a time. Boundaries: geoBoundaries (CC BY 4.0).
+            </span>
+          </figcaption>
+        </figure>
+        <p id="prevalence-map-status" class="status" role="status"></p>
+        <p id="lisa-sentence"></p>
+        <p class="table-intro">The same figures as a table, by state name:</p>
+        <div id="prevalence-map-table" class="table-wrap"></div>
+
+        <h3 id="dots-heading">All state estimates with their 95% confidence intervals</h3>
+        <figure class="chart-figure" aria-labelledby="prevalence-chart-title">
+          <div id="prevalence-chart" class="chart" role="img" aria-labelledby="prevalence-chart-desc">
+            <div class="chart-plot tall" aria-hidden="true"></div>
+          </div>
+          <figcaption>
+            <span id="prevalence-chart-title" class="chart-title">Loading chart…</span>
+            <span id="prevalence-chart-desc" class="chart-desc" aria-hidden="true"></span>
+          </figcaption>
+        </figure>
+        <p id="prevalence-chart-status" class="status" role="status"></p>
+        <p>
+          Where two intervals overlap a lot, the survey cannot tell those states apart. Model-based
+          small-area estimates (Fay-Herriot) were tried and would change these figures by only a
+          few per cent, so the site shows the survey's direct estimates.
+          <a href="./methodology.html#small-area">Why</a>.
+        </p>
+        <p class="table-intro">The same figures as a table, highest estimate first:</p>
+        <div id="prevalence-chart-table" class="table-wrap"></div>
+      </section>
+
+      <section aria-labelledby="spatial-heading">
+        <h2 id="spatial-heading">Do neighbouring states look alike?</h2>
+        <p>
+          These checks use the DHS 2024 state estimates only. They are exploratory or
+          descriptive, and they describe states, not people.
+          <a href="./methodology.html#spatial">Methods and limits</a>.
+        </p>
+        <p id="spatial-status" class="status" role="status"></p>
+        <h3>Clustering across the country</h3>
+        <p id="moran-sentence"></p>
+        <details class="more">
+          <summary>The six activities and children 5–17</summary>
+          <div id="moran-table" class="table-wrap"></div>
+          <ul id="moran-sentences" class="sentences"></ul>
+        </details>
+        <h3>Local hotspots</h3>
+        <p id="lisa-detail"></p>
+        <h3>States grouped by their disability profile</h3>
+        <p id="cluster-sentence"></p>
+        <div id="cluster-groups"></div>
+        <h3>Health facilities and disability</h3>
+        <p id="services-sentence"></p>
+        <ul id="services-caveats" class="sentences"></ul>
+      </section>
+
+      <section aria-labelledby="jonapwd-heading">
+        <h2 id="jonapwd-heading">What was assumed: JONAPWD's 2025 estimates</h2>
+        <div class="caveat">
+          <h3 id="caveat-heading">These are estimates built on an assumption</h3>
+          <p>
+            No one was counted. JONAPWD applied the global 15% disability rate to 2025
+            population projections. Totals may differ from JONAPWD's by a few people (rounding).
+            Because every state gets the same rate, no map or spatial analysis is made of
+            these figures.
+          </p>
+        </div>
+
+        <h3 id="national-heading">All 37 states, by type of disability</h3>
         <figure class="chart-figure" aria-labelledby="national-chart-title">
           <div id="national-chart" class="chart" role="img" aria-labelledby="national-chart-desc">
             <div class="chart-plot" aria-hidden="true"></div>
@@ -50,8 +149,12 @@
         <p id="national-chart-status" class="status" role="status"></p>
         <noscript>
           <p class="status error">
-            The chart, its table and the state explorer need JavaScript. The same figures are
-            available as a CSV file:
+            The charts, map, tables and the state explorer need JavaScript. The figures are
+            available as CSV files on GitHub:
+            <a href="https://github.com/batestguy/curb-cut/tree/main/data/public/aggregates"
+              >DHS 2024 survey aggregates</a
+            >
+            and
             <a href="https://github.com/batestguy/curb-cut/blob/main/data/public/jonapwd/state_disability_type.csv"
               >JONAPWD state figures by type of disability</a
             >.
@@ -83,10 +186,11 @@
         <h2 id="explore-heading">Explore by state</h2>
         <p>
           Choose a state, then press <strong>Show figures</strong> to see a short profile of the
-          state, a map showing where it is, and its figures by type of disability. The state is
-          also highlighted in the chart of all states above. The figures are queried in your
-          browser from a Parquet file with DuckDB-WASM; nothing is sent to a server. The first
-          query can take a few seconds while the in-browser database loads.
+          state with its measured disability figure, a map showing where it is, and JONAPWD's
+          assumed figures by type of disability. The state is also outlined on the map and
+          highlighted in the chart of JONAPWD's figures above. JONAPWD's figures are queried in
+          your browser from a Parquet file with DuckDB-WASM; nothing is sent to a server. The
+          first query can take a few seconds while the in-browser database loads.
         </p>
         <div class="field">
           <label for="state-select">State</label>
@@ -117,9 +221,23 @@
     </main>
 
     <footer class="site-footer">
-      <h2 class="footer-heading">Source</h2>
+      <h2 class="footer-heading">Sources</h2>
       <p>
-        Joint National Association of Persons with Disabilities (JONAPWD),
+        Measured figures: The DHS Program, <cite>Nigeria Demographic and Health Survey 2024</cite>
+        (National Population Commission and ICF), Washington Group Short Set; estimates by Curb
+        Cut from the survey microdata, used for the registered project "Curb Cut: disability
+        prevalence and poverty in Nigeria". Only disclosure-checked aggregates are published.
+        Comparison: the
+        <a href="https://dhsprogram.com/pubs/pdf/FR395/FR395.pdf">NDHS 2023-24 final report</a>
+        (FR395), Table 14.1, and the WHO fact sheet
+        <a href="https://www.who.int/news-room/fact-sheets/detail/disability-and-health"
+          >"Disability"</a
+        >
+        (7 March 2023). Health facilities: GRID3 NGA Health Facilities v2.0 (CIESIN, Columbia
+        University, CC BY 4.0).
+      </p>
+      <p>
+        Assumed figures: Joint National Association of Persons with Disabilities (JONAPWD),
         <cite>2025 Assumptive Disability Disaggregated Data</cite>, state pages 14 to 50.
         © JONAPWD, all rights reserved. Figures are cited from the
         <a href="https://jonapwdng.org/10865-2/">publication on JONAPWD's website</a>; the PDF is
@@ -134,10 +252,9 @@
         <a href="https://www.geoboundaries.org/">geoBoundaries</a> (CC BY 4.0; source GRID3).
       </p>
       <p>
-        How the figures were extracted and checked:
-        <a href="https://github.com/batestguy/curb-cut/tree/main/data/public/jonapwd"
-          >data notes on GitHub</a
-        >.
+        <a href="./methodology.html">Methodology: definitions, sources and limits</a>.
+        How the figures were made and checked:
+        <a href="https://github.com/batestguy/curb-cut/tree/main/data/public">data notes on GitHub</a>.
       </p>
     </footer>
 
