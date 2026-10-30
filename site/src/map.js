@@ -55,6 +55,24 @@ function makePattern(id, tile, k, scale) {
   return pattern;
 }
 
+// The document's tile scale gives about 12px tiles on a 630px-wide map. On a narrow screen the
+// map shrinks and so would the tiles (about 5.5px at 288px), too small to tell apart. So the
+// tiles never go below MIN_TILE_PX on screen: the scale is raised to match the drawn width.
+const MIN_TILE_PX = 8;
+
+function fitPatterns(svg, doc, prefix) {
+  const width = svg.getBoundingClientRect().width;
+  const units = Number(doc.map.viewBox.trim().split(/\s+/)[2]);
+  if (!width || !units) return;
+  const pxPerUnit = width / units;
+  doc.classes.forEach((c, k) => {
+    const pattern = svg.querySelector(`#${CSS.escape(`${prefix}-${k}`)}`);
+    const size = doc.patterns.tiles[c.pattern].size;
+    const scale = Math.max(doc.patterns.scale, MIN_TILE_PX / (size * pxPerUnit));
+    pattern?.setAttribute('patternTransform', `scale(${scale.toFixed(4)})`);
+  });
+}
+
 function patternDefs(doc, prefix, scale) {
   const defs = document.createElementNS(SVG_NS, 'defs');
   doc.classes.forEach((c, k) => {
@@ -155,6 +173,12 @@ export function renderChoropleth(doc, { figure, holder, legendEl, titleEl, table
   ring.setAttribute('r', '0');
   svg.append(ring);
   holder.replaceChildren(svg);
+  if (doc.patterns) {
+    fitPatterns(svg, doc, prefix);
+    if ('ResizeObserver' in window) {
+      new ResizeObserver(() => fitPatterns(svg, doc, prefix)).observe(holder);
+    }
+  }
 
   const tip = figure.querySelector('.map-tip');
   const tipName = tip.querySelector('.map-tip-state');

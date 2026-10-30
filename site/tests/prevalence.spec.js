@@ -338,6 +338,49 @@ test('if the spatial findings fail, the failure is shown and announced', async (
   await expect(page.locator('#prevalence-map svg')).toBeVisible();
 });
 
+test('at 320px the map pattern tiles are drawn at least 8px wide', async ({ page, request }) => {
+  const doc = await (await request.get('data/charts/prevalence_map.json')).json();
+  await page.setViewportSize({ width: 320, height: 800 });
+  await ready(page);
+  // On-screen tile size: tile width x patternTransform scale x screen pixels per map unit.
+  const sizes = await page.locator('#prevalence-map svg').evaluate((svg) => {
+    const units = Number(svg.getAttribute('viewBox').trim().split(/\s+/)[2]);
+    const px = svg.getBoundingClientRect().width / units;
+    return [...svg.querySelectorAll('pattern')].map((pattern) => {
+      const scale = Number(/scale\(([\d.]+)\)/.exec(pattern.getAttribute('patternTransform'))[1]);
+      return Number(pattern.getAttribute('width')) * scale * px;
+    });
+  });
+  expect(sizes).toHaveLength(doc.classes.length);
+  for (const size of sizes) expect(size).toBeGreaterThanOrEqual(7.99);
+});
+
+test('a findings problem does not take the chart down; no findings block, no placeholder', async ({
+  page,
+}) => {
+  // A malformed findings block: the chart still draws, and the block says what went wrong.
+  await page.route('**/data/charts/prevalence_by_state.json', async (route) => {
+    const doc = await (await route.fetch()).json();
+    doc.findings.statements = null;
+    await route.fulfill({ json: doc });
+  });
+  await ready(page);
+  await expect(page.locator('#prevalence-chart-findings .findings-count')).toContainText(
+    'The findings could not be shown',
+  );
+  await expect(page.locator('#prevalence-chart-title')).not.toHaveText('Chart unavailable');
+  // No findings block at all: the "Loading the findings…" placeholder is not left behind.
+  await page.unroute('**/data/charts/prevalence_by_state.json');
+  await page.route('**/data/charts/prevalence_by_state.json', async (route) => {
+    const doc = await (await route.fetch()).json();
+    delete doc.findings;
+    await route.fulfill({ json: doc });
+  });
+  await ready(page);
+  await expect(page.locator('#prevalence-chart-findings')).toBeHidden();
+  await expect(page.getByText('Loading the findings')).toHaveCount(0);
+});
+
 test('at 320px the map fits and wide tables scroll inside a named region', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 800 });
   await ready(page);

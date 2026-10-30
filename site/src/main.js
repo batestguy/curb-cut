@@ -23,20 +23,36 @@ let chosenState = null;
 let stateChart = null;
 let prevalenceMap = null;
 
+// The findings under a chart. Rendered on their own, so a problem here never takes the chart
+// down; a chart without a findings block hides the block instead of leaving its placeholder.
+function showFindings(doc, id) {
+  const findingsEl = document.getElementById(`${id}-findings`);
+  if (!findingsEl) return;
+  if (!doc.findings) {
+    findingsEl.querySelector('.findings-count')?.replaceChildren();
+    findingsEl.hidden = true;
+    return;
+  }
+  try {
+    renderFindings(doc.findings, doc.meta.source, {
+      count: findingsEl.querySelector('.findings-count'),
+      list: findingsEl.querySelector('.findings-list'),
+      notes: findingsEl.querySelector('.findings-notes'),
+      families: findingsEl.querySelector('.findings-families'),
+      method: findingsEl.querySelector('.findings-method'),
+    });
+  } catch (error) {
+    findingsEl.querySelector('.findings-list').hidden = true;
+    findingsEl.querySelector('.findings-count').textContent =
+      `The findings could not be shown: ${error.message}.`;
+  }
+}
+
 async function showChart(name, id) {
   const titleEl = document.getElementById(`${id}-title`);
   try {
     const doc = await getJson(`charts/${name}.json`);
-    const findingsEl = document.getElementById(`${id}-findings`);
-    if (findingsEl && doc.findings) {
-      renderFindings(doc.findings, doc.meta.source, {
-        count: findingsEl.querySelector('.findings-count'),
-        list: findingsEl.querySelector('.findings-list'),
-        notes: findingsEl.querySelector('.findings-notes'),
-        families: findingsEl.querySelector('.findings-families'),
-        method: findingsEl.querySelector('.findings-method'),
-      });
-    }
+    showFindings(doc, id);
     return await renderChart(doc, {
       container: document.getElementById(id),
       titleEl,
