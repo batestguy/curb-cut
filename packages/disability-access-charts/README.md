@@ -13,7 +13,13 @@ Built for [Curb Cut](https://github.com/batestguy/curb-cut), an accessible platf
 - **Maps are stable.** `choropleth()` is exported, with a pattern per class by default, so neighbouring classes differ by more than a shade.
 - **Precision flags.** `Series(..., precision=...)` takes a flag per estimate (`reliable`, `review`, `unreliable`, `suppressed`), shown in the table and used by the findings.
 
-Nothing from 0.1 changed: with patterns and findings off (the default for `bar()` and `dot()`), a 0.1 call gives the same document, apart from the version number.
+What changed from 0.1, precisely:
+
+- `choropleth()` gives each class a pattern by default (`patterns=None` means "auto": on with five classes or fewer, off with more, when the audit warns that neighbouring classes differ by shade alone). `patterns=False` gives the 0.1 document; `patterns=True` with more than five classes raises.
+- `describe(chart_type="bar")` with several series now describes grouped bars; in 0.1 it raised.
+- In the claim checker, a list of names with values separated by semicolons ("A, 1%; B, 2%; and C, 3%") is one clause, so each estimate in a list written that way (with "; and" before the last item) is checked (a two-item list without the "and", or a comma list, is only partly checked), and a hedged rank ("the second-highest estimate") no longer warns when the test cannot separate it from a neighbour.
+
+Otherwise `bar()` and `dot()` with patterns and findings off (their default) give the same document as in 0.1, apart from the version number.
 
 ```bash
 pip install disability-access-charts            # core: no dependencies
@@ -108,8 +114,8 @@ disability-access-charts check --strict charts/*.json   # warnings fail too
 
 ## More
 
-- **Languages:** one table of templates and claim words per language (`_lang/en.py`); only English ships in 0.1. Numbers stay as digits in every language, so the checker still works.
-- **Maps:** `choropleth()` builds a shaded-map document in fixed classes, each with its own pattern, with the same alt-text checks, a table and an audit; `audit()` and `check` handle it. The page draws the SVG from the document. How its colours and patterns meet WCAG is in [the maps note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/maps.md).
+- **Languages:** one table of templates and claim words per language (`_lang/en.py`); only English ships so far. Numbers stay as digits in every language, so the checker still works.
+- **Maps:** `choropleth()` builds a shaded-map document in fixed classes, each with its own pattern (up to five classes), with the same alt-text checks, a table and an audit; `audit()` and `check` handle it. The page draws the SVG from the document. How its colours and patterns meet WCAG is in [the maps note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/maps.md).
 - **Python:** 3.10 or later. Tests and CI run on 3.12; 3.10 is checked by installing the wheel and running the examples.
 - **Examples** (in the source distribution and the repository's `examples/`): JONAPWD's 2025 *assumed* figures by disability type (a WHO 15% benchmark applied to population, not survey estimates), a synthetic dot plot with intervals and findings, a synthetic patterned map written out as a standalone SVG page, and an audit of a plain Plotly figure. The installed package holds no data.
 

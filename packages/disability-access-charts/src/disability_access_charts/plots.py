@@ -13,7 +13,8 @@ no Plotly import (the figure is plain dicts):
 * ``audit``: the result of :func:`disability_access_charts.audit.audit` on the document;
 * ``meta``: provenance (generator, library version, chart type, source, language);
 * ``findings`` (only with ``findings=True``): the statistical findings block, see
-  :mod:`disability_access_charts.findings`;
+  :mod:`disability_access_charts.findings`. The alt-text's "can / cannot show a difference"
+  then follows the block's corrected ``extremes`` results instead of the uncorrected test;
 * ``patterns`` (bars with patterns on): the pattern tiles, each series' tile and each
   theme's ink, see :mod:`disability_access_charts.patterns`.
 
@@ -43,7 +44,12 @@ from disability_access_charts.describe import (
     format_value,
     shares_of,
 )
-from disability_access_charts.findings import DEFAULT_Q, Reference, statistical_findings
+from disability_access_charts.findings import (
+    DEFAULT_Q,
+    Reference,
+    extreme_verdicts,
+    statistical_findings,
+)
 from disability_access_charts.palettes import DEFAULT_THEMES, SYMBOLS, Theme
 from disability_access_charts.patterns import assign, ink_for, plotly_pattern, tile_dict
 
@@ -173,7 +179,12 @@ def _document(
     findings: dict[str, Any] | None = None,
     patterns: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
-    alt_text = describe(data, chart_type=chart_type, title=title, source=source, lang=lang)
+    # With findings, "can / cannot show a difference" in the alt-text follows the findings'
+    # corrected extremes results, so the two never disagree.
+    verdicts = None if findings is None else extreme_verdicts(findings, data)
+    alt_text = describe(
+        data, chart_type=chart_type, title=title, source=source, lang=lang, verdicts=verdicts
+    )
     doc: dict[str, Any] = {
         "id": chart_id,
         "title": title,

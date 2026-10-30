@@ -16,9 +16,13 @@ comparison in them is counted, supported or not:
 * ``gaps``: two series in the same category (e.g. women against men in one state), for
   every pair of series and every category;
 * ``rankings``: every other pair of neighbours in the ranking (highest first, ties in chart
-  order), per series; the pairs already in ``extremes`` are not counted twice;
+  order), per series; the pairs already in ``extremes`` are not counted twice. A finding
+  gives each estimate's rank, from the nearer end ("the second-highest estimate", "the
+  3rd-lowest estimate"; competition ranking, as the claim checker's);
 * ``outliers``: each estimate against an overall value (a :class:`Reference`, e.g. the
-  national estimate), per series. Without a reference this family is empty.
+  national estimate), per series. Without a reference this family is empty. The estimates
+  in one finding are listed with semicolons between them ("A, 1%; B, 2%; and C, 3%"), and
+  the claim checker checks each of them.
 
 The test
 --------
@@ -26,12 +30,25 @@ The claim checker's interval test (:func:`disability_access_charts.describe.diff
 each standard error is the interval's larger half-width divided by the normal quantile of
 its level, and the difference is tested against ``1.96 * sqrt(se_a**2 + se_b**2)``. Here it
 is turned into a two-sided p-value, ``p = 2 * (1 - Phi(|a - b| / sqrt(se_a**2 + se_b**2)))``,
-so a comparison passes the checker's test exactly when ``p < 0.05``.
+so a comparison passes the checker's test exactly when ``p < 0.05`` (up to 1.96 against
+the exact quantile 1.95996). The larger half-width is conservative only when the interval
+is wider than a normal one on that side; the survey design's degrees of freedom and t
+quantiles are not used.
 
 Benjamini-Hochberg controls the false discovery rate over **all** the comparisons tested in
-the block (every family and series together) at ``q`` (default 0.05). A comparison is
-*supported* when its BH-adjusted p-value is at most ``q``. A supported comparison also
-passes the checker's own test, so every finding sentence passes the claim checker.
+the block (every family and series together) at ``q`` (default 0.05; at most 0.05, the
+checker's own level, or a ``ValueError``). A comparison is *supported* when its
+BH-adjusted p-value is at most ``q`` and the difference also passes the checker's test
+(which only matters at the 1.96 edge), so every finding sentence passes the claim
+checker. BH's guarantee needs the tests to be independent or positively dependent; that is
+not proven for these comparisons, so ``q`` is nominal. The ``dependence`` caveat says so
+and gives how many comparisons Benjamini-Yekutieli (valid under any dependence) would
+support.
+
+The chart builders also use the ``extremes`` results in the alt-text: with
+``findings=True``, its "the survey can / cannot show a difference from the next estimate"
+follows the ``supported`` flags (see :func:`extreme_verdicts`), so the alt-text and the
+findings never disagree.
 
 Precision
 ---------
@@ -39,8 +56,11 @@ A series may carry a precision flag per estimate (:class:`~disability_access_cha
 ``precision``). A comparison that involves a "review" estimate is tested, and its finding
 is hedged ("Read with care: ...'s estimate is flagged for review."). A comparison that
 involves an "unreliable" or "suppressed" estimate is **not tested**: it is listed under
-``dropped`` and counted there, and it is not in the BH family. Categories left out of the
-chart altogether (no data, or suppressed for disclosure) are named in ``withheld``.
+``dropped`` and counted there, and it is not in the BH family. So is a comparison that
+involves an interval of zero width (e.g. 0 events, interval 0 to 0): it has no standard
+error to test with, and a zero standard error would make any difference "supported".
+Categories left out of the chart altogether (no data, or suppressed for disclosure) are
+named in ``withheld``.
 """
 
 from __future__ import annotations
@@ -63,6 +83,7 @@ from disability_access_charts.describe import (
     _z_level,
     check_alt_text,
     format_value,
+    verdict_key,
 )
 
 FAMILIES: tuple[str, ...] = ("extremes", "gaps", "rankings", "outliers")
@@ -74,7 +95,11 @@ FAMILY_LABELS: dict[str, str] = {
 }
 DEFAULT_Q = 0.05
 """The false discovery rate the block controls by default."""
+MAX_Q = 0.05
+"""The largest ``q`` allowed: the claim checker's own level, which every finding must pass."""
 DROPPED_FLAGS = frozenset({"unreliable", "suppressed"})
+ZERO_WIDTH = "zero-width"
+"""The ``reason`` of a comparison dropped for an interval of zero width."""
 HEDGED_FLAGS = frozenset({"review"})
 METHOD = "benjamini-hochberg"
 
@@ -90,6 +115,12 @@ _CAVEATS: dict[str, str] = {
     "reference": (
         "Each estimate is part of the overall value it is compared with. The test ignores "
         "that overlap, which makes it conservative (it finds fewer differences)."
+    ),
+    "dependence": (
+        "Benjamini-Hochberg keeps the false discovery rate at {q}% when the tests are "
+        "independent or positively dependent. That is not proven for these comparisons, "
+        "which share estimates, so the {q}% is nominal. Benjamini-Yekutieli, which holds "
+        "under any dependence, would support {by} of the {checked}."
     ),
 }
 
@@ -146,6 +177,14 @@ def difference_p(difference: float, sd: float) -> float:
     return min(1.0, 2.0 * (1.0 - NormalDist().cdf(abs(difference) / sd)))
 
 
+def benjamini_yekutieli(p_values: Sequence[float]) -> list[float]:
+    """Benjamini-Yekutieli adjusted p-values: Benjamini-Hochberg's times
+    ``c(m) = 1 + 1/2 + ... + 1/m``, capped at 1. They control the false discovery rate under
+    any dependence between the tests (Benjamini and Yekutieli, 2001)."""
+    c = sum(1 / k for k in range(1, len(p_values) + 1))
+    return [min(1.0, p * c) for p in benjamini_hochberg(p_values)]
+
+
 def benjamini_hochberg(p_values: Sequence[float]) -> list[float]:
     """Benjamini-Hochberg adjusted p-values, in the input order.
 
@@ -182,8 +221,12 @@ class _Builder:
         q: float,
         lang: str,
     ) -> None:
-        if not 0 < q < 1:
-            raise ValueError("q must be between 0 and 1")
+        if not 0 < q <= MAX_Q:
+            raise ValueError(
+                f"q must be above 0 and at most {MAX_Q}: a supported finding must also pass "
+                f"the claim checker's own {100 * MAX_Q:g}% test, so a larger q would not "
+                "support more"
+            )
         self.data = data
         self.lang = _lang.get(lang)
         self.lang_code = lang
@@ -228,6 +271,10 @@ class _Builder:
         lower = None if s.lower is None else s.lower[i]
         upper = None if s.upper is None else s.upper[i]
         return s.values[i], lower, upper
+
+    def zero_width(self, cell: _Cell) -> bool:
+        _, lower, upper = self.numbers(cell)
+        return lower is not None and upper is not None and upper - lower <= 0
 
     def se(self, cell: _Cell) -> float:
         value, lower, upper = self.numbers(cell)
@@ -308,6 +355,8 @@ class _Builder:
         dropped: list[dict[str, Any]] = []
         for family, a, b, group in planned:
             flags = {f for f in (self.flag(a), self.flag(b)) if f in DROPPED_FLAGS}
+            if not flags and (self.zero_width(a) or self.zero_width(b)):
+                flags = {ZERO_WIDTH}
             if flags:
                 dropped.append(
                     {
@@ -336,7 +385,14 @@ class _Builder:
         adjusted = benjamini_hochberg([c["p"] for c in tested])
         for c, p_adj in zip(tested, adjusted, strict=True):
             c["p_adjusted"] = p_adj
+            # q <= 0.05, so p_adj <= q already implies p < 0.05; the threshold test only
+            # matters at the edge, where 1.96 is a little above the exact quantile.
             c["supported"] = p_adj <= self.q and c["difference"] > c["threshold"]
+        by_supported = sum(
+            1
+            for c, p_by in zip(tested, benjamini_yekutieli([c["p"] for c in tested]), strict=True)
+            if p_by <= self.q and c["difference"] > c["threshold"]
+        )
         statements = self.statements(tested, cells)
         families = []
         for family in FAMILIES:
@@ -358,6 +414,9 @@ class _Builder:
             caveats.append("independence")
         if self.reference is not None:
             caveats.append("reference")
+        if checked:
+            caveats.append("dependence")
+        caveat_values = {"q": f"{100 * self.q:g}", "by": by_supported, "checked": checked}
         return {
             "method": {
                 "test": "two-sided normal test of the difference, as the claim checker's",
@@ -387,13 +446,37 @@ class _Builder:
                 q=self.q,
                 lang=self.lang_code,
             ),
-            "caveats": [{"id": c, "text": _CAVEATS[c]} for c in caveats],
+            "caveats": [{"id": c, "text": _CAVEATS[c].format(**caveat_values)} for c in caveats],
         }
 
     # Sentences.
     def item(self, cell: _Cell) -> str:
         value = format_value(self.numbers(cell)[0], self.data)
         return self.f["finding_item"].format(name=self.name(cell), value=value)
+
+    def rank_item(self, cell: _Cell) -> str:
+        """The estimate with its rank from the nearer end: "Abia, the second-highest
+        estimate (10.6%)". Competition ranking, as the claim checker's."""
+        f = self.f
+        values = self.data.series[cell.series].values
+        v = values[cell.category or 0]
+        from_top = 1 + sum(1 for x in values if x > v)
+        from_bottom = 1 + sum(1 for x in values if x < v)
+        if from_top <= from_bottom:
+            rank = (
+                f["rank_top"]
+                if from_top == 1
+                else f["rank_high"].format(ordinal=self.lang.ordinal(from_top))
+            )
+        else:
+            rank = (
+                f["rank_bottom"]
+                if from_bottom == 1
+                else f["rank_low"].format(ordinal=self.lang.ordinal(from_bottom))
+            )
+        return f["finding_rank_item"].format(
+            name=self.name(cell), rank=rank, value=format_value(v, self.data)
+        )
 
     def prefix(self, s: int) -> str:
         if len(self.data.series) == 1:
@@ -473,9 +556,9 @@ class _Builder:
                     if family == "rankings":
                         text = f["finding_one"].format(
                             prefix=self.prefix(a.series),
-                            items=self.item(a),
+                            items=self.rank_item(a),
                             direction=f["higher"],
-                            other=self.item(b),
+                            other=self.rank_item(b),
                         )
                     else:
                         text = f["finding_gap"].format(
@@ -531,11 +614,22 @@ def _with_reference(
     )
 
 
+def _checked_templates(lang: Any) -> list[str]:
+    """The findings templates whose text the claim checker reads: the finding sentences and
+    the words put into them (not the count, method or left-out lines)."""
+    return [
+        v
+        for k, v in lang.FINDINGS.items()
+        if k.startswith(("finding_", "rank_")) or k in ("higher", "lower", "series_lowest_ci")
+    ]
+
+
 def _refuse_colliding_names(data: ChartData, reference: Reference | None, lang: Any) -> None:
-    """A name that is also a word of the findings sentences ("care", "review") would be
-    read as that name by the claim checker; refuse it."""
-    text = " ".join(re.sub(r"\{\w+\}", " ", v) for v in lang.FINDINGS.values())
-    words = set(re.findall(r"[a-z]+", text.lower()))
+    """A name that is also a word of the finding sentences ("care", "review") would be read
+    as that name by the claim checker; refuse it. Only the sentences the checker reads count,
+    and the hedge words; the count, method and left-out lines do not ("Rate", "Survey")."""
+    text = " ".join(re.sub(r"\{\w+\}", " ", v) for v in _checked_templates(lang))
+    words = set(re.findall(r"[a-z]+", text.lower())) | {w.lower() for w in lang.HEDGES}
     names = [*data.categories, *(s.name for s in data.series)]
     if reference is not None:
         names.append(reference.label)
@@ -545,6 +639,29 @@ def _refuse_colliding_names(data: ChartData, reference: Reference | None, lang: 
             f"name(s) {', '.join(bad)} are also words of the findings sentences; "
             "rename them (for example 'Care group') to use findings"
         )
+
+
+def extreme_verdicts(block: Mapping[str, Any], data: ChartData) -> dict[tuple[int, int, int], bool]:
+    """The ``extremes`` results as :data:`~disability_access_charts.describe.Verdicts` for
+    the alt-text: each tested pair's ``supported`` flag, and False for a dropped pair (it was
+    not tested, so the survey cannot show the difference). Cells not in ``data`` are skipped.
+    """
+    series = {s.name: j for j, s in enumerate(data.series)}
+    categories = {c: i for i, c in enumerate(data.categories)}
+    out: dict[tuple[int, int, int], bool] = {}
+    rows = [(c, bool(c.get("supported"))) for c in block.get("comparisons", [])]
+    rows += [(d, False) for d in block.get("dropped_comparisons", [])]
+    for c, supported in rows:
+        if not isinstance(c, Mapping) or c.get("family") != "extremes":
+            continue
+        a, b = c.get("a") or {}, c.get("b") or {}
+        s = series.get(str(a.get("series")))
+        i = categories.get(str(a.get("category")))
+        j = categories.get(str(b.get("category")))
+        if s is None or i is None or j is None or b.get("series") != a.get("series"):
+            continue
+        out[verdict_key(s, i, j)] = supported
+    return out
 
 
 def lines(
@@ -595,7 +712,7 @@ def statistical_findings(
 
     Needs at least one series with intervals. ``reference`` adds the ``outliers`` family;
     ``withheld`` names categories left out of the chart (suppressed or no data), which the
-    block reports; ``q`` is the false discovery rate.
+    block reports; ``q`` is the false discovery rate, above 0 and at most 0.05.
     """
     return _Builder(data, reference, withheld, q, lang).build()
 
@@ -797,12 +914,18 @@ def findings_checks(doc: Mapping[str, Any], data: ChartData) -> list[dict[str, A
     )
 
     # Hedging: a finding with a "review" estimate says so; no tested comparison involves an
-    # unreliable or suppressed estimate.
+    # unreliable or suppressed estimate, or an interval of zero width. The hedge is found by
+    # its English wording ("'s", "flagged for review"); another language would need its own.
     problems = []
     for k, c in enumerate(comparisons):
         flags = {(c.get(side) or {}).get("precision") for side in ("a", "b")}
         if flags & DROPPED_FLAGS:
             problems.append(f"comparison {k + 1} involves an unreliable or suppressed estimate")
+        for side in ("a", "b"):
+            cell = c.get(side) or {}
+            lo, hi = cell.get("lower"), cell.get("upper")
+            if isinstance(lo, (int, float)) and isinstance(hi, (int, float)) and hi - lo <= 0:
+                problems.append(f"comparison {k + 1} involves an interval of zero width")
         if bool(flags & HEDGED_FLAGS) != bool(c.get("hedged")):
             problems.append(f"comparison {k + 1}: 'hedged' does not match its flags")
     for st in statements:
@@ -823,7 +946,8 @@ def findings_checks(doc: Mapping[str, Any], data: ChartData) -> list[dict[str, A
             "findings-hedged",
             "error",
             "Findings that involve a 'review' estimate are hedged; comparisons that involve an "
-            "unreliable or suppressed estimate are dropped, not tested",
+            "unreliable or suppressed estimate, or an interval of zero width, are dropped, "
+            "not tested",
             not problems,
             problems=problems,
         )

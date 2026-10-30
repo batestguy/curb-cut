@@ -1,6 +1,6 @@
 # Maps: colour, patterns, contrast and what the audit checks
 
-`disability_access_charts.choropleth` (also importable from `disability_access_charts.maps`) builds a shaded-map ("choropleth") document. It is **stable API since 0.2**: exported from the package, with `meta.experimental = false`. In 0.1 it was experimental; its arguments are unchanged, and 0.2 adds `patterns` (on by default). Curb Cut uses it for its national prevalence map.
+`disability_access_charts.choropleth` (also importable from `disability_access_charts.maps`) builds a shaded-map ("choropleth") document. It is **stable API since 0.2**: exported from the package, with `meta.experimental = false`. In 0.1 it was experimental. Its arguments are unchanged, and 0.2 adds `patterns`, which changes the default document: `patterns=None` (the default) means "auto", a pattern per class with five classes or fewer and none with more (there are five tiles), where the audit adds a `not-colour-alone` **warning** that neighbouring classes differ by shade alone. So a default call with five classes or fewer now gives a patterned document; one with more gives the 0.1 document plus that warning. `patterns=False` gives the 0.1 document (with the same warning); `patterns=True` with more than five classes raises. Curb Cut uses it for its national prevalence map.
 
 ## The document
 
@@ -11,7 +11,7 @@ Like `bar()` and `dot()`, one JSON-serialisable dict:
 - `themes`: light and dark `MapTheme`s (background, text, boundary `edge`, one fill per class);
 - `alt_text`: built from the data (see below); `alt_text_classes` is its class sentence;
 - `table`: every region, sorted by name, with its value, interval, class and any extra text columns (e.g. a precision flag);
-- `patterns` (unless `patterns=False`): the tiles, each class's tile in order, each theme's ink, and `scale` (how much to scale a 12-unit tile in map units); each entry in `classes` also names its tile as `pattern`, for the legend;
+- `patterns` (when patterns are on): the tiles, each class's tile in order, each theme's ink, and `scale` (how much to scale a 12-unit tile in map units); each entry in `classes` also names its tile as `pattern`, for the legend;
 - `data`, `keyboard`, `audit`, `meta`.
 
 ## Fixed classes
@@ -37,4 +37,4 @@ The alt-text has three parts: an introduction ("Map: title. 37 states, each with
 
 ## What the page must do
 
-The document cannot check the page. Curb Cut's page draws the map as one `role="img"` named by the alt-text, with the SVG hidden from assistive technology; the regions are not separate Tab stops; the tooltip closes with Esc, can be hovered, and stays until the pointer leaves (SC 1.4.13); and the table follows the map. With patterns, the page draws one SVG `<pattern>` per class (the class fill behind, the tile in the theme's ink in front, scaled by `patterns.scale`), fills each region with its class's pattern, and draws the same pattern in each legend swatch; the colours follow the light or dark scheme. Its Playwright and axe tests check those, in both schemes. The tiles, their sources and the ink rule are in [patterns.md](patterns.md).
+The document cannot check the page. Curb Cut's page draws the map as one `role="img"` named by the alt-text, with the SVG hidden from assistive technology; the regions are not separate Tab stops; the tooltip closes with Esc, can be hovered, and stays until the pointer leaves (SC 1.4.13); and the table follows the map. With patterns, the page draws one SVG `<pattern>` per class (the class fill behind, the tile in the theme's ink in front, scaled by `patterns.scale`), fills each region with its class's pattern, and draws the same pattern in each legend swatch. On a narrow screen it raises the scale so that no tile is drawn under 8 pixels (at 320 px the map is about 288 px wide, and the document's scale alone would give tiles of about 5.5 px); the colours follow the light or dark scheme. Its Playwright and axe tests check those, in both schemes. The tiles, their sources and the ink rule are in [patterns.md](patterns.md).

@@ -443,3 +443,16 @@ def test_warnings_helper() -> None:
 def test_rejects_bad_data(kwargs: dict) -> None:
     with pytest.raises(ValueError):
         ChartData(**kwargs)
+
+
+def test_bar_with_several_series_is_described_as_grouped_bars() -> None:
+    # New in 0.2: in 0.1, describe(chart_type="bar") with several series raised.
+    data = ChartData(
+        categories=("Kano", "Lagos"),
+        series=(Series("Women", (6.0, 1.0)), Series("Men", (3.0, 2.0))),
+        unit="percent",
+        decimals=1,
+    )
+    text = describe(data, chart_type="bar", title="Synthetic", source="Synthetic")
+    assert text.startswith("Bar chart: Synthetic. 2 rows, one per category, with 2 series")
+    assert check_alt_text(text, data) == []

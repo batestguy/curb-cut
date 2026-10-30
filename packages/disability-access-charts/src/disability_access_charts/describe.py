@@ -36,6 +36,8 @@ only that it is one of that category's figures.
   ten), within 5% of the actual ratio;
 * ranks: "ranked N of M", "3rd", "the second-highest", "number one", "#2", with
   competition ranking (ties share a rank) and M equal to the number of categories;
+* lists of names with values, "A, 1%; B, 2%; and C, 3%": the semicolons between such items
+  do not end the clause, and the list is read as one list of names;
 * equality: "A is *the same as* B", "A and B are equal";
 * differences: "the survey *can / cannot* show a difference from (or between) ...";
 * "no difference", "not different" and close variants always fail.
@@ -46,11 +48,20 @@ just read off the point estimates. "A is higher than B" passes only if
 interval's half-width divided by the normal quantile for the interval's level (1.96 for a
 95% interval; the level is read from the interval label, e.g. "90% confidence interval"
 or "90% CI", and defaults to 95%). When an interval is asymmetric, the **larger**
-half-width is used, which makes the test conservative. This is a two-sided test at the 5%
+half-width is used. That is conservative only when the interval is wider than a normal
+(Wald) interval with the same standard error would be on that side; it is not a guarantee.
+The normal quantile is used throughout: the survey design's degrees of freedom and t
+quantiles are not. This is a two-sided test at the 5%
 level that assumes roughly normal, symmetric intervals and **independent groups**, with
 **no correction for multiple comparisons**. When groups may not be independent (two series
 for the same category, or categories that are parts of one whole) the checker still
 applies the test but adds a warning.
+
+``verdicts`` (optional, on :func:`describe` and :func:`check_alt_text`) replaces this test
+for given pairs of estimates in the "can / cannot show a difference" wording only. The
+chart builders pass the statistical findings' results for the ``extremes`` comparisons
+(corrected for multiple comparisons, see :mod:`disability_access_charts.findings`), so the
+alt-text and the findings never disagree. Every other claim keeps the uncorrected test.
 
 * An unqualified superlative ("A is the highest") fails unless the test separates A from
   **every** other group. The hedged form "A has the highest estimate" is accepted when A
@@ -58,7 +69,8 @@ applies the test but adds a warning.
 * Ratios are checked on the point estimates (within 5%), and a ratio other than 1 also
   needs the difference to pass the test. Ratios of values below zero get a warning.
 * Ranks are checked on the point estimates. If the test cannot separate the group from a
-  neighbour in the ranking, a warning says the rank is not statistically supported.
+  neighbour in the ranking, a warning says the rank is not statistically supported, unless
+  the rank is hedged ("the second-highest estimate"), as for superlatives.
 * Equality ("the same as") always fails with intervals: a survey cannot show two groups
   are equal. The suggested wording is "the survey cannot show a difference".
 
@@ -99,6 +111,17 @@ PRECISION_FLAGS = ("reliable", "review", "unreliable", "suppressed")
 """Per-estimate precision flags a series may carry (see :class:`Series`)."""
 RATIO_TOLERANCE = 0.05
 TEST_Z = 1.96  # two-sided 5% test of a difference
+
+Verdicts = Mapping[tuple[int, int, int], bool]
+"""Results that replace the interval test in the "can / cannot show a difference" wording,
+keyed by (series index, category index, category index), the two categories in increasing
+order. See :func:`verdict_key`."""
+
+
+def verdict_key(s: int, i: int, j: int) -> tuple[int, int, int]:
+    """The :data:`Verdicts` key for categories ``i`` and ``j`` of series ``s``."""
+    return (s, min(i, j), max(i, j))
+
 
 _MARK0 = 0xE000  # private-use characters stand in for category and series names
 _MARK = "[-]"
@@ -338,7 +361,8 @@ def _se(data: ChartData, s: Series, i: int) -> float | None:
     if s.lower is None or s.upper is None:
         return None
     v = s.values[i]
-    half = max(v - s.lower[i], s.upper[i] - v)  # the larger half-width: conservative
+    # The larger half-width: conservative only where the interval is wider than a normal one.
+    half = max(v - s.lower[i], s.upper[i] - v)
     return half / _z_level(data)
 
 
@@ -359,10 +383,20 @@ def difference_test(
     return diff > threshold, diff, threshold
 
 
-def _all_supported(data: ChartData, s: int, group: Iterable[int], other: Iterable[int]) -> bool:
+def _all_supported(
+    data: ChartData,
+    s: int,
+    group: Iterable[int],
+    other: Iterable[int],
+    verdicts: Verdicts | None = None,
+) -> bool:
     other = list(other)
     for i in group:
         for j in other:
+            if verdicts is not None and verdict_key(s, i, j) in verdicts:
+                if not verdicts[verdict_key(s, i, j)]:
+                    return False
+                continue
             result = difference_test(data, (s, i), (s, j))
             if result is None:
                 if data.series[s].values[i] == data.series[s].values[j]:
@@ -390,10 +424,11 @@ def _groups(values: Sequence[float]) -> tuple[list[int], list[int], list[int], l
 
 
 class _Writer:
-    def __init__(self, data: ChartData, lang: str) -> None:
+    def __init__(self, data: ChartData, lang: str, verdicts: Verdicts | None = None) -> None:
         self.data = data
         self.lang = _lang.get(lang)
         self.t = self.lang.TEMPLATES
+        self.verdicts = verdicts
 
     def name(self, i: int) -> str:
         return _display(self.data, self.lang, self.data.categories[i])
@@ -430,7 +465,7 @@ class _Writer:
         )
 
     def difference(self, s: int, group: Sequence[int], other: Sequence[int], which: str) -> str:
-        can = _all_supported(self.data, s, group, other)
+        can = _all_supported(self.data, s, group, other, self.verdicts)
         return self.t["difference"].format(
             can=self.t["can"] if can else self.t["cannot"],
             which=self.t[which],
@@ -600,7 +635,13 @@ class _Writer:
 
 
 def describe(
-    data: ChartData, *, chart_type: str = "bar", title: str, source: str, lang: str = "en"
+    data: ChartData,
+    *,
+    chart_type: str = "bar",
+    title: str,
+    source: str,
+    lang: str = "en",
+    verdicts: Verdicts | None = None,
 ) -> str:
     """Alt-text for a chart, built only from ``data``, in ``lang`` (only "en" ships).
 
@@ -609,9 +650,11 @@ def describe(
     whether the survey can show a difference from the next estimate, then the intervals
     themselves. With
     intervals, superlatives are hedged ("highest estimate"). The text passes
-    :func:`check_alt_text` by construction, and the tests hold it to that.
+    :func:`check_alt_text` by construction (with the same ``verdicts``), and the tests hold
+    it to that. ``verdicts`` decides "can / cannot show a difference" for the pairs it holds
+    (see the module docstring).
     """
-    writer = _Writer(data, lang)
+    writer = _Writer(data, lang, verdicts)
     if chart_type == "bar":
         if len(data.series) == 1:
             return writer.single("bar", title, source, "bars")
@@ -735,8 +778,11 @@ def reserved_names(lang: ModuleType) -> frozenset[str]:
 
 
 class _Checker:
-    def __init__(self, text: str, data: ChartData, lang: str) -> None:
+    def __init__(
+        self, text: str, data: ChartData, lang: str, verdicts: Verdicts | None = None
+    ) -> None:
         self.data = data
+        self.verdicts = verdicts
         self.lang = _lang.get(lang)
         lang_ = self.lang
         self.problems: list[Problem] = []
@@ -784,6 +830,7 @@ class _Checker:
             r"(?:" + "|".join(lang_.EXCLUDERS) + r")\s+(?:the\s+)?$", flags
         )
         self.re_list_sep = re.compile(lang_.LIST_SEPARATOR, flags)
+        self.re_item_sep = re.compile(lang_.ITEM_SEPARATOR, flags)
         self.re_connector = re.compile(lang_.CONNECTOR, flags)
         self.re_ellipsis = re.compile(lang_.ELLIPSIS, flags)
         self.re_not_name = re.compile(r"(?:\bbut\s+)?\bnot\s+(?:the\s+)?" + _MARK, flags)
@@ -872,10 +919,18 @@ class _Checker:
     # Sentences, clauses and the parts of a clause.
     def clauses(self) -> list[tuple[tuple[int, int], tuple[int, int]]]:
         bounds = [0, *(m.end() for m in re.finditer(r"[.!?](?=\s)", self.skel)), len(self.skel)]
+        # Semicolons between the items of a list of names with values ("A, 1%; B, 2%; and C,
+        # 3%") do not end the clause.
+        items = re.compile(
+            _MARK + "(" + self.lang.ITEM_SEPARATOR + ")(?=" + _MARK + ")", re.IGNORECASE
+        )
+        in_list = {m.start(1) + m.group(1).index(";") for m in items.finditer(self.skel)}
         out = []
         for a, b in itertools.pairwise(bounds):
             start = a
             for m in re.finditer(";", self.skel[a:b]):
+                if a + m.start() in in_list:
+                    continue
                 out.append(((a, b), (start, a + m.start())))
                 start = a + m.end()
             out.append(((a, b), (start, b)))
@@ -921,7 +976,7 @@ class _Checker:
         seps: list[str] = []
         for pos, mark in reversed(marks[:-1]):
             between = self.skel[pos + 1 : chain[0][0]]
-            if not self.re_list_sep.fullmatch(between):
+            if not self.list_sep(between):
                 break
             chain.insert(0, (pos, mark))
             seps.insert(0, between)
@@ -938,13 +993,17 @@ class _Checker:
         seps: list[str] = []
         for pos, mark in marks[1:]:
             between = self.skel[chain[-1][0] + 1 : pos]
-            if not self.re_list_sep.fullmatch(between):
+            if not self.list_sep(between):
                 break
             chain.append((pos, mark))
             seps.append(between)
         if len(chain) > 1 and not self.re_joiner.search(seps[-1]):
             chain = chain[:1]
         return chain
+
+    def list_sep(self, between: str) -> bool:
+        """Whether ``between`` joins two names of one list ("A, B and C", "A, 1%; B, 2%")."""
+        return bool(self.re_list_sep.fullmatch(between) or self.re_item_sep.fullmatch(between))
 
     @staticmethod
     def _unique(chain: Iterable[tuple[int, _Mark]]) -> list[_Mark]:
@@ -1087,6 +1146,11 @@ class _Checker:
             supported = True
             for ref in refs:
                 assert ref is not None
+                if self.verdicts is not None and ref[0][0] == ref[1][0]:
+                    key = verdict_key(ref[0][0], ref[0][1], ref[1][1])
+                    if key in self.verdicts:
+                        supported = supported and self.verdicts[key]
+                        continue
                 result = difference_test(self.data, ref[0], ref[1])
                 if result is None:
                     supported = supported and self.value(ref[0]) != self.value(ref[1])
@@ -1372,6 +1436,14 @@ class _Checker:
             return int(digits.group())
         return self.lang.ORDINAL_WORDS.get(token) or self.lang.RANK_NUMBER_WORDS.get(token)
 
+    def hedge_after(self, pos: int, clause: tuple[int, int]) -> bool:
+        """Whether a hedge word follows ``pos``: "the second-highest estimate"."""
+        hedge = re.compile(
+            r"\W+(?:[\w" + _APOSTROPHES + r"]+\W+)?(?:" + _words(self.lang.HEDGES) + r")\b",
+            re.IGNORECASE,
+        )
+        return hedge.match(self.skel, pos, clause[1]) is not None
+
     def ranks(
         self, clause: tuple[int, int], sentence: tuple[int, int], consumed: list[tuple[int, int]]
     ) -> None:
@@ -1428,7 +1500,8 @@ class _Checker:
                         self.msg("rank_count_wrong", actual=n, claimed=m.group("of")),
                         "rank",
                     )
-                if actual == claimed and self.data.series[s].has_interval:
+                hedged = self.hedge_after(m.end(), clause)
+                if actual == claimed and self.data.series[s].has_interval and not hedged:
                     values = self.data.series[s].values
                     order = sorted(range(n), key=lambda j: values[j], reverse=not ascending)
                     pos = order.index(mark.index)
@@ -1978,13 +2051,16 @@ class _Checker:
         return None
 
 
-def check_alt_text(text: str, data: ChartData, *, lang: str = "en") -> list[Problem]:
+def check_alt_text(
+    text: str, data: ChartData, *, lang: str = "en", verdicts: Verdicts | None = None
+) -> list[Problem]:
     """Check every number and every recognised claim in ``text`` against ``data``.
 
     Returns errors and warnings (see :class:`Problem`). No errors means no recognised claim
-    was found false; see the module docstring for what is and is not checked.
+    was found false; see the module docstring for what is and is not checked. ``verdicts``
+    decides "can / cannot show a difference" for the pairs it holds.
     """
-    return _Checker(text, data, lang).run()
+    return _Checker(text, data, lang, verdicts).run()
 
 
 def mentioned_categories(text: str, data: ChartData, *, lang: str = "en") -> set[int]:

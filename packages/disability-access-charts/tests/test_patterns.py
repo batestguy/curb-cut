@@ -9,6 +9,7 @@ from disability_access_charts import (
     DEFAULT_THEMES,
     MAP_THEMES,
     PATTERNS,
+    MapTheme,
     Series,
     Theme,
     audit,
@@ -49,6 +50,9 @@ MAP_KW: dict[str, Any] = {
     "source": "Synthetic",
 }
 MAP_VALUES = [4.6, 0.8, 2.5, 11.3, 3.5]
+_LIGHT = MAP_THEMES["light"]
+THREE = {"light": MapTheme(_LIGHT.background, _LIGHT.text, _LIGHT.edge, _LIGHT.classes[::2])}
+SIX = {"light": MapTheme(_LIGHT.background, _LIGHT.text, _LIGHT.edge, ("#f4fbf6", *_LIGHT.classes))}
 
 
 def failed(doc: dict[str, Any]) -> set[str]:
@@ -225,6 +229,32 @@ def test_map_without_patterns_is_the_01_document() -> None:
     assert "patterns" not in doc
     assert all("pattern" not in c for c in doc["classes"])
     assert not any(c["id"].startswith("patterns-") for c in doc["audit"]["checks"])
+    # Not silent: shade alone tells neighbouring classes apart, a warning says so.
+    warn = [
+        c
+        for c in doc["audit"]["checks"]
+        if c["id"] == "not-colour-alone" and c["severity"] == "warning"
+    ]
+    assert len(warn) == 1 and warn[0]["passed"] is False
+    assert doc["audit"]["passed"] is True
+
+
+def test_map_patterns_are_auto_by_default() -> None:
+    # Five classes or fewer: on, as with patterns=True.
+    assert make_map()["patterns"] == make_map(patterns=True)["patterns"]
+    assert "patterns" in make_map(breaks=[2, 4], themes=THREE)
+    # More than five: off by default, as in 0.1 (which took any number of classes), with
+    # the warning; patterns=True still refuses.
+    six = make_map(breaks=[1, 2, 3, 4, 6], themes=SIX)
+    assert "patterns" not in six
+    assert all("pattern" not in c for c in six["classes"])
+    assert six["audit"]["passed"] is True
+    assert any(
+        c["id"] == "not-colour-alone" and c["severity"] == "warning" and not c["passed"]
+        for c in six["audit"]["checks"]
+    )
+    with pytest.raises(ValueError, match="at most 5"):
+        make_map(breaks=[1, 2, 3, 4, 6], themes=SIX, patterns=True)
 
 
 def test_map_audit_catches_pattern_problems() -> None:

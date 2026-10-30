@@ -34,16 +34,21 @@ The ratios between neighbouring class fills are reported in the audit's
 ``not-colour-alone`` check, so the trade-off is visible, not hidden. The fills get darker
 (light theme) or brighter (dark theme) with the value, and the audit checks that order.
 
-Patterns (new in 0.2, on by default)
-------------------------------------
+Patterns (new in 0.2, on by default for up to five classes)
+-----------------------------------------------------------
 Each class also gets its own pattern tile (:mod:`disability_access_charts.patterns`), drawn
 over its fill as an SVG ``<pattern>``, from the sparsest ink (lowest class) to the densest.
 Neighbouring classes then differ by a pattern as well as a shade. The document's
 ``patterns`` block holds the tiles, each theme's ink and the tile scale in map units, and
 each class names its tile (``classes[k]["pattern"]``) for the legend. The audit checks that
 classes and patterns line up one to one, that the ink is 3:1 against every fill in every
-theme, and that the legend has each class's pattern. ``patterns=False`` gives the 0.1
-document.
+theme, and that the legend has each class's pattern.
+
+``patterns=None`` (the default) means "auto": patterns are on with five classes or fewer,
+and off with more (there are five tiles). ``patterns=True`` with more than five classes
+raises; ``patterns=False`` gives the 0.1 document. Without patterns, the audit adds a
+``not-colour-alone`` **warning** that neighbouring classes differ by shade alone, so a map
+that falls back to the 0.1 document is never silent about it.
 """
 
 from __future__ import annotations
@@ -62,7 +67,13 @@ from disability_access_charts.contrast import (
     relative_luminance,
 )
 from disability_access_charts.describe import DEFAULT_INTERVAL_LABEL, ChartData, Series, describe
-from disability_access_charts.patterns import assign, ink_for, pattern_checks, tile_dict
+from disability_access_charts.patterns import (
+    PATTERNS,
+    assign,
+    ink_for,
+    pattern_checks,
+    tile_dict,
+)
 
 SCHEMA = "1.0"
 
@@ -230,7 +241,7 @@ def choropleth(
     themes: Mapping[str, MapTheme] | None = None,
     chart_id: str = "map",
     lang: str = "en",
-    patterns: bool = True,
+    patterns: bool | None = None,
 ) -> dict[str, Any]:
     """A choropleth document (see the module docstring).
 
@@ -239,7 +250,8 @@ def choropleth(
     increasing class boundaries (one class more than breaks); every theme needs exactly that
     many fills. ``extra_columns`` adds text columns to the table, e.g. a precision flag.
     ``rings`` (code -> [cx, cy, r]) marks small regions so they can be found.
-    ``patterns`` (default on) gives each class a pattern tile; at most five classes then.
+    ``patterns`` gives each class a pattern tile: ``None`` (the default) turns them on for
+    five classes or fewer and off for more; ``True`` needs five classes or fewer.
     """
     _lang.get(lang)
     themes = dict(themes or MAP_THEMES)
@@ -261,6 +273,8 @@ def choropleth(
             raise ValueError(
                 f"theme {name!r} has {len(theme.classes)} fills for {len(breaks) + 1} classes"
             )
+    if patterns is None:
+        patterns = len(breaks) + 1 <= len(PATTERNS)
     tiles = assign(len(breaks) + 1) if patterns else ()
     for label, column in extra_columns:
         if len(column) != len(names):
@@ -572,6 +586,17 @@ def map_checks(doc: Mapping[str, Any], alt_text: str | None = None) -> list[dict
             ),
         )
     )
+    if block is None:
+        checks.append(
+            _check(
+                "not-colour-alone",
+                "1.4.1",
+                "warning",
+                "Neighbouring classes differ by more than a shade: no patterns, so on the map "
+                "itself they differ by shade alone (patterns need five classes or fewer)",
+                False,
+            )
+        )
     checks.append(
         _check(
             "keyboard-metadata",

@@ -1,6 +1,6 @@
 # The claim checker: full rules
 
-This page is the complete reference for `check_alt_text` in `disability-access-charts` 0.1. The [README](../README.md) has the short version. The same rules are in the module docstring of `disability_access_charts/describe.py`.
+This page is the complete reference for `check_alt_text` in `disability-access-charts` 0.2. The [README](../README.md) has the short version. The same rules are in the module docstring of `disability_access_charts/describe.py`.
 
 **What a pass means.** No errors means that **no recognised claim was found false**. Wording the checker does not recognise is warned about where it detects it, and otherwise not checked. A pass does not make a description true, complete or good.
 

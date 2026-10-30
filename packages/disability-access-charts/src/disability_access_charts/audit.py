@@ -36,12 +36,13 @@ from disability_access_charts.contrast import NON_TEXT_MIN, TEXT_MIN, contrast_r
 from disability_access_charts.describe import (
     ChartData,
     Series,
+    Verdicts,
     check_alt_text,
     mentioned_categories,
     number_tokens,
     shares_of,
 )
-from disability_access_charts.findings import findings_checks
+from disability_access_charts.findings import extreme_verdicts, findings_checks
 from disability_access_charts.palettes import Theme
 from disability_access_charts.patterns import ink_for, pattern_checks
 
@@ -219,8 +220,17 @@ def theme_checks(themes: Mapping[str, Theme], *, chart_type: str, n_series: int)
     return checks
 
 
-def alt_text_checks(alt_text: str | None, data: ChartData | None, *, lang: str = "en") -> list:
-    """Whether the alt-text exists and whether its numbers and claims match the data."""
+def alt_text_checks(
+    alt_text: str | None,
+    data: ChartData | None,
+    *,
+    lang: str = "en",
+    verdicts: Verdicts | None = None,
+) -> list:
+    """Whether the alt-text exists and whether its numbers and claims match the data.
+
+    ``verdicts`` (from a findings block) decides "can / cannot show a difference" for the
+    pairs it holds, as when the alt-text was written."""
     if not alt_text or not alt_text.strip():
         return [_check("alt-text-present", "1.1.1", "error", "The chart has alt-text", False)]
     if data is None:
@@ -233,7 +243,7 @@ def alt_text_checks(alt_text: str | None, data: ChartData | None, *, lang: str =
                 False,
             )
         ]
-    problems = check_alt_text(alt_text, data, lang=lang)
+    problems = check_alt_text(alt_text, data, lang=lang, verdicts=verdicts)
     errs = [p for p in problems if p.severity == "error"]
     warns = [p for p in problems if p.severity == "warning"]
     vacuous = []
@@ -365,7 +375,12 @@ def _audit_document(doc: Mapping[str, Any], alt_text: str | None) -> list[dict[s
     n_series = len(data.series) if data else len(traces)
     checks = theme_checks(themes, chart_type=chart_type, n_series=n_series)
     text = alt_text if alt_text is not None else doc.get("alt_text")
-    checks += alt_text_checks(text, data, lang=meta.get("alt_text_lang", "en"))
+    verdicts = (
+        extreme_verdicts(doc["findings"], data)
+        if data is not None and isinstance(doc.get("findings"), Mapping)
+        else None
+    )
+    checks += alt_text_checks(text, data, lang=meta.get("alt_text_lang", "en"), verdicts=verdicts)
     checks += interaction_checks(traces, doc["plotly"].get("layout", {}), has_table="table" in doc)
     if chart_type == "dot" and len(traces) > 1:
         checks.append(_symbols_check(traces, "error"))
