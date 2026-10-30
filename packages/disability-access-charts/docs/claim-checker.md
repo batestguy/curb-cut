@@ -18,7 +18,7 @@ This page is the complete reference for `check_alt_text` in `disability-access-c
 
 **With confidence intervals** the checker tests the claim rather than reading the point estimates:
 
-- "A is higher than B" passes only if |a − b| > 1.96 · √(se_a² + se_b²), with each se = the interval's half-width ÷ 1.96 (or the normal quantile for the level in the interval label, such as "90% CI"). For an asymmetric interval it uses the **larger** half-width, which is conservative.
+- "A is higher than B" passes only if |a − b| > 1.96 · √(se_a² + se_b²), with each se = the interval's half-width ÷ 1.96 (or the normal quantile for the level in the interval label, such as "90% CI"). For an asymmetric interval it uses the **larger** half-width, which is conservative. A zero-width interval (such as 0 events, interval 0 to 0) has no standard error to test with, so the claim never passes: the suggestion is "the survey cannot show a difference".
 - **Assumptions:** roughly symmetric, normal intervals, **independent groups**, and **no correction for multiple comparisons**. When groups may not be independent (two series for the same category, or categories that are parts of one whole) the result comes with a warning.
 - "A is the highest" fails unless A is separated from **every** other group; "A has the highest estimate" is the accepted hedged form.
 - Ratios are checked on the point estimates and also need a supported difference. Ranks are checked on the point estimates, with a warning when a neighbour in the ranking cannot be separated.

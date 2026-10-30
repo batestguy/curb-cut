@@ -2,7 +2,7 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-30 · **Current phase:** **P4b step 11 (chart library 0.2) done on branch `p4b-charts-pages`** except the clean-wheel installs (Python 3.12 core and `[plotly]`, and 3.10); next step 12 (push `charts-v0.2.0` after the author's go-ahead), then step 13 (37 state pages). P4a gate passed 2026-10-29 (PR #2 merged); P4b plan agreed 2026-10-29, step 10 (law facts, D25) done; P4 planned 2026-10-27 (`PLAN.md` → P4: P4a numbers, map and comparison; P4b chart library 0.2 and state pages); P4a step 0 done 2026-10-27 (the pipeline reproduces the NDHS report tables; R and svy agree, `verification.md` D48); step 1 (direct estimates) next. `disability-access-charts` 0.1.0 is on PyPI (2026-10-22). P1 is live; its NVDA check is deferred.
+**Last updated:** 2026-10-30 · **Current phase:** **P4b step 11 (chart library 0.2) done on branch `p4b-charts-pages`; step 12 (release `charts-v0.2.0`) approved by the author 2026-10-30**; then step 13 (37 state pages). P4a gate passed 2026-10-29 (PR #2 merged); P4b plan agreed 2026-10-29, step 10 (law facts, D25) done; P4 planned 2026-10-27 (`PLAN.md` → P4: P4a numbers, map and comparison; P4b chart library 0.2 and state pages); P4a step 0 done 2026-10-27 (the pipeline reproduces the NDHS report tables; R and svy agree, `verification.md` D48); step 1 (direct estimates) next. `disability-access-charts` 0.1.0 is on PyPI (2026-10-22). P1 is live; its NVDA check is deferred.
 
 ## Phases
 
@@ -89,7 +89,7 @@ The one page to read first. It says where things stand and what happens next. Th
 
 ### P4b progress (2026-10-30)
 
-**Step 11 (chart library 0.2) done** on branch `p4b-charts-pages`, review fixes committed and pushed; the checks are in the decisions log. **Still owed for step 11:** a clean install of the built wheel on Python 3.12 (core and `[plotly]`) and 3.10. **Next: step 12**, the release: the author's go-ahead, then Claude pushes `charts-v0.2.0` and checks a clean install from PyPI. **Then step 13**, the 37 state pages. Accessible places per state was checked and dropped (D60).
+**Step 11 (chart library 0.2) done** on branch `p4b-charts-pages`, review fixes committed and pushed; the checks are in the decisions log. The built wheel installs clean on Python 3.12 (core and `[plotly]`) and 3.10 (core and `[plotly]`): every example runs and its chart documents pass `check --strict`. **Step 12** (release): the author said go ahead on 2026-10-30; Claude pushes `charts-v0.2.0` and checks a clean install from PyPI. **Then step 13**, the 37 state pages. Accessible places per state was checked and dropped (D60).
 
 ### P4a gate passed (2026-10-29)
 
@@ -261,4 +261,5 @@ The one page to read first. It says where things stand and what happens next. Th
 | 2026-10-29 | **P4b plan agreed** (author: "yes"; `PLAN.md` steps 10–14). Map classes get pattern fills; the adire review is optional (D31); Claude pushes `charts-v0.2.0` after the author approves; AT unmet need deferred (D24). Step 10 done the same day: law facts from the gazetted Act (D25). It commenced on 17 January 2019, not on the 23rd; the 5% quota (s.29) covers public employers only, "as much as possible". |
 | 2026-10-30 | **Accessible places per physically disabled person, by state: not built** (author asked to skip it if not feasible). OSM has 948 `wheelchair=*` tags in all of Nigeria, GRID3 has no accessibility attribute, and audits are local one-offs (D60). Out of scope until a national audit with state coverage is published. |
 | 2026-10-30 | **P4b step 11 review fixes verified and committed** on `p4b-charts-pages`: ruff, pyright, 530 Python tests, dbt 208/208 (fixtures and real), `check --strict` on 4 charts, 38 site tests; the dot plot still reads "73 comparisons checked, 20 supported". |
+| 2026-10-30 | **Before the 0.2.0 tag** (author: "proceed"): the claim checker never treats a pair with a zero-width interval as separated (it said "can show a difference" for any gap); the map's shade-only warning gets its own id, `shade-alone`, so `not-colour-alone` names one check. 531 Python tests; clean wheel installs on 3.12 and 3.10 pass. |
 | 2026-10-16 | **P0 gate passed.** Nigeria DHS 2024 is adopted as a second prevalence source next to MPI 2021. The exploratory panel uses GHS W4→W5 (all six WG-SS domains). |

@@ -47,7 +47,7 @@ theme, and that the legend has each class's pattern.
 ``patterns=None`` (the default) means "auto": patterns are on with five classes or fewer,
 and off with more (there are five tiles). ``patterns=True`` with more than five classes
 raises; ``patterns=False`` gives the 0.1 document. Without patterns, the audit adds a
-``not-colour-alone`` **warning** that neighbouring classes differ by shade alone, so a map
+``shade-alone`` **warning** that neighbouring classes differ by shade alone, so a map
 that falls back to the 0.1 document is never silent about it.
 """
 
@@ -589,7 +589,7 @@ def map_checks(doc: Mapping[str, Any], alt_text: str | None = None) -> list[dict
     if block is None:
         checks.append(
             _check(
-                "not-colour-alone",
+                "shade-alone",
                 "1.4.1",
                 "warning",
                 "Neighbouring classes differ by more than a shade: no patterns, so on the map "

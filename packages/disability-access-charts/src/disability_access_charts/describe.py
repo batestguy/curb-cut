@@ -372,13 +372,17 @@ def difference_test(
     """Whether the interval test separates two estimates.
 
     ``a`` and ``b`` are (series index, category index). Returns (supported, abs
-    difference, threshold), or None when either estimate has no interval.
+    difference, threshold), or None when either estimate has no interval. A zero-width
+    interval has no standard error to test with, so the pair is never separated (as in
+    the findings, where such a comparison is dropped).
     """
     sa, sb = data.series[a[0]], data.series[b[0]]
     se_a, se_b = _se(data, sa, a[1]), _se(data, sb, b[1])
     if se_a is None or se_b is None:
         return None
     diff = abs(sa.values[a[1]] - sb.values[b[1]])
+    if se_a == 0 or se_b == 0:
+        return False, diff, 0.0
     threshold = TEST_Z * math.sqrt(se_a**2 + se_b**2)
     return diff > threshold, diff, threshold
 

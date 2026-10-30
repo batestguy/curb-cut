@@ -231,10 +231,10 @@ def test_map_without_patterns_is_the_01_document() -> None:
     assert not any(c["id"].startswith("patterns-") for c in doc["audit"]["checks"])
     # Not silent: shade alone tells neighbouring classes apart, a warning says so.
     warn = [
-        c
-        for c in doc["audit"]["checks"]
-        if c["id"] == "not-colour-alone" and c["severity"] == "warning"
+        c for c in doc["audit"]["checks"] if c["id"] == "shade-alone" and c["severity"] == "warning"
     ]
+    # One check per id: the error check keeps its own id.
+    assert sum(c["id"] == "not-colour-alone" for c in doc["audit"]["checks"]) == 1
     assert len(warn) == 1 and warn[0]["passed"] is False
     assert doc["audit"]["passed"] is True
 
@@ -250,7 +250,7 @@ def test_map_patterns_are_auto_by_default() -> None:
     assert all("pattern" not in c for c in six["classes"])
     assert six["audit"]["passed"] is True
     assert any(
-        c["id"] == "not-colour-alone" and c["severity"] == "warning" and not c["passed"]
+        c["id"] == "shade-alone" and c["severity"] == "warning" and not c["passed"]
         for c in six["audit"]["checks"]
     )
     with pytest.raises(ValueError, match="at most 5"):
