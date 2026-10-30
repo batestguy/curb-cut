@@ -55,6 +55,8 @@ Each reads only the columns it needs and writes `data/restricted/derived/<source
 
 Counts you should see with the releases above: DHS 148,177 people (de facto, aged 5+, asked the module); MPI 213,820; GHS W4 23,280; GHS W5 24,439.
 
+**MPI household poverty (P5).** `uv run python -I -m curbcut_ingest.restricted.mpi2021_poverty --validate` rebuilds the Nigeria MPI (2022) from its 15 indicators at household level and writes `data/restricted/derived/mpi2021_household.parquet` (52,024 households: design, weights, household confounders, deprivations, score, `poor` at k = 26%; no disability item is read). `--validate` prints national H, A, MPI and each indicator's uncensored and censored headcount next to the report's Tables D1–D3 and exits 1 if H, A or MPI is outside the tolerance fixed in D64. It needs WHO's four "expanded tables" z-score workbooks (length/height-for-age and weight-for-age, boys and girls) in git-ignored `data/sources/who-growth/`, downloaded by hand from who.int (links in `curbcut_ingest/who_growth.py`); their SHA-256 is checked on load.
+
 ## 5. Estimate, gate and publish
 
 ```
