@@ -21,7 +21,7 @@ About the author and setup:
 | JONAPWD PDF is extractable with pdfplumber | Planning research said the PDF had no text layer and needed OCR. **P0 found that wrong (2026-10-16):** it has a text layer, and pages 14–50 are per-state Power BI exports. Text extraction works, but the numbers come out sorted rather than next to their labels, so the mapping must be hand-validated. The "reliable data remains…" quote wasn't found outside the PDF itself. |
 | HF `africa-disability-niger` = Nigerian disability data | It covers **Niger**. The `-nigeria` version is a WHO health-indicator mirror, not disability data. **Dropped.** |
 | NBS MPI 2021, 144 disability variables | **Confirmed.** Covers the six Washington Group difficulty areas (seeing, hearing, walking, communicating, self-care, remembering), ages 5+, answered by a household member on others' behalf, with state/LGA IDs and free registration. **This is the main source.** |
-| "71% vs 62% MPI poor" | **Not found.** We compute it ourselves from the microdata. |
+| "71% vs 62% MPI poor" | **Not found** at planning time. **Found 2026-10-30 (D61):** NBS's own Table 7 (71.4% vs 61.8%, unadjusted, NBS's broad definition). P5 reproduces it and adds the adjusted gap. |
 | NPC 2025 state projections | Not public. Use the NBS Demographic Bulletin 2023 projections, with WorldPop (CC BY) as a cross-check. |
 | Zenodo N. Nigeria PWD dataset | Not found. |
 | Gemini 1,500 RPD / 1M TPM | Unsupported. Google publishes no numbers; third parties report about 100–1,000 RPD after cuts. Free-tier prompts may be used for training. Nigeria is supported. |
@@ -289,6 +289,21 @@ Delegation: steps 0–2 inline in the main session (they need the author's judge
 - **Brief:** policy brief written via pandoc.
 - **Methods on show** (added 2026-10-21): the results page explains, with worked examples, survey weights, intervals, adjusted association versus effect, and sensitivity analysis, modelled on the UK Ethnicity Facts and Figures "how to read survey data" page (D32).
 - **Gate:** the brief is committed and the results page is live.
+
+**P5 detailed plan (agreed 2026-10-30).** Research (D61–D63): NBS ships no MPI score or poverty flag, so the index is rebuilt from its 15 indicators (k = 26%, household level); no indicator uses the disability items; religion and ethnicity are not in MPI; DoubleML's `weights` set the target average, not the nuisance fits; GHS has only W4 and W5 with the full WG-SS. Author decisions of 2026-10-30:
+- **Treatment (primary):** the household has any member aged 5+ with "a lot of difficulty" or "cannot do" on MPI's own items (D43: seeing, hearing and walking severity are asked only after a "yes" screener and aid use). Pre-declared secondaries: NBS's broad definition (Table 7) and "the head has a severe difficulty".
+- **Weights:** a population-weighted ATE (survey weights in DoubleML's ATE score), standard errors clustered by enumeration area.
+- **GHS:** a two-wave onset comparison, exploratory, with a power check first and a drop threshold fixed in the pre-registration. Never called an event study.
+- **Table 7** is reproduced only after the OSF registration. Before it, only national MPI figures are computed (no disability split).
+
+Steps:
+- **15. Corrections (main session):** D61 (NBS Table 7), D62 (DoubleML weights and sensitivity), D63 (GHS waves and design); CLAUDE.md fixed.
+- **16. Rebuild the MPI (`executor`, then `reviewer`):** household-level deprivations for the 15 indicators from the NBS MPI 2022 report's definitions, the weighted score and poverty at k = 26%. Validate against the national figures (H 62.9%, A 40.9%, MPI 0.257) within a tolerance written down before the run; any indicator that can't be matched is documented. **No disability split**; the harmoniser adds household confounders (state, senatorial district, sector, household age structure, head's sex, age and education) but never tabulates them against poverty.
+- **17. Pre-registration (main session; the author approves):** `docs/preregistration.md` on the OSF secondary-data template: questions, causal diagram, estimand, treatment and outcome definitions, confounders (and why each is pre-treatment), estimator and learners, cross-fitting, overlap rule, inference, sensitivity (DoubleML bounds benchmarked on observed covariates, E-value on the risk ratio, survey-weighted linear model with sensemakr), refutations (placebo treatment, random common cause, data subset), secondaries, multiplicity, the GHS design and drop threshold, deviations policy, and a prior-knowledge disclosure (NBS Table 7; the DHS wealth tables already on the site). The analysis code is written and tested on synthetic data and committed with it. The author registers it on OSF; the URL and timestamp go in a D-row.
+- **18. Run once (main session runs; scripts already committed):** Table 7 reproduction, primary, secondaries, sensitivity, refutations. Deviations logged. Only results that pass the disclosure gate leave the restricted zone.
+- **19. GHS two-wave comparison (exploratory):** as registered.
+- **20. Results page and brief (`executor`, then `reviewer`):** `site/poverty.html` with the estimates through the chart library, worked examples on reading survey data (D32), the adjusted-association wording; the policy brief via pandoc.
+- **21. P5 gate:** CI green, keyboard + NVDA check, review; the NBS publication copy.
 
 ### P6 — API + site polish (weeks 9–10)
 - **API:** FastAPI on Render, reading the public Parquet.

@@ -53,7 +53,7 @@ Never commit microdata, never send it to an LLM or any external service, and nev
 
 - HF `electricsheepafrica/africa-disability-niger` covers **Niger**, not Nigeria; the `-nigeria` variant is a WHO health-indicator mirror. Both are dropped.
 - The JONAPWD PDF **does** have a text layer (planning research wrongly said it was scanned). Values come out sorted rather than next to their labels, so validate the label→value mapping by hand against the rendered page. It is "All rights reserved": keep the PDF git-ignored in `data/sources/`, and cite figures rather than redistributing it.
-- The "71% vs 62% MPI poor" figure is unverified; compute it from the microdata.
+- The "71% vs 62% MPI poor" figure is NBS's own (Nigeria MPI 2022 report, Table 7: 71.4% vs 61.8%, `docs/verification.md` D61). It is unadjusted and uses NBS's broad disability definition (some difficulty or worse, plus skin conditions), not the WG cut-off. P5 reproduces it after the pre-registration and adds the adjusted gap.
 - NPC 2025 state projections aren't public. Denominators come from NBS Demographic Bulletin 2023 Annex 3 (state × sex), cross-checked with WorldPop v3.0 `state_pop_total_scaled.csv` (CC BY 4.0).
 - DHS registration is open again (it was reported paused during planning). Nigeria DHS 2024 microdata (full WG-SS) comes from dhsprogram.com, not the World Bank library.
 - GHS-Panel is only national/zone-representative. The full WG-SS is in W4 (`s4aq23`–`s4aq33`) and W5 (`s3q23`–`s3q28`); W3 asks only about seeing and walking.
