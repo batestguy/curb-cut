@@ -158,6 +158,21 @@ def test_difference_test_formula() -> None:
     assert supported is False
 
 
+def test_zero_width_interval_never_separates_a_pair() -> None:
+    # 0 events: the interval is 0 to 0, so there is no standard error to test with.
+    zero = ChartData(
+        categories=("Area A", "Area B"),
+        series=(Series("Rate", (0.0, 9.0), (0.0, 7.0), (0.0, 11.0)),),
+        unit="percent",
+        decimals=1,
+        verbatim=("T", "S"),
+        category_label="Area",
+    )
+    assert difference_test(zero, (0, 1), (0, 0)) == (False, 9.0, 0.0)
+    problems = check_alt_text("Area B is higher than Area A.", zero)
+    assert [(p.severity, p.kind) for p in problems] == [("error", "comparison")]
+
+
 def test_interval_level_is_read_from_the_label() -> None:
     ninety = ChartData(
         categories=("A", "B"),
@@ -443,3 +458,16 @@ def test_warnings_helper() -> None:
 def test_rejects_bad_data(kwargs: dict) -> None:
     with pytest.raises(ValueError):
         ChartData(**kwargs)
+
+
+def test_bar_with_several_series_is_described_as_grouped_bars() -> None:
+    # New in 0.2: in 0.1, describe(chart_type="bar") with several series raised.
+    data = ChartData(
+        categories=("Kano", "Lagos"),
+        series=(Series("Women", (6.0, 1.0)), Series("Men", (3.0, 2.0))),
+        unit="percent",
+        decimals=1,
+    )
+    text = describe(data, chart_type="bar", title="Synthetic", source="Synthetic")
+    assert text.startswith("Bar chart: Synthetic. 2 rows, one per category, with 2 series")
+    assert check_alt_text(text, data) == []

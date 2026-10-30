@@ -31,7 +31,8 @@ def _check(paths: Sequence[Path], strict: bool) -> int:
         print(f"{path}: {'FAILED' if bad else 'passed'}")
         for c in failed:
             where = f" [{c['theme']}]" if "theme" in c else ""
-            print(f"  {c['severity']}: {c['id']} (WCAG {c['wcag']}){where}: {c['description']}")
+            wcag = f" (WCAG {c['wcag']})" if c.get("wcag") not in (None, "n/a") else ""
+            print(f"  {c['severity']}: {c['id']}{wcag}{where}: {c['description']}")
             for p in c.get("problems", []):
                 if isinstance(p, dict):
                     number = f" {p['number']}:" if p.get("number") else ""

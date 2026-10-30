@@ -7,6 +7,7 @@ from collections.abc import Mapping
 from typing import Any
 
 from disability_access_charts.palettes import DEFAULT_THEMES, Theme
+from disability_access_charts.patterns import ink_for
 
 
 def _apply(fig: dict[str, Any], t: Theme, *, chart_type: str | None = None) -> dict[str, Any]:
@@ -25,10 +26,13 @@ def _apply(fig: dict[str, Any], t: Theme, *, chart_type: str | None = None) -> d
         legend = layout.setdefault("legend", {})
         legend["font"] = {**(legend.get("font") or {}), "color": t.text}
     scatter_index = 0
-    for trace in fig.get("data") or []:
+    traces = fig.get("data") or []
+    bars = [tr for tr in traces if tr.get("type", "scatter") == "bar"]
+    grouped = chart_type != "dot" and len(bars) > 1 and bool(t.series)
+    for trace in traces:
         kind = trace.get("type", "scatter")
         marker = trace.setdefault("marker", {})
-        if kind == "bar" and chart_type != "dot":
+        if kind == "bar" and chart_type != "dot" and not grouped:
             marker["color"] = t.mark
         elif t.series:
             marker["color"] = t.series[scatter_index % len(t.series)]
@@ -39,6 +43,12 @@ def _apply(fig: dict[str, Any], t: Theme, *, chart_type: str | None = None) -> d
             if isinstance(trace.get(bars), Mapping):
                 trace[bars] = {**trace[bars], "color": whisker}
         trace["textfont"] = {**(trace.get("textfont") or {}), "color": t.text}
+    # Pattern fills (0.2): each bar's own colour behind, one ink for the theme in front.
+    patterned = [tr["marker"] for tr in traces if isinstance(tr["marker"].get("pattern"), Mapping)]
+    if patterned:
+        ink = ink_for([str(m["color"]) for m in patterned])
+        for m in patterned:
+            m["pattern"] = {**m["pattern"], "fgcolor": ink, "bgcolor": m["color"]}
     return fig
 
 

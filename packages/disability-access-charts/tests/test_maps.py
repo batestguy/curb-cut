@@ -1,4 +1,4 @@
-"""The experimental choropleth document and its audit."""
+"""The choropleth document (stable since 0.2) and its audit."""
 
 import copy
 import json
@@ -37,7 +37,7 @@ def failed(doc: dict[str, Any]) -> set[str]:
 
 def test_document_shape_and_audit() -> None:
     doc = json.loads(json.dumps(make()))
-    assert doc["meta"]["experimental"] is True
+    assert doc["meta"]["experimental"] is False  # stable since 0.2
     assert doc["meta"]["chart_type"] == "choropleth"
     assert doc["keyboard"]["hover_only_data"] is False
     assert doc["keyboard"]["data_route"] == "table"

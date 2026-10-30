@@ -1,5 +1,6 @@
-// The measured figures (P4a): headline, comparison, prevalence map, dot plot, spatial
-// findings, the state card's DHS figure, and the methodology page.
+// The measured figures (P4a, P4b): headline, comparison, prevalence map with pattern
+// fills, dot plot with its statistical findings, spatial findings, the state card's DHS
+// figure, and the methodology page.
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
@@ -89,18 +90,106 @@ test('the map is one image named by its data-derived alt-text, with no state Tab
   await expect(map).toHaveAttribute('role', 'img');
   await expect(map).toHaveAccessibleName(doc.alt_text);
   await expect(map.locator('svg')).toHaveAttribute('aria-hidden', 'true');
-  await expect(map.locator('path')).toHaveCount(37);
+  await expect(map.locator('path[data-state]')).toHaveCount(37);
   await expect(map.locator('[tabindex]')).toHaveCount(0);
   // The legend gives every class in words, and the classes cover all 37 states.
   const legend = page.locator('#prevalence-map-legend li');
   await expect(legend).toHaveCount(doc.classes.length);
   for (const [i, c] of doc.classes.entries()) {
     await expect(legend.nth(i)).toHaveText(`${c.label}: ${c.count} states`);
+    // Each swatch shows its class's pattern (hidden from assistive technology).
+    const swatch = legend.nth(i).locator('svg.swatch');
+    await expect(swatch).toHaveAttribute('data-pattern', c.pattern);
+    await expect(swatch).toHaveAttribute('aria-hidden', 'true');
   }
   expect(doc.classes.reduce((sum, c) => sum + c.count, 0)).toBe(37);
   expect(doc.classes.every((c) => c.count > 0)).toBe(true);
   // No hotspot outlines, and the page says why.
   await expect(page.locator('#lisa-sentence')).toContainText('no hotspot outlines');
+});
+
+for (const colorScheme of ['light', 'dark']) {
+  test(`each map class has its own pattern, in the audited ink (${colorScheme})`, async ({
+    page,
+    request,
+  }) => {
+    const doc = await (await request.get('data/charts/prevalence_map.json')).json();
+    expect(doc.audit.passed).toBe(true);
+    const ids = doc.classes.map((c) => c.pattern);
+    expect(new Set(ids).size).toBe(doc.classes.length); // one pattern per class
+    await page.emulateMedia({ colorScheme });
+    await ready(page);
+    const map = page.locator('#prevalence-map');
+    await expect(map.locator('svg pattern')).toHaveCount(doc.classes.length);
+    // Every state is filled with its class's pattern.
+    const fills = await map.locator('path[data-state]').evaluateAll((paths) =>
+      paths.map((p) => [p.dataset.state, p.style.fill]),
+    );
+    const classOf = new Map(doc.regions.map((r) => [r.code, r.class]));
+    for (const [code, fill] of fills) {
+      expect(fill).toContain(`prevalence_map-pattern-${classOf.get(code)}`);
+    }
+    // The ink drawn is the document's ink for this scheme.
+    const ink = await map
+      .locator('svg pattern path.tile')
+      .first()
+      .evaluate((el) => getComputedStyle(el).fill);
+    const hex = doc.patterns.ink[colorScheme];
+    const rgb = `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(', ')})`;
+    expect(ink).toBe(rgb);
+    const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
+    expect(results.violations).toEqual([]);
+  });
+}
+
+test('the findings under the dot plot are plain text from the document, after the chart', async ({
+  page,
+  request,
+}) => {
+  const doc = await (await request.get('data/charts/prevalence_by_state.json')).json();
+  const findings = doc.findings;
+  expect(doc.audit.passed).toBe(true);
+  expect(doc.audit.checks.filter((c) => c.id.startsWith('findings-') && !c.passed)).toEqual([]);
+  await ready(page);
+  const block = page.locator('#prevalence-chart-findings');
+  await expect(block.getByRole('heading', { level: 4 })).toHaveText(
+    'Which differences the survey can show',
+  );
+  // The count line, as the library wrote it: 'N comparisons checked, K supported.'
+  await expect(block.locator('.findings-count')).toHaveText(findings.lines.count);
+  await expect(block.locator('.findings-count')).toHaveText(
+    /^\d+ comparisons? checked, \d+ supported\.$/,
+  );
+  const items = block.locator('.findings-list li');
+  await expect(items).toHaveCount(findings.statements.length);
+  for (const [i, s] of findings.statements.entries()) {
+    await expect(items.nth(i)).toHaveText(s.text);
+  }
+  // The list is named by the heading; nothing in the block is a live region, so it is
+  // read in order, not announced over the page.
+  await expect(block.locator('.findings-list')).toHaveAccessibleName(
+    'Which differences the survey can show',
+  );
+  await expect(block.locator('[aria-live], [role="status"], [role="alert"]')).toHaveCount(0);
+  // The method, with the false discovery rate and the source, one click away.
+  await block.locator('details summary').click();
+  await expect(block.locator('.findings-method')).toContainText('false discovery rate 5%');
+  await expect(block.locator('.findings-method')).toContainText(`Source: ${doc.meta.source}.`);
+  await expect(block.locator('.findings-families li').first()).toContainText('checked');
+  // After the chart, before its table.
+  const order = await page.evaluate(() => {
+    const chart = document.getElementById('prevalence-chart');
+    const f = document.getElementById('prevalence-chart-findings');
+    const table = document.getElementById('prevalence-chart-table');
+    const after = (a, b) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING);
+    return after(chart, f) && after(f, table);
+  });
+  expect(order).toBe(true);
+  // Hedged wording only: no causes, no 'first', no unqualified 'significant'.
+  await expect(block).not.toContainText(FIRST_CLAIM);
+  await expect(block).not.toContainText(/\bsignificant|\bcaused by\b|\bbecause of\b/i);
+  // The dot-plot table shows each state's precision flag.
+  await expect(page.locator('#prevalence-chart-table thead th').last()).toHaveText('Precision');
 });
 
 test('the map tip shows on hover, tap and focus; it can be hovered and Esc closes it', async ({
@@ -186,7 +275,7 @@ test('the spatial findings are sentences, with cluster members sorted by name', 
   await expect(page.locator('#moran-sentence')).toHaveText(spatial.moran[0].sentence);
   expect(spatial.moran[0].measure).toBe('disability3');
   expect(spatial.moran[0].age_group).toBe('18+');
-  await page.locator('details.more summary').click();
+  await page.locator('#spatial-heading ~ details.more summary').click();
   await expect(page.locator('#moran-table table tbody tr')).toHaveCount(8);
   await expect(page.locator('#moran-sentences li')).toHaveCount(7);
   await expect(page.locator('#lisa-detail')).toHaveText(spatial.lisa.sentence);
@@ -247,6 +336,49 @@ test('if the spatial findings fail, the failure is shown and announced', async (
   await expect(page.locator('#spatial-status')).toHaveAttribute('role', 'status');
   await expect(page.locator('#spatial-status')).toContainText('could not be loaded');
   await expect(page.locator('#prevalence-map svg')).toBeVisible();
+});
+
+test('at 320px the map pattern tiles are drawn at least 8px wide', async ({ page, request }) => {
+  const doc = await (await request.get('data/charts/prevalence_map.json')).json();
+  await page.setViewportSize({ width: 320, height: 800 });
+  await ready(page);
+  // On-screen tile size: tile width x patternTransform scale x screen pixels per map unit.
+  const sizes = await page.locator('#prevalence-map svg').evaluate((svg) => {
+    const units = Number(svg.getAttribute('viewBox').trim().split(/\s+/)[2]);
+    const px = svg.getBoundingClientRect().width / units;
+    return [...svg.querySelectorAll('pattern')].map((pattern) => {
+      const scale = Number(/scale\(([\d.]+)\)/.exec(pattern.getAttribute('patternTransform'))[1]);
+      return Number(pattern.getAttribute('width')) * scale * px;
+    });
+  });
+  expect(sizes).toHaveLength(doc.classes.length);
+  for (const size of sizes) expect(size).toBeGreaterThanOrEqual(7.99);
+});
+
+test('a findings problem does not take the chart down; no findings block, no placeholder', async ({
+  page,
+}) => {
+  // A malformed findings block: the chart still draws, and the block says what went wrong.
+  await page.route('**/data/charts/prevalence_by_state.json', async (route) => {
+    const doc = await (await route.fetch()).json();
+    doc.findings.statements = null;
+    await route.fulfill({ json: doc });
+  });
+  await ready(page);
+  await expect(page.locator('#prevalence-chart-findings .findings-count')).toContainText(
+    'The findings could not be shown',
+  );
+  await expect(page.locator('#prevalence-chart-title')).not.toHaveText('Chart unavailable');
+  // No findings block at all: the "Loading the findings…" placeholder is not left behind.
+  await page.unroute('**/data/charts/prevalence_by_state.json');
+  await page.route('**/data/charts/prevalence_by_state.json', async (route) => {
+    const doc = await (await route.fetch()).json();
+    delete doc.findings;
+    await route.fulfill({ json: doc });
+  });
+  await ready(page);
+  await expect(page.locator('#prevalence-chart-findings')).toBeHidden();
+  await expect(page.getByText('Loading the findings')).toHaveCount(0);
 });
 
 test('at 320px the map fits and wide tables scroll inside a named region', async ({ page }) => {

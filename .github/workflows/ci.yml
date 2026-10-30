@@ -76,12 +76,30 @@ jobs:
         run: uv run python packages/transform/scripts/build_charts.py
       - name: Build locator map (from the committed geoBoundaries file; fails if a state is missing)
         run: uv run python packages/transform/scripts/build_map.py
+      - name: Build the 37 state pages (fails on a failed chart audit)
+        run: uv run python packages/transform/scripts/build_state_pages.py
+      # The fixture warehouse has the edge cases (a suppressed cell, a state with no rows), so
+      # the pages must build from it too; the output is thrown away. The fixtures publish only
+      # one activity, so this covers only the no-chart path; the chart path is covered by the
+      # real build above and by packages/transform/tests_py/test_build_state_pages.py.
+      - name: Build the state pages from the fixture warehouse (edge cases)
+        run: >-
+          uv run python packages/transform/scripts/build_state_pages.py
+          --db data/fixtures.duckdb --pages-dir "$RUNNER_TEMP/fixture-pages"
+          --charts-dir "$RUNNER_TEMP/fixture-charts"
       - name: Audit every chart document, warnings included (e.g. an empty map class)
-        run: uv run disability-access-charts check --strict site/public/data/charts/*.json
+        run: >-
+          uv run disability-access-charts check --strict site/public/data/charts/*.json
+          site/public/data/charts/states/*.json
       - uses: actions/upload-artifact@v7
         with:
           name: site-data
           path: site/public/data/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        with:
+          name: state-pages
+          path: site/states/
           if-no-files-found: error
 
   site:
@@ -101,12 +119,17 @@ jobs:
         with:
           name: site-data
           path: site/public/data/
+      - uses: actions/download-artifact@v8
+        with:
+          name: state-pages
+          path: site/states/
       - name: Install
         run: npm ci
-      - name: Build (fetches the pinned DuckDB Parquet extension, then vite build)
-        run: npm run build
+      # Before the build: prebuild screenshots the state pages' share images with Chromium.
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
+      - name: Build (fetches the pinned DuckDB Parquet extension, makes the share images, then vite build)
+        run: npm run build
       - name: Playwright + axe
         run: npm test
       - uses: actions/upload-artifact@v7

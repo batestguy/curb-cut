@@ -6,7 +6,7 @@
 // After "Show figures", a state card (facts from states.json, the state's DHS 2024 figure with
 // the national one for comparison, a locator map) appears above the state's table, and focus
 // moves to the card's heading; the table follows it.
-import { formatValue, renderTable } from './format.js';
+import { formatValue, renderTable, stateHref } from './format.js';
 import { interval, pct } from './prevalence.js';
 
 const PARQUET = 'jonapwd_state_by_type.parquet';
@@ -205,6 +205,11 @@ function renderCard(card, profile, map, total, national) {
   if (profile.slogan) parts.push('; slogan, ', link(profile.slogan_source_url, 'Zikoko'));
   parts.push('; map figures, JONAPWD 2025 (see Sources at the foot of the page).');
   sources.replaceChildren(...parts);
+  const more = card.querySelector('.card-page');
+  more.replaceChildren(
+    link(stateHref(profile.state), `${profile.state}'s own page`),
+    ': every figure for the state, by sex, age, activity, area and wealth.',
+  );
 
   const figure = card.querySelector('.locator');
   if (map) renderMap(figure, map, profile, total);

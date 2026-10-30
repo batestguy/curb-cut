@@ -89,7 +89,9 @@ def simplify(points: list[tuple[float, float]], tolerance: float) -> list[tuple[
     return [pt for pt, k in zip(points, keep, strict=True) if k]
 
 
-def build(geojson: dict, seeds: Path) -> dict:
+def build(geojson: dict, seeds: Path, tolerance: float = TOLERANCE) -> dict:
+    """Project and simplify the 37 states. ``tolerance`` (SVG units) is the Douglas-Peucker
+    tolerance; the state pages inline a coarser map to keep each page small."""
     keys, codes = state_lookup(seeds)
     features: dict[str, list[list[Ring]]] = {}
     errors: list[str] = []
@@ -124,7 +126,7 @@ def build(geojson: dict, seeds: Path) -> dict:
 
     def ring_path(ring: Ring) -> str:
         out: list[tuple[float, float]] = []
-        for x, y in simplify([project(lon, lat) for lon, lat in ring], TOLERANCE):
+        for x, y in simplify([project(lon, lat) for lon, lat in ring], tolerance):
             pt = (round(x, 1), round(y, 1))
             if not out or pt != out[-1]:
                 out.append(pt)

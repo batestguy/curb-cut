@@ -1,10 +1,9 @@
-"""EXPERIMENTAL: a choropleth (shaded map) document, until map support lands in 0.2.
+"""A choropleth (shaded map) document. Stable API since 0.2.
 
-Not exported from the package and not part of the stable API: import it as
-``from disability_access_charts.maps import choropleth``. Documents carry
-``meta.experimental = True`` and ``meta.chart_type = "choropleth"``, and
-:func:`disability_access_charts.audit.audit` (and so the ``check`` CLI) audits them with
-:func:`map_checks`.
+``from disability_access_charts import choropleth`` (or from this module). Documents carry
+``meta.chart_type = "choropleth"``, and :func:`disability_access_charts.audit.audit` (and so
+the ``check`` CLI) audits them with :func:`map_checks`. In 0.1 this was experimental
+(``meta.experimental = True``); its arguments are unchanged.
 
 A choropleth document follows the bar and dot documents: one JSON-serialisable dict with
 the map geometry (SVG paths the page draws itself; no Plotly), light and dark themes, the
@@ -34,6 +33,22 @@ is room for about one 3:1 step, not four. So colour is never the only way to rea
 The ratios between neighbouring class fills are reported in the audit's
 ``not-colour-alone`` check, so the trade-off is visible, not hidden. The fills get darker
 (light theme) or brighter (dark theme) with the value, and the audit checks that order.
+
+Patterns (new in 0.2, on by default for up to five classes)
+-----------------------------------------------------------
+Each class also gets its own pattern tile (:mod:`disability_access_charts.patterns`), drawn
+over its fill as an SVG ``<pattern>``, from the sparsest ink (lowest class) to the densest.
+Neighbouring classes then differ by a pattern as well as a shade. The document's
+``patterns`` block holds the tiles, each theme's ink and the tile scale in map units, and
+each class names its tile (``classes[k]["pattern"]``) for the legend. The audit checks that
+classes and patterns line up one to one, that the ink is 3:1 against every fill in every
+theme, and that the legend has each class's pattern.
+
+``patterns=None`` (the default) means "auto": patterns are on with five classes or fewer,
+and off with more (there are five tiles). ``patterns=True`` with more than five classes
+raises; ``patterns=False`` gives the 0.1 document. Without patterns, the audit adds a
+``shade-alone`` **warning** that neighbouring classes differ by shade alone, so a map
+that falls back to the 0.1 document is never silent about it.
 """
 
 from __future__ import annotations
@@ -52,6 +67,13 @@ from disability_access_charts.contrast import (
     relative_luminance,
 )
 from disability_access_charts.describe import DEFAULT_INTERVAL_LABEL, ChartData, Series, describe
+from disability_access_charts.patterns import (
+    PATTERNS,
+    assign,
+    ink_for,
+    pattern_checks,
+    tile_dict,
+)
 
 SCHEMA = "1.0"
 
@@ -219,14 +241,17 @@ def choropleth(
     themes: Mapping[str, MapTheme] | None = None,
     chart_id: str = "map",
     lang: str = "en",
+    patterns: bool | None = None,
 ) -> dict[str, Any]:
-    """A choropleth document (see the module docstring). EXPERIMENTAL.
+    """A choropleth document (see the module docstring).
 
     ``names``, ``codes`` and ``values`` (and ``lower``/``upper``) have one entry per region;
     ``paths`` maps each code to its SVG path in ``view_box`` units. ``breaks`` are the
     increasing class boundaries (one class more than breaks); every theme needs exactly that
     many fills. ``extra_columns`` adds text columns to the table, e.g. a precision flag.
     ``rings`` (code -> [cx, cy, r]) marks small regions so they can be found.
+    ``patterns`` gives each class a pattern tile: ``None`` (the default) turns them on for
+    five classes or fewer and off for more; ``True`` needs five classes or fewer.
     """
     _lang.get(lang)
     themes = dict(themes or MAP_THEMES)
@@ -248,6 +273,9 @@ def choropleth(
             raise ValueError(
                 f"theme {name!r} has {len(theme.classes)} fills for {len(breaks) + 1} classes"
             )
+    if patterns is None:
+        patterns = len(breaks) + 1 <= len(PATTERNS)
+    tiles = assign(len(breaks) + 1) if patterns else ()
     for label, column in extra_columns:
         if len(column) != len(names):
             raise ValueError(f"extra column {label!r} needs one entry per region")
@@ -279,6 +307,16 @@ def choropleth(
         for k, label in enumerate(labels)
     ]
     alt_text, class_sentence, _ = _alt_text(data, classes, title=title, source=source, lang=lang)
+    pattern_block: dict[str, Any] | None = None
+    if patterns:
+        for c, tile in zip(classes, tiles, strict=True):
+            c["pattern"] = tile.id
+        pattern_block = {
+            "tiles": {tile.id: tile_dict(tile) for tile in tiles},
+            "classes": [tile.id for tile in tiles],
+            "ink": {name: ink_for(t.classes) for name, t in themes.items()},
+            "scale": tile_scale(view_box, max(tile.size for tile in tiles)),
+        }
     doc: dict[str, Any] = {
         "id": chart_id,
         "title": title,
@@ -317,7 +355,7 @@ def choropleth(
             "tooltip": "hover, tap and focus; Esc closes it (WCAG 2.2 SC 1.4.13)",
         },
         "meta": {
-            "experimental": True,
+            "experimental": False,
             "generator": "disability_access_charts.maps.choropleth",
             "library_version": __version__,
             "schema": SCHEMA,
@@ -328,10 +366,22 @@ def choropleth(
             "classed_on": f"values rounded to {decimals} decimal(s), as displayed",
         },
     }
+    if pattern_block is not None:
+        doc["patterns"] = pattern_block
     from disability_access_charts.audit import audit
 
     doc["audit"] = audit(doc)
     return doc
+
+
+def tile_scale(view_box: str, size: int) -> float:
+    """How much to scale a tile so it is 1/52 of the map's width: about 12 pixels when the
+    map is drawn 630 pixels wide, as on Curb Cut's page."""
+    try:
+        width = float(view_box.split()[2])
+    except (IndexError, ValueError):
+        raise ValueError(f"view_box must be 'x y width height', got {view_box!r}") from None
+    return round(width / 52 / size, 4)
 
 
 # --- Audit --------------------------------------------------------------------------------
@@ -486,6 +536,17 @@ def map_checks(doc: Mapping[str, Any], alt_text: str | None = None) -> list[dict
         )
     )
 
+    block = doc.get("patterns")
+    if block is not None:
+        checks += pattern_checks(
+            list(block.get("classes", [])),
+            block.get("tiles", {}),
+            {name: list(t.classes) for name, t in themes.items()},
+            block.get("ink", {}),
+            what="class",
+            legend_patterns=[c.get("pattern") for c in classes],
+        )
+
     # Colour is not the only cue: legend ranges, the table's class column, the tooltip.
     adjacent = {
         name: [
@@ -516,9 +577,26 @@ def map_checks(doc: Mapping[str, Any], alt_text: str | None = None) -> list[dict
                 "cannot reach 3:1 between neighbours), so the map's classes are also given "
                 "in words (legend, table, tooltip); boundaries meet 3:1 against the background "
                 "and every fill."
+                + (
+                    " Each class also has its own pattern, at 3:1 against its fill (see the "
+                    "patterns checks)."
+                    if block is not None
+                    else ""
+                )
             ),
         )
     )
+    if block is None:
+        checks.append(
+            _check(
+                "shade-alone",
+                "1.4.1",
+                "warning",
+                "Neighbouring classes differ by more than a shade: no patterns, so on the map "
+                "itself they differ by shade alone (patterns need five classes or fewer)",
+                False,
+            )
+        )
     checks.append(
         _check(
             "keyboard-metadata",

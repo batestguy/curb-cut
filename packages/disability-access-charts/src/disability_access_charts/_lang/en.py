@@ -71,6 +71,45 @@ TEMPLATES: dict[str, str] = {
     "source": "Source: {source}.",
 }
 
+# Statistical findings (findings.py). Kept apart from TEMPLATES so they do not change which
+# names the alt-text checker reserves. The "finding_*" sentences must pass the claim
+# checker; the "findings_*" lines are counts and method, checked by the audit instead.
+FINDINGS: dict[str, str] = {
+    "series_lowest_ci": "{series}: lowest estimate {low}{low_difference}.",
+    "finding_item": "{name}, {value}",
+    # A ranking neighbour with its rank, hedged like the alt-text's extremes ("estimate").
+    "finding_rank_item": "{name}, the {rank} estimate ({value})",
+    "rank_top": "highest",
+    "rank_bottom": "lowest",
+    "rank_high": "{ordinal}-highest",
+    "rank_low": "{ordinal}-lowest",
+    "finding_one": "{prefix}{items}, is {direction} than {other}.",
+    "finding_many": "{prefix}{items}, are each {direction} than {other}.",
+    "finding_gap": "{name}: {a}, {va}, is {direction} than {b}, {vb}.",
+    "finding_prefix": "{series}: ",
+    "higher": "higher",
+    "lower": "lower",
+    "finding_review": "Read with care: {name}'s estimate is flagged for review.",
+    "finding_review_series": "Read with care: {name}'s {series} estimate is flagged for review.",
+    "findings_count": "{checked} {comparisons} checked, {supported} supported.",
+    "comparison": "comparison",
+    "comparisons": "comparisons",
+    "findings_method": (
+        "A comparison is supported when the difference between two estimates is larger than "
+        "their survey uncertainty allows, after allowing for every comparison checked "
+        "(Benjamini-Hochberg, false discovery rate {q}%). These describe the estimates; "
+        "they do not say why they differ."
+    ),
+    "findings_dropped": (
+        "{dropped} more {comparisons} not tested, because {they} involve an estimate that "
+        "is suppressed, too imprecise or has an interval of zero width."
+    ),
+    "findings_withheld": (
+        "Not shown or compared ({count}): {names}; too few respondents or no data."
+    ),
+    "findings_none": "None of the comparisons is supported.",
+}
+
 AND = "and"
 
 
@@ -80,6 +119,25 @@ def join(names: Sequence[str]) -> str:
     if len(names) == 1:
         return names[0]
     return ", ".join(names[:-1]) + f" {AND} " + names[-1]
+
+
+def items(parts: Sequence[str]) -> str:
+    """'A, 1%', 'A, 1%; and B, 2%', 'A, 1%; B, 2%; and C, 3%'. Commas keep each name and its
+    value together and semicolons keep the items apart, so a long list stays clear when read
+    aloud; the claim checker reads such a list as one list of names (ITEM_SEPARATOR)."""
+    parts = list(parts)
+    if len(parts) == 1:
+        return parts[0]
+    return "; ".join(parts[:-1]) + f"; {AND} " + parts[-1]
+
+
+def ordinal(n: int) -> str:
+    """'second' for 2 (words up to tenth, as ORDINAL_WORDS), then '11th', '21st', '22nd'."""
+    for word, value in ORDINAL_WORDS.items():
+        if value == n:
+            return word
+    suffix = "th" if 10 <= n % 100 <= 20 else {1: "st", 2: "nd", 3: "rd"}.get(n % 10, "th")
+    return f"{n}{suffix}"
 
 
 def label(category_label: str) -> str:
@@ -293,6 +351,9 @@ RANGE_JOIN = r"\s*%?\s*(?:to|\u2013|\u2014)\s*"
 RESPECTIVELY = r"\brespectively\b"
 # Separators inside a list of names: "A, B and C", "A or B".
 LIST_SEPARATOR = r"\s*(?:,\s*(?:and\s+|or\s+)?|and\s+|or\s+|&\s*)\s*"
+# Between the items of a list of names with values: "A, 1.0%; B, 2.0%; and C, 3.0%" (the
+# text after a name up to the next name). A semicolon here does not end the clause.
+ITEM_SEPARATOR = r"\s*,\s*-?\d[\d,]*(?:\.\d+)?\s*%?\s*;\s*(?:(?:and|or)\s+)?"
 LIST_JOINERS = r"\b(?:and|or)\b|&"
 
 # Comparative or trend words the checker does not test. Each one gives a warning.

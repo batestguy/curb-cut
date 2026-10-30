@@ -33,6 +33,9 @@ site/dist/
 # Generated at build time by packages/transform/scripts (CI rebuilds them)
 site/public/data/
 site/public/duckdb-extensions/
+# State pages and their share images (build_state_pages.py, make-share-images.mjs)
+site/states/
+site/public/share/
 site/test-results/
 site/playwright-report/
 
@@ -53,3 +56,6 @@ Thumbs.db
 
 # Third-party source files: kept out of git until their licence is confirmed
 data/sources/
+
+# Claude Code local settings and agent worktrees (personal, not shared)
+.claude/

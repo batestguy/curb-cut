@@ -36,6 +36,8 @@ only that it is one of that category's figures.
   ten), within 5% of the actual ratio;
 * ranks: "ranked N of M", "3rd", "the second-highest", "number one", "#2", with
   competition ranking (ties share a rank) and M equal to the number of categories;
+* lists of names with values, "A, 1%; B, 2%; and C, 3%": the semicolons between such items
+  do not end the clause, and the list is read as one list of names;
 * equality: "A is *the same as* B", "A and B are equal";
 * differences: "the survey *can / cannot* show a difference from (or between) ...";
 * "no difference", "not different" and close variants always fail.
@@ -46,11 +48,20 @@ just read off the point estimates. "A is higher than B" passes only if
 interval's half-width divided by the normal quantile for the interval's level (1.96 for a
 95% interval; the level is read from the interval label, e.g. "90% confidence interval"
 or "90% CI", and defaults to 95%). When an interval is asymmetric, the **larger**
-half-width is used, which makes the test conservative. This is a two-sided test at the 5%
+half-width is used. That is conservative only when the interval is wider than a normal
+(Wald) interval with the same standard error would be on that side; it is not a guarantee.
+The normal quantile is used throughout: the survey design's degrees of freedom and t
+quantiles are not. This is a two-sided test at the 5%
 level that assumes roughly normal, symmetric intervals and **independent groups**, with
 **no correction for multiple comparisons**. When groups may not be independent (two series
 for the same category, or categories that are parts of one whole) the checker still
 applies the test but adds a warning.
+
+``verdicts`` (optional, on :func:`describe` and :func:`check_alt_text`) replaces this test
+for given pairs of estimates in the "can / cannot show a difference" wording only. The
+chart builders pass the statistical findings' results for the ``extremes`` comparisons
+(corrected for multiple comparisons, see :mod:`disability_access_charts.findings`), so the
+alt-text and the findings never disagree. Every other claim keeps the uncorrected test.
 
 * An unqualified superlative ("A is the highest") fails unless the test separates A from
   **every** other group. The hedged form "A has the highest estimate" is accepted when A
@@ -58,7 +69,8 @@ applies the test but adds a warning.
 * Ratios are checked on the point estimates (within 5%), and a ratio other than 1 also
   needs the difference to pass the test. Ratios of values below zero get a warning.
 * Ranks are checked on the point estimates. If the test cannot separate the group from a
-  neighbour in the ranking, a warning says the rank is not statistically supported.
+  neighbour in the ranking, a warning says the rank is not statistically supported, unless
+  the rank is hedged ("the second-highest estimate"), as for superlatives.
 * Equality ("the same as") always fails with intervals: a survey cannot show two groups
   are equal. The suggested wording is "the survey cannot show a difference".
 
@@ -95,8 +107,21 @@ from disability_access_charts import _lang
 
 UNITS = ("count", "percent", "number")
 DEFAULT_INTERVAL_LABEL = "95% confidence interval"
+PRECISION_FLAGS = ("reliable", "review", "unreliable", "suppressed")
+"""Per-estimate precision flags a series may carry (see :class:`Series`)."""
 RATIO_TOLERANCE = 0.05
 TEST_Z = 1.96  # two-sided 5% test of a difference
+
+Verdicts = Mapping[tuple[int, int, int], bool]
+"""Results that replace the interval test in the "can / cannot show a difference" wording,
+keyed by (series index, category index, category index), the two categories in increasing
+order. See :func:`verdict_key`."""
+
+
+def verdict_key(s: int, i: int, j: int) -> tuple[int, int, int]:
+    """The :data:`Verdicts` key for categories ``i`` and ``j`` of series ``s``."""
+    return (s, min(i, j), max(i, j))
+
 
 _MARK0 = 0xE000  # private-use characters stand in for category and series names
 _MARK = "[-]"
@@ -111,12 +136,20 @@ _APOSTROPHES = "'" + chr(0x2019)  # straight and curly
 
 @dataclass(frozen=True)
 class Series:
-    """One series of values, one per category, with an optional interval."""
+    """One series of values, one per category, with an optional interval.
+
+    ``precision`` (optional) is a flag per estimate from :data:`PRECISION_FLAGS`:
+    "reliable", "review" (few events; read with care), "unreliable" or "suppressed".
+    The statistical findings (:mod:`disability_access_charts.findings`) hedge comparisons
+    that involve a "review" estimate and leave out those that involve an "unreliable" or
+    "suppressed" one. The alt-text and the claim checker do not read it.
+    """
 
     name: str
     values: tuple[float, ...]
     lower: tuple[float, ...] | None = None
     upper: tuple[float, ...] | None = None
+    precision: tuple[str, ...] | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "values", tuple(self.values))
@@ -124,6 +157,8 @@ class Series:
             object.__setattr__(self, "lower", tuple(self.lower))
         if self.upper is not None:
             object.__setattr__(self, "upper", tuple(self.upper))
+        if self.precision is not None:
+            object.__setattr__(self, "precision", tuple(self.precision))
 
     @property
     def has_interval(self) -> bool:
@@ -162,17 +197,20 @@ class ChartData:
         return any(s.has_interval for s in self.series)
 
     def to_dict(self) -> dict[str, Any]:
+        series: list[dict[str, Any]] = []
+        for s in self.series:
+            item: dict[str, Any] = {
+                "name": s.name,
+                "values": list(s.values),
+                "lower": None if s.lower is None else list(s.lower),
+                "upper": None if s.upper is None else list(s.upper),
+            }
+            if s.precision is not None:  # only when given, so 0.1 documents are unchanged
+                item["precision"] = list(s.precision)
+            series.append(item)
         out: dict[str, Any] = {
             "categories": list(self.categories),
-            "series": [
-                {
-                    "name": s.name,
-                    "values": list(s.values),
-                    "lower": None if s.lower is None else list(s.lower),
-                    "upper": None if s.upper is None else list(s.upper),
-                }
-                for s in self.series
-            ],
+            "series": series,
             "unit": self.unit,
             "decimals": self.decimals,
             "shares": self.shares,
@@ -194,6 +232,7 @@ class ChartData:
                     tuple(s["values"]),
                     None if s.get("lower") is None else tuple(s["lower"]),
                     None if s.get("upper") is None else tuple(s["upper"]),
+                    None if s.get("precision") is None else tuple(s["precision"]),
                 )
                 for s in d["series"]
             ),
@@ -243,6 +282,15 @@ def _validate(data: ChartData) -> None:
                     raise ValueError(f"series {s.name!r}: bounds must be finite numbers")
                 if not lo <= v <= hi:
                     raise ValueError(f"series {s.name!r}: need lower <= value <= upper")
+        if s.precision is not None:
+            if len(s.precision) != n:
+                raise ValueError(f"series {s.name!r}: one precision flag per category")
+            unknown = sorted(set(s.precision) - set(PRECISION_FLAGS))
+            if unknown:
+                raise ValueError(
+                    f"series {s.name!r}: unknown precision flag(s) {', '.join(unknown)}; "
+                    f"expected {', '.join(PRECISION_FLAGS)}"
+                )
         if data.unit == "count" and any(v < 0 for v in s.values):
             raise ValueError("counts must be non-negative")
         if data.shares and sum(s.values) <= 0:
@@ -313,7 +361,8 @@ def _se(data: ChartData, s: Series, i: int) -> float | None:
     if s.lower is None or s.upper is None:
         return None
     v = s.values[i]
-    half = max(v - s.lower[i], s.upper[i] - v)  # the larger half-width: conservative
+    # The larger half-width: conservative only where the interval is wider than a normal one.
+    half = max(v - s.lower[i], s.upper[i] - v)
     return half / _z_level(data)
 
 
@@ -323,21 +372,35 @@ def difference_test(
     """Whether the interval test separates two estimates.
 
     ``a`` and ``b`` are (series index, category index). Returns (supported, abs
-    difference, threshold), or None when either estimate has no interval.
+    difference, threshold), or None when either estimate has no interval. A zero-width
+    interval has no standard error to test with, so the pair is never separated (as in
+    the findings, where such a comparison is dropped).
     """
     sa, sb = data.series[a[0]], data.series[b[0]]
     se_a, se_b = _se(data, sa, a[1]), _se(data, sb, b[1])
     if se_a is None or se_b is None:
         return None
     diff = abs(sa.values[a[1]] - sb.values[b[1]])
+    if se_a == 0 or se_b == 0:
+        return False, diff, 0.0
     threshold = TEST_Z * math.sqrt(se_a**2 + se_b**2)
     return diff > threshold, diff, threshold
 
 
-def _all_supported(data: ChartData, s: int, group: Iterable[int], other: Iterable[int]) -> bool:
+def _all_supported(
+    data: ChartData,
+    s: int,
+    group: Iterable[int],
+    other: Iterable[int],
+    verdicts: Verdicts | None = None,
+) -> bool:
     other = list(other)
     for i in group:
         for j in other:
+            if verdicts is not None and verdict_key(s, i, j) in verdicts:
+                if not verdicts[verdict_key(s, i, j)]:
+                    return False
+                continue
             result = difference_test(data, (s, i), (s, j))
             if result is None:
                 if data.series[s].values[i] == data.series[s].values[j]:
@@ -365,10 +428,11 @@ def _groups(values: Sequence[float]) -> tuple[list[int], list[int], list[int], l
 
 
 class _Writer:
-    def __init__(self, data: ChartData, lang: str) -> None:
+    def __init__(self, data: ChartData, lang: str, verdicts: Verdicts | None = None) -> None:
         self.data = data
         self.lang = _lang.get(lang)
         self.t = self.lang.TEMPLATES
+        self.verdicts = verdicts
 
     def name(self, i: int) -> str:
         return _display(self.data, self.lang, self.data.categories[i])
@@ -405,7 +469,7 @@ class _Writer:
         )
 
     def difference(self, s: int, group: Sequence[int], other: Sequence[int], which: str) -> str:
-        can = _all_supported(self.data, s, group, other)
+        can = _all_supported(self.data, s, group, other, self.verdicts)
         return self.t["difference"].format(
             can=self.t["can"] if can else self.t["cannot"],
             which=self.t[which],
@@ -488,15 +552,15 @@ class _Writer:
         parts.append(t["source"].format(source=source))
         return " ".join(parts)
 
-    def multi(self, title: str, source: str) -> str:
-        """Several series: a dot plot with one row per category."""
+    def multi(self, title: str, source: str, kind: str = "dot") -> str:
+        """Several series: a dot plot, or grouped bars, with one row per category."""
         data, t = self.data, self.t
         n = len(data.categories)
         ci = data.has_interval
         label = self.lang.label(data.category_label)
         names = self.lang.join([self.series_name(s) for s in range(len(data.series))])
         common = {
-            "kind": t["kind_dot"],
+            "kind": t[f"kind_{kind}"],
             "title": title,
             "n": n,
             "label": label,
@@ -526,7 +590,7 @@ class _Writer:
                 continue
             top, next_top, bottom, next_bottom = _groups(values)
             if len(top) == n:
-                things = t["things_estimates" if has else "things_dots"]
+                things = t["things_estimates" if has else f"things_{kind}s"]
                 parts.append(
                     t["series_all_equal"].format(
                         series=sname, n=n, things=things, value=format_value(values[0], data)
@@ -575,7 +639,13 @@ class _Writer:
 
 
 def describe(
-    data: ChartData, *, chart_type: str = "bar", title: str, source: str, lang: str = "en"
+    data: ChartData,
+    *,
+    chart_type: str = "bar",
+    title: str,
+    source: str,
+    lang: str = "en",
+    verdicts: Verdicts | None = None,
 ) -> str:
     """Alt-text for a chart, built only from ``data``, in ``lang`` (only "en" ships).
 
@@ -584,13 +654,15 @@ def describe(
     whether the survey can show a difference from the next estimate, then the intervals
     themselves. With
     intervals, superlatives are hedged ("highest estimate"). The text passes
-    :func:`check_alt_text` by construction, and the tests hold it to that.
+    :func:`check_alt_text` by construction (with the same ``verdicts``), and the tests hold
+    it to that. ``verdicts`` decides "can / cannot show a difference" for the pairs it holds
+    (see the module docstring).
     """
-    writer = _Writer(data, lang)
+    writer = _Writer(data, lang, verdicts)
     if chart_type == "bar":
-        if len(data.series) != 1:
-            raise ValueError("a bar chart has exactly one series")
-        return writer.single("bar", title, source, "bars")
+        if len(data.series) == 1:
+            return writer.single("bar", title, source, "bars")
+        return writer.multi(title, source, kind="bar")  # grouped bars
     if chart_type == "dot":
         if len(data.series) == 1:
             return writer.single("dot", title, source, "dots")
@@ -710,8 +782,11 @@ def reserved_names(lang: ModuleType) -> frozenset[str]:
 
 
 class _Checker:
-    def __init__(self, text: str, data: ChartData, lang: str) -> None:
+    def __init__(
+        self, text: str, data: ChartData, lang: str, verdicts: Verdicts | None = None
+    ) -> None:
         self.data = data
+        self.verdicts = verdicts
         self.lang = _lang.get(lang)
         lang_ = self.lang
         self.problems: list[Problem] = []
@@ -759,6 +834,7 @@ class _Checker:
             r"(?:" + "|".join(lang_.EXCLUDERS) + r")\s+(?:the\s+)?$", flags
         )
         self.re_list_sep = re.compile(lang_.LIST_SEPARATOR, flags)
+        self.re_item_sep = re.compile(lang_.ITEM_SEPARATOR, flags)
         self.re_connector = re.compile(lang_.CONNECTOR, flags)
         self.re_ellipsis = re.compile(lang_.ELLIPSIS, flags)
         self.re_not_name = re.compile(r"(?:\bbut\s+)?\bnot\s+(?:the\s+)?" + _MARK, flags)
@@ -847,10 +923,18 @@ class _Checker:
     # Sentences, clauses and the parts of a clause.
     def clauses(self) -> list[tuple[tuple[int, int], tuple[int, int]]]:
         bounds = [0, *(m.end() for m in re.finditer(r"[.!?](?=\s)", self.skel)), len(self.skel)]
+        # Semicolons between the items of a list of names with values ("A, 1%; B, 2%; and C,
+        # 3%") do not end the clause.
+        items = re.compile(
+            _MARK + "(" + self.lang.ITEM_SEPARATOR + ")(?=" + _MARK + ")", re.IGNORECASE
+        )
+        in_list = {m.start(1) + m.group(1).index(";") for m in items.finditer(self.skel)}
         out = []
         for a, b in itertools.pairwise(bounds):
             start = a
             for m in re.finditer(";", self.skel[a:b]):
+                if a + m.start() in in_list:
+                    continue
                 out.append(((a, b), (start, a + m.start())))
                 start = a + m.end()
             out.append(((a, b), (start, b)))
@@ -896,7 +980,7 @@ class _Checker:
         seps: list[str] = []
         for pos, mark in reversed(marks[:-1]):
             between = self.skel[pos + 1 : chain[0][0]]
-            if not self.re_list_sep.fullmatch(between):
+            if not self.list_sep(between):
                 break
             chain.insert(0, (pos, mark))
             seps.insert(0, between)
@@ -913,13 +997,17 @@ class _Checker:
         seps: list[str] = []
         for pos, mark in marks[1:]:
             between = self.skel[chain[-1][0] + 1 : pos]
-            if not self.re_list_sep.fullmatch(between):
+            if not self.list_sep(between):
                 break
             chain.append((pos, mark))
             seps.append(between)
         if len(chain) > 1 and not self.re_joiner.search(seps[-1]):
             chain = chain[:1]
         return chain
+
+    def list_sep(self, between: str) -> bool:
+        """Whether ``between`` joins two names of one list ("A, B and C", "A, 1%; B, 2%")."""
+        return bool(self.re_list_sep.fullmatch(between) or self.re_item_sep.fullmatch(between))
 
     @staticmethod
     def _unique(chain: Iterable[tuple[int, _Mark]]) -> list[_Mark]:
@@ -1062,6 +1150,11 @@ class _Checker:
             supported = True
             for ref in refs:
                 assert ref is not None
+                if self.verdicts is not None and ref[0][0] == ref[1][0]:
+                    key = verdict_key(ref[0][0], ref[0][1], ref[1][1])
+                    if key in self.verdicts:
+                        supported = supported and self.verdicts[key]
+                        continue
                 result = difference_test(self.data, ref[0], ref[1])
                 if result is None:
                     supported = supported and self.value(ref[0]) != self.value(ref[1])
@@ -1347,6 +1440,14 @@ class _Checker:
             return int(digits.group())
         return self.lang.ORDINAL_WORDS.get(token) or self.lang.RANK_NUMBER_WORDS.get(token)
 
+    def hedge_after(self, pos: int, clause: tuple[int, int]) -> bool:
+        """Whether a hedge word follows ``pos``: "the second-highest estimate"."""
+        hedge = re.compile(
+            r"\W+(?:[\w" + _APOSTROPHES + r"]+\W+)?(?:" + _words(self.lang.HEDGES) + r")\b",
+            re.IGNORECASE,
+        )
+        return hedge.match(self.skel, pos, clause[1]) is not None
+
     def ranks(
         self, clause: tuple[int, int], sentence: tuple[int, int], consumed: list[tuple[int, int]]
     ) -> None:
@@ -1403,7 +1504,8 @@ class _Checker:
                         self.msg("rank_count_wrong", actual=n, claimed=m.group("of")),
                         "rank",
                     )
-                if actual == claimed and self.data.series[s].has_interval:
+                hedged = self.hedge_after(m.end(), clause)
+                if actual == claimed and self.data.series[s].has_interval and not hedged:
                     values = self.data.series[s].values
                     order = sorted(range(n), key=lambda j: values[j], reverse=not ascending)
                     pos = order.index(mark.index)
@@ -1953,13 +2055,16 @@ class _Checker:
         return None
 
 
-def check_alt_text(text: str, data: ChartData, *, lang: str = "en") -> list[Problem]:
+def check_alt_text(
+    text: str, data: ChartData, *, lang: str = "en", verdicts: Verdicts | None = None
+) -> list[Problem]:
     """Check every number and every recognised claim in ``text`` against ``data``.
 
     Returns errors and warnings (see :class:`Problem`). No errors means no recognised claim
-    was found false; see the module docstring for what is and is not checked.
+    was found false; see the module docstring for what is and is not checked. ``verdicts``
+    decides "can / cannot show a difference" for the pairs it holds.
     """
-    return _Checker(text, data, lang).run()
+    return _Checker(text, data, lang, verdicts).run()
 
 
 def mentioned_categories(text: str, data: ChartData, *, lang: str = "en") -> set[int]:

@@ -2,12 +2,17 @@
 
 :func:`audit` takes one of:
 
-* a chart document from :func:`~disability_access_charts.plots.bar` or
-  :func:`~disability_access_charts.plots.dot` (it has ``plotly`` and ``themes``), or an
-  experimental choropleth document from :func:`disability_access_charts.maps.choropleth`
+* a chart document from :func:`~disability_access_charts.plots.bar`,
+  :func:`~disability_access_charts.plots.grouped_bar` or
+  :func:`~disability_access_charts.plots.dot` (it has ``plotly`` and ``themes``), or a
+  choropleth document from :func:`disability_access_charts.maps.choropleth`
   (``meta.chart_type`` is "choropleth"; see :func:`~disability_access_charts.maps.map_checks`);
 * a Plotly figure as a dict (``data`` and ``layout``);
 * a Plotly ``Figure`` (anything with ``to_plotly_json`` or ``to_dict``).
+
+A document with a ``findings`` block also gets
+:func:`~disability_access_charts.findings.findings_checks`, and one with a ``patterns``
+block gets :func:`~disability_access_charts.patterns.pattern_checks`.
 
 It returns ``{"passed": bool, "checks": [...]}``. Every check has an ``id``, the ``wcag``
 criterion it stands for, a ``severity`` ("error" or "warning") and ``passed``. The
@@ -31,12 +36,15 @@ from disability_access_charts.contrast import NON_TEXT_MIN, TEXT_MIN, contrast_r
 from disability_access_charts.describe import (
     ChartData,
     Series,
+    Verdicts,
     check_alt_text,
     mentioned_categories,
     number_tokens,
     shares_of,
 )
+from disability_access_charts.findings import extreme_verdicts, findings_checks
 from disability_access_charts.palettes import Theme
+from disability_access_charts.patterns import ink_for, pattern_checks
 
 # plotly.js defaults, used when neither the figure nor its template sets a value.
 PLOTLY_COLORWAY = (
@@ -154,7 +162,7 @@ def theme_checks(themes: Mapping[str, Theme], *, chart_type: str, n_series: int)
     """Contrast checks for every theme: marks (or series colours), text and highlight."""
     checks: list[dict[str, Any]] = []
     for name, theme in themes.items():
-        if chart_type == "dot":
+        if chart_type == "dot" or n_series > 1:  # dot plots and grouped bars
             for j in range(n_series):
                 if j >= len(theme.series):
                     checks.append(
@@ -212,8 +220,17 @@ def theme_checks(themes: Mapping[str, Theme], *, chart_type: str, n_series: int)
     return checks
 
 
-def alt_text_checks(alt_text: str | None, data: ChartData | None, *, lang: str = "en") -> list:
-    """Whether the alt-text exists and whether its numbers and claims match the data."""
+def alt_text_checks(
+    alt_text: str | None,
+    data: ChartData | None,
+    *,
+    lang: str = "en",
+    verdicts: Verdicts | None = None,
+) -> list:
+    """Whether the alt-text exists and whether its numbers and claims match the data.
+
+    ``verdicts`` (from a findings block) decides "can / cannot show a difference" for the
+    pairs it holds, as when the alt-text was written."""
     if not alt_text or not alt_text.strip():
         return [_check("alt-text-present", "1.1.1", "error", "The chart has alt-text", False)]
     if data is None:
@@ -226,7 +243,7 @@ def alt_text_checks(alt_text: str | None, data: ChartData | None, *, lang: str =
                 False,
             )
         ]
-    problems = check_alt_text(alt_text, data, lang=lang)
+    problems = check_alt_text(alt_text, data, lang=lang, verdicts=verdicts)
     errs = [p for p in problems if p.severity == "error"]
     warns = [p for p in problems if p.severity == "warning"]
     vacuous = []
@@ -358,10 +375,27 @@ def _audit_document(doc: Mapping[str, Any], alt_text: str | None) -> list[dict[s
     n_series = len(data.series) if data else len(traces)
     checks = theme_checks(themes, chart_type=chart_type, n_series=n_series)
     text = alt_text if alt_text is not None else doc.get("alt_text")
-    checks += alt_text_checks(text, data, lang=meta.get("alt_text_lang", "en"))
+    verdicts = (
+        extreme_verdicts(doc["findings"], data)
+        if data is not None and isinstance(doc.get("findings"), Mapping)
+        else None
+    )
+    checks += alt_text_checks(text, data, lang=meta.get("alt_text_lang", "en"), verdicts=verdicts)
     checks += interaction_checks(traces, doc["plotly"].get("layout", {}), has_table="table" in doc)
     if chart_type == "dot" and len(traces) > 1:
         checks.append(_symbols_check(traces, "error"))
+    elif chart_type == "bar" and len(traces) > 1 and "patterns" not in doc:
+        checks.append(
+            _check(
+                "not-colour-alone",
+                "1.4.1",
+                "warning",
+                "Grouped bars are told apart by more than colour (turn patterns on)",
+                False,
+            )
+        )
+    if "patterns" in doc:
+        checks += bar_pattern_checks(doc, themes)
     keyboard = doc.get("keyboard")
     if keyboard is not None:
         problems = []
@@ -383,6 +417,56 @@ def _audit_document(doc: Mapping[str, Any], alt_text: str | None) -> list[dict[s
             )
         )
     checks += data_checks(doc, data)
+    if "findings" in doc and data is not None:
+        checks += findings_checks(doc, data)
+    return checks
+
+
+def bar_pattern_checks(doc: Mapping[str, Any], themes: Mapping[str, Theme]) -> list[dict]:
+    """Pattern checks for a bar or grouped-bar document with a ``patterns`` block."""
+    block = doc["patterns"]
+    traces = doc["plotly"].get("data", [])
+    n = len(traces)
+    assigned = list(block.get("series", []))
+    fills = {name: (list(t.series[:n]) if n > 1 else [t.mark]) for name, t in themes.items()}
+    ink = dict(block.get("ink", {}))
+    patterns = [(t.get("marker") or {}).get("pattern") or {} for t in traces]
+    drawn = [p.get("path") for p in patterns]
+    # The light theme is what the Plotly spec draws: test the ink and fills it really uses.
+    used_ink = {p.get("fgcolor") for p in patterns}
+    if len(used_ink) == 1 and "light" in ink:
+        ink["light"] = str(next(iter(used_ink)))
+    if "light" in fills:
+        fills["light"] = [str(p.get("bgcolor") or "") for p in patterns]
+    tiles = block.get("tiles", {})
+    by_path = {tile.get("path"): pid for pid, tile in tiles.items()}
+    legend = doc["plotly"].get("layout", {}).get("showlegend", False)
+    if n > 1:
+        legend_patterns = [by_path.get(path) if legend else None for path in drawn]
+    else:  # one series: no legend; the axis title names it
+        legend_patterns = [by_path.get(path) for path in drawn]
+    checks = pattern_checks(
+        assigned,
+        tiles,
+        fills,
+        ink,
+        what="series",
+        legend_patterns=legend_patterns,
+        drawn=drawn,
+    )
+    want = {name: ink_for(colours) for name, colours in fills.items() if all(colours)}
+    stale = [name for name, i in want.items() if block.get("ink", {}).get(name) != i]
+    if stale:
+        checks.append(
+            _check(
+                "patterns-ink-rule",
+                "1.4.11",
+                "warning",
+                "The pattern ink is the black or white with the higher lowest contrast",
+                False,
+                problems=stale,
+            )
+        )
     return checks
 
 
@@ -646,7 +730,7 @@ def is_document(obj: Any) -> bool:
 
 
 def is_map_document(obj: Any) -> bool:
-    """An (experimental) choropleth document: no Plotly spec, its own map and themes."""
+    """A choropleth document: no Plotly spec, its own map and themes."""
     meta = obj.get("meta") if isinstance(obj, Mapping) else None
     return isinstance(meta, Mapping) and meta.get("chart_type") == "choropleth" and "map" in obj
 
@@ -658,7 +742,7 @@ def audit(fig: Any, *, alt_text: str | None = None, has_table: bool = False) -> 
     a table (``has_table``); a chart document carries both.
     """
     if is_map_document(fig):
-        from disability_access_charts.maps import map_checks  # experimental; imports audit
+        from disability_access_charts.maps import map_checks  # maps imports audit
 
         checks = map_checks(fig, alt_text)
     elif is_document(fig):

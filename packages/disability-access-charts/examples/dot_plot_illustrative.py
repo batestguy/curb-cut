@@ -6,7 +6,8 @@ ILLUSTRATIVE DATA ONLY. The areas, series and numbers below are synthetic, made 
 show how intervals change what a description may claim. They are not Nigerian figures
 and not from any survey.
 
-The script builds the chart, then checks two hand-written claims against its data:
+The script builds the chart with its statistical findings (every pre-declared comparison
+counted, false discovery rate 5%), then checks two hand-written claims against its data:
 
 * "For Women, Area A is higher than Area D." passes: the difference is larger than the
   interval test needs.
@@ -48,6 +49,7 @@ def main(out_dir: Path) -> int:
         source=SOURCE,
         unit="percent",
         chart_id="illustrative_dot",
+        findings=True,
     )
     path = out_dir / "dot_plot_illustrative.json"
     path.write_text(json.dumps(doc, indent=2) + "\n", encoding="utf-8")
@@ -55,6 +57,9 @@ def main(out_dir: Path) -> int:
     (out_dir / "dot_plot_illustrative.csv").write_text(to_csv(doc), encoding="utf-8")
     print("Alt-text:", doc["alt_text"])
     print("Audit:", "passed" if doc["audit"]["passed"] else "FAILED")
+    print("Findings:", doc["findings"]["lines"]["count"])
+    for statement in doc["findings"]["statements"]:
+        print("  -", statement["text"])
 
     data = ChartData.from_dict(doc["data"])
     results = []
