@@ -13,7 +13,7 @@
 // of the map (the state chosen in the explorer, or a hint). Esc closes it, the pointer can
 // move onto it, and it stays until the pointer leaves the map (WCAG 2.2 SC 1.4.13). It is
 // hidden from screen readers, which get the same figures from the name and the table.
-import { formatValue, renderTable } from './format.js';
+import { formatValue, renderTable, stateHref } from './format.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -128,7 +128,8 @@ function renderLegend(legendEl, doc) {
 export function renderChoropleth(doc, { figure, holder, legendEl, titleEl, tableEl }) {
   titleEl.textContent = doc.title;
   holder.setAttribute('aria-label', doc.alt_text);
-  tableEl.replaceChildren(renderTable(doc.table));
+  // Each state's name links to its own page.
+  tableEl.replaceChildren(renderTable({ ...doc.table, rowHref: stateHref }));
   renderLegend(legendEl, doc);
   applyTheme(figure, doc);
   darkQuery.addEventListener('change', () => applyTheme(figure, doc));

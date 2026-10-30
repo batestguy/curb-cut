@@ -38,8 +38,8 @@
           communicating). Every estimate here comes with its 95% confidence interval and a
           precision flag. The NDHS 2024 report already publishes state figures for each sex;
           this site adds both sexes together with intervals, in accessible tables with the
-          data downloadable. The state figures for each activity at the cut-off are published
-          as downloadable data; state pages come in a later phase.
+          data downloadable. Each state has its own page with its figures for each activity at
+          the cut-off, by sex and age, and more: <a href="./states/">all 37 state pages</a>.
           <a href="./methodology.html">How the figures were made</a>.
         </p>
       </section>
@@ -75,10 +75,14 @@
         </figure>
         <p id="prevalence-map-status" class="status" role="status"></p>
         <p id="lisa-sentence"></p>
-        <p class="table-intro">The same figures as a table, by state name:</p>
+        <p class="table-intro">
+          The same figures as a table, by state name. Each state's name links to its own page.
+        </p>
+        <!-- The table holds 37 links; keyboard users can jump past them. -->
+        <p class="skip-table"><a href="#dots-heading">Skip the state table</a></p>
         <div id="prevalence-map-table" class="table-wrap"></div>
 
-        <h3 id="dots-heading">All state estimates with their 95% confidence intervals</h3>
+        <h3 id="dots-heading" tabindex="-1">All state estimates with their 95% confidence intervals</h3>
         <figure class="chart-figure" aria-labelledby="prevalence-chart-title">
           <div id="prevalence-chart" class="chart" role="img" aria-labelledby="prevalence-chart-desc">
             <div class="chart-plot tall" aria-hidden="true"></div>
@@ -233,6 +237,7 @@
               <figcaption>Boundaries: geoBoundaries (CC BY 4.0)</figcaption>
             </figure>
           </div>
+          <p class="card-page"></p>
           <p class="card-sources"></p>
         </div>
         <div id="state-table"></div>

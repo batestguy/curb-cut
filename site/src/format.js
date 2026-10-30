@@ -30,10 +30,25 @@ export function formatValue(value, type, decimals = 1) {
 }
 
 /**
+ * The URL of a state's own page (site/states/<slug>.html). The slug is the name in lower case
+ * with every run of other characters replaced by one hyphen, the same rule as
+ * build_state_pages.py's state_slug ("Akwa Ibom" -> "akwa-ibom").
+ */
+export function stateHref(name) {
+  const slug = String(name)
+    .toLowerCase()
+    .replace(/[^a-z]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return `${import.meta.env.BASE_URL}states/${slug}.html`;
+}
+
+/**
  * Render an accessible data table: <caption>, column headers with scope="col", the first
  * cell of each row as a row header with scope="row", and numbers right-aligned.
  *
- * @param {{caption: string, columns: {label: string, type: string, decimals?: number}[], rows: unknown[][]}} spec
+ * With `rowHref`, each row header links to rowHref(first value) (e.g. the state's page).
+ *
+ * @param {{caption: string, columns: {label: string, type: string, decimals?: number}[], rows: unknown[][], rowHref?: (value: unknown) => string}} spec
  */
 export function renderTable(spec) {
   const table = document.createElement('table');
@@ -57,7 +72,15 @@ export function renderTable(spec) {
       const cell = document.createElement(i === 0 ? 'th' : 'td');
       if (i === 0) cell.scope = 'row';
       if (column.type !== 'text') cell.className = 'num';
-      cell.textContent = formatValue(value, column.type, column.decimals);
+      const text = formatValue(value, column.type, column.decimals);
+      if (i === 0 && spec.rowHref) {
+        const a = document.createElement('a');
+        a.href = spec.rowHref(value);
+        a.textContent = text;
+        cell.append(a);
+      } else {
+        cell.textContent = text;
+      }
       tr.append(cell);
     });
   }

@@ -644,3 +644,120 @@ h4 {
 .comparison-value {
   font-size: 1.2rem;
 }
+
+/* State pages (site/states/*.html, built by packages/transform/scripts/build_state_pages.py):
+   plain HTML with no script. The dot plot is a static SVG whose colours are the chart
+   document's theme colours, set per page as --dot-* custom properties for light and dark. */
+.breadcrumb ol {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  font-size: 0.95rem;
+}
+
+.breadcrumb li + li::before {
+  content: "›" / "";
+  margin-right: 0.5rem;
+  color: var(--muted);
+}
+
+.dot-chart {
+  max-width: 34rem;
+}
+
+.dot-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.dot-grid {
+  stroke: var(--dot-grid);
+  stroke-width: 1;
+}
+
+.dot-text {
+  fill: var(--dot-text);
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.dot-cat {
+  font-weight: 700;
+}
+
+.dot-whisker {
+  fill: none;
+  stroke-width: 2;
+}
+
+.dot-mark { stroke: none; }
+.dot-s0.dot-mark { fill: var(--dot-s0); }
+.dot-s1.dot-mark { fill: var(--dot-s1); }
+.dot-s2.dot-mark { fill: var(--dot-s2); }
+.dot-s3.dot-mark { fill: var(--dot-s3); }
+.dot-s0.dot-whisker { stroke: var(--dot-s0); }
+.dot-s1.dot-whisker { stroke: var(--dot-s1); }
+.dot-s2.dot-whisker { stroke: var(--dot-s2); }
+.dot-s3.dot-whisker { stroke: var(--dot-s3); }
+
+.dot-legend {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+}
+
+.dot-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.dot-key {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: none;
+}
+
+/* The state pages' locator map is a picture, not a control: no pointer, no hover outline. */
+.locator-static .locator-map path {
+  cursor: default;
+}
+
+.locator-static .locator-map path:hover {
+  stroke: var(--map-edge);
+  stroke-width: 0.8;
+}
+
+.locator-static .locator-map path.selected:hover {
+  stroke: var(--text);
+  stroke-width: 3;
+}
+
+.facts.compare dd {
+  margin-bottom: 0.25rem;
+}
+
+.state-links {
+  padding-left: 1.25rem;
+}
+
+.state-links li {
+  margin-bottom: 0.35rem;
+}
+
+/* "Skip the state table" before the map's table of 37 state links. */
+.skip-table {
+  margin: 0.25rem 0;
+  font-size: 0.95rem;
+}
+
+h3[tabindex="-1"]:focus {
+  outline: none;
+}

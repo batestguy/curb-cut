@@ -58,17 +58,17 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   await page.keyboard.press('Enter');
   await expect(page.locator('main')).toBeFocused();
 
-  // Tab from <main> until the select is reached (bounded, so a trap or a run of new stops
-  // fails the test). At desktop width it is the 11th stop: the methodology link, five
-  // comparison source links, the map, the two spatial links ("Why", "Methods and limits"),
-  // the <summary> of the details, then the select. The bound allows a small margin.
+  // Tab from <main>: the state pages link, the methodology link, five comparison source links
+  // and the map come first, then "Skip the state table" (the 9th stop), which jumps the 37
+  // state links in the map's table. After it: "Why", the findings' <summary>, "Methods and
+  // limits", the Moran <summary>, then the select. Exact counts, so a trap or a new stop
+  // fails the test.
   const select = page.locator('#state-select');
-  let reached = false;
-  for (let i = 0; i < 15 && !reached; i += 1) {
-    await page.keyboard.press('Tab');
-    reached = await select.evaluate((el) => el === document.activeElement);
-  }
-  expect(reached).toBe(true);
+  for (let i = 0; i < 9; i += 1) await page.keyboard.press('Tab');
+  await expect(page.getByRole('link', { name: 'Skip the state table' })).toBeFocused();
+  await page.keyboard.press('Enter');
+  for (let i = 0; i < 5; i += 1) await page.keyboard.press('Tab');
+  await expect(select).toBeFocused();
 
   // Choose Lagos by typing its name, as a keyboard user would on a closed select. Nothing loads
   // yet; Tab to "Show figures" and press Enter.
@@ -88,6 +88,17 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   // Focus moves to the state card's heading so screen readers hear the state at once; the
   // card and then the table follow in reading order.
   await expect(page.getByRole('heading', { level: 3, name: 'Lagos' })).toBeFocused();
+});
+
+test('keyboard: without the skip, the select is the 51st stop after <main>', async ({ page }) => {
+  await loaded(page);
+  await page.locator('main').focus();
+  // 9 stops up to and including "Skip the state table", the 37 state links, then "Why", the
+  // findings' <summary>, "Methods and limits", the Moran <summary> and the select.
+  for (let i = 0; i < 50; i += 1) await page.keyboard.press('Tab');
+  await expect(page.locator('#state-select')).not.toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#state-select')).toBeFocused();
 });
 
 test('the state card shows the facts, and the map carries the share and rank', async ({
