@@ -2,7 +2,7 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-30 · **Current phase:** **P4b step 11 (chart library 0.2) done on branch `p4b-charts-pages`; step 12 done 2026-10-30: `disability-access-charts` 0.2.0 is on PyPI (tag `charts-v0.2.0` on 6d778e8)**; next step 13 (37 state pages). P4a gate passed 2026-10-29 (PR #2 merged); P4b plan agreed 2026-10-29, step 10 (law facts, D25) done; P4 planned 2026-10-27 (`PLAN.md` → P4: P4a numbers, map and comparison; P4b chart library 0.2 and state pages); P4a step 0 done 2026-10-27 (the pipeline reproduces the NDHS report tables; R and svy agree, `verification.md` D48); step 1 (direct estimates) next. `disability-access-charts` 0.1.0 is on PyPI (2026-10-22). P1 is live; its NVDA check is deferred.
+**Last updated:** 2026-10-30 · **Current phase:** **P4 done: the P4b gate passed 2026-10-30** (author: "pass"; PR #3): 37 state pages live, `disability-access-charts` 0.2.0 on PyPI. **Next: P5** (`PLAN.md` → P5: the pre-registration is committed before any outcome is examined). Still owed: the DHS and NBS publication copies (Gmail drafts prepared for the author), P1's NVDA check (before P6). P4a gate passed 2026-10-29 (PR #2 merged); P4b plan agreed 2026-10-29, step 10 (law facts, D25) done; P4 planned 2026-10-27 (`PLAN.md` → P4: P4a numbers, map and comparison; P4b chart library 0.2 and state pages); P4a step 0 done 2026-10-27 (the pipeline reproduces the NDHS report tables; R and svy agree, `verification.md` D48); step 1 (direct estimates) next. `disability-access-charts` 0.1.0 is on PyPI (2026-10-22). P1 is live; its NVDA check is deferred.
 
 ## Phases
 
@@ -12,7 +12,7 @@ The one page to read first. It says where things stand and what happens next. Th
 | P1 Thin vertical slice | 🟡 built and live; keyboard pre-check passed 2026-10-17. **The author's NVDA check is deferred (author, 2026-10-17)**: do it before the P6 gate at the latest | Live URL works by keyboard and with NVDA (author, per `docs/accessibility-testing.md`) |
 | P2 disability-access-charts 0.1 | ✅ done 2026-10-22: 0.1.0 published (tag `charts-v0.1.0`, pushed by the author); a clean install from PyPI ran all 3 examples and `check` | Clean install reproduces examples; LLM mocked in tests |
 | P3 Restricted zone + warehouse | ✅ done 2026-10-24 (author): PR #1 merged, CI green; all aggregates incl. MPI 2021 public | `dbt build` green on fixtures; disclosure check passes |
-| P4 Prevalence | 🟡 P4a ✅ passed 2026-10-29 (author); P4b in progress: 0.2.0 on PyPI 2026-10-30, state pages next | P4a: map and comparison live · P4b: state pages live, 0.2 on PyPI |
+| P4 Prevalence | ✅ P4a passed 2026-10-29; P4b passed 2026-10-30 (author): 37 state pages live, 0.2.0 on PyPI | P4a: map and comparison live · P4b: state pages live, 0.2 on PyPI |
 | P5 Poverty analysis | ⚪ not started | Pre-registration committed first; brief and results page live |
 | P6 API + site polish | ⚪ not started | Accessibility 100 in CI; walkthrough video recorded; author's NVDA check; regular screen-reader user's feedback sought, not blocking (2026-10-24); acted on |
 | P7 Launch | ⚪ not started | — |
@@ -86,6 +86,10 @@ The one page to read first. It says where things stand and what happens next. Th
 | Gemini / Groq real quotas | Accounts (P2) | 2026-10-16 |
 
 ## Next actions (pick up here)
+
+### P4b gate passed (2026-10-30)
+
+**Gate evidence:** CI green on PR #3; 561 Python and 98 site tests; `check --strict` on 41 chart documents; review findings fixed (tables reachable by keyboard at 320 px, findings compare the state's own activities, unreliable cells hidden, skip link past the state table). A scripted NVDA transcript (Guidepup, NVDA, Chrome; Edo, which has suppressed cells) confirmed: 22 Tab stops in a sensible order, 14 headings in order, both graphics named (the dot plot's data-derived description; the locator map), all 6 tables announce caption and size, wealth cells read with their headers including "not shown: too few respondents", "not shown: withheld so a neighbouring small cell can't be worked out" and "not shown: too imprecise (unreliable)", Edo's own wealth details open with Enter; on the main page "Skip the state table" lands on the next heading and the state picker is 5 Tabs on, and a map-table link reads "row 2, State, column 1, Abia, link". The script could not capture the picker's full announcement; the author checked the main page and a state page by hand and passed the gate. **Next: P5.** Then send the DHS and NBS publication copies (drafts prepared).
 
 ### P4b progress (2026-10-30)
 
@@ -264,5 +268,7 @@ The one page to read first. It says where things stand and what happens next. Th
 | 2026-10-30 | **Accessible places per physically disabled person, by state: not built** (author asked to skip it if not feasible). OSM has 948 `wheelchair=*` tags in all of Nigeria, GRID3 has no accessibility attribute, and audits are local one-offs (D60). Out of scope until a national audit with state coverage is published. |
 | 2026-10-30 | **P4b step 11 review fixes verified and committed** on `p4b-charts-pages`: ruff, pyright, 530 Python tests, dbt 208/208 (fixtures and real), `check --strict` on 4 charts, 38 site tests; the dot plot still reads "73 comparisons checked, 20 supported". |
 | 2026-10-30 | **Before the 0.2.0 tag** (author: "proceed"): the claim checker never treats a pair with a zero-width interval as separated (it said "can show a difference" for any gap); the map's shade-only warning gets its own id, `shade-alone`, so `not-colour-alone` names one check. 531 Python tests; clean wheel installs on 3.12 and 3.10 pass. |
+| 2026-10-30 | **State pages: wealth shown by the state's zone first** (author: "keep zone first"); the state's own wealth cells, mostly review or unreliable, sit in a details element below. |
+| 2026-10-30 | **P4b gate passed** (author: "pass"). Evidence: CI, review fixes, the Guidepup NVDA transcript of Edo and the main page, and the author's own check. PR #3 merged. D24 (AT unmet need) stays deferred to P5/P6. |
 | 2026-10-30 | **`disability-access-charts` 0.2.0 released** (author: "yes edit and do it"): tag `charts-v0.2.0` pushed by Claude; PyPI trusted publishing passed; clean install from PyPI on 3.12 and 3.10 checked. |
 | 2026-10-16 | **P0 gate passed.** Nigeria DHS 2024 is adopted as a second prevalence source next to MPI 2021. The exploratory panel uses GHS W4→W5 (all six WG-SS domains). |
