@@ -220,4 +220,13 @@ Any change after registration is logged in `docs/preregistration-deviations.md` 
 
 ## 11. Registration record
 
-To be filled at registration: approval date, commit hash, code-freeze tag, SHA-256 of this file, of `uv.lock` and of `renv.lock`, the OSF URL and timestamp.
+Section 11 is the only part of this file changed after the freeze. The hashes are of the files as committed at the freeze (`git show p5-freeze:<file> | sha256sum`).
+
+- **Approved by the author:** 2026-10-31 (revision 3).
+- **Code freeze:** tag `p5-freeze`, commit `22b8acee10b304f25201627d5cf4da47c2544a19`.
+- **SHA-256 at the freeze:**
+  - `docs/preregistration.md`: `65d0a4b2a3047e499f497aa8b59e5917ad74612c63fc8b2c66bd25af69e82955`
+  - `uv.lock`: `a190dc1cb31e2f51d6192f28f4dcea8f6203c1c0bb9d320e4224da25d185269e`
+  - `renv.lock`: `544618bebb922958811b2d4488f0cff71ce3611072593708057cd338ea18e57a`
+- **Section 5.6 check re-run on the frozen commit** (2026-10-31): the same shares as section 2.2 item 9 (primary 1.33%, S2 11.07%, S3 0.61%, S5 8.78%, S6 0.92%); S2 passes.
+- **OSF registration:** to be added (URL and timestamp).
