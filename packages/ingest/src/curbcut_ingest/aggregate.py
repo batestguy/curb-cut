@@ -304,16 +304,16 @@ R_LOG_PREFIX = "estimate.R: "
 """estimate.R prints only counts, on lines starting with this; nothing else is shown."""
 
 
-def run_r(cmd: list[str]) -> None:
-    """Run R with its output captured. Only estimate.R's own count lines are printed; R's
-    messages, warnings and errors (which could quote data) are withheld and only counted,
-    the same rule as :func:`common.safe_main`."""
+def run_r(cmd: list[str], prefix: str = R_LOG_PREFIX) -> None:
+    """Run R with its output captured. Only the script's own count lines (starting with
+    ``prefix``) are printed; R's messages, warnings and errors (which could quote data)
+    are withheld and only counted, the same rule as :func:`common.safe_main`."""
     result = subprocess.run(cmd, cwd=c.ROOT, capture_output=True, text=True, check=False)
     lines = [*(result.stdout or "").splitlines(), *(result.stderr or "").splitlines()]
-    shown = [line for line in lines if line.startswith(R_LOG_PREFIX)]
+    shown = [line for line in lines if line.startswith(prefix)]
     for line in shown:
         c.log(f"  {line}")
-    withheld = sum(1 for line in lines if line.strip() and not line.startswith(R_LOG_PREFIX))
+    withheld = sum(1 for line in lines if line.strip() and not line.startswith(prefix))
     if withheld:
         c.log(f"  R: {withheld} other output lines withheld (messages and warnings)")
     if result.returncode != 0:

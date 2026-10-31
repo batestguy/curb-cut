@@ -368,6 +368,7 @@ SECTIONS_ROWS: dict[str, list[dict]] = {
         {"hh_id": 2, **dict.fromkeys(m.COLUMNS[m.SECTION_K][1:], 2)},
         {"hh_id": 3, **dict.fromkeys(m.COLUMNS[m.SECTION_K][1:], 2), "k2e": 1},
     ],
+    m.SECTION_Q: [{"hh_id": 1, "a9a": 1}, {"hh_id": 2, "a9a": 1}, {"hh_id": 3, "a9a": 2}],
     m.SECTION_R: [{"hh_id": 1, "q12b": 40, "q13": 1, "q14": 70, "q15": 175}],
     m.SECTION_T: [{"hh_id": 2, "t0": 2, "t1a": 1, "t1b": 10, "t1c": 2, "t1d": 35}],
 }  # fmt: skip
@@ -400,6 +401,19 @@ def test_build_household_frame() -> None:
     assert list(out.loc["3", ["head_sex", "head_age", "head_education"]]) == [
         "male", 65, "higher"]  # fmt: skip
     assert out.loc["1", "head_education"] == "secondary"
+    # P5 additions (pre-registration 3.1, 3.3, 3.4): response status, age bands, and the
+    # two outcome-robustness variants; the index itself is unchanged.
+    assert out["a9a"].tolist() == [1, 1, 2]
+    p5_bands = ["n_0_4", "n_5", "n_6_14", "n_15_17", "n_18_59", "n_60_69", "n_70plus"]
+    assert list(out.loc["2", p5_bands]) == [1, 0, 1, 0, 1, 0, 0]
+    assert list(out.loc["3", p5_bands]) == [0, 0, 0, 0, 1, 1, 0]
+    # Household 2 cooks with wood (7): deprived under both fuel definitions.
+    assert out.loc["2", "d_cooking_fuel_alt"] == 1
+    assert out.loc["2", "poor_fuel_alt"] == out.loc["2", "poor"]
+    # Household 3 answered "don't know" throughout: missing, but not deprived under (b).
+    assert out.loc["3", "d_security_shock_dk0"] == 0
+    assert out.loc["3", "poor_shock_dk0"] == 0
+    assert out.loc["3", "score_shock_dk0"] == pytest.approx(out.loc["1", "score"])
 
 
 def test_national_weights_people_and_skips_incomplete() -> None:

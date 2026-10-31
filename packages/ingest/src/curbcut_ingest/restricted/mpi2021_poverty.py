@@ -48,6 +48,7 @@ SECTION_H2 = "SECTION H2_ SAFETY AND SECURITY.dta"
 SECTION_I = "SECTION I_ WATER AND SANITATION.dta"
 SECTION_J = "SECTION J_HOUSING CHARACTERISTICS_NEW.dta"
 SECTION_K = "SECTION K_HOUSEHOLD ASSETS.dta"
+SECTION_Q = "SECTION Q_HOUSEHOLD RESPONSE STATUS.dta"
 SECTION_R = "SECTION R_ADULT NUTRITION ANTHROPOMETRY.dta"
 SECTION_T = "SECTION T_CHILDREN NUTRITION ANTHROPOMETRY.dta"
 
@@ -77,6 +78,7 @@ COLUMNS = {
     SECTION_I: ["hh_id", "i1", "i2", "i2a", "i2b", "i4", "i5"],
     SECTION_J: ["hh_id", "j1", "j2", "j3", "j4"],
     SECTION_K: ["hh_id", *(v for vs in ASSET_ITEMS.values() for v in vs), CAR],
+    SECTION_Q: ["hh_id", "a9a"],
     SECTION_R: ["hh_id", "q12b", "q13", "q14", "q15"],
     SECTION_T: ["hh_id", "t0", "t1a", "t1b", "t1c", "t1d"],
 }
@@ -146,6 +148,11 @@ RUDIMENTARY_WALL = {1, 2, 3, 4, 5, 6, 7, 8, 9}  # none ... plywood, cardboard, r
 SOLID_FUEL = {5, 7, 8}
 """Dung, wood, charcoal/coal/lignite: the report's wording. Straw/grass (6) and crop
 residue (9) are not named and are not counted."""
+SOLID_FUEL_NO_CHARCOAL = {5, 6, 7, 9}
+"""Outcome robustness (a) of the pre-registration (section 3.3; D64): dung, straw/grass,
+wood, crop residue. Used only for ``poor_fuel_alt``; the index itself is unchanged."""
+DONT_KNOW = 3
+"""Section H2's "don't know" code."""
 
 FIES_SEVERE = 7
 HEALTH_MINUTES = 30
@@ -171,6 +178,18 @@ MEASURED_ADULT = {1, 4}
 LYING, STANDING = 1, 2
 
 AGE_COUNTS = {"n_0_4": (0, 4), "n_5_14": (5, 14), "n_15_59": (15, 59), "n_60plus": (60, 200)}
+P5_AGE_COUNTS = {
+    # Pre-registration section 3.4: the MPI eligibility ages plus the very old.
+    "n_0_4": (0, 4),
+    "n_5": (5, 5),
+    "n_6_14": (6, 14),
+    "n_15_17": (15, 17),
+    "n_18_59": (18, 59),
+    "n_60_69": (60, 69),
+    "n_70plus": (70, 200),
+}
+COMPLETED = 1
+"""Section Q ``a9a``: 1 = completed interview (the P5 sample)."""
 EDUCATION = {
     "none": "never attended school",
     "preschool": "preschool only",
@@ -421,9 +440,9 @@ def housing(j: pd.DataFrame) -> pd.Series:
     return _flag(bad, known | bad)
 
 
-def cooking_fuel(j: pd.DataFrame) -> pd.Series:
+def cooking_fuel(j: pd.DataFrame, codes: set[int] = SOLID_FUEL) -> pd.Series:
     fuel = c.to_num(j["j4"])
-    return _flag(fuel.isin(list(SOLID_FUEL)), fuel.notna())
+    return _flag(fuel.isin(list(codes)), fuel.notna())
 
 
 def assets(k: pd.DataFrame) -> pd.Series:
@@ -482,6 +501,14 @@ def security_shock(h2: pd.DataFrame) -> pd.Series:
     return _flag(any_yes, all_no)
 
 
+def security_shock_dk_not_deprived(h2: pd.DataFrame) -> pd.Series:
+    """Outcome robustness (b): as :func:`security_shock`, but "don't know" counts as no."""
+    answers = h2[SHOCKS].apply(c.to_num)
+    any_yes = (answers == YES).any(axis=1)
+    all_answered = answers.isin([NO, DONT_KNOW]).all(axis=1)
+    return _flag(any_yes, all_answered)
+
+
 # --- score, confounders, national figures -------------------------------------------
 
 
@@ -521,7 +548,7 @@ def household_structure(roster: pd.DataFrame, households: pd.Index) -> pd.DataFr
     """
     age = c.to_num(roster["b4a"])
     out = pd.DataFrame(index=households)
-    for column, (lo, hi) in AGE_COUNTS.items():
+    for column, (lo, hi) in {**AGE_COUNTS, **P5_AGE_COUNTS}.items():
         in_band = roster.loc[age.between(lo, hi), "hh_id"]
         out[column] = in_band.value_counts().reindex(households).fillna(0).astype("Int16")
     heads = roster[c.to_num(roster["b5"]) == HEAD]
@@ -562,6 +589,11 @@ def build(
     out["hh_wgt"] = c.to_num(a["hh_wgt"])
     out["pop_wgt"] = c.to_num(a["pop_wgt"])
     out["person_weight"] = out["pop_wgt"] / out["hhsize"].astype("float64")
+    if SECTION_Q in sections:
+        q = _by_household(sections[SECTION_Q], households)
+        out["a9a"] = c.to_num(q["a9a"]).astype("Int8")
+    else:
+        out["a9a"] = pd.Series(pd.NA, index=households, dtype="Int8")
     out = out.join(household_structure(roster, households))
 
     kids = child_undernourished(sections[SECTION_T], roster, tables)
@@ -588,6 +620,23 @@ def build(
     points = score_points(dep)
     out["score"] = points.astype("Float64") / POINTS
     out["poor"] = is_poor(points)
+    # Outcome robustness (pre-registration 3.3): one indicator swapped, the rest unchanged.
+    alternatives = {
+        # suffix: (indicator swapped, its alternative column, values)
+        "fuel_alt": ("cooking_fuel", "d_cooking_fuel_alt", cooking_fuel(j, SOLID_FUEL_NO_CHARCOAL)),
+        "shock_dk0": (
+            "security_shock",
+            "d_security_shock_dk0",
+            security_shock_dk_not_deprived(_by_household(sections[SECTION_H2], households)),
+        ),
+    }
+    for name, (indicator, column, values) in alternatives.items():
+        swapped = dep.copy()
+        swapped[indicator] = values.astype("Int8")
+        out[column] = swapped[indicator]
+        alt_points = score_points(swapped)
+        out[f"score_{name}"] = alt_points.astype("Float64") / POINTS
+        out[f"poor_{name}"] = is_poor(alt_points)
     out.index = c.code_text(pd.Series(out.index, index=out.index)).to_numpy()
     out.index.name = "hh_id"
     return out.reset_index()
@@ -677,7 +726,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
 
-    c.log("MPI 2021 poverty: reading Sections A, B, C, E, F, H2, I, J, K, R, T (not D)")
+    c.log("MPI 2021 poverty: reading Sections A, B, C, E, F, H2, I, J, K, Q, R, T (not D)")
     sections, labels = read_sections(args.data_dir)
     tables = who_growth.load_tables(args.who_dir)
     frame = build(sections, tables, labels, StateLookup.from_seeds())

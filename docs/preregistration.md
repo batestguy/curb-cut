@@ -1,10 +1,10 @@
 # Pre-registration: disability and multidimensional poverty in Nigeria
 
-**Status: DRAFT (revision 2, after an independent methods review), not yet approved or registered.** When the author approves it, it is committed together with the analysis code, a code-freeze tag is made, and the commit hash, the tag and the SHA-256 of this file, `uv.lock` and `renv.lock` are recorded in section 11. It is then registered on OSF (Secondary Data Preregistration template, Van den Akker et al. 2021). Until the OSF timestamp exists, no individual- or household-level figure linking poverty to disability, or poverty to any confounder, is computed.
+**Status: revision 3, approved by the author on 2026-10-31 and frozen at tag `p5-freeze`; not yet registered.** Revision 2 (after an independent methods review) was approved on 2026-10-30; the decisions added in revision 3 (section 2.2 item 9 and the text it points to) were agreed on 2026-10-31, and the author approved the whole text after a final read the same day. After the freeze, only section 11 changes. As approved, it is committed together with the analysis code, a code-freeze tag is made, and the commit hash, the tag and the SHA-256 of this file, `uv.lock` and `renv.lock` are recorded in section 11. It is then registered on OSF (Secondary Data Preregistration template, Van den Akker et al. 2021). Until the OSF timestamp exists, no individual- or household-level figure linking poverty to disability, or poverty to any confounder, is computed.
 
 - **Project:** Curb Cut (https://github.com/batestguy/curb-cut), phase P5 (`PLAN.md` steps 15–21).
 - **Author:** the project author (statistician on this analysis). Code is drafted with an AI assistant (Claude); every decision here is the author's.
-- **Date drafted:** 2026-10-30.
+- **Date drafted:** 2026-10-30; revision 3 on 2026-10-31.
 - **Registered DHS project:** "Curb Cut: disability prevalence and poverty in Nigeria" (DHS data are not used in this analysis).
 
 Vocabulary: **exposure** means living in a household with a member who has a severe functional difficulty. "Treatment", "ATE" and "IRM" appear only as the names DoubleML gives its code; they do not claim a causal effect.
@@ -47,6 +47,7 @@ Everything the author and the project know that bears on the questions, before t
 6. **The rebuilt national MPI** (step 16, D64): national H, A and MPI and each indicator's national deprivation rate. The first complete validation run failed (H 60.8 against 62.9 ± 1.0). Two education rules were then corrected so that the rebuild reproduces the report's Table 8 (school attendance) and Table 9 (schooling of household members); the second run passed (H 63.0, A 40.7, MPI 0.256). National alternative cooking-fuel definitions were also computed (D64). None of this splits by disability or by any confounder.
 7. **GHS:** national and zone disability prevalence for W4 and W5 (published aggregates). No consumption or work figure has been examined, by disability or otherwise.
 8. **Metadata only** for every other variable (names, labels, value labels, row and distinct-value counts; D62–D64).
+9. **The exposure check of section 5.6** (2026-10-31; exposure only, no poverty data). The first run failed: S2 gave 14.26% against NBS's 11.0% ± 1.5. It counted every "yes" screener for seeing, hearing and walking as a difficulty, including aid users who report no difficulty when using their aid. A diagnostic run that read only the severity items (people not asked counted as having none) gave 5.65%. The author then adopted "reading C" for S2 (section 3.2) before it was run, on the wording of NBS's footnote 19 (page 57: "some/a lot/complete difficulty with seeing; hearing; walking … even when using equipment or being assisted"), and the rule that a household with a severe member is exposed whatever the other members' missing answers (section 3.2). The re-run passed: S2 11.07%, with 0.22% of people in households whose exposure is missing (58 households, all with a member whose answers are partly missing). The other definitions in the same run: primary 1.33%, S3 0.61%, S5 8.78%, S6 0.92%.
 
 No individual- or household-level analysis linking poverty, deprivation, consumption or work to disability, or to any confounder, has been run by the author or the project.
 
@@ -69,7 +70,14 @@ People with a "yes" screener for seeing, hearing or walking and no aid have **no
 
 Members under 5 are not assessed by MPI. Upper-body items (lifting, hands) are left out of the primary definition, which stays as close to the Washington Group's six domains as MPI allows; they are part of S2.
 
-A household is **unexposed** if every member aged 5+ has non-missing, not-severe answers in every domain above. Households with a member whose answers are all missing are excluded; their number and weighted share are reported.
+A household with at least one severe member is **exposed**, whatever the other members' missing answers. A household with no severe member is **unexposed** if every member aged 5+ has non-missing, not-severe answers in every domain above. Otherwise its exposure is missing: it is excluded if a member's answers are all missing, and missing if a member's answers are partly missing. Their number and weighted share are reported, by reason. The same rule applies to every exposure definition (S2, S5 and S6); S3 looks only at the head.
+
+**S2 (NBS's broad definition).** A household is exposed if any member aged 5+ has "some difficulty" or worse in any item: the six domains above (communication as its two items), lifting (`d13a`), using the hands (`d14a`) and the skin item (`d15a`, albinism or vitiligo). For seeing, hearing and walking, NBS's footnote 19 says "even when using equipment or being assisted" ("reading C"):
+- an aid user counts if the answer "even when using the aid" is "some difficulty" or worse;
+- a "yes" screener without an aid counts as a difficulty: without an aid, the difficulty when using one is the difficulty without it;
+- a "no" screener counts as no difficulty.
+
+The first version of this definition counted every "yes" screener and failed the check of section 5.6; the record is in section 2.2, item 9.
 
 This is MPI's own measure, not the Washington Group's DISABILITY3, and is described as such everywhere it is used.
 
@@ -124,7 +132,7 @@ The **population-weighted standardised difference** in the probability that a pe
 
 ### 5.1 Estimator
 
-- **DoubleML** (Python, `doubleml` 0.11.x, D62), `DoubleMLIRM`, `score='ATE'`, with the population weights normalised to mean 1 passed as `weights`, so the score targets the population average. `normalize_ipw=True`. Propensity scores are clipped at 0.01 and 0.99 (`trimming_threshold=0.01`; DoubleML clips, it does not drop observations).
+- **DoubleML** (Python, `doubleml` 0.11.x, D62), `DoubleMLIRM`, `score='ATE'`, with the population weights normalised to mean 1 passed as `weights`, so the score targets the population average. `normalize_ipw=True`. Propensity scores are clipped at 0.01 and 0.99 (`trimming_threshold=0.01`; DoubleML clips, it does not drop observations). On `doubleml` 0.11.4 `trimming_threshold` is a deprecated name for the same clipping (removed in 0.12); it is used as written.
 - **Cross-fitting:** 5 folds, repeated 5 times (`n_rep=5`), median aggregation; folds formed by cluster (`cluster_cols`). Seed 20261030 for the folds and every learner.
 - **Nuisance fits are unweighted** (the survey weights enter only the score). This is the design DoubleML supports (D62); consistency does not require weighted nuisance fits.
 - **Learners** (scikit-learn; fixed hyper-parameters, no tuning):
@@ -132,9 +140,9 @@ The **population-weighted standardised difference** in the probability that a pe
   - Random forest: 500 trees, `min_samples_leaf=20`, `max_features="sqrt"`; categoricals one-hot encoded.
   - Histogram gradient boosting: `max_iter=300`, `learning_rate=0.05`, `max_leaf_nodes=31`, `min_samples_leaf=50`, no early stopping; state, district and the head's education as native categorical features.
 
-  The outcome learner is the classifier version of each.
-- **Learner selection** (before any exposure difference is computed): for the outcome model and the propensity model separately, each candidate's **unweighted** log loss is computed with the same cluster-based 5-fold split (first repetition). The lowest wins; any candidate within one standard error of the lowest is preferred in the order logistic, random forest, gradient boosting. The selection log is saved.
-- **Overlap:** the weighted share of people with a propensity outside 0.05–0.95 is reported. If it exceeds 5%, the estimate on the overlap population (households with a propensity in 0.05–0.95) is also reported as a secondary.
+  The outcome learner is the classifier version of each. For the continuous outcomes of S1 and S4 it is the regressor version, with ridge regression (`alpha=1`) in place of the logistic regression.
+- **Learner selection** (before any exposure difference is computed): for the outcome model and the propensity model separately, each candidate's **unweighted** log loss (squared error for the continuous outcomes of S1 and S4) is computed with the same cluster-based 5-fold split (first repetition). The outcome model is scored per arm, as DoubleML fits it: each arm's model is fitted on that arm's training households and scored on that arm's held-out households. The lowest mean loss wins; any candidate within one standard error of the lowest (the standard error of the best candidate's mean loss across the five folds) is preferred in the order logistic, random forest, gradient boosting. The selection log is saved.
+- **Overlap:** the propensity is each household's cross-fitted propensity averaged over the five repetitions, before clipping. Its 1, 5, 25, 50, 75, 95 and 99% quantiles are reported for exposed and for unexposed households, with the weighted and unweighted share of propensities clipped at 0.01 or 0.99. The estimate on the overlap population (households with a propensity from 0.01 to 0.99) is always reported, as a secondary.
 - **Inference:** cluster-robust standard errors by enumeration area; 95% intervals; two-sided α = 0.05 for the primary estimate only.
 
 ### 5.2 Benchmark
@@ -143,8 +151,9 @@ A survey-weighted linear probability model (R `survey::svyglm`; design: clusters
 
 ### 5.3 Sensitivity to unmeasured confounding
 
-- **DoubleML's omitted-variable bounds** (`sensitivity_analysis`, Chernozhukov et al., "Long Story Short"): the robustness values (RV, RVa), and bounds benchmarked on observed covariates (`sensitivity_benchmark`) for (a) the head's education, (b) state, and (c) sector: "a confounder as strong as state would move the estimate to …". The code tests that this runs with `weights` and `cluster_cols` on synthetic data.
-- **E-value** (VanderWeele and Ding 2017) for the risk ratio RR = 1 + ATE/μ₀, where μ₀ is the weighted doubly robust estimate of the poverty share without exposure; also for the confidence limit closer to 1. If the estimate is below 0, the E-value is computed for 1/RR. Two caveats are stated with it: the confidence-limit E-value ignores the uncertainty in μ₀, and with a base rate near 60% the risk ratio cannot exceed about 1.6, so E-values are small by construction.
+- **DoubleML's omitted-variable bounds** (`sensitivity_analysis`, Chernozhukov et al., "Long Story Short"): the robustness values (RV, RVa), and bounds benchmarked on observed covariates for (a) the head's education, (b) place (state and senatorial district dropped together; district codes include the state, so dropping state alone would leave place in the model), and (c) sector: "a confounder as strong as place would move the estimate to …". The code tests that this runs with `weights` and `cluster_cols` on synthetic data.
+- **Stated deviation from DoubleML's routine:** the benchmarks use the project's own code, not DoubleML's `sensitivity_benchmark`. Like `sensitivity_benchmark`, it refits the model without the benchmark covariates on the same folds and passes both fits to DoubleML's `gain_statistics`. Unlike it, it rebuilds the learners for the shorter set of columns, because the learners address columns by position.
+- **E-value** (VanderWeele and Ding 2017) for the risk ratio RR = 1 + ATE/μ₀, where μ₀ is the weighted doubly robust estimate of the poverty share without exposure; also for the confidence limit closer to 1 (1 if the risk-ratio interval includes 1). If the estimate is below 0, the E-value is computed for 1/RR. Two caveats are stated with it: the confidence-limit E-value ignores the uncertainty in μ₀, and with a base rate near 60% the risk ratio cannot exceed about 1.6, so E-values are small by construction.
 - **sensemakr** (R, Cinelli and Hazlett 2020) on a weighted `lm` with the same covariates (sensemakr does not take `svyglm`; this model ignores the design), benchmarked on the head's education.
 
 No decision depends on these numbers. They are reported as they come out.
@@ -152,15 +161,15 @@ No decision depends on these numbers. They are reported as they come out.
 ### 5.4 Refutations and robustness
 
 Each refutation has a pre-declared expectation. A failure is reported, not hidden. Refutations use the selected learners with `n_rep=1`.
-1. **Placebo exposure:** the exposure permuted within senatorial district, 100 times. Expected: the permutation estimates centred on 0, about 5% of their 95% intervals excluding 0; the real estimate's empirical p-value against the permutation distribution is reported.
-2. **Random common cause:** an independent standard-normal covariate added. Pass if the estimate moves by no more than the larger of 10% of its standard error and the range of the estimate across five fold seeds.
-3. **Leave one zone out:** the primary analysis with each of the six zones dropped in turn; reported descriptively (no pass rule).
+1. **Placebo exposure:** the exposure permuted within senatorial district, 100 times. Expected: the permutation estimates centred on 0, about 5% of their 95% intervals excluding 0; the real estimate's empirical p-value against the permutation distribution is reported. It is two-sided with the +1 correction: (1 + the number of permutation estimates at least as far from 0 as the real one) / (1 + 100).
+2. **Random common cause:** an independent standard-normal covariate added. Pass if the estimate moves by no more than the larger of 10% of its standard error and the range of the estimate across five fold seeds. The reference is the `n_rep=1` estimate at the primary seed; the five fold seeds are 20261030 to 20261034.
+3. **Leave one zone out:** the primary analysis (`n_rep=1`) with each of the six zones dropped in turn; reported descriptively (no pass rule).
 
 Robustness runs, reported alongside the primary: the head's education dropped; adjustment for place and the head's sex and age only (section 3.4); place as state only (no district); each of the three learner families; the outcome robustness (a) and (b) of section 3.3.
 
 ### 5.5 Secondaries and multiplicity
 
-S1–S6 use the same estimator, learner-selection rule and inference (S3 without the head's education). Their intervals are reported unadjusted and labelled secondary. Wording that a secondary difference "is supported" uses Holm's correction across S1, S2 and S3. S4–S6 and X1 are descriptive.
+S1–S6 use the same estimator, learner-selection rule and inference (S3 without the head's education). Their intervals are reported unadjusted and labelled secondary. Wording that a secondary difference "is supported" uses Holm's correction across S1, S2 and S3. S4–S6 and X1 are descriptive. X1 uses the learners selected for the primary.
 
 ### 5.6 Order of work
 
@@ -176,7 +185,7 @@ S1–S6 use the same estimator, learner-selection rule and inference (S3 without
 ## 6. Missing data
 
 - Indicator-level missing values follow the rebuild's rules (D64: the report's rules where stated, OPHI's global-MPI conventions where not).
-- Missing confounders: an explicit "missing" category for categorical ones; the age-structure counts are complete by construction (roster).
+- Missing confounders: an explicit "missing" category for categorical ones; the head's age, if missing, is set to the median with a missing indicator; the age-structure counts are complete by construction (roster).
 - Households excluded for missing exposure (3.2) or missing outcome (3.3) are counted and reported, with their weighted shares.
 
 ## 7. Interpretation rules
@@ -192,10 +201,10 @@ S1–S6 use the same estimator, learner-selection rule and inference (S3 without
 **Design.** Only two waves carry the full WG-SS (D63), five years apart: a two-period comparison, not an event study. The assumption that the comparison group shows the change the onset group would have shown without onset is untestable and stated as such.
 
 - **Domains:** the six WG-SS domains with the four-level scale in both waves (W4 `s4aq23`–`s4aq33`, W5 `s3q23`–`s3q28`). W5's communication item adds "using your usual language"; this wording difference is stated.
-- **Sample (person level):** people aged 15+ in W4 who are found in W5 (linked on `hhid` and `indiv`), with no severe difficulty in any domain in W4 and non-missing answers in W5. The linkage rate is reported, and attriters are compared with stayers on W4 characteristics (age, sex, zone, sector, W4 difficulty), with no outcome involved.
+- **Sample (person level):** people aged 15+ in W4 who are found in W5 (linked on `hhid` and `indiv`), with all six W4 domains answered and none severe, and a known W5 status (a severe answer in at least one domain, or all six answered). The linkage rate is reported, and attriters are compared with stayers on W4 characteristics (age, sex, zone, sector, W4 difficulty), with no outcome involved.
 - **Onset:** a severe difficulty ("a lot" or "cannot") in any domain in W5.
-- **Outcomes:** (a) the change in log household consumption per capita (`totcons_adj` in each wave; a common deflator cancels in the change, and spatial deflation is within wave); (b) the change in whether the person did any work (W4 `sect3`, W5 `sect4a`, harmonised to "any wage, farm or non-farm work in the reference period").
-- **Model:** a change-score regression (no lagged outcome): weighted least squares of each change on onset and W4 covariates (age band, sex, zone, sector), with the longitudinal weight (which adjusts for attrition); standard errors clustered by enumeration area (pyfixest `feols`); checked against R `fixest` or `lm` with clustered errors.
+- **Outcomes:** (a) the change in log household consumption per capita (`totcons_adj` in each wave; a common deflator cancels in the change, and spatial deflation is within wave); (b) the change in whether the person did any work in the last 7 days, in the same three categories in both waves (W4 `sect3`, W5 `sect4a`; variables identified from the files' labels): wage work (W4 `s3q4`, W5 `s4aq4`), work on the household farm (W4 `s3q5`, W5 `s4aq10`) and work in the person's own business (W4 `s3q6`, "on their own account or in a business", not labelled non-farm; W5 `s4aq6`, a non-farm household business). W5's items on helping in another member's business or on the farm (`s4aq8`, `s4aq11`) are not used, because W4 has no separate helping item. The wording differences between the waves are stated with the result.
+- **Model:** a change-score regression (no lagged outcome): weighted least squares of each change on onset and W4 covariates (age band 15–29, 30–44, 45–59 or 60+; sex, zone, sector), with the longitudinal weight (which adjusts for attrition); standard errors clustered by enumeration area (pyfixest `feols`); checked against R `fixest` or `lm` with clustered errors.
 - **Power and the run rule:** before any outcome is examined, count the unweighted onset cases and compute the minimum detectable effect (MDE) at 80% power and α = 0.05, using the pooled standard deviation of the **change** in each outcome (no split by onset), a design effect from the weights (Kish) and the clustering (intra-cluster correlation of the change), and the onset share. **E1 is run for an outcome only if its MDE is at most 0.5 standard deviations of the change.** Otherwise only the onset count (if 30 or more), the MDE and the reason are reported.
 - **Interpretation:** exploratory; two outcomes; no multiplicity claim; no confirmatory language; intervals only.
 
