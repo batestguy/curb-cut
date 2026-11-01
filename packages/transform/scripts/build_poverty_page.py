@@ -522,10 +522,15 @@ def ghs_section(nums: Any) -> str:
             )
         return "The interval does not include zero."
 
+    OUTCOME_WORDS = {"dlog_consumption": "consumption", "dwork": "work"}
+
     def mde(outcome: str) -> str:
         run = "analysed" if nums.flag(f"{outcome}_run", "ghs") else "not analysed"
         value = nums.value(f"{outcome}_mde_sd", "ghs", 2)
-        return f"{value} standard deviations of the change, so it was {run}"
+        return (
+            f"For {OUTCOME_WORDS[outcome]}, the smallest detectable difference was {value} "
+            f"standard deviations, so it was {run}."
+        )
 
     agree = max(
         nums.raw("summary.ghs.dlog_consumption_r_max_abs_diff.value"),
@@ -595,8 +600,8 @@ exploratory: two outcomes, intervals only, no claim that a difference is support
 <p>The General Household Survey-Panel visited the same households in 2018/19 and 2023/24, and
 both rounds asked the Washington Group's six questions. {text.ghs_sample_line(nums)}</p>
 <p>A rule fixed in advance said each outcome is analysed only if the survey could detect a
-difference of at most half a standard deviation of the change. The smallest detectable
-difference was {mde("dlog_consumption")} for consumption and {mde("dwork")} for work.</p>
+difference of at most half a standard deviation of the change.
+{mde("dlog_consumption")} {mde("dwork")}</p>
 {ghs}
 <ul class="sentences">
 <li><strong>Consumption:</strong> {nums.est("ghs_dlog_consumption", decimals=3)} log points
