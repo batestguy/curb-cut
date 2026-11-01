@@ -24,15 +24,15 @@ Color Research and Application 30(1): 21-30) between the CIELAB values of two sR
 
 Thresholds
 ----------
-These are design thresholds, not WCAG numbers: WCAG has no colour-difference criterion,
-which is why a map also uses patterns and words (SC 1.4.1). A colour difference of about
-2.3 is commonly quoted as just noticeable side by side (for CIELAB's ΔE*ab; Sharma 2003,
-*Digital Color Imaging Handbook*); map classes must be told apart across a map and against
-a legend swatch, not side by side, so both thresholds sit well above it.
+These are **design thresholds**, chosen for this library; they are not WCAG numbers (WCAG
+has no colour-difference criterion, which is why a map also uses patterns and words, SC
+1.4.1) and they are not derived from a perception study. For orientation only: a CIEDE2000
+difference of about 1 is roughly the just-noticeable difference for two patches side by
+side. Map classes must be told apart across a map and against a legend swatch, not side by
+side, so both thresholds sit far above that.
 
-* :data:`CVD_MIN_DELTA_E` = 5 (the ``colour-vision`` **error**): about twice the
-  just-noticeable difference. Below it, two neighbouring classes look the same to that
-  colour vision except for their patterns.
+* :data:`CVD_MIN_DELTA_E` = 5 (the ``colour-vision`` **error**). Below it, two neighbouring
+  classes are hard to tell apart for that colour vision except by their patterns.
 * :data:`CVD_TARGET_DELTA_E` = 10 (the ``colour-vision-target`` **warning**). ColorBrewer's
   five-class YlGnBu meets it (10.3 at its closest, protanopia, between the two lightest
   classes) and so does the library's dark YlGnBu-style palette (11.6, deuteranopia); 0.2's

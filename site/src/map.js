@@ -211,6 +211,11 @@ export function renderChoropleth(doc, { figure, holder, legendEl, titleEl, table
   );
   const codeByName = new Map(doc.regions.map((r) => [r.name, r.code]));
   const cased = Boolean(doc.themes.light.halo);
+  // The casing's stroke widths come from the document (map.casing, audited: each halo wider
+  // than its edge), as CSS custom properties the stylesheet reads.
+  for (const [key, width] of Object.entries(doc.map.casing ?? {})) {
+    figure.style.setProperty(`--map-${key.replace('_', '-')}-w`, `${width}px`);
+  }
 
   const svg = svgEl('svg', { viewBox: doc.map.viewBox, 'aria-hidden': 'true', focusable: 'false' });
   const prefix = `${doc.id}-pattern`;
@@ -265,6 +270,9 @@ export function renderChoropleth(doc, { figure, holder, legendEl, titleEl, table
   }
   const setSelectedOutline = outline('selected');
   const setHoverOutline = outline('hover');
+  // The ring is cased like the boundaries: a halo circle under the edge circle.
+  const ringHalo = cased ? svgEl('circle', { r: '0', class: 'map-ring-halo' }) : null;
+  if (ringHalo) svg.append(ringHalo);
   const ring = svgEl('circle', { r: '0' });
   ring.classList.add('map-ring');
   svg.append(ring);
@@ -392,9 +400,11 @@ export function renderChoropleth(doc, { figure, holder, legendEl, titleEl, table
       // class is the one the legend shows; small states also get a ring so they can be found.
       setSelectedOutline(code ?? null);
       const r = code ? doc.map.rings?.[code] : null;
-      ring.setAttribute('cx', r ? r[0] : 0);
-      ring.setAttribute('cy', r ? r[1] : 0);
-      ring.setAttribute('r', r ? r[2] : 0);
+      for (const circle of ringHalo ? [ringHalo, ring] : [ring]) {
+        circle.setAttribute('cx', r ? r[0] : 0);
+        circle.setAttribute('cy', r ? r[1] : 0);
+        circle.setAttribute('r', r ? r[2] : 0);
+      }
     },
   };
 }

@@ -193,6 +193,9 @@ for (const colorScheme of ['light', 'dark']) {
     });
     expect(strokes.halo).toBe(rgb(theme.halo));
     expect(strokes.edge).toBe(rgb(theme.edge));
+    // The widths are the document's (map.casing), the halo wider than the edge.
+    expect(strokes.haloWidth).toBe(doc.map.casing.halo);
+    expect(strokes.edgeWidth).toBe(doc.map.casing.edge);
     expect(strokes.haloWidth).toBeGreaterThan(strokes.edgeWidth);
     const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
     expect(results.violations).toEqual([]);
@@ -355,6 +358,60 @@ test('the legend filter and the state highlight work together', async ({ page, r
     doc.map.paths['NG-KN'],
   );
 });
+
+for (const colorScheme of ['light', 'dark']) {
+  test(`a small chosen state gets a cased outline and ring, at the document's widths (${colorScheme})`, async ({
+    page,
+    request,
+  }) => {
+    const doc = await (await request.get('data/charts/prevalence_map.json')).json();
+    const theme = doc.themes[colorScheme];
+    expect(theme.halo).toBeTruthy();
+    const casing = doc.map.casing;
+    // Imo is small (it has a ring) and in the highest class, the darkest fill in light mode.
+    const imo = doc.regions.find((r) => r.name === 'Imo');
+    expect(doc.map.rings[imo.code]).toBeTruthy();
+    expect(imo.class).toBe(doc.classes.length - 1);
+    await page.emulateMedia({ colorScheme });
+    await ready(page);
+    await chooseState(page, 'Imo');
+    const map = page.locator('#prevalence-map');
+    const drawn = await map.evaluate((holder) => {
+      const style = (sel) => {
+        const el = holder.querySelector(sel);
+        const cs = getComputedStyle(el);
+        return { stroke: cs.stroke, width: parseFloat(cs.strokeWidth), r: el.getAttribute('r') };
+      };
+      return {
+        ringHalo: style('circle.map-ring-halo'),
+        ring: style('circle.map-ring'),
+        outlineHalo: style('.map-outline-selected .outline-halo'),
+        outlineEdge: style('.map-outline-selected .outline-edge'),
+        // The halo circle is drawn under the edge circle.
+        haloFirst: Boolean(
+          holder
+            .querySelector('circle.map-ring-halo')
+            .compareDocumentPosition(holder.querySelector('circle.map-ring')) &
+            Node.DOCUMENT_POSITION_FOLLOWING,
+        ),
+      };
+    });
+    const r = String(doc.map.rings[imo.code][2]);
+    expect(drawn.ringHalo).toEqual({ stroke: rgb(theme.halo), width: casing.outline_halo, r });
+    expect(drawn.ring).toEqual({ stroke: rgb(theme.edge), width: casing.outline_edge, r });
+    expect(drawn.haloFirst).toBe(true);
+    expect(drawn.outlineHalo.stroke).toBe(rgb(theme.halo));
+    expect(drawn.outlineHalo.width).toBe(casing.outline_halo);
+    expect(drawn.outlineEdge.width).toBe(casing.outline_edge);
+    // A shown class's boundaries are drawn at the document's active widths.
+    await page.locator('#prevalence-map-legend').getByRole('button').nth(imo.class).click();
+    const active = await map.evaluate((holder) => ({
+      halo: parseFloat(getComputedStyle(holder.querySelector('.map-halos path.active')).strokeWidth),
+      edge: parseFloat(getComputedStyle(holder.querySelector('.map-edges path.active')).strokeWidth),
+    }));
+    expect(active).toEqual({ halo: casing.active_halo, edge: casing.active_edge });
+  });
+}
 
 test('at 320px the legend fits, with no sideways scroll, before and after a press', async ({
   page,

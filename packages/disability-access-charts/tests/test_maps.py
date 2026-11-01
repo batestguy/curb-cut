@@ -191,6 +191,31 @@ def test_cased_boundaries_are_audited_against_every_fill() -> None:
     assert doc["themes"]["light"]["halo"] == "#ffffff"
 
 
+def test_casing_widths_are_in_the_document() -> None:
+    doc = make()
+    assert doc["map"]["casing"] == {
+        "halo": 3,
+        "edge": 1,
+        "active_halo": 5,
+        "active_edge": 2,
+        "outline_halo": 6,
+        "outline_edge": 3,
+    }
+    check = next(c for c in doc["audit"]["checks"] if c["id"] == "casing-widths")
+    assert check["passed"] is True
+    # One edge colour, no casing: no widths and no check.
+    green = make(scheme="green")
+    assert "casing" not in green["map"]
+    assert not any(c["id"] == "casing-widths" for c in green["audit"]["checks"])
+    # A halo no wider than its edge would be hidden under it.
+    bad = copy.deepcopy(doc)
+    bad["map"]["casing"]["active_halo"] = 2
+    assert "casing-widths" in failed(bad)
+    bad = copy.deepcopy(doc)
+    del bad["map"]["casing"]
+    assert "casing-widths" in failed(bad)
+
+
 def test_a_single_edge_fails_on_ylgnbu() -> None:
     # No one boundary colour is 3:1 against both #ffffcc and #253494: without the halo the
     # near-black edge is 1.54:1 on the darkest fill.

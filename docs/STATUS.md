@@ -92,7 +92,8 @@ The one page to read first. It says where things stand and what happens next. Th
 Branch `p6-map-redesign`, not pushed. Option C from the decisions log, built in two commits:
 - **Library `disability-access-charts` 0.3.0** (prepared, **not published**, no tag): `choropleth(scheme="ylgnbu")` is the new default (light: ColorBrewer YlGnBu 5 `#ffffcc #a1dab4 #41b6c4 #2c7fb8 #253494`; dark, drawn for the library: `#4a4512 #2b7340 #1b8f96 #77bdf2 #d4ebff`); `scheme="green"` is the 0.2 look. Cased boundaries (edge over a wider halo) with their own 3:1 rule; map patterns by ink weight (plain, dots, lines, crosshatch, solid) with an ink per class; a colour-vision check (Machado 2009 simulation, CIEDE2000: error under 5, warning under 10; default minimum 10.3 light, 11.6 dark); legend-filter metadata checked against the data; schema 1.1. Details in `packages/disability-access-charts/docs/maps.md`.
 - **Site:** the map draws the casing and per-class ink; the legend is a vertical list of `aria-pressed` toggle buttons with 40 × 28 px patterned swatches (one class at a time; a second press or Esc shows all) and one polite live region ("Showing 6 states in 4% to under 6%: Adamawa, …" / "Showing all 37 states."). The legend adds five Tab stops before the map.
-- **Next:** `reviewer`, then the author's look (screenshots in the session scratchpad) and a keyboard + NVDA pass on the legend buttons; then a PR. Publishing 0.3.0 to PyPI (tag `charts-v0.3.0`) needs the author's go-ahead.
+- **Review (2026-11-01):** `reviewer` said ship with fixes; all applied (cased ring, casing widths in the document, docs).
+- **Next:** the author's look (screenshots in the session scratchpad); for the P6 gate, by hand: a keyboard + NVDA pass on the legend buttons, and a **Windows forced-colours (High Contrast) check of the map and legend**; then a PR. Publishing 0.3.0 to PyPI (tag `charts-v0.3.0`) needs the author's go-ahead.
 
 ### P5: pick up here (2026-11-01)
 

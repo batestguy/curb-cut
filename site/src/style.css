@@ -567,23 +567,23 @@ table:focus-visible {
 
 .choropleth .map-halos path {
   stroke: var(--map-halo);
-  stroke-width: 3;
+  stroke-width: var(--map-halo-w, 3px);
 }
 
 .choropleth .map-edges path {
   stroke: var(--map-edge);
-  stroke-width: 1;
+  stroke-width: var(--map-edge-w, 1px);
 }
 
 /* The chosen and the hovered state: a thick edge over a wider halo, over everything. */
 .choropleth .map-outline .outline-halo {
   stroke: var(--map-halo);
-  stroke-width: 6;
+  stroke-width: var(--map-outline-halo-w, 6px);
 }
 
 .choropleth .map-outline .outline-edge {
   stroke: var(--map-edge);
-  stroke-width: 3;
+  stroke-width: var(--map-outline-edge-w, 3px);
 }
 
 /* The legend filter: the shown class keeps its full fill and pattern and gets a heavier
@@ -599,11 +599,11 @@ table:focus-visible {
 }
 
 .choropleth .map-halos path.active {
-  stroke-width: 5;
+  stroke-width: var(--map-active-halo-w, 5px);
 }
 
 .choropleth .map-edges path.active {
-  stroke-width: 2;
+  stroke-width: var(--map-active-edge-w, 2px);
 }
 
 /* Pattern tiles (inside <pattern> elements): ink only, no boundary stroke. Each class's ink
@@ -614,12 +614,23 @@ table:focus-visible {
   cursor: default;
 }
 
-.choropleth .map-ring {
+/* The ring round a small chosen state: cased like the outline (a halo circle under it)
+   when the document has a halo, so it shows on the darkest and the palest fills. */
+.choropleth .map-ring,
+.choropleth .map-ring-halo {
   pointer-events: none;
   fill: none;
-  stroke: var(--map-edge);
-  stroke-width: 3;
   vector-effect: non-scaling-stroke;
+}
+
+.choropleth .map-ring {
+  stroke: var(--map-edge);
+  stroke-width: var(--map-outline-edge-w, 3px);
+}
+
+.choropleth .map-ring-halo {
+  stroke: var(--map-halo);
+  stroke-width: var(--map-outline-halo-w, 6px);
 }
 
 .map-key-label {

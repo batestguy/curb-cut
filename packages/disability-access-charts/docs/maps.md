@@ -36,6 +36,8 @@ The YlGnBu fills take larger lightness steps than the greens (CIELAB L\* 99, 82,
 
 No single boundary colour is 3:1 against both `#ffffcc` and `#253494` (near-black is 1.66:1 on the dark blue, white 1.03:1 on the pale yellow). So a theme can carry a `halo`, and the page draws every boundary twice, **after all the fills**: a wide stroke in the halo colour (3 px on Curb Cut's page) under a narrow stroke in the edge colour (1 px). At any border, whatever the two fills, the edge or the halo stands out from each side. The legend swatches are outlined in the edge colour, which is 3:1 against the background.
 
+The stroke widths are in the document as `map.casing`, in screen pixels: `halo` 3 and `edge` 1 for every boundary, `active_halo` 5 and `active_edge` 2 for the class a legend filter shows, `outline_halo` 6 and `outline_edge` 3 for a chosen region's outline and ring. The `casing-widths` check asks that each halo is wider than its edge.
+
 For a theme with a halo the audit (`wcag-1.4.11`, one check per item and theme) asks that:
 
 - the edge is at least 3:1 against the background, and against the halo;
@@ -83,7 +85,9 @@ With `legend_filter=True` (the default) the document carries what a page needs f
 
 ## Getting the 0.2 look
 
-`choropleth(..., scheme="green")` gives the 0.2 greens, one boundary colour, the 0.2 pattern order (dots, rings, checks, lines, crosshatch) and one ink per theme in `patterns.ink`, as in 0.2. Its audit is stricter than in 0.2: `colour-vision-target` warns (7.5 and 8.2), so `check --strict` fails on it while plain `check` passes. Add `legend_filter=False` to leave out the legend metadata too. Otherwise the document differs from 0.2's only in the version, `meta.schema` ("1.1"), `meta.scheme` and `patterns.sequence`.
+`choropleth(..., scheme="green")` gives the 0.2 greens, one boundary colour, the 0.2 pattern order (dots, rings, checks, lines, crosshatch) and one ink per theme in `patterns.ink`, as in 0.2. Its audit is stricter than in 0.2: `colour-vision-target` warns (7.5 and 8.2), so `check --strict` fails on it while plain `check` passes. Add `legend_filter=False` to leave out the legend metadata too. Otherwise the document differs from 0.2's only in the version, `meta.schema` ("1.1"), `meta.scheme`, `patterns.sequence` and `keyboard.legend_filter: false`.
+
+Custom themes: `choropleth(..., themes=...)` without `scheme` gets the 0.3 pattern style (ink-weight order, an ink per class) and every 0.3 check, so fills that passed in 0.2 can now fail `colour-vision`. Pass `scheme="green"` with them to keep the 0.2 pattern order and one ink per theme.
 
 ## Alt-text
 
@@ -91,6 +95,6 @@ The alt-text has three parts: an introduction ("Map: title. 37 states, each with
 
 ## What the page must do
 
-The document cannot check the page. Curb Cut's page draws the map as one `role="img"` named by the alt-text, with the SVG hidden from assistive technology; the regions are not separate Tab stops; the tooltip closes with Esc, can be hovered, and stays until the pointer leaves (SC 1.4.13); and the table follows the map. With patterns, the page draws one SVG `<pattern>` per class (the class fill behind, the tile in the class's ink in front, scaled by `patterns.scale`; nothing in front for plain and solid), fills each region with its class's pattern, and draws the same pattern in each legend swatch. With a halo it draws every fill, then every halo, then every edge. On a narrow screen it raises the scale so that no tile is drawn under 8 pixels (at 320 px the map is about 288 px wide, and the document's scale alone would give tiles of about 5.5 px); the colours follow the light or dark scheme.
+The document cannot check the page. Curb Cut's page draws the map as one `role="img"` named by the alt-text, with the SVG hidden from assistive technology; the regions are not separate Tab stops; the tooltip closes with Esc, can be hovered, and stays until the pointer leaves (SC 1.4.13); and the table follows the map. With patterns, the page draws one SVG `<pattern>` per class (the class fill behind, the tile in the class's ink in front, scaled by `patterns.scale`; nothing in front for plain and solid), fills each region with its class's pattern, and draws the same pattern in each legend swatch. With a halo it draws every fill, then every halo, then every edge, at the widths in `map.casing`, and the ring round a small chosen region is cased the same way. On a narrow screen it raises the scale so that no tile is drawn under 8 pixels (at 320 px the map is about 288 px wide, and the document's scale alone would give tiles of about 5.5 px); the colours follow the light or dark scheme.
 
 With a legend block, Curb Cut's legend is a vertical list of `<button type="button" aria-pressed>` items under a visible label, lowest class first, each with a 40 × 28 px patterned swatch (hidden from assistive technology) and the text "Under 2%: 12 states". Pressing one shows only that class: the other states are dimmed (their boundaries stay, faint) and the shown states keep their full fill and pattern with heavier boundaries, so the difference is not one of hue alone. Pressing it again, or Esc in the legend or on the map, shows all. One polite live region announces `announce` or `announce_all`. Its Playwright and axe tests check all of this in both schemes. The tiles, their sources and the ink rule are in [patterns.md](patterns.md).

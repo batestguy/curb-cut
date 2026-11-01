@@ -147,6 +147,20 @@ class MapTheme:
 
 DEFAULT_SCHEME = "ylgnbu"
 
+CASING: dict[str, float] = {
+    "halo": 3,
+    "edge": 1,
+    "active_halo": 5,
+    "active_edge": 2,
+    "outline_halo": 6,
+    "outline_edge": 3,
+}
+"""Stroke widths in screen pixels (non-scaling) for cased boundaries (new in 0.3), stored as
+``map.casing`` when a theme has a halo: every boundary (``halo`` under ``edge``), the
+boundaries of the class a legend filter shows (``active_*``), and the thick outline and ring
+of a chosen region (``outline_*``). Each halo must be wider than its edge, so the halo shows
+on both sides of the edge; the audit's ``casing-widths`` check asks for that."""
+
 # "ylgnbu" (the default since 0.3). Light: ColorBrewer's five-class YlGnBu (Brewer,
 # colorbrewer2.org), near-black edges on white halos. Dark: drawn for this library to match:
 # yellow (olive) to green to teal to blue to a pale blue, brighter for higher values, the
@@ -479,6 +493,7 @@ def choropleth(
             "paths": {code: paths[code] for code in codes},
             "rings": {c: list(r) for c, r in (rings or {}).items() if c in set(codes)},
             "attribution": attribution,
+            **({"casing": dict(CASING)} if any(t.halo for t in themes.values()) else {}),
         },
         "regions": [
             {"code": code, "name": name, "class": k}
@@ -713,7 +728,31 @@ def _theme_checks(themes: Mapping[str, MapTheme]) -> list[dict[str, Any]]:
     return checks
 
 
-def keyboard_block(doc: Mapping[str, Any]) -> Mapping[str, Any]:
+def _casing_widths_check(doc: Mapping[str, Any]) -> dict[str, Any]:
+    """With cased boundaries, the document gives the stroke widths, each halo wider than its
+    edge so it shows on both sides."""
+    casing = (doc.get("map") or {}).get("casing")
+    problems: list[str] = []
+    if not isinstance(casing, Mapping):
+        problems.append("the map has no casing widths")
+    else:
+        for prefix in ("", "active_", "outline_"):
+            halo, edge = casing.get(f"{prefix}halo"), casing.get(f"{prefix}edge")
+            if not isinstance(halo, int | float) or not isinstance(edge, int | float):
+                problems.append(f"no {prefix}halo or {prefix}edge width")
+            elif not 0 < edge < halo:
+                problems.append(f"{prefix}halo ({halo}) is not wider than {prefix}edge ({edge})")
+    return _check(
+        "casing-widths",
+        "1.4.11",
+        "error",
+        "Cased boundaries have their stroke widths, each halo wider than its edge",
+        not problems,
+        problems=problems,
+    )
+
+
+def _keyboard_block(doc: Mapping[str, Any]) -> Mapping[str, Any]:
     return doc.get("keyboard") or {}
 
 
@@ -828,6 +867,9 @@ def map_checks(doc: Mapping[str, Any], alt_text: str | None = None) -> list[dict
         )
     )
 
+    if any(t.halo for t in themes.values()):
+        checks.append(_casing_widths_check(doc))
+
     block = doc.get("patterns")
     if block is not None:
         checks += pattern_checks(
@@ -840,7 +882,7 @@ def map_checks(doc: Mapping[str, Any], alt_text: str | None = None) -> list[dict
             class_ink=block.get("class_ink"),
         )
 
-    if keyboard_block(doc).get("legend_filter"):
+    if _keyboard_block(doc).get("legend_filter"):
         checks.append(_legend_check(doc, data, expected, labels))
 
     # Colour is not the only cue: legend ranges, the table's class column, the tooltip.
