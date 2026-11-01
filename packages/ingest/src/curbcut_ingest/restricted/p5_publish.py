@@ -314,7 +314,11 @@ def mpi_estimates(results: Mapping[str, Any]) -> pd.DataFrame:
                 **base,
                 "group": "sensemakr",
                 "estimate_id": f"sensemakr_{times}x",
-                "label": f"A hidden factor {times} times as strong as the head's education",
+                "label": (
+                    "A hidden factor as strong as the head's education"
+                    if times == "1"
+                    else f"A hidden factor {times} times as strong as the head's education"
+                ),
                 "learners": None,
                 "estimate": bound["adjusted_estimate"],
                 "se": None,
