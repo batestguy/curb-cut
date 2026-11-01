@@ -668,16 +668,20 @@ def registration_section(nums: Any) -> str:
     reg = "summary.mpi"
     osf = nums.raw(f"{reg}.osf_url.value_text")
     commit = nums.raw(f"{reg}.freeze_commit.value_text")
+    osf_label = esc("OSF registration " + osf.rstrip("/").rsplit("/", 1)[-1])
+    commit_label = esc(f"frozen commit {commit[:7]} on GitHub")
     return f"""<section aria-labelledby="registration-heading">
 <h2 id="registration-heading">Registration, data and citations</h2>
 <div class="p5-registration">
 <h3 id="osf-heading">Registered before the analysis</h3>
 <dl class="facts">
-<dt>Registration</dt><dd><a href="{esc(osf)}">{nums.text(f"{reg}.osf_url.value_text")}</a>
+<dt>Registration</dt><dd><a href="{esc(osf)}"
+aria-label="{osf_label}">{nums.text(f"{reg}.osf_url.value_text")}</a>
 (Open Science Framework, {text.OSF_TEMPLATE} template)</dd>
 <dt>Registered</dt><dd>{nums.text(f"{reg}.registered_utc.value_text")}</dd>
 <dt>Plan and code frozen</dt><dd>tag {nums.text(f"{reg}.freeze_tag.value_text")}, commit
-<a href="{REPO}/commit/{esc(commit)}"><code>{nums.text(f"{reg}.freeze_commit.value_text")}</code>
+<a href="{REPO}/commit/{esc(commit)}" aria-label="{commit_label}">
+<code>{nums.text(f"{reg}.freeze_commit.value_text")}</code>
 </a></dd>
 <dt>Deviations from the plan</dt><dd>{nums.text(f"{reg}.deviations.value_text")} so far
 (<a href="{REPO}/blob/main/docs/preregistration-deviations.md">deviations log</a>)</dd>

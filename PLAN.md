@@ -309,6 +309,7 @@ Steps:
 - **API:** FastAPI on Render, reading the public Parquet.
   - Endpoints: `/states`, `/prevalence`, `/compare`, `/poverty`, `/status`.
   - Rate limiting; its docs page notes the cold start.
+- **Map redesign first** (author, 2026-11-01, STATUS decisions log): option C, a yellow→green→blue colour-blind-safe scale with patterns ordered by ink weight and a large legend whose items toggle one class on the map (keyboard and screen reader, `aria-pressed`, a spoken "Showing N states: …"); light boundaries on dark classes; dark-mode palette; `disability-access-charts` 0.3 with audit rules for it.
 - **Site:**
   - Pages: explorer, sensitivity slider, poverty, methodology, data dictionary.
   - CSV/JSON downloads everywhere; Lighthouse CI.
