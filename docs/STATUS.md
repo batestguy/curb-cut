@@ -13,7 +13,7 @@ The one page to read first. It says where things stand and what happens next. Th
 | P2 disability-access-charts 0.1 | ✅ done 2026-10-22: 0.1.0 published (tag `charts-v0.1.0`, pushed by the author); a clean install from PyPI ran all 3 examples and `check` | Clean install reproduces examples; LLM mocked in tests |
 | P3 Restricted zone + warehouse | ✅ done 2026-10-24 (author): PR #1 merged, CI green; all aggregates incl. MPI 2021 public | `dbt build` green on fixtures; disclosure check passes |
 | P4 Prevalence | ✅ P4a passed 2026-10-29; P4b passed 2026-10-30 (author): 37 state pages live, 0.2.0 on PyPI | P4a: map and comparison live · P4b: state pages live, 0.2 on PyPI |
-| P5 Poverty analysis | 🟡 in progress: steps 15–16 done; step 17 (pre-registration) **frozen 2026-10-31 at tag `p5-freeze`** (commit 22b8ace; section 11 filled in 55f9fe4) and **waiting on the author's OSF registration**. Analysis code written and reviewed twice, synthetic data only; the 5.6 exposure check passed (S2 11.07% vs NBS 11.0%). No outcome by disability has been computed. Details: Next actions → "P5: pick up here" | Pre-registration committed first; brief and results page live |
+| P5 Poverty analysis | 🟡 in progress: steps 15–16 done; step 17 (pre-registration) **frozen 2026-10-31 at tag `p5-freeze`** (commit 22b8ace; section 11 filled in 55f9fe4) and **registered on OSF 2026-11-01: https://osf.io/kes3p/** (approval pending at recording). Next: the real run. Analysis code written and reviewed twice, synthetic data only; the 5.6 exposure check passed (S2 11.07% vs NBS 11.0%). No outcome by disability has been computed. Details: Next actions → "P5: pick up here" | Pre-registration committed first; brief and results page live |
 | P6 API + site polish | ⚪ not started | Accessibility 100 in CI; walkthrough video recorded; author's NVDA check; regular screen-reader user's feedback sought, not blocking (2026-10-24); acted on |
 | P7 Launch | ⚪ not started | — |
 
@@ -87,7 +87,9 @@ The one page to read first. It says where things stand and what happens next. Th
 
 ## Next actions (pick up here)
 
-### P5: pick up here (2026-10-31)
+### P5: pick up here (2026-11-01)
+
+**Update 2026-11-01:** steps 1 and 2 below are done. The author registered on OSF: **https://osf.io/kes3p/**, registered 2026-11-01 05:49:21 UTC. OSF's admin approval was pending when recorded (approve via OSF's email, or it auto-approves after 48 h); check that the page is public before citing it. The frozen file is attached under "Codebook documentation" (the template has no slot for the plan); the integrity statement is at the end of "Prior knowledge"; access date 2026-10-16. Section 11 now holds the URL, so the `--real` guard no longer refuses. **Next: step 3, the real run** (not started).
 
 **State:** pre-registration revision 3 approved by the author and frozen (tag `p5-freeze`, commit `22b8acee`); section 11 records the approval, the tag, the commit and the SHA-256 of the pre-registration, `uv.lock` and `renv.lock` as frozen. Branch `p5-poverty` and the tag are pushed. **Nothing has linked poverty to disability or to any confounder.** The real-data CLIs (`p5_mpi --real`, `p5_ghs --real`) refuse until section 11 holds an OSF URL.
 
