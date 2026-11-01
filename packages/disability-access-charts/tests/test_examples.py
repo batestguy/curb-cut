@@ -40,14 +40,17 @@ def test_choropleth_patterns(tmp_path: Path) -> None:
     doc = json.loads((tmp_path / "choropleth_patterns.json").read_text(encoding="utf-8"))
     assert doc["audit"]["passed"] is True
     assert [c["pattern"] for c in doc["classes"]] == [
+        "plain",
         "dots",
-        "rings",
-        "checks",
         "lines",
         "crosshatch",
+        "solid",
     ]
     page = (tmp_path / "choropleth_patterns.html").read_text(encoding="utf-8")
     assert page.count("<pattern ") == 10  # one per class for the map, one for the legend
+    # Cased boundaries: a white halo under the dark edge.
+    halo = doc["themes"]["light"]["halo"]
+    assert f'stroke="{halo}" stroke-width="3"' in page
     assert 'role="img"' in page and 'aria-hidden="true"' in page
     assert "ILLUSTRATIVE" in doc["title"]
 

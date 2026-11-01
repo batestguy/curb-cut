@@ -8,7 +8,15 @@ from typing import Any
 import pytest
 from disability_access_charts import audit, contrast_ratio
 from disability_access_charts.cli import main
-from disability_access_charts.maps import MAP_THEMES, MapTheme, choropleth, class_labels, classify
+from disability_access_charts.maps import (
+    MAP_SCHEMES,
+    MAP_THEMES,
+    MapTheme,
+    choropleth,
+    class_labels,
+    classify,
+)
+from disability_access_charts.vision import CVD_MIN_DELTA_E, CVD_TARGET_DELTA_E, delta_e
 
 NAMES = ["Kano", "Lagos", "Oyo", "Taraba", "Abia"]
 CODES = ["NG-KN", "NG-LA", "NG-OY", "NG-TA", "NG-AB"]
@@ -95,9 +103,19 @@ def test_table_is_sorted_by_name_with_class_and_extra_columns() -> None:
 
 
 def test_default_themes_meet_the_contrast_rules() -> None:
+    assert MAP_THEMES is MAP_SCHEMES["ylgnbu"]  # the default since 0.3
+    assert MAP_THEMES["light"].classes == ("#ffffcc", "#a1dab4", "#41b6c4", "#2c7fb8", "#253494")
     for t in MAP_THEMES.values():
+        assert t.halo is not None
         assert contrast_ratio(t.text, t.background) >= 4.5
         assert contrast_ratio(t.edge, t.background) >= 3
+        assert contrast_ratio(t.edge, t.halo) >= 3
+        # Cased: for the background and every fill, the edge or the halo is 3:1.
+        for colour in (t.background, *t.classes):
+            assert max(contrast_ratio(t.edge, colour), contrast_ratio(t.halo, colour)) >= 3
+    # The 0.2 greens keep one boundary colour, 3:1 against every fill.
+    for t in MAP_SCHEMES["green"].values():
+        assert t.halo is None
         assert all(contrast_ratio(t.edge, fill) >= 3 for fill in t.classes)
     doc = make()
     cue = next(c for c in doc["audit"]["checks"] if c["id"] == "not-colour-alone")
@@ -151,6 +169,154 @@ def test_audit_catches_weak_colours() -> None:
         "#ffffff", "#1a1a1a", "#1a1a1a", tuple(reversed(MAP_THEMES["light"].classes))
     )
     assert "classes-ordered" in failed(make(themes={"light": unordered}))
+
+
+def _checks(doc: dict[str, Any], check_id: str, theme: str = "light") -> list[dict[str, Any]]:
+    return [c for c in audit(doc)["checks"] if c["id"] == check_id and c.get("theme") == theme]
+
+
+def test_cased_boundaries_are_audited_against_every_fill() -> None:
+    doc = make()
+    for theme in ("light", "dark"):
+        cased = [
+            c
+            for c in _checks(doc, "wcag-1.4.11", theme)
+            if c["description"].startswith("State boundaries (edge or halo)")
+        ]
+        assert len(cased) == 6  # the background and the five fills
+        assert all(c["passed"] and "edge_ratio" in c and "halo_ratio" in c for c in cased)
+    # In the light theme the white halo carries the darkest fill, the edge the others.
+    darkest = next(c for c in _checks(doc, "wcag-1.4.11") if c["background"] == "#253494")
+    assert darkest["edge_ratio"] < 3 <= darkest["halo_ratio"]
+    assert doc["themes"]["light"]["halo"] == "#ffffff"
+
+
+def test_a_single_edge_fails_on_ylgnbu() -> None:
+    # No one boundary colour is 3:1 against both #ffffcc and #253494: without the halo the
+    # near-black edge is 1.54:1 on the darkest fill.
+    light = MAP_THEMES["light"]
+    single = MapTheme(light.background, light.text, light.edge, light.classes)
+    doc = make(themes={"light": single})
+    low = [c for c in _checks(doc, "wcag-1.4.11") if not c["passed"]]
+    assert [c["background"] for c in low] == ["#253494"]
+    assert doc["audit"]["passed"] is False
+    # A halo that does not stand out from the edge fails too, and so does one that leaves a
+    # fill with neither the edge nor the halo at 3:1.
+    weak = MapTheme(light.background, light.text, light.edge, light.classes, halo="#333333")
+    failed_checks = [
+        c for c in _checks(make(themes={"light": weak}), "wcag-1.4.11") if not c["passed"]
+    ]
+    assert any(c["description"] == "Boundary edge against its halo" for c in failed_checks)
+    assert any(c["background"] == "#253494" for c in failed_checks)
+
+
+def test_fills_in_the_wrong_order_fail() -> None:
+    for name in ("light", "dark"):
+        t = MAP_THEMES[name]
+        wrong = MapTheme(t.background, t.text, t.edge, tuple(reversed(t.classes)), halo=t.halo)
+        assert "classes-ordered" in failed(make(themes={"light": MAP_THEMES["light"], name: wrong}))
+    # Dark mode: brighter for higher values.
+    assert "classes-ordered" not in failed(make())
+
+
+def test_colour_vision_check_reports_the_minimum_difference() -> None:
+    doc = make()
+    for theme, low, vision in (("light", 10.3, "protanopia"), ("dark", 11.6, "deuteranopia")):
+        (check,) = _checks(doc, "colour-vision", theme)
+        assert check["passed"] and check["min_delta_e"] == low
+        assert check["worst_vision"] == vision
+        assert set(check["min_delta_e_by_vision"]) == {
+            "normal",
+            "deuteranopia",
+            "protanopia",
+            "tritanopia",
+        }
+        assert check["minimum"] == CVD_MIN_DELTA_E
+        (target,) = _checks(doc, "colour-vision-target", theme)
+        assert target["passed"] and target["minimum"] == CVD_TARGET_DELTA_E
+    # The 0.2 greens pass the floor but miss the target: a warning, not an error.
+    green = make(scheme="green")
+    assert green["audit"]["passed"] is True
+    targets = [c for c in green["audit"]["checks"] if c["id"] == "colour-vision-target"]
+    assert [c["min_delta_e"] for c in targets] == [7.5, 8.2]
+    assert not any(c["passed"] for c in targets)
+
+
+def test_fills_that_merge_for_colour_blind_readers_fail() -> None:
+    # Classes 2 and 3 differ clearly in normal vision but almost vanish under deuteranopia.
+    a, b = "#78a578", "#c37878"
+    assert delta_e(a, b) > 40 and delta_e(a, b, "deuteranopia") < CVD_MIN_DELTA_E
+    light = MAP_THEMES["light"]
+    fills = (light.classes[0], a, b, light.classes[3], light.classes[4])
+    theme = MapTheme(light.background, light.text, light.edge, fills, halo=light.halo)
+    doc = make(themes={"light": theme})
+    (check,) = _checks(doc, "colour-vision", "light")
+    assert check["passed"] is False and check["worst_vision"] == "deuteranopia"
+    assert "classes-ordered" not in failed(doc)  # only the colour-vision rule catches it
+    assert doc["audit"]["passed"] is False
+
+
+def test_green_scheme_is_the_02_look() -> None:
+    doc = make(scheme="green")
+    assert doc["meta"]["scheme"] == "green"
+    assert doc["themes"] == {
+        "light": {
+            "background": "#ffffff",
+            "text": "#1a1a1a",
+            "edge": "#1a1a1a",
+            "classes": ("#e4f3e9", "#b5dec3", "#7dc39a", "#3fa16f", "#008751"),
+        },
+        "dark": {
+            "background": "#121212",
+            "text": "#f0f0f0",
+            "edge": "#ffffff",
+            "classes": ("#1b2f23", "#1e4b33", "#226943", "#2a8753", "#34a061"),
+        },
+    }
+    assert make()["meta"]["scheme"] == "ylgnbu"
+    assert make(themes=MAP_SCHEMES["green"])["meta"]["scheme"] == "custom"
+    assert make()["meta"]["schema"] == "1.1"
+    with pytest.raises(ValueError, match="unknown map scheme"):
+        make(scheme="viridis")
+
+
+def test_legend_filter_metadata() -> None:
+    doc = make()
+    assert doc["keyboard"]["legend_filter"] is True
+    assert [c["regions"] for c in doc["classes"]] == [
+        ["Lagos"],
+        ["Abia", "Oyo"],
+        [],
+        ["Kano"],
+        ["Taraba"],
+    ]
+    assert [c["announce"] for c in doc["classes"]] == [
+        "Showing 1 state in under 2%: Lagos.",
+        "Showing 2 states in 2% to under 3%: Abia, Oyo.",
+        "No states are in 3% to under 4%.",
+        "Showing 1 state in 4% to under 6%: Kano.",
+        "Showing 1 state in 6% and over: Taraba.",
+    ]
+    assert doc["legend"]["announce_all"] == "Showing all 5 states."
+    assert doc["legend"]["templates"]["filter_class"] == "Showing {n} {noun} in {range}: {names}."
+    check = next(c for c in doc["audit"]["checks"] if c["id"] == "legend-filter-matches-data")
+    assert check["passed"] is True
+
+    for tamper in (
+        lambda d: d["classes"][1]["regions"].append("Kano"),
+        lambda d: d["classes"][3].__setitem__(
+            "announce", "Showing 1 state in 4% to under 6%: Oyo."
+        ),
+        lambda d: d["legend"].__setitem__("announce_all", "Showing all 6 states."),
+    ):
+        bad = copy.deepcopy(doc)
+        tamper(bad)
+        assert "legend-filter-matches-data" in failed(bad)
+
+    off = make(legend_filter=False)
+    assert "legend" not in off and off["keyboard"]["legend_filter"] is False
+    assert all("announce" not in c for c in off["classes"])
+    assert not any(c["id"] == "legend-filter-matches-data" for c in off["audit"]["checks"])
 
 
 def test_empty_class_is_a_warning() -> None:

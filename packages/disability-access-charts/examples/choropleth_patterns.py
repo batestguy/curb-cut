@@ -11,9 +11,13 @@ The script builds the map document, audits it, and writes:
   themes, alt-text, table, audit);
 * ``choropleth_patterns.html``: a page that draws the map the way the document asks: one
   ``role="img"`` named by the alt-text with the SVG hidden from assistive technology, an
-  SVG ``<pattern>`` per class over its fill, a legend whose swatches show the same patterns
-  with each range in words, and the data table after the map. Light theme only, to keep
-  the page short; Curb Cut's site also switches to the dark theme.
+  SVG ``<pattern>`` per class over its fill (0.3: ordered by ink weight, plain to solid,
+  each class in its own ink), cased boundaries (a white halo under a dark edge), a legend
+  whose swatches show the same patterns with each range in words, and the data table after
+  the map. Light theme only and no legend filter, to keep the page short; Curb Cut's site
+  also switches to the dark theme and makes the legend items toggle buttons.
+
+Pass ``scheme="green"`` to ``choropleth()`` for the 0.2 look.
 """
 
 from __future__ import annotations
@@ -41,27 +45,43 @@ UPPER = [1.7, 2.4, 3.0, 3.6, 3.8, 4.4, 5.1, 6.5, 7.6, 9.3, 2.1, 5.8]
 def page(doc: dict) -> str:
     """A minimal page for the light theme (see the module docstring)."""
     theme = doc["themes"]["light"]
-    ink = doc["patterns"]["ink"]["light"]
-    scale = doc["patterns"]["scale"]
+    block = doc["patterns"]
+    # 0.3: an ink per class (None where the tile draws nothing); 0.2 documents (scheme
+    # "green") have one ink per theme instead.
+    inks = block.get("class_ink", {}).get("light") or [block["ink"]["light"]] * len(doc["classes"])
+    scale = block["scale"]
     defs = "".join(
         svg_pattern(
             get(c["pattern"]),
             pattern_id=f"p{k}",
-            ink=ink,
+            ink=inks[k],
             fill=theme["classes"][k],
             scale=scale,
         )
-        + svg_pattern(get(c["pattern"]), pattern_id=f"l{k}", ink=ink, fill=theme["classes"][k])
+        + svg_pattern(get(c["pattern"]), pattern_id=f"l{k}", ink=inks[k], fill=theme["classes"][k])
         for k, c in enumerate(doc["classes"])
     )
-    regions = "".join(
-        f'<path d="{doc["map"]["paths"][r["code"]]}" fill="url(#p{r["class"]})" '
-        f'stroke="{theme["edge"]}"/>'
+    fills = "".join(
+        f'<path d="{doc["map"]["paths"][r["code"]]}" fill="url(#p{r["class"]})"/>'
         for r in doc["regions"]
     )
+    # Cased boundaries: a wide halo under a narrow edge, drawn after every fill so each
+    # shared border gets both.
+    outline = "".join(f'<path d="{doc["map"]["paths"][r["code"]]}"/>' for r in doc["regions"])
+    halo = theme.get("halo")
+    casing = (
+        f'<g fill="none" stroke="{halo}" stroke-width="3" stroke-linejoin="round">{outline}</g>'
+        if halo
+        else ""
+    )
+    edge = (
+        f'<g fill="none" stroke="{theme["edge"]}" stroke-width="1" stroke-linejoin="round">'
+        f"{outline}</g>"
+    )
     legend = "".join(
-        f'<li><svg width="24" height="16" aria-hidden="true" focusable="false">'
-        f'<rect width="24" height="16" fill="url(#l{k})" stroke="{theme["edge"]}"/></svg> '
+        f'<li><svg width="40" height="28" aria-hidden="true" focusable="false">'
+        f'<rect x="0.5" y="0.5" width="39" height="27" fill="url(#l{k})" '
+        f'stroke="{theme["edge"]}"/></svg> '
         f"{html.escape(c['label'])}: {c['count']} areas</li>"
         for k, c in enumerate(doc["classes"])
     )
@@ -73,7 +93,7 @@ def page(doc: dict) -> str:
 <ul style="list-style:none;padding:0">{legend}</ul>
 <div role="img" aria-label="{html.escape(doc["alt_text"], quote=True)}" style="max-width:40rem">
 <svg viewBox="{doc["map"]["viewBox"]}" aria-hidden="true" focusable="false">
-<defs>{defs}</defs>{regions}</svg>
+<defs>{defs}</defs>{fills}{casing}{edge}</svg>
 </div>
 {to_html(doc)}</body>
 </html>

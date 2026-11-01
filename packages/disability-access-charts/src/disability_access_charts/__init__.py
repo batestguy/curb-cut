@@ -9,6 +9,11 @@ New in 0.2: statistical findings with false discovery rate control
 (:func:`statistical_findings`, ``findings=True`` on the chart builders), adire-inspired
 pattern fills (:mod:`~disability_access_charts.patterns`, :func:`grouped_bar`), and stable
 map support (:func:`choropleth`).
+
+New in 0.3: map colour schemes (:data:`MAP_SCHEMES`; the default is now ``"ylgnbu"``,
+``scheme="green"`` gives the 0.2 look), cased boundaries, map patterns ordered by ink weight
+with an ink per class (:data:`MAP_PATTERNS`), a colour-vision check
+(:mod:`~disability_access_charts.vision`) and legend-filter metadata.
 """
 
 from disability_access_charts._version import __version__
@@ -27,15 +32,17 @@ from disability_access_charts.describe import (
     describe,
 )
 from disability_access_charts.findings import Reference, statistical_findings
-from disability_access_charts.maps import MAP_THEMES, MapTheme, choropleth
+from disability_access_charts.maps import MAP_SCHEMES, MAP_THEMES, MapTheme, choropleth
 from disability_access_charts.palettes import DEFAULT_THEMES, OKABE_ITO, SYMBOLS, Theme
-from disability_access_charts.patterns import PATTERNS, Pattern
+from disability_access_charts.patterns import MAP_PATTERNS, PATTERNS, Pattern
 from disability_access_charts.plots import bar, dot, figure, grouped_bar
 from disability_access_charts.table import to_csv, to_html
 from disability_access_charts.theme import theme
 
 __all__ = [
     "DEFAULT_THEMES",
+    "MAP_PATTERNS",
+    "MAP_SCHEMES",
     "MAP_THEMES",
     "OKABE_ITO",
     "PATTERNS",
