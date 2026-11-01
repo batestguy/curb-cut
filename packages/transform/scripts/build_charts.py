@@ -12,7 +12,12 @@ a data table and an accessibility audit. The build fails if any audit fails.
 * ``prevalence_by_state``: the same 37 estimates with their 95% intervals and precision
   flags, as a dot plot, with the library's statistical findings (each state against the
   next in the ranking and against the national estimate, false discovery rate 5%);
-* ``national_by_type`` and ``national_by_state``: JONAPWD's assumed figures, as bars.
+* ``national_by_type`` and ``national_by_state``: JONAPWD's assumed figures, as bars;
+* ``poverty_headline`` and ``poverty_dimensions`` (P5, from ``poverty.json``): the five
+  headline estimates and the four MPI dimensions (S4), each with its 95% interval, as dot
+  plots in percentage points (or score points out of 100). ``findings=False``: comparisons
+  between these estimates were not pre-registered. The library has no percentage-point unit,
+  so ``unit="number"`` is used with the unit in the value label.
 """
 
 from __future__ import annotations
@@ -25,7 +30,7 @@ from pathlib import Path
 from types import ModuleType
 
 import duckdb
-from disability_access_charts import Reference, Series, bar, choropleth, dot
+from disability_access_charts import Reference, Series, audit, bar, choropleth, dot
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DATA = ROOT / "site" / "public" / "data"
@@ -188,6 +193,122 @@ def prevalence_map(data_dir: Path, build_map: ModuleType) -> dict:
     )
 
 
+POVERTY_SOURCE = "NBS MPI 2021, Curb Cut estimates (pre-registered, OSF kes3p)"
+# (estimate_id, chart label). Labels avoid "estimate", which the claim checker reads as a
+# hedge word.
+POVERTY_HEADLINE = (
+    ("primary", "All households (primary)"),
+    ("overlap_population", "Better-supported comparison (overlap)"),
+    ("survey_lpm", "Survey-weighted linear model"),
+    ("s2_broad", "NBS's broad definition (S2)"),
+    ("s3_head", "Household head has the difficulty (S3)"),
+)
+POVERTY_DIMENSIONS = (
+    ("s4_health", "Health"),
+    ("s4_education", "Education"),
+    ("s4_living_standards", "Living standards"),
+    ("s4_work_and_shocks", "Work and shocks"),
+)
+
+
+def _poverty_dot(
+    payload: dict,
+    rows: tuple[tuple[str, str], ...],
+    *,
+    title: str,
+    value_label: str,
+    chart_id: str,
+    unit_words: str,
+) -> dict:
+    """A dot plot of P5 estimates, x100 (percentage points or score points), with intervals.
+
+    Every listed estimate must be published: the page has no chart without them.
+    """
+    found = [(label, payload["estimates"][eid]) for eid, label in rows]
+    hidden = [label for label, e in found if e["suppressed"]]
+    if hidden:
+        raise SystemExit(f"{chart_id}: suppressed estimates {hidden}; no chart")
+    doc = dot(
+        [label for label, _ in found],
+        [
+            Series(
+                value_label,
+                tuple(100 * e["estimate"] for _, e in found),
+                tuple(100 * e["ci_low"] for _, e in found),
+                tuple(100 * e["ci_high"] for _, e in found),
+            )
+        ],
+        title=title,
+        value_label=value_label,
+        category_label="Comparison",
+        source=POVERTY_SOURCE,
+        unit="number",
+        decimals=1,
+        chart_id=chart_id,
+        findings=False,
+    )
+    return neutral_alt_text(doc, unit_words)
+
+
+def _fixed(value: float) -> str:
+    text = f"{value:.1f}"
+    return text.lstrip("-") if float(text) == 0 else text
+
+
+def neutral_alt_text(doc: dict, unit_words: str) -> dict:
+    """Replace describe()'s alt-text with a neutral one built from the document's own data.
+
+    describe() names the highest and lowest estimates and whether the survey can show a
+    difference from the next one. These estimates come from one sample (not independent
+    groups), and no comparison between them was pre-registered, so the poverty charts say
+    only what each estimate and interval is, in table order, every row. The audit is rerun on
+    the new text (alt-text-matches-data must still pass).
+    """
+    data = doc["data"]
+    series = data["series"][0]
+    items = "; ".join(
+        f"{name} {_fixed(v)} {unit_words} (95% confidence interval {_fixed(lo)} to {_fixed(hi)})"
+        for name, v, lo, hi in zip(
+            data["categories"], series["values"], series["lower"], series["upper"], strict=True
+        )
+    )
+    n = len(data["categories"])
+    doc["alt_text"] = (
+        f"Dot plot: {doc['title']}. {n} dots, in table order: {items}. "
+        f"Source: {doc['meta']['source']}."
+    )
+    doc["audit"] = audit(doc)
+    return doc
+
+
+def poverty_charts(data_dir: Path) -> dict[str, dict]:
+    payload = json.loads((data_dir / "poverty.json").read_text(encoding="utf-8"))
+    return {
+        "poverty_headline": _poverty_dot(
+            payload,
+            POVERTY_HEADLINE,
+            title=(
+                "How much more likely people in households with a severely disabled member "
+                "are to be multidimensionally poor, five ways, with 95% confidence intervals"
+            ),
+            value_label="Difference (percentage points)",
+            chart_id="poverty_headline",
+            unit_words="percentage points",
+        ),
+        "poverty_dimensions": _poverty_dot(
+            payload,
+            POVERTY_DIMENSIONS,
+            title=(
+                "Where the difference sits: each MPI dimension's part of the deprivation "
+                "score, with 95% confidence intervals"
+            ),
+            value_label="Difference (points out of 100)",
+            chart_id="poverty_dimensions",
+            unit_words="points",
+        ),
+    }
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build chart JSON documents for the site.")
     parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA)
@@ -201,6 +322,7 @@ def main() -> int:
         "prevalence_by_state": prevalence_by_state(args.data_dir),
         "national_by_type": national_by_type(args.data_dir),
         "national_by_state": national_by_state(args.data_dir),
+        **poverty_charts(args.data_dir),
     }
     for name, doc in docs.items():
         path = out_dir / f"{name}.json"

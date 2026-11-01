@@ -8,8 +8,10 @@ Description: R side of Curb Cut (survey estimates, small-area estimation, DiD
 License: MIT + file LICENSE
 Encoding: UTF-8
 Imports:
+    fixest,
     jsonlite,
     nanoparquet,
     sae,
+    sensemakr,
     spdep,
     survey

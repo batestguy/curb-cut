@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here. Entries follow [Conventional Commits](https://www.conventionalcommits.org/).
 
+## P5 — 2026-11-01 (gate checks passed; merge and NBS copy pending)
+
+### Added
+- feat(ingest): Nigeria's national MPI rebuilt at household level from its 15 indicators and validated against NBS's published H, A and MPI (D64).
+- docs: pre-registration (revision 3) frozen at tag `p5-freeze` before any poverty figure was split by disability; registered on OSF, https://osf.io/kes3p/ (2026-11-01); deviations log (none so far).
+- feat(ingest): P5 analysis (DoubleML interactive regression with survey weights, learner selection by a pre-declared rule, overlap, DoubleML omitted-variable bounds with benchmarks, E-value, survey-weighted linear model and sensemakr in R, placebo, random common cause and leave-one-zone-out refutations, robustness runs, secondaries with Holm) and an exploratory GHS-Panel W4→W5 comparison with a power run rule; run once on the real data (Table 7 stop rule passed).
+- feat(ingest): a disclosure-gate path for model estimates (both groups at least 30) and `p5_publish`; `data/public/aggregates/p5_*.csv` with manifest entries.
+- feat(transform): P5 marts with synthetic fixtures and tests; `poverty.json`; two charts via `disability-access-charts` with neutral, data-built alt text (`check --strict`).
+- feat(site): `poverty.html`, generated statically with every number from the data: the headline in the registered wording with the secondary overlap estimate, the two mandatory reasons, how it was checked, how strong a hidden factor would need to be, secondaries, the exploratory GHS comparison, worked examples on reading survey figures, and the registration record; site navigation on the main, methodology and poverty pages.
+- docs: a two-page policy brief (markdown and HTML committed; PDF printed at build).
+- test: Python tests for the publisher, gate and page builder; Playwright + axe (light, dark, 320 px), keyboard reach, every number against the data, and a wording guard against effect, impact and causal language.
+
+### Verified
+- Reviewed by `reviewer` (ship after fixes; all fixes applied). P5 gate checks run automatically at the author's request: a keyboard pass and a scripted NVDA transcript (Guidepup), details in `docs/STATUS.md`.
+
 ## P4b — 2026-10-30 (gate passed)
 
 ### Added

@@ -23,6 +23,14 @@ Every survey aggregate passes through :func:`publish` on its way out of the rest
 Files for a source that is *held* (MPI 2021 until NBS replies, ``docs/STATUS.md``) are
 written to a git-ignored sub-folder with their own manifest; the committed manifest only
 records that they are held.
+
+**Model estimates** (P5: one adjusted difference per row, not a survey cell) leave through
+:func:`publish_estimates`. The rule is on both arms of the comparison: an estimate whose
+exposed (or onset) group or whose comparison group has fewer than 30 unweighted units is
+suppressed (numbers and both counts set to null). Estimates are not parts of a published
+total, so there is no complementary suppression. Scalar results that go with them (checks,
+sensitivity values, counts) leave through :func:`publish_summary`, where any count under 30
+is suppressed. Both record the same manifest entry as :func:`publish`.
 """
 
 from __future__ import annotations
@@ -379,3 +387,203 @@ def publish(
         manifest.setdefault("files", {})[key] = entry
     _save_manifest(manifest_path, manifest)
     return path, entry
+
+
+# --- Model estimates (P5) -------------------------------------------------------------------
+
+ESTIMATE_COLUMNS = (
+    "analysis",
+    "group",
+    "estimate_id",
+    "label",
+    "outcome",
+    "exposure",
+    "scale",
+    "learners",
+    "estimate",
+    "se",
+    "ci_low",
+    "ci_high",
+    "pval",
+    "holm_p",
+    "supported",
+    "mu0",
+    "n",
+    "n_exposed",
+    "n_unexposed",
+)
+"""Columns of one model estimate. ``n_exposed`` is the exposed (or onset) group's unweighted
+count and ``n_unexposed`` the comparison group's; ``n`` is their sum."""
+PUBLIC_ESTIMATE_COLUMNS = ("source", "dataset_version", *ESTIMATE_COLUMNS, "suppressed")
+ESTIMATE_NULLED = ("estimate", "se", "ci_low", "ci_high", "pval", "holm_p", "supported", "mu0")
+ESTIMATE_DECIMALS = {
+    "estimate": 6,
+    "se": 6,
+    "ci_low": 6,
+    "ci_high": 6,
+    "mu0": 6,
+    "pval": 10,
+    "holm_p": 10,
+}
+SUMMARY_COLUMNS = ("analysis", "section", "item_id", "label", "kind", "value", "value_text")
+"""One scalar result. ``kind`` is count, share (0-1), number, flag (1 or 0) or text."""
+SUMMARY_KINDS = ("count", "share", "number", "flag", "text")
+PUBLIC_SUMMARY_COLUMNS = ("source", "dataset_version", *SUMMARY_COLUMNS, "suppressed")
+SUMMARY_DECIMALS = 8
+
+ESTIMATE_RULE = (
+    "Model estimates: suppressed (numbers and both group counts null, suppressed = true) if "
+    "the exposed (or onset) group or the comparison group has fewer than 30 unweighted units. "
+    "No complementary suppression: estimates are not parts of a published total."
+)
+SUMMARY_RULE = "Scalar results: a count under 30 (above 0) is suppressed (value null)."
+
+
+def parse_count(value: Any) -> int | None:
+    """A count from the analysis files, which write counts as safe text ("5,269", "<30").
+
+    "<k" (a masked count from 1 to k-1) becomes k-1, so it is always below the threshold.
+    Missing values stay None.
+    """
+    if value is None or (isinstance(value, float) and math.isnan(value)):
+        return None
+    if isinstance(value, bool):
+        raise GateError("a count cannot be a boolean")
+    if isinstance(value, int | float):
+        return int(value)
+    text = str(value).strip().replace(",", "")
+    if text.startswith("<"):
+        return int(text[1:]) - 1
+    return int(text)
+
+
+def gate_estimates(raw: pd.DataFrame, dataset: Dataset, threshold: int = THRESHOLD) -> pd.DataFrame:
+    """Apply the estimate rule (module docstring). Returns public rows only."""
+    missing = [c for c in ESTIMATE_COLUMNS if c not in raw.columns]
+    if missing:
+        raise GateError(f"model estimates lack columns {missing}")
+    out = raw.loc[:, list(ESTIMATE_COLUMNS)].copy().reset_index(drop=True)
+    if out["estimate_id"].duplicated().any():
+        raise GateError("two model estimates share an estimate_id")
+    for column in ("n", "n_exposed", "n_unexposed"):
+        counts = [parse_count(v) for v in out[column]]
+        if any(c is None or c < 0 for c in counts):
+            raise GateError(f"{column} must be present and non-negative on every estimate")
+        out[column] = pd.array(counts, dtype="Int64")
+    hide = ((out["n_exposed"] < threshold) | (out["n_unexposed"] < threshold)).astype(bool)
+    for column in ESTIMATE_NULLED:
+        if column == "supported":
+            out[column] = out[column].astype("boolean").mask(hide)
+            continue
+        out[column] = pd.to_numeric(out[column], errors="coerce").astype("float64")
+        out.loc[hide, column] = math.nan
+        out[column] = out[column].round(ESTIMATE_DECIMALS[column])
+    for column in ("n_exposed", "n_unexposed"):
+        out[column] = out[column].mask(hide)
+    inside = (out["ci_low"] <= out["estimate"]) & (out["estimate"] <= out["ci_high"])
+    if (~hide & ~inside).any():
+        raise GateError("an estimate lies outside its own interval, or has no interval")
+    out["suppressed"] = hide
+    out["source"] = dataset.source
+    out["dataset_version"] = dataset.version
+    return out.loc[:, list(PUBLIC_ESTIMATE_COLUMNS)]
+
+
+def gate_summary(raw: pd.DataFrame, dataset: Dataset, threshold: int = THRESHOLD) -> pd.DataFrame:
+    """Apply the summary rule (module docstring). Returns public rows only."""
+    missing = [c for c in SUMMARY_COLUMNS if c not in raw.columns]
+    if missing:
+        raise GateError(f"summary rows lack columns {missing}")
+    out = raw.loc[:, list(SUMMARY_COLUMNS)].copy().reset_index(drop=True)
+    if out.duplicated(["analysis", "item_id"]).any():
+        raise GateError("two summary rows share an item_id")
+    unknown = sorted(set(out["kind"]) - set(SUMMARY_KINDS))
+    if unknown:
+        raise GateError(f"unknown summary kinds {unknown}")
+    values: list[float] = []
+    hide: list[bool] = []
+    for kind, value in zip(out["kind"], out["value"], strict=True):
+        if kind == "text":
+            values.append(math.nan)
+            hide.append(False)
+            continue
+        if kind == "count":
+            count = parse_count(value)
+            if count is None:
+                raise GateError("a count item has no value")
+            small = 0 < count < threshold
+            values.append(math.nan if small else float(count))
+            hide.append(small)
+            continue
+        number = _num(value)
+        if math.isnan(number):
+            raise GateError("a numeric summary item has no value")
+        values.append(round(number, SUMMARY_DECIMALS))
+        hide.append(False)
+    out["value"] = pd.Series(values, dtype="float64")
+    texts = out["value_text"].astype("string")
+    if ((out["kind"] == "text") & texts.isna()).any():
+        raise GateError("a text item has no value_text")
+    out["value_text"] = texts
+    out["suppressed"] = hide
+    out["source"] = dataset.source
+    out["dataset_version"] = dataset.version
+    return out.loc[:, list(PUBLIC_SUMMARY_COLUMNS)]
+
+
+def _write_entry(
+    public: pd.DataFrame,
+    dataset: Dataset,
+    filename: str,
+    out_root: Path,
+    threshold: int,
+    rule: str,
+) -> tuple[Path, dict[str, Any]]:
+    if dataset.held:
+        raise GateError("model estimates and summaries are never held")
+    path = out_root / filename
+    write_csv(public, path)
+    entry: dict[str, Any] = {
+        "source": dataset.title,
+        "dataset_version": dataset.version,
+        "citation": dataset.citation,
+        "terms": dataset.terms,
+        "design": dataset.design,
+        "sha256": sha256(path),
+        "rows": len(public),
+        "suppressed_cells": int(public["suppressed"].sum()),
+        "disclosure_threshold": threshold,
+        "disclosure_rule": rule,
+        "script_commit": script_commit(),
+        "generated_on": dt.date.today().isoformat(),
+        **dict(dataset.extra),
+    }
+    manifest_path = out_root / "manifest.json"
+    manifest = {**_load_manifest(manifest_path), **MANIFEST_HEADER}
+    manifest.setdefault("files", {})[path.relative_to(out_root).as_posix()] = entry
+    _save_manifest(manifest_path, manifest)
+    return path, entry
+
+
+def publish_estimates(
+    raw: pd.DataFrame,
+    dataset: Dataset,
+    filename: str,
+    out_root: Path = AGGREGATES,
+    threshold: int = THRESHOLD,
+) -> tuple[Path, dict[str, Any]]:
+    """Gate model estimates (:func:`gate_estimates`), write them and record the manifest."""
+    public = gate_estimates(raw, dataset, threshold)
+    return _write_entry(public, dataset, filename, out_root, threshold, ESTIMATE_RULE)
+
+
+def publish_summary(
+    raw: pd.DataFrame,
+    dataset: Dataset,
+    filename: str,
+    out_root: Path = AGGREGATES,
+    threshold: int = THRESHOLD,
+) -> tuple[Path, dict[str, Any]]:
+    """Gate scalar results (:func:`gate_summary`), write them and record the manifest."""
+    public = gate_summary(raw, dataset, threshold)
+    return _write_entry(public, dataset, filename, out_root, threshold, SUMMARY_RULE)

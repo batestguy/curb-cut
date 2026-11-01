@@ -36,6 +36,9 @@ site/public/duckdb-extensions/
 # State pages and their share images (build_state_pages.py, make-share-images.mjs)
 site/states/
 site/public/share/
+# The poverty page (build_poverty_page.py) and the brief's PDF (make-brief-pdf.mjs)
+site/poverty.html
+site/public/downloads/
 site/test-results/
 site/playwright-report/
 

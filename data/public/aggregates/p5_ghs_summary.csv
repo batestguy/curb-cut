@@ -1,0 +1,61 @@
+source,dataset_version,analysis,section,item_id,label,kind,value,value_text,suppressed
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,linkage,w4_people_15plus,People aged 15+ in W4,count,15229.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,linkage,found_in_w5,Found in W5,count,13266.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,linkage,found_with_w5_answers,Found with W5 answers,count,11296.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,linkage,analysis_sample,In the analysis sample,count,10933.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,linkage,onset_cases,Onset of a severe difficulty by W5,count,364.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,linkage,linkage_rate,Linkage rate,share,0.87110119,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_age_stayers,age: stayers,number,37.37312871,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_age_attriters,age: attriters,number,31.85525635,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_age_standardised_difference,age: standardised_difference,number,0.31757218,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_female_stayers,female: stayers,number,0.51107411,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_female_attriters,female: attriters,number,0.52542617,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_female_standardised_difference,female: standardised_difference,number,-0.02872621,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_urban_stayers,urban: stayers,number,0.29424441,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_urban_attriters,urban: attriters,number,0.28023036,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_urban_standardised_difference,urban: standardised_difference,number,0.03097581,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_severe_w4_stayers,severe_w4: stayers,number,0.0201938,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_severe_w4_attriters,severe_w4: attriters,number,0.03233484,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_severe_w4_standardised_difference,severe_w4: standardised_difference,number,-0.0759741,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_1_north_central_stayers,zone=1. North Central: stayers,number,0.17234015,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_1_north_central_attriters,zone=1. North Central: attriters,number,0.1399945,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_1_north_central_standardised_difference,zone=1. North Central: standardised_difference,number,0.08919164,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_2_north_east_stayers,zone=2. North East: stayers,number,0.14588494,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_2_north_east_attriters,zone=2. North East: attriters,number,0.1268052,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_2_north_east_standardised_difference,zone=2. North East: standardised_difference,number,0.05562248,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_3_north_west_stayers,zone=3. North West: stayers,number,0.26466009,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_3_north_west_attriters,zone=3. North West: attriters,number,0.2595447,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_3_north_west_standardised_difference,zone=3. North West: standardised_difference,number,0.01163195,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_4_south_east_stayers,zone=4. South East: stayers,number,0.13989005,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_4_south_east_attriters,zone=4. South East: attriters,number,0.14442908,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_4_south_east_standardised_difference,zone=4. South East: standardised_difference,number,-0.01299814,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_5_south_south_stayers,zone=5. South South: stayers,number,0.16058234,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_5_south_south_attriters,zone=5. South South: attriters,number,0.20114485,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_5_south_south_standardised_difference,zone=5. South South: standardised_difference,number,-0.10552976,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_6_south_west_stayers,zone=6. South West: stayers,number,0.11664243,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_6_south_west_attriters,zone=6. South West: attriters,number,0.12808166,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,attrition,attrition_zone_6_south_west_standardised_difference,zone=6. South West: standardised_difference,number,-0.03491257,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dlog_consumption_n,dlog_consumption: n,count,10933.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dlog_consumption_onset_cases,dlog_consumption: onset_cases,count,364.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dlog_consumption_onset_share,dlog_consumption: onset_share,number,0.0332937,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dlog_consumption_sd_change,dlog_consumption: sd_change,number,0.54387842,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dlog_consumption_deff_kish,dlog_consumption: deff_kish,number,1.99354401,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dlog_consumption_icc,dlog_consumption: icc,number,0.2204906,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dlog_consumption_deff,dlog_consumption: deff,number,10.95845673,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dlog_consumption_mde_sd,dlog_consumption: mde_sd,number,0.4944024,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dlog_consumption_mde,dlog_consumption: mde,number,0.26889479,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dlog_consumption_run,dlog_consumption: run under the MDE rule,flag,1.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,r_check,dlog_consumption_r_max_abs_diff,"dlog_consumption: largest difference, R vs Python",number,0.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,r_check,dlog_consumption_fixest,dlog_consumption: R fixest version,text,,0.14.2,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dwork_n,dwork: n,count,10628.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dwork_onset_cases,dwork: onset_cases,count,360.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dwork_onset_share,dwork: onset_share,number,0.03387279,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dwork_sd_change,dwork: sd_change,number,0.53900752,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dwork_deff_kish,dwork: deff_kish,number,2.00178828,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dwork_icc,dwork: icc,number,0.03541624,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dwork_deff,dwork: deff,number,3.40541433,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dwork_mde_sd,dwork: mde_sd,number,0.27721735,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dwork_mde,dwork: mde,number,0.14942224,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,power,dwork_run,dwork: run under the MDE rule,flag,1.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,r_check,dwork_r_max_abs_diff,"dwork: largest difference, R vs Python",number,0.0,,False
+ghs_w4_w5,NGA_2018_GHSP-W4_v03_M + NGA_2023_GHSP-W5_v02_M,ghs,r_check,dwork_fixest,dwork: R fixest version,text,,0.14.2,False

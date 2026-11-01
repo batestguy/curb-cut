@@ -761,3 +761,62 @@ h4 {
 h3[tabindex="-1"]:focus {
   outline: none;
 }
+
+/* Site navigation in the header (main page, methodology, poverty page). */
+.site-nav ul {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.25rem;
+  font-size: 0.95rem;
+}
+
+.site-nav a[aria-current="page"] {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* The poverty page (site/poverty.html, built by packages/transform/scripts/
+   build_poverty_page.py): the main and the overlap estimates side by side, with equal weight. */
+.p5-pair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.p5-result {
+  border: 2px solid var(--flag-green);
+  border-radius: 4px;
+  background: var(--card-bg);
+  padding: 0 1rem 0.25rem;
+}
+
+.p5-result h3 {
+  margin-top: 0.75rem;
+  font-size: 1.05rem;
+}
+
+.p5-big {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 0.25rem 0 0.5rem;
+}
+
+.p5-registration {
+  border-left: 0.3rem solid var(--flag-green);
+  padding-left: 0.9rem;
+}
+
+.poverty-page code {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.dot-zero {
+  stroke: var(--dot-text);
+  stroke-width: 2;
+}

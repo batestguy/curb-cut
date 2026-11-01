@@ -1,0 +1,119 @@
+source,dataset_version,analysis,section,item_id,label,kind,value,value_text,suppressed
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,table7,table7_exposed,"Ours: People who are poor, households with a person with a disability (%)",number,71.99048881,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,table7,table7_exposed_nbs,"NBS Table 7: People who are poor, households with a person with a disability (%)",number,71.4,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,table7,table7_exposed_pass,"Within tolerance: People who are poor, households with a person with a disability (%)",flag,1.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,table7,table7_unexposed,"Ours: People who are poor, households without (%)",number,61.84457041,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,table7,table7_unexposed_nbs,"NBS Table 7: People who are poor, households without (%)",number,61.8,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,table7,table7_unexposed_pass,"Within tolerance: People who are poor, households without (%)",flag,1.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,table7,table7_gap,Ours: Gap (percentage points),number,10.1459184,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,table7,table7_gap_nbs,NBS Table 7: Gap (percentage points),number,9.6,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,table7,table7_gap_pass,Within tolerance: Gap (percentage points),flag,1.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,table7,table7_tolerance,"Tolerance (points, each figure)",number,2.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,table7,table7_all_pass,Table 7 check passed,flag,1.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,evalue,evalue_rr,Risk ratio,number,1.18611326,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,evalue,evalue_rr_ci_low,"Risk ratio, 95% interval lower",number,1.09639526,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,evalue,evalue_rr_ci_high,"Risk ratio, 95% interval upper",number,1.27295076,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,evalue,evalue,E-value for the estimate,number,1.65595516,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,evalue,evalue_ci,E-value for the interval limit closer to 1,number,1.42149111,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensitivity,rv,DoubleML robustness value RV,share,0.01812499,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensitivity,rva,DoubleML robustness value RVa (interval),share,0.01028998,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensitivity,default_theta_lower,"Bound at 3% strength, lower",number,-0.07544979,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensitivity,default_ci_lower,"Interval at 3% strength, lower",number,-0.14264738,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensitivity,default_theta_upper,"Bound at 3% strength, upper",number,0.31134292,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensitivity,default_ci_upper,"Interval at 3% strength, upper",number,0.36342676,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensitivity,default_cf_y,Assumed strength on poverty (cf_y),share,0.03,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensitivity,default_cf_d,Assumed strength on exposure (cf_d),share,0.03,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_head_education_cf_y,head_education: cf_y,number,0.1071553,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_head_education_cf_d,head_education: cf_d,number,0.01130962,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_head_education_rho,head_education: rho,number,0.04659982,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_head_education_theta_lower,"head_education: bound, lower",number,0.10651941,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_head_education_ci_lower,"head_education: interval, lower",number,0.05888799,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_head_education_theta_upper,"head_education: bound, upper",number,0.12749394,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_head_education_ci_upper,"head_education: interval, upper",number,0.17252983,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_place_cf_y,place: cf_y,number,0.07752674,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_place_cf_d,place: cf_d,number,0.14641629,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_place_rho,place: rho,number,0.0011772,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_place_theta_lower,"place: bound, lower",number,0.11613406,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_place_ci_lower,"place: interval, lower",number,0.06877645,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_place_theta_upper,"place: bound, upper",number,0.11787929,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_place_ci_upper,"place: interval, upper",number,0.16339293,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_sector_cf_y,sector: cf_y,number,0.01959677,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_sector_cf_d,sector: cf_d,number,0.00656977,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_sector_rho,sector: rho,number,-0.03081391,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_sector_theta_lower,"sector: bound, lower",number,0.1147518,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_sector_ci_lower,"sector: interval, lower",number,0.06735907,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_sector_theta_upper,"sector: bound, upper",number,0.11926155,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,benchmark,bench_sector_ci_upper,"sector: interval, upper",number,0.16470172,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensemakr,sensemakr_estimate,Weighted linear model estimate,number,0.08014408,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensemakr,sensemakr_se,Weighted linear model standard error,number,0.0160858,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensemakr,sensemakr_rv_q,sensemakr robustness value,share,0.02175777,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensemakr,sensemakr_rv_qa,sensemakr robustness value (interval),share,0.01325551,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensemakr,sensemakr_partial_r2,Partial R2 of exposure with poverty,share,0.0004837,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensemakr,survey_lpm_df,Survey linear model degrees of freedom,number,3519.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensemakr,version_survey,R survey version,text,,4.5,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensemakr,version_sensemakr,R sensemakr version,text,,0.1.6,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sensemakr,version_r,R r version,text,,4.5.2,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,placebo,placebo_n,Placebo permutations,number,100.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,placebo,placebo_mean,"Placebo estimates, mean",number,0.00603643,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,placebo,placebo_sd,"Placebo estimates, standard deviation",number,0.02669584,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,placebo,placebo_share_ci_excluding_0,Share of placebo intervals excluding 0,share,0.08,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,placebo,placebo_empirical_p,Empirical p of the real estimate,number,0.00990099,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_reference,Reference estimate (one repetition),number,0.1213089,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_with,With a random covariate added,number,0.11794008,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_moved,How far it moved,number,0.00336882,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_allowed,How far it may move,number,0.02548954,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_pass,Random common cause check passed,flag,1.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_seed_min,"One repetition, five fold splits: lowest",number,0.09897445,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_seed_max,"One repetition, five fold splits: highest",number,0.12446399,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,primary_rep_min,"Primary, its repetitions: lowest",number,0.11038886,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,primary_rep_max,"Primary, its repetitions: highest",number,0.12385412,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,overlap_clipped_share_weighted,Share of people whose propensity was clipped,share,0.61975748,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,overlap_clipped_share_unweighted,Share of households clipped,share,0.63736922,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,outside_households,Households outside the overlap population,count,32668.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,outside_weighted_share,Share of people outside the overlap population,share,0.6169932,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_households,exposed: households,count,680.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q01,exposed: propensity q01,number,0.00184387,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q05,exposed: propensity q05,number,0.00342113,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q25,exposed: propensity q25,number,0.00995295,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q50,exposed: propensity q50,number,0.02186969,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q75,exposed: propensity q75,number,0.04763817,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q95,exposed: propensity q95,number,0.11155818,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q99,exposed: propensity q99,number,0.18022221,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_households,unexposed: households,count,50742.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q01,unexposed: propensity q01,number,0.00097344,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q05,unexposed: propensity q05,number,0.00158991,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q25,unexposed: propensity q25,number,0.00364169,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q50,unexposed: propensity q50,number,0.00692835,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q75,unexposed: propensity q75,number,0.01418245,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q95,unexposed: propensity q95,number,0.0440321,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q99,unexposed: propensity q99,number,0.09492201,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,clip_low,"Clip, lower",number,0.01,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,clip_high,"Clip, upper",number,0.99,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sample,weights_n,Households in the primary analysis,count,51422.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sample,kish_effective_n,Kish effective sample size,number,26009.34158394,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sample,max_weight_share,Largest weight's share of the total,share,0.00033159,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sample,households_in_sample,Households in the sample,count,52022.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sample,missing_poor_households,Households with poverty missing,count,545.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sample,missing_poor_share,Share of people with poverty missing,share,0.01116741,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sample,missing_exposure_primary_households,Households with exposure missing,count,59.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sample,missing_exposure_primary_share,Share of people with exposure missing,share,0.00200165,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,learners,folds,Cross-fitting folds,number,5.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,learners,n_rep,Repetitions,number,5.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,learners,outcome_chosen,Chosen outcome learner,text,,boosting,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,learners,outcome_lowest,"Lowest mean loss, outcome",text,,boosting,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,learners,outcome_logistic_mean_loss,"outcome: logistic, mean log loss",number,0.52446313,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,learners,outcome_forest_mean_loss,"outcome: forest, mean log loss",number,0.52801032,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,learners,outcome_boosting_mean_loss,"outcome: boosting, mean log loss",number,0.51981821,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,learners,propensity_chosen,Chosen propensity learner,text,,logistic,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,learners,propensity_lowest,"Lowest mean loss, propensity",text,,forest,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,learners,propensity_logistic_mean_loss,"propensity: logistic, mean log loss",number,0.06441296,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,learners,propensity_forest_mean_loss,"propensity: forest, mean log loss",number,0.06366973,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,learners,propensity_boosting_mean_loss,"propensity: boosting, mean log loss",number,0.07614229,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,registration,osf_url,OSF registration,text,,https://osf.io/kes3p/,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,registration,registered_utc,Registered (UTC),text,,2026-11-01 05:49:21 UTC,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,registration,freeze_tag,Code freeze tag,text,,p5-freeze,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,registration,freeze_commit,Code freeze commit,text,,22b8acee10b304f25201627d5cf4da47c2544a19,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,registration,preregistration_sha256,SHA-256 of the pre-registration at the freeze,text,,65d0a4b2a3047e499f497aa8b59e5917ad74612c63fc8b2c66bd25af69e82955,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,registration,deviations,Deviations logged,text,,none,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,registration,run_commit,Commit the real run was made from,text,,13c078eee2e6ba84be4722f63ce1b14e87ee3a82,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,registration,run_created,Real run finished (UTC),text,,2026-11-01T09:28:07+00:00,False

@@ -1,4 +1,4 @@
-import { readdirSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 
@@ -18,6 +18,10 @@ try {
   statePages = {};
 }
 
+// The poverty page is generated too (packages/transform/scripts/build_poverty_page.py).
+const povertyPage = resolve(import.meta.dirname, 'poverty.html');
+const generated = existsSync(povertyPage) ? { poverty: povertyPage } : {};
+
 // GitHub Pages serves the site at /curb-cut/. Override with SITE_BASE=/ for other hosts.
 export default defineConfig({
   base: process.env.SITE_BASE ?? '/curb-cut/',
@@ -25,11 +29,13 @@ export default defineConfig({
     target: 'es2022',
     // Plotly and the DuckDB-WASM bundles are large by nature; they are loaded once.
     chunkSizeWarningLimit: 4000,
-    // The main page, the methodology note and the 37 state pages with their index.
+    // The main page, the methodology note, the poverty page and the 37 state pages with
+    // their index.
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
         methodology: resolve(import.meta.dirname, 'methodology.html'),
+        ...generated,
         ...statePages,
       },
     },

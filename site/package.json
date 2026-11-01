@@ -10,8 +10,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "prebuild": "node scripts/fetch-duckdb-extensions.mjs && node scripts/make-share-images.mjs",
+    "prebuild": "node scripts/fetch-duckdb-extensions.mjs && node scripts/make-share-images.mjs && node scripts/make-brief-pdf.mjs",
     "share-images": "node scripts/make-share-images.mjs",
+    "brief-pdf": "node scripts/make-brief-pdf.mjs",
     "build": "vite build",
     "preview": "vite preview --port 4173 --strictPort",
     "test": "playwright test"
