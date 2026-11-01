@@ -12,7 +12,11 @@ artefacts (git-ignored) under ``site/public/data/``, which Vite copies into the 
   headline (DISABILITY3, adults 18+, both sexes);
 * ``prevalence.json``: the national headline and the comparison rows;
 * ``spatial.json``: the plain-English spatial sentences from
-  ``data/public/spatial/summary.json``, with cluster members named and sorted by name.
+  ``data/public/spatial/summary.json``, with cluster members named and sorted by name;
+* ``poverty.json``: the P5 estimates and scalar results (``mart_p5_estimates``,
+  ``mart_p5_summary``) for the poverty page and the brief, with a few values derived from
+  them (the implied poverty rate, the section 4 wording verdict, ranges); see
+  :func:`poverty_payload`.
 """
 
 from __future__ import annotations
@@ -174,6 +178,103 @@ def spatial_payload(con: duckdb.DuckDBPyConnection, summary: dict[str, Any]) -> 
     }
 
 
+SMALLEST_DIFFERENCE = 0.02
+"""Pre-registration section 4: the smallest difference of interest, 2 percentage points."""
+
+ESTIMATE_FIELDS = (
+    "analysis, estimate_group, label, outcome, exposure, scale, learners, estimate, se, "
+    "ci_low, ci_high, pval, holm_p, supported, mu0, n, n_exposed, n_unexposed, suppressed, "
+    "display_factor"
+)
+
+
+def section4_verdict(ci_low: float, ci_high: float) -> str:
+    """The pre-registered wording rule (section 4) for the primary estimate.
+
+    "no meaningful difference" only if the whole 95% interval lies within +/-2 points;
+    otherwise "higher" or "lower" if the interval excludes 0, else "inconclusive".
+    """
+    if ci_low >= -SMALLEST_DIFFERENCE and ci_high <= SMALLEST_DIFFERENCE:
+        return "no meaningful difference"
+    if ci_low > 0:
+        return "higher"
+    if ci_high < 0:
+        return "lower"
+    return "inconclusive"
+
+
+def poverty_payload(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
+    """The P5 page's and brief's data: every estimate by id, every scalar by analysis and id,
+    and values derived from them (named under ``derived``; no other arithmetic happens in
+    the page or the brief)."""
+    estimates: dict[str, dict[str, Any]] = {}
+    for row in _rows(
+        con,
+        f"select estimate_id, {ESTIMATE_FIELDS} from mart_p5_estimates "
+        "order by group_order, estimate_id",
+    ):
+        estimates[row.pop("estimate_id")] = row
+    summary: dict[str, dict[str, Any]] = {}
+    for row in _rows(
+        con,
+        "select analysis, item_id, section, label, kind, value, value_text, suppressed "
+        "from mart_p5_summary order by analysis, section, item_id",
+    ):
+        summary.setdefault(row.pop("analysis"), {})[row.pop("item_id")] = row
+    primary = estimates["primary"]
+    overlap = estimates["overlap_population"]
+    if primary["suppressed"] or overlap["suppressed"]:
+        raise ValueError("the primary or overlap estimate is suppressed; no page can be built")
+
+    def span(group: str) -> dict[str, float]:
+        values = [
+            e["estimate"]
+            for e in estimates.values()
+            if e["estimate_group"] == group and not e["suppressed"]
+        ]
+        return {"min": min(values), "max": max(values)}
+
+    mu0 = primary["mu0"]
+    derived = {
+        "verdict": section4_verdict(primary["ci_low"], primary["ci_high"]),
+        "primary_implied": mu0 + primary["estimate"],
+        "overlap_implied": overlap["mu0"] + overlap["estimate"],
+        "share_inside_overlap": 1 - summary["mpi"]["outside_weighted_share"]["value"],
+        "rr_ceiling": 1 / mu0,
+        # Risk ratio minus 1: the difference as a share of the comparison rate.
+        "relative_increase": summary["mpi"]["evalue_rr"]["value"] - 1,
+        # Section 5.4: p = (1 + as far from 0 as the real estimate) / (1 + n), so this is
+        # the number of placebo estimates at least as far from 0 as the real one.
+        "placebo_as_extreme": round(
+            summary["mpi"]["placebo_empirical_p"]["value"]
+            * (summary["mpi"]["placebo_n"]["value"] + 1)
+            - 1
+        ),
+        "robustness": span("robustness"),
+        "leave_one_zone_out": span("leave_one_zone_out"),
+        # The widest range the three observed-covariate benchmarks move the estimate to.
+        "benchmarks": {
+            "min": min(
+                summary["mpi"][f"bench_{b}_theta_lower"]["value"]
+                for b in ("head_education", "place", "sector")
+            ),
+            "max": max(
+                summary["mpi"][f"bench_{b}_theta_upper"]["value"]
+                for b in ("head_education", "place", "sector")
+            ),
+        },
+    }
+    return {
+        "note": (
+            "P5, pre-registered (docs/preregistration.md). Adjusted associations, not causal "
+            "effects. MPI's own disability questions, not the Washington Group's DISABILITY3."
+        ),
+        "estimates": estimates,
+        "summary": summary,
+        "derived": derived,
+    }
+
+
 def export(db_path: Path, out_dir: Path, summary_path: Path = SPATIAL_SUMMARY) -> list[Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     written: list[Path] = []
@@ -190,6 +291,7 @@ def export(db_path: Path, out_dir: Path, summary_path: Path = SPATIAL_SUMMARY) -
             "spatial.json": spatial_payload(
                 con, json.loads(summary_path.read_text(encoding="utf-8"))
             ),
+            "poverty.json": poverty_payload(con),
         }
     for filename, document in documents.items():
         path = out_dir / filename

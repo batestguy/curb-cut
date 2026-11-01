@@ -87,6 +87,12 @@ jobs:
           uv run python packages/transform/scripts/build_state_pages.py
           --db data/fixtures.duckdb --pages-dir "$RUNNER_TEMP/fixture-pages"
           --charts-dir "$RUNNER_TEMP/fixture-charts"
+      # P5: the poverty page from the exported estimates (fails on a failed chart audit or on
+      # wording the pre-registration rules out), and the committed brief must match the data.
+      - name: Build the poverty page
+        run: uv run python packages/transform/scripts/build_poverty_page.py
+      - name: Check the policy brief matches the exported estimates
+        run: uv run python packages/transform/scripts/build_brief.py --check
       - name: Audit every chart document, warnings included (e.g. an empty map class)
         run: >-
           uv run disability-access-charts check --strict site/public/data/charts/*.json
@@ -100,6 +106,11 @@ jobs:
         with:
           name: state-pages
           path: site/states/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        with:
+          name: poverty-page
+          path: site/poverty.html
           if-no-files-found: error
 
   site:
@@ -123,12 +134,16 @@ jobs:
         with:
           name: state-pages
           path: site/states/
+      - uses: actions/download-artifact@v8
+        with:
+          name: poverty-page
+          path: site/
       - name: Install
         run: npm ci
       # Before the build: prebuild screenshots the state pages' share images with Chromium.
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
-      - name: Build (fetches the pinned DuckDB Parquet extension, makes the share images, then vite build)
+      - name: Build (fetches the pinned DuckDB Parquet extension, makes the share images and the brief PDF, then vite build)
         run: npm run build
       - name: Playwright + axe
         run: npm test

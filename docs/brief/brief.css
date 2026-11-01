@@ -1,0 +1,70 @@
+/* Print style for the P5 policy brief (pandoc embeds it; Chromium prints it to A4).
+   Two pages at most: site/tests/poverty.spec.js counts the PDF's pages. */
+@page {
+  size: A4;
+  margin: 13mm 15mm 13mm 15mm;
+}
+
+html {
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Noto Sans", Arial, sans-serif;
+  font-size: 9.6pt;
+  line-height: 1.36;
+  color: #1a1a1a;
+  background: #ffffff;
+}
+
+body {
+  margin: 0;
+  max-width: none;
+  padding: 0;
+}
+
+header#title-block-header {
+  border-top: 6px solid #008751;
+  padding-top: 4pt;
+  margin-bottom: 6pt;
+}
+
+h1.title {
+  font-size: 17pt;
+  margin: 0;
+  color: #006b3f;
+}
+
+p.subtitle {
+  margin: 2pt 0 0;
+  font-size: 10pt;
+  color: #4d4d4d;
+}
+
+h2 {
+  font-size: 11.5pt;
+  margin: 8pt 0 2pt;
+  color: #006b3f;
+  border-bottom: 1px solid #d9d9d9;
+  break-after: avoid;
+}
+
+p,
+ul,
+ol {
+  margin: 0 0 4pt;
+}
+
+ul,
+ol {
+  padding-left: 14pt;
+}
+
+li {
+  margin-bottom: 1.5pt;
+}
+
+a {
+  color: #006b3f;
+  overflow-wrap: anywhere;
+}
+
+strong {
+  color: #000000;
+}

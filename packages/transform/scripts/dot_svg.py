@@ -43,6 +43,21 @@ def nice_max(value: float, ticks: int = 4) -> tuple[float, float]:
     return top, step
 
 
+def nice_range(low: float, high: float, ticks: int = 4) -> tuple[float, float, float]:
+    """The axis's (bottom, top, step). From 0 when nothing is below 0 (as :func:`nice_max`);
+    otherwise round bounds on a common step that includes 0, for differences that cross it."""
+    if low >= 0:
+        top, step = nice_max(high, ticks)
+        return 0.0, top, step
+    high = max(high, 0.0)
+    raw = (high - low) / ticks
+    magnitude = 10 ** math.floor(math.log10(raw))
+    step = next(s * magnitude for s in _STEPS if s * magnitude >= raw - 1e-12)
+    bottom = math.floor(low / step + 1e-9) * step
+    top = math.ceil(high / step - 1e-9) * step
+    return bottom, top, step
+
+
 def _fmt(value: float, decimals: int) -> str:
     text = f"{value:.{decimals}f}"
     return "0" if float(text) == 0 and text.startswith("-") else text
@@ -129,20 +144,22 @@ def render_dot_svg(doc: Mapping[str, Any]) -> str:
     symbols = _symbols(doc, len(series))
 
     highs = [v for s in series for v in (s.get("upper") or s["values"]) if v is not None]
-    top, step = nice_max(max(highs))
+    lows = [v for s in series for v in (s.get("lower") or s["values"]) if v is not None]
+    bottom, top, step = nice_range(min(lows), max(highs))
 
     def sx(value: float) -> float:
-        return PLOT_LEFT + (PLOT_RIGHT - PLOT_LEFT) * max(0.0, min(value, top)) / top
+        share = (max(bottom, min(value, top)) - bottom) / (top - bottom)
+        return PLOT_LEFT + (PLOT_RIGHT - PLOT_LEFT) * share
 
     row_h = LABEL_H + SERIES_GAP * len(series) + ROW_PAD
     plot_h = row_h * len(categories)
     height = plot_h + AXIS_H
     parts: list[str] = []
 
-    # Vertical grid lines and tick labels.
-    n_ticks = round(top / step)
+    # Vertical grid lines and tick labels; a stronger line at 0 when the axis crosses it.
+    n_ticks = round((top - bottom) / step)
     for k in range(n_ticks + 1):
-        value = k * step
+        value = round(bottom + k * step, 10)
         x = sx(value)
         parts.append(f'<line class="dot-grid" x1="{_num(x)}" y1="0" x2="{_num(x)}" y2="{plot_h}"/>')
         anchor = "start" if k == 0 else "middle"
@@ -150,6 +167,11 @@ def render_dot_svg(doc: Mapping[str, Any]) -> str:
         parts.append(
             f'<text class="dot-text" x="{_num(x)}" y="{plot_h + 18}" '
             f'text-anchor="{anchor}">{tick}{suffix}</text>'
+        )
+    if bottom < 0:
+        x0 = sx(0.0)
+        parts.append(
+            f'<line class="dot-zero" x1="{_num(x0)}" y1="0" x2="{_num(x0)}" y2="{plot_h}"/>'
         )
     label = _value_label(doc)
     if label:
