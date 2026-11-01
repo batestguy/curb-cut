@@ -71,6 +71,17 @@ TEMPLATES: dict[str, str] = {
     "source": "Source: {source}.",
 }
 
+# The map legend's filter (maps.py, new in 0.3): what the page announces when a legend
+# button shows one class. Kept apart from TEMPLATES, like FINDINGS, so they do not change
+# which names the alt-text checker reserves. {range} is the class label as it reads
+# mid-sentence; {names} the class's regions, in name order.
+MAP_LEGEND: dict[str, str] = {
+    "filter_class": "Showing {n} {noun} in {range}: {names}.",
+    "filter_empty": "No {plural} are in {range}.",
+    "filter_all": "Showing all {n} {noun}.",
+    "names_separator": ", ",
+}
+
 # Statistical findings (findings.py). Kept apart from TEMPLATES so they do not change which
 # names the alt-text checker reserves. The "finding_*" sentences must pass the claim
 # checker; the "findings_*" lines are counts and method, checked by the audit instead.

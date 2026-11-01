@@ -2,7 +2,19 @@
 
 All notable changes to this project are documented here. Entries follow [Conventional Commits](https://www.conventionalcommits.org/).
 
-## P5 — 2026-11-01 (gate checks passed; merge and NBS copy pending)
+## P6 — in progress (2026-11-01)
+
+### Added
+- feat(charts): `disability-access-charts` 0.3.0, prepared, not yet published:
+  - `scheme=` on `choropleth()` and `MAP_SCHEMES`. **Changed default:** `"ylgnbu"`, a colour-blind-safe yellow→green→blue scale (ColorBrewer YlGnBu 5 in the light theme; a matching dark palette, brighter for higher values) with larger lightness steps; `MAP_THEMES` is now its themes. `scheme="green"` gives the 0.2 look. **Custom themes too:** `choropleth(..., themes=...)` without `scheme` now gets the 0.3 pattern style (ink-weight order with an ink per class, no single `patterns.ink`) and the new audit checks, so a custom set of fills can fail the new `colour-vision` error (or the casing rule, if a theme has a halo); pass `scheme="green"` with your `themes=` to keep the 0.2 pattern order and one ink per theme.;
+  - cased boundaries (`MapTheme.halo`): a wide halo stroke under a narrow edge stroke; the audit asks the edge to be 3:1 against the background and the halo, and the edge or the halo to be 3:1 against the background and every fill; themes without a halo keep the 0.2 rule;
+  - map patterns ordered by ink weight (`MAP_PATTERNS`: plain, dots, lines, crosshatch, solid; ordered subsets for fewer classes) with an ink per class (`patterns.class_ink`, audited at 3:1 per inked class); bars unchanged;
+  - `vision` module: Machado et al. (2009) colour-vision simulation and CIEDE2000 (reproduces Sharma's test pairs); `colour-vision` check (error under 5) and `colour-vision-target` (warning under 10); the default scheme's closest neighbours are 10.3 (light) and 11.6 (dark);
+  - legend-filter metadata (`legend_filter=True`): each class's regions and announcement, checked by `legend-filter-matches-data`; schema 1.1.
+- feat(site): the prevalence map in the new scheme, with cased boundaries and per-class pattern ink; a large vertical legend of toggle buttons (`aria-pressed`) that shows one class at a time (others dimmed, their boundaries faint; Esc or a second press shows all), announced in one polite live region with the state names.
+- test: library tests for every new rule, including failing cases; Playwright checks of the drawn colours, inks and casing against the chart JSON in both themes, the legend's keyboard use and announcements, the filter with the state highlight, axe with a class shown, and 320 px.
+
+## P5 — 2026-11-01 (gate passed; NBS publication copy sent)
 
 ### Added
 - feat(ingest): Nigeria's national MPI rebuilt at household level from its 15 indicators and validated against NBS's published H, A and MPI (D64).

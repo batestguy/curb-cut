@@ -83,11 +83,13 @@ async function showMap() {
       legendEl: document.getElementById('prevalence-map-legend'),
       titleEl: document.getElementById('prevalence-map-title'),
       tableEl: document.getElementById('prevalence-map-table'),
+      statusEl: document.getElementById('prevalence-map-filter-status'),
     });
     if (chosenState) prevalenceMap.highlight(chosenState);
   } catch (error) {
     const message = `The map could not be loaded: ${error.message}. The same figures are in the chart and table below.`;
     document.getElementById('prevalence-map-title').textContent = 'Map unavailable';
+    holder.closest('figure').querySelector('.map-key').hidden = true;
     holder.setAttribute('aria-label', message);
     holder.removeAttribute('tabindex');
     fail('prevalence-map-status', message);

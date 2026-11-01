@@ -1,12 +1,14 @@
 """Pattern tiles: the designs, the ink rule, bars, grouped bars, maps, and their audit checks."""
 
 import copy
+import itertools
 import re
 from typing import Any
 
 import pytest
 from disability_access_charts import (
     DEFAULT_THEMES,
+    MAP_SCHEMES,
     MAP_THEMES,
     PATTERNS,
     MapTheme,
@@ -21,9 +23,15 @@ from disability_access_charts import (
 )
 from disability_access_charts.patterns import (
     BLACK,
+    MAP_PATTERNS,
+    MAP_SEQUENCES,
     WHITE,
     assign,
+    assign_map,
+    best_ink,
+    class_inks,
     get,
+    has_ink,
     ink_for,
     plotly_pattern,
     svg_pattern,
@@ -51,8 +59,21 @@ MAP_KW: dict[str, Any] = {
 }
 MAP_VALUES = [4.6, 0.8, 2.5, 11.3, 3.5]
 _LIGHT = MAP_THEMES["light"]
-THREE = {"light": MapTheme(_LIGHT.background, _LIGHT.text, _LIGHT.edge, _LIGHT.classes[::2])}
-SIX = {"light": MapTheme(_LIGHT.background, _LIGHT.text, _LIGHT.edge, ("#f4fbf6", *_LIGHT.classes))}
+THREE = {
+    "light": MapTheme(
+        _LIGHT.background, _LIGHT.text, _LIGHT.edge, _LIGHT.classes[::2], halo=_LIGHT.halo
+    )
+}
+# ColorBrewer's six-class YlGnBu, with the default casing.
+SIX = {
+    "light": MapTheme(
+        _LIGHT.background,
+        _LIGHT.text,
+        _LIGHT.edge,
+        ("#ffffcc", "#c7e9b4", "#7fcdbb", "#41b6c4", "#2c7fb8", "#253494"),
+        halo=_LIGHT.halo,
+    )
+}
 
 
 def failed(doc: dict[str, Any]) -> set[str]:
@@ -77,11 +98,24 @@ def test_five_distinct_tiles_inside_their_square() -> None:
 
 
 def test_ink_is_black_or_white_with_the_higher_lowest_contrast() -> None:
-    assert ink_for(MAP_THEMES["light"].classes) == BLACK
-    assert ink_for(MAP_THEMES["dark"].classes) == WHITE
-    for name, t in MAP_THEMES.items():
+    green = MAP_SCHEMES["green"]
+    assert ink_for(green["light"].classes) == BLACK
+    assert ink_for(green["dark"].classes) == WHITE
+    for name, t in green.items():
         ink = ink_for(t.classes)
         assert all(contrast_ratio(ink, c) >= 3 for c in t.classes), name
+    # The 0.3 scheme runs from light to dark fills, so no one ink suits every class: each
+    # class gets its own, the better of black and white for its fill.
+    for name, t in MAP_THEMES.items():
+        inks = class_inks(MAP_PATTERNS, t.classes)
+        assert inks[0] is None and inks[-1] is None  # plain and solid draw no ink
+        for ink, fill in zip(inks[1:-1], t.classes[1:-1], strict=True):
+            assert ink == best_ink(fill)
+            assert ink is not None and contrast_ratio(ink, fill) >= 3, name
+    light = class_inks(MAP_PATTERNS, MAP_THEMES["light"].classes)
+    assert light == [None, BLACK, BLACK, BLACK, None]
+    dark = class_inks(MAP_PATTERNS, MAP_THEMES["dark"].classes)
+    assert dark == [None, WHITE, BLACK, BLACK, None]
     for t in DEFAULT_THEMES.values():
         ink = ink_for(t.series)
         assert all(contrast_ratio(ink, c) >= 3 for c in t.series)
@@ -211,17 +245,61 @@ def make_map(**overrides: Any) -> dict[str, Any]:
     return choropleth(NAMES, CODES, MAP_VALUES, **{**MAP_KW, **overrides})
 
 
-def test_map_patterns_per_class_in_density_order() -> None:
+def test_map_sequence_is_ordered_by_ink_weight() -> None:
+    assert [p.id for p in MAP_PATTERNS] == ["plain", "dots", "lines", "crosshatch", "solid"]
+    assert [has_ink(p) for p in MAP_PATTERNS] == [False, True, True, True, False]
+    # Bars keep the 0.2 order, unchanged.
+    assert [p.id for p in PATTERNS] == ["dots", "rings", "checks", "lines", "crosshatch"]
+    # Fewer classes take an ordered subset, and two no-ink tiles are never neighbours.
+    assert [p.id for p in assign_map(2)] == ["plain", "crosshatch"]
+    assert [p.id for p in assign_map(3)] == ["plain", "lines", "solid"]
+    assert [p.id for p in assign_map(4)] == ["plain", "dots", "crosshatch", "solid"]
+    assert assign_map(5) == MAP_PATTERNS
+    for tiles in MAP_SEQUENCES.values():
+        order = [MAP_PATTERNS.index(t) for t in tiles]
+        assert order == sorted(order)
+        blank = [i for i, t in enumerate(tiles) if not has_ink(t)]
+        assert all(b - a > 1 for a, b in itertools.pairwise(blank))
+    with pytest.raises(ValueError, match="2 to 5 classes"):
+        assign_map(6)
+    assert get("plain").path == "" and get("solid").path == ""
+
+
+def test_map_patterns_per_class_in_ink_weight_order() -> None:
     doc = make_map()
-    assert [c["pattern"] for c in doc["classes"]] == [p.id for p in PATTERNS]
-    assert doc["patterns"]["ink"] == {"light": BLACK, "dark": WHITE}
+    assert [c["pattern"] for c in doc["classes"]] == [p.id for p in MAP_PATTERNS]
+    assert doc["patterns"]["sequence"] == "ink-weight"
+    assert "ink" not in doc["patterns"]  # an ink per class instead
+    assert doc["patterns"]["class_ink"] == {
+        "light": [None, BLACK, BLACK, BLACK, None],
+        "dark": [None, WHITE, BLACK, BLACK, None],
+    }
     assert doc["patterns"]["scale"] == pytest.approx(632 / 52 / 12, abs=1e-4)
     cue = next(c for c in doc["audit"]["checks"] if c["id"] == "not-colour-alone")
     assert "own pattern" in cue["note"]
     assert doc["audit"]["passed"] is True and doc["audit"]["warnings"] == 0
     ink = [c for c in doc["audit"]["checks"] if c["id"] == "patterns-ink-contrast"]
     assert {c["theme"] for c in ink} == {"light", "dark"}
+    for c in ink:
+        assert c["ratios"][0] is None and c["ratios"][-1] is None  # no ink: exempt
+        assert all(r >= 3 for r in c["ratios"][1:-1])
+
+
+def test_fewer_classes_get_an_ordered_subset() -> None:
+    doc = make_map(breaks=[2, 4], themes=THREE)
+    assert [c["pattern"] for c in doc["classes"]] == ["plain", "lines", "solid"]
+    assert doc["audit"]["passed"] is True
+
+
+def test_green_scheme_keeps_the_02_patterns_and_one_ink() -> None:
+    doc = make_map(scheme="green")
+    assert [c["pattern"] for c in doc["classes"]] == [p.id for p in PATTERNS]
+    assert doc["patterns"]["ink"] == {"light": BLACK, "dark": WHITE}
+    assert "class_ink" not in doc["patterns"]
+    assert doc["patterns"]["sequence"] == "density-0.2"
+    ink = [c for c in doc["audit"]["checks"] if c["id"] == "patterns-ink-contrast"]
     assert all(min(c["ratios"]) >= 3 for c in ink)
+    assert doc["audit"]["passed"] is True
 
 
 def test_map_without_patterns_is_the_01_document() -> None:
@@ -260,17 +338,56 @@ def test_map_patterns_are_auto_by_default() -> None:
 def test_map_audit_catches_pattern_problems() -> None:
     doc = make_map()
     bad = copy.deepcopy(doc)
-    bad["patterns"]["classes"][1] = "dots"
+    bad["patterns"]["classes"][2] = "dots"
     assert "patterns-one-to-one" in failed(bad)
 
     bad = copy.deepcopy(doc)
     bad["classes"][2]["pattern"] = None
     assert "patterns-legend" in failed(bad)
 
+    # Per-class ink under 3:1: white on the pale green of class 2 (1.59:1).
     bad = copy.deepcopy(doc)
-    bad["patterns"]["ink"]["dark"] = BLACK  # black on the dark greens is under 3:1
+    bad["patterns"]["class_ink"]["light"][1] = WHITE
+    check = next(
+        c
+        for c in audit(bad)["checks"]
+        if c["id"] == "patterns-ink-contrast" and c["theme"] == "light"
+    )
+    assert check["passed"] is False
+    assert check["problems"] == ["class 2: #ffffff on #a1dab4 (1.59:1)"]
+
+    # A class whose tile draws ink must have an ink.
+    bad = copy.deepcopy(doc)
+    bad["patterns"]["class_ink"]["dark"][2] = None
     assert "patterns-ink-contrast" in failed(bad)
 
     bad = copy.deepcopy(doc)
-    del bad["patterns"]["ink"]["light"]
+    del bad["patterns"]["class_ink"]["light"]
     assert "patterns-ink-contrast" in failed(bad)
+
+    # 3:1 but not the better of black and white: a warning, not an error.
+    bad = copy.deepcopy(doc)
+    bad["patterns"]["class_ink"]["light"][3] = WHITE  # 4.4:1 on #2c7fb8; black is 4.8:1
+    assert "patterns-ink-rule" in failed(bad)
+    assert audit(bad)["passed"] is True
+
+    # No-ink tiles side by side would leave two classes told apart by shade alone.
+    bad = copy.deepcopy(doc)
+    bad["patterns"]["classes"] = ["plain", "solid", "lines", "crosshatch", "dots"]
+    for c, pid in zip(bad["classes"], bad["patterns"]["classes"], strict=True):
+        c["pattern"] = pid
+    check = next(c for c in audit(bad)["checks"] if c["id"] == "patterns-one-to-one")
+    assert "two neighbouring classes both have a pattern with no ink" in check["problems"]
+
+    # ... and the fills of no-ink classes must be 3:1 apart.
+    bad = copy.deepcopy(doc)
+    bad["themes"]["light"]["classes"] = [*bad["themes"]["light"]["classes"][:4], "#c8c8a0"]
+    check = next(c for c in audit(bad)["checks"] if c["id"] == "patterns-one-to-one")
+    assert any("have no ink" in p for p in check["problems"])
+
+
+def test_svg_pattern_without_ink() -> None:
+    svg = svg_pattern(get("plain"), pattern_id="p0", ink=None, fill="#ffffcc")
+    assert "<path" not in svg and 'fill="#ffffcc"' in svg
+    with pytest.raises(ValueError, match="needs an ink"):
+        svg_pattern(get("dots"), pattern_id="p1", ink=None, fill="#ffffcc")
