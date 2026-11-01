@@ -19,6 +19,17 @@ How to rebuild them from your own copy of the microdata: `docs/reproduce.md`.
 
 GHS is representative only nationally and by zone, so it never has state rows.
 
+### P5 poverty analysis (model estimates, 2026-11-01)
+
+| File | Source | Rows | Suppressed | Contents |
+|---|---|---|---|---|
+| `p5_mpi_estimates.csv` | NBS MPI 2021 | 37 | 0 | The pre-registered estimates (`docs/preregistration.md`, OSF https://osf.io/kes3p/), each with its 95% interval: primary, overlap population, survey-weighted linear benchmark, S1–S6, robustness runs, leave-one-zone-out, X1 subgroups, sensemakr bounds |
+| `p5_mpi_summary.csv` | NBS MPI 2021 | 98 | 0 | Scalar results: Table 7 check, E-value, sensitivity values and benchmark bounds, placebo summary, random common cause, overlap, weights, sample and missing counts, learner choice (mean losses), registration record |
+| `p5_ghs_estimates.csv` | GHS-Panel W4 + W5 | 4 | 0 | Exploratory E1: the two estimates and R's check of each |
+| `p5_ghs_summary.csv` | GHS-Panel W4 + W5 | 60 | 0 | Linkage, attrition, power and the run rule |
+
+Written by `uv run python -I -m curbcut_ingest.restricted.p5_publish` from the real-run results through `disclosure.publish_estimates` and `publish_summary`. These are **adjusted associations, not causal effects**, and use MPI's own disability questions, not DISABILITY3. Columns of the estimate files: `analysis` (`mpi`, `ghs`), `group` (headline, secondary, dimension, robustness, leave_one_zone_out, subgroup, sensemakr, e1, r_check), `estimate_id`, `label`, `outcome`, `exposure`, `scale` (proportions or 0–1 score points; ×100 for percentage points), `learners`, `estimate`, `se`, `ci_low`, `ci_high`, `pval`, `holm_p` and `supported` (S1–S3 only), `mu0` (the comparison households' standardised poverty share), `n` (households for MPI, people for GHS), `n_exposed` (exposed households, or people with onset), `n_unexposed`, `suppressed`. The summary files have `section`, `item_id`, `label`, `kind` (count, share, number, flag, text), `value`, `value_text`. Disclosure rule: an estimate is suppressed if its exposed (onset) group or its comparison group has fewer than 30 unweighted units (the smallest exposed group is 60 households); a summary count under 30 is suppressed. Learner-selection fold losses and the 100 placebo estimates are not published.
+
 ## Columns
 
 | Column | Meaning |
