@@ -63,10 +63,30 @@ mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_with,With a random cov
 mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_moved,How far it moved,number,0.00336882,,False
 mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_allowed,How far it may move,number,0.02548954,,False
 mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_pass,Random common cause check passed,flag,1.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_seed_min,"One repetition, five fold splits: lowest",number,0.09897445,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,rcc_seed_max,"One repetition, five fold splits: highest",number,0.12446399,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,primary_rep_min,"Primary, its repetitions: lowest",number,0.11038886,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,random_common_cause,primary_rep_max,"Primary, its repetitions: highest",number,0.12385412,,False
 mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,overlap_clipped_share_weighted,Share of people whose propensity was clipped,share,0.61975748,,False
 mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,overlap_clipped_share_unweighted,Share of households clipped,share,0.63736922,,False
 mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,outside_households,Households outside the overlap population,count,32668.0,,False
 mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,outside_weighted_share,Share of people outside the overlap population,share,0.6169932,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_households,exposed: households,count,680.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q01,exposed: propensity q01,number,0.00184387,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q05,exposed: propensity q05,number,0.00342113,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q25,exposed: propensity q25,number,0.00995295,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q50,exposed: propensity q50,number,0.02186969,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q75,exposed: propensity q75,number,0.04763817,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q95,exposed: propensity q95,number,0.11155818,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_exposed_q99,exposed: propensity q99,number,0.18022221,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_households,unexposed: households,count,50742.0,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q01,unexposed: propensity q01,number,0.00097344,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q05,unexposed: propensity q05,number,0.00158991,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q25,unexposed: propensity q25,number,0.00364169,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q50,unexposed: propensity q50,number,0.00692835,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q75,unexposed: propensity q75,number,0.01418245,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q95,unexposed: propensity q95,number,0.0440321,,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,quantile_unexposed_q99,unexposed: propensity q99,number,0.09492201,,False
 mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,clip_low,"Clip, lower",number,0.01,,False
 mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,overlap,clip_high,"Clip, upper",number,0.99,,False
 mpi2021,NGA-NBS-MPI-2021-v1.0,mpi,sample,weights_n,Households in the primary analysis,count,51422.0,,False

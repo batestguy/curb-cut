@@ -24,7 +24,7 @@ GHS is representative only nationally and by zone, so it never has state rows.
 | File | Source | Rows | Suppressed | Contents |
 |---|---|---|---|---|
 | `p5_mpi_estimates.csv` | NBS MPI 2021 | 37 | 0 | The pre-registered estimates (`docs/preregistration.md`, OSF https://osf.io/kes3p/), each with its 95% interval: primary, overlap population, survey-weighted linear benchmark, S1–S6, robustness runs, leave-one-zone-out, X1 subgroups, sensemakr bounds |
-| `p5_mpi_summary.csv` | NBS MPI 2021 | 98 | 0 | Scalar results: Table 7 check, E-value, sensitivity values and benchmark bounds, placebo summary, random common cause, overlap, weights, sample and missing counts, learner choice (mean losses), registration record |
+| `p5_mpi_summary.csv` | NBS MPI 2021 | 118 | 0 | Scalar results: Table 7 check, E-value, sensitivity values and benchmark bounds, placebo summary, random common cause (with the fold-split and repetition ranges), overlap (with the propensity quantiles by exposure), weights, sample and missing counts, learner choice (mean losses), registration record |
 | `p5_ghs_estimates.csv` | GHS-Panel W4 + W5 | 4 | 0 | Exploratory E1: the two estimates and R's check of each |
 | `p5_ghs_summary.csv` | GHS-Panel W4 + W5 | 60 | 0 | Linkage, attrition, power and the run rule |
 
