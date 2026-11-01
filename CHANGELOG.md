@@ -2,7 +2,7 @@
 
 All notable changes to this project are documented here. Entries follow [Conventional Commits](https://www.conventionalcommits.org/).
 
-## P5 — 2026-11-01 (gate checks passed; merge and NBS copy pending)
+## P5 — 2026-11-01 (gate passed; NBS publication copy sent)
 
 ### Added
 - feat(ingest): Nigeria's national MPI rebuilt at household level from its 15 indicators and validated against NBS's published H, A and MPI (D64).
