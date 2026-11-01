@@ -125,6 +125,20 @@ def fake_results() -> dict[str, Any]:
                 "unweighted_share": 0.6,
             },
             "range": [0.01, 0.99],
+            "quantiles_by_exposure": {
+                group: {
+                    "households": count,
+                    **{
+                        k: v
+                        for k, v in zip(
+                            ("q01", "q05", "q25", "q50", "q75", "q95", "q99"),
+                            (0.001, 0.003, 0.01, 0.02, 0.05, 0.1, 0.2),
+                            strict=True,
+                        )
+                    },
+                }
+                for group, count in (("exposed", "100"), ("unexposed", "900"))
+            },
         },
         "overlap_population": est(0.08, n=400, exposed="80"),
         "sensitivity": {"default": bounds(-0.07, 0.3), "benchmarks": benchmarks},
@@ -358,6 +372,19 @@ def test_registration_needs_section_11() -> None:
     partial = PREREG_TEXT.replace("registered 2026", "on 2026")
     with pytest.raises(pub.PublishError, match="registered_utc"):
         pub.registration(partial)
+
+
+def test_deviations_count_and_summary_line() -> None:
+    log = "# Deviations\n\nNo deviations as of 2026-11-01.\n"
+    assert pub.deviations_count(log) == 0
+    two = log + "\n## 2026-11-02 Changed X\n\ntext\n\n## 2026-11-03 Changed Y\n"
+    assert pub.deviations_count(two) == 2
+    items = pub.mpi_summary(fake_results(), MANIFEST, PREREG_TEXT, two).set_index("item_id")
+    assert items.loc["deviations", "value_text"] == "2"
+    none = pub.mpi_summary(fake_results(), MANIFEST, PREREG_TEXT, log).set_index("item_id")
+    assert none.loc["deviations", "value_text"] == "none"
+    assert none.loc["quantile_exposed_q50", "value"] == 0.02
+    assert none.loc["rcc_seed_min", "value"] == 0.12
 
 
 def test_parse_count() -> None:

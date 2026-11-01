@@ -42,6 +42,8 @@ from curbcut_ingest.restricted.p5_mpi import OUT_DIR, PREREG, registration_url
 RESULTS = OUT_DIR / "results.json"
 GHS_RESULTS = OUT_DIR / "ghs_results.json"
 RUN_MANIFEST = OUT_DIR / "manifest.json"
+DEVIATIONS = PREREG.with_name("preregistration-deviations.md")
+"""Section 10's log; each deviation is a "## YYYY-MM-DD ..." heading."""
 
 FILES = {
     "mpi_estimates": "p5_mpi_estimates.csv",
@@ -166,6 +168,11 @@ SECONDARIES = {
         PP,
     ),
 }
+
+
+def deviations_count(text: str) -> int:
+    """Dated entries ("## YYYY-MM-DD ...") in ``docs/preregistration-deviations.md``."""
+    return len(re.findall(r"^## \d{4}-\d{2}-\d{2}(?!\d)", text, flags=re.M))
 
 
 class PublishError(ValueError):
@@ -420,7 +427,10 @@ def registration(text: str) -> dict[str, str]:
 
 
 def mpi_summary(
-    results: Mapping[str, Any], run_manifest: Mapping[str, Any], prereg_text: str
+    results: Mapping[str, Any],
+    run_manifest: Mapping[str, Any],
+    prereg_text: str,
+    deviations_text: str = "",
 ) -> pd.DataFrame:
     """Scalar MPI results (module docstring). Never the fold losses or placebo estimates."""
     rows: list[dict[str, Any]] = []
@@ -577,6 +587,36 @@ def mpi_summary(
     add("random_common_cause", "rcc_moved", "How far it moved", "number", rcc["moved"])
     add("random_common_cause", "rcc_allowed", "How far it may move", "number", rcc["allowed"])
     add("random_common_cause", "rcc_pass", "Random common cause check passed", "flag", rcc["pass"])
+    seeds = rcc["seed_estimates"]
+    add(
+        "random_common_cause",
+        "rcc_seed_min",
+        "One repetition, five fold splits: lowest",
+        "number",
+        min(seeds),
+    )
+    add(
+        "random_common_cause",
+        "rcc_seed_max",
+        "One repetition, five fold splits: highest",
+        "number",
+        max(seeds),
+    )
+    reps = results["primary"]["all_coef"]
+    add(
+        "random_common_cause",
+        "primary_rep_min",
+        "Primary, its repetitions: lowest",
+        "number",
+        min(reps),
+    )
+    add(
+        "random_common_cause",
+        "primary_rep_max",
+        "Primary, its repetitions: highest",
+        "number",
+        max(reps),
+    )
 
     ov = results["overlap"]
     add(
@@ -608,6 +648,20 @@ def mpi_summary(
         "share",
         out["weighted_share"],
     )
+    # Section 5.1: the propensity's quantiles for exposed and unexposed households (each
+    # summarises hundreds of households or more; the gate checks the group counts).
+    for group, q in ov["quantiles_by_exposure"].items():
+        add(
+            "overlap",
+            f"quantile_{group}_households",
+            f"{group}: households",
+            "count",
+            q["households"],
+        )
+        for key in ("q01", "q05", "q25", "q50", "q75", "q95", "q99"):
+            add(
+                "overlap", f"quantile_{group}_{key}", f"{group}: propensity {key}", "number", q[key]
+            )
     add("overlap", "clip_low", "Clip, lower", "number", ov["range"][0])
     add("overlap", "clip_high", "Clip, upper", "number", ov["range"][1])
 
@@ -681,7 +735,14 @@ def mpi_summary(
         ("preregistration_sha256", "SHA-256 of the pre-registration at the freeze"),
     ):
         add("registration", key, label, "text", text=reg[key])
-    add("registration", "deviations", "Deviations logged", "text", text="none")
+    count = deviations_count(deviations_text)
+    add(
+        "registration",
+        "deviations",
+        "Deviations logged",
+        "text",
+        text="none" if count == 0 else str(count),
+    )
     git = run_manifest.get("git", {})
     if git.get("dirty"):
         raise PublishError("the real run was made from a dirty working tree")
@@ -768,6 +829,7 @@ def publish_all(
     run_manifest: Mapping[str, Any],
     prereg_text: str,
     out_root: Path = disclosure.AGGREGATES,
+    deviations_text: str = "",
 ) -> dict[str, dict[str, Any]]:
     """Build every table first (so a bad input writes nothing), then publish all four."""
     if run_manifest.get("mode") != "real":
@@ -776,7 +838,7 @@ def publish_all(
         "mpi_estimates": (mpi_estimates(results), MPI, disclosure.publish_estimates),
         "ghs_estimates": (ghs_estimates(ghs), GHS, disclosure.publish_estimates),
         "mpi_summary": (
-            mpi_summary(results, run_manifest, prereg_text),
+            mpi_summary(results, run_manifest, prereg_text, deviations_text),
             MPI,
             disclosure.publish_summary,
         ),
@@ -811,6 +873,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             read_json(args.manifest),
             PREREG.read_text(encoding="utf-8"),
             args.out_root,
+            DEVIATIONS.read_text(encoding="utf-8") if DEVIATIONS.is_file() else "",
         )
     except (PublishError, disclosure.GateError, KeyError) as exc:
         c.log(f"refused: {type(exc).__name__}: {exc}")
