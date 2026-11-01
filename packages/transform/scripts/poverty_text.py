@@ -198,8 +198,55 @@ def verdict_rule(nums: Numbers) -> str:
 def comparison_rates(nums: Numbers) -> str:
     return (
         f"In comparable households without such a member, {nums.num('estimates.primary.mu0')}% "
-        "of people are multidimensionally poor. With the difference added, the figure for "
-        f"households with such a member is {nums.num('derived.primary_implied')}%."
+        "of people are multidimensionally poor. Standardised to the same mix of households, "
+        f"the figure with such a member would be {nums.num('derived.primary_implied')}%."
+    )
+
+
+def missing_line(nums: Numbers) -> str:
+    """Section 6: who was left out, and why (counts and weighted shares from the data)."""
+
+    def count(item: str) -> str:
+        # A count under 30 is suppressed by the gate: say so rather than show it.
+        if nums.raw(f"summary.mpi.{item}.suppressed"):
+            return "fewer than 30"
+        return nums.n(item)
+
+    return (
+        f"Of {nums.n('households_in_sample')} households in the sample, "
+        f"{count('missing_poor_households')} ({nums.share('missing_poor_share')} of people) "
+        "were left out for missing poverty data and "
+        f"{count('missing_exposure_primary_households')} "
+        f"({nums.share('missing_exposure_primary_share')} of people) for missing disability "
+        "answers."
+    )
+
+
+def ghs_sample_line(nums: Numbers) -> str:
+    """Section 8: who the panel comparison follows (the linkage counts from the data)."""
+    return (
+        f"Of {nums.n('w4_people_15plus', 'ghs')} people aged 15 and over in 2018/19, "
+        f"{nums.n('found_in_w5', 'ghs')} were found again ({nums.share('linkage_rate', 'ghs')}). "
+        "After keeping those with no severe difficulty in 2018/19 and complete answers, "
+        f"{nums.n('analysis_sample', 'ghs')} could be used. {nums.n('onset_cases', 'ghs')} of "
+        "them had a severe difficulty by 2023/24."
+    )
+
+
+def rcc_line(nums: Numbers) -> str:
+    """The random common cause check, with what its allowance means (section 5.4 item 2)."""
+    verdict = "passed" if nums.flag("rcc_pass") else "failed"
+    return (
+        "Adding a factor made of pure noise moved the one-repetition estimate by "
+        f"{nums.num('summary.mpi.rcc_moved.value', 100, 2)} points. The allowance, "
+        f"{nums.num('summary.mpi.rcc_allowed.value', 100, 2)} points, is the range of that "
+        "estimate across five ways of splitting the households into folds "
+        f"({nums.num('summary.mpi.rcc_seed_min.value')} to "
+        f"{nums.num('summary.mpi.rcc_seed_max.value')}): the fold split alone moves it that "
+        f"much. The check {verdict}. The main estimate is the median of "
+        f"{nums.value('n_rep', decimals=0)} repetitions, which ranged from "
+        f"{nums.num('summary.mpi.primary_rep_min.value')} to "
+        f"{nums.num('summary.mpi.primary_rep_max.value')}."
     )
 
 
@@ -218,7 +265,15 @@ def reasons(nums: Numbers, sensitivity_href: str) -> list[str]:
 
 
 def misclassification(nums: Numbers) -> str:
-    """Section 3.2 / 7: the exposure misclassification, with S5 as the other bound."""
+    """Section 3.2 / 7: the exposure misclassification, with S5 as the other definition."""
+    lower = nums.raw("estimates.s5_unasked_severe.estimate") < nums.raw(
+        "estimates.primary.estimate"
+    )
+    s5_side = (
+        "S5 came out lower than the main estimate, so it is not an upper bound."
+        if lower
+        else "S5 came out at or above the main estimate."
+    )
     return (
         f"Who counts as having a severe difficulty comes from {MEASURE}. For seeing, hearing "
         "and walking, the survey asks how hard it is only of people who said yes to a "
@@ -229,8 +284,7 @@ def misclassification(nums: Numbers) -> str:
         "zero. Counting all of them as severe instead (secondary question S5, "
         f"{nums.count('estimates.s5_unasked_severe.n_exposed')} households with such a "
         f"member) gives {nums.est('s5_unasked_severe')} points "
-        f"(95% confidence interval {nums.ci('s5_unasked_severe')}). The pre-registration "
-        "treats the two definitions as two bounds. S5's group is much larger and includes "
-        "people whose difficulty was never graded, so many of them may have only some "
-        "difficulty."
+        f"(95% confidence interval {nums.ci('s5_unasked_severe')}). The yes/no screener does "
+        "not separate some from a lot of difficulty, so this group probably includes milder "
+        f"cases; {s5_side}"
     )

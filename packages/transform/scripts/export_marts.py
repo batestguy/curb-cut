@@ -252,6 +252,10 @@ def poverty_payload(con: duckdb.DuckDBPyConnection) -> dict[str, Any]:
         ),
         "robustness": span("robustness"),
         "leave_one_zone_out": span("leave_one_zone_out"),
+        # The smallest group (exposed or comparison) behind any published estimate.
+        "smallest_group": min(
+            min(e["n_exposed"], e["n_unexposed"]) for e in estimates.values() if not e["suppressed"]
+        ),
         # The widest range the three observed-covariate benchmarks move the estimate to.
         "benchmarks": {
             "min": min(

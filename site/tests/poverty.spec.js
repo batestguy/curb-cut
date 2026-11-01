@@ -20,6 +20,8 @@ const CONSTANTS = new Set([
   '1', '2', '5', '7', '15', '26', '30', '95', '100', '0.01', '0.99',
   // Citations: MPI 2021 version 1.0, GHS-Panel Waves 4 and 5.
   '1.0', '4',
+  // The propensity quantile rows (1%, 5%, 25%, ... 99% of households below).
+  '25', '50', '75', '99',
 ]);
 
 function fixed(value, decimals) {

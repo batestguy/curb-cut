@@ -94,13 +94,16 @@ severe difficulty are 11.7 percentage points more likely to be
 multidimensionally poor than people in comparable households (95%
 confidence interval 6.1 to 17.2 points).</strong> In comparable
 households without such a member, 62.9% of people are multidimensionally
-poor. With the difference added, the figure for households with such a
-member is 74.6%.</p>
+poor. Standardised to the same mix of households, the figure with such a
+member would be 74.6%.</p>
 <p>Exposure is rare, so the main estimate leans on few households. Among
 households where the comparison is better supported (those whose
 estimated chance of having such a member was between 0.01 and 0.99,
 38.3% of people), the difference is 8.1 points (95% confidence interval
-2.1 to 14.1). Both estimates are shown with equal weight.</p>
+2.1 to 14.1). It is a secondary estimate, reported next to the main one.
+Of 52,022 households in the sample, 545 (1.1% of people) were left out
+for missing poverty data and 59 (0.2% of people) for missing disability
+answers.</p>
 <h2 id="what-this-does-and-does-not-show">What this does and does not
 show</h2>
 <p>This is <strong>an adjusted association, not a causal
@@ -117,11 +120,14 @@ not in the survey, and a factor like these could account for part or all
 of the difference. <a href="https://batestguy.github.io/curb-cut/poverty.html#sensitivity-heading">How
 strong such a factor would need to be</a>.</li>
 </ol>
-<p>A hidden factor would not need to be strong: one accounting for 1.8%
-of what is left unexplained in both poverty and in which households have
-such a member could bring the estimate to zero (E-value 1.66). But a
-factor as strong as any measured one (the head’s education, place, or
-urban or rural) would move it only to between 10.7 and 12.7 points.</p>
+<p>How strong would a hidden factor need to be? Two answers to two
+different questions. In the worst case, a factor lined up perfectly with
+both poverty and which households have such a member, accounting for
+1.8% of what is left unexplained in each, could bring the estimate to
+zero. A factor as strong as the head’s education, place or urban or
+rural, and lined up with poverty and exposure the way each of those is,
+would move it only to between 10.7 and 12.7 points. On the risk-ratio
+scale, the E-value is 1.66.</p>
 <p>Who counts as having a severe difficulty comes from MPI’s own
 disability questions (not the Washington Group’s DISABILITY3 measure).
 For seeing, hearing and walking, the survey asks how hard it is only of
@@ -132,21 +138,22 @@ puts some severely disabled people from poorer households in the
 comparison group; the pre-registration expected this to pull the
 estimate towards zero. Counting all of them as severe instead (secondary
 question S5, 4,086 households with such a member) gives 5.4 points (95%
-confidence interval 1.5 to 9.7). The pre-registration treats the two
-definitions as two bounds. S5’s group is much larger and includes people
-whose difficulty was never graded, so many of them may have only some
-difficulty.</p>
+confidence interval 1.5 to 9.7). The yes/no screener does not separate
+some from a lot of difficulty, so this group probably includes milder
+cases; S5 came out lower than the main estimate, so it is not an upper
+bound.</p>
 <h2 id="how-it-was-checked">How it was checked</h2>
 <p>The plan was registered publicly before any poverty figure was split
-by disability (https://osf.io/kes3p/, 2026-11-01 05:49:21 UTC), with no
-deviations so far. Our rebuilt index reproduces NBS’s published
-comparison (Table 7: 72.0% against NBS’s 71.4% poor with a person with a
-disability, 61.8% against 61.8% without; the check passed). Eight other
-reasonable choices give 10.1 to 13.0 points; leaving out one zone at a
-time gives 9.3 to 12.7. Shuffling exposure 100 times gave estimates
-centred near zero, and a random extra factor moved the estimate by only
-0.34 points (check passed). A survey-weighted linear model gives 8.0
-points (3.4 to 12.6).</p>
+by disability (https://osf.io/kes3p/, 2026-11-01 05:49:21 UTC), with
+deviations logged so far: none. Our rebuilt index reproduces NBS’s
+published comparison (Table 7: 72.0% against NBS’s 71.4% poor with a
+person with a disability, 61.8% against 61.8% without; the check
+passed). Eight other reasonable choices give 10.1 to 13.0 points;
+leaving out one zone at a time gives 9.3 to 12.7. Shuffling exposure 100
+times gave estimates centred near zero. A random extra factor moved the
+one-repetition estimate by 0.34 points, within the 2.55 points that the
+fold split alone moves it (check passed). A survey-weighted linear model
+gives 8.0 points (3.4 to 12.6).</p>
 <h2 id="other-registered-results">Other registered results</h2>
 <ul>
 <li>NBS’s broad definition (S2): 6.8 points (3.5 to 10.2). The household
@@ -156,28 +163,30 @@ score): health 2.0 (0.9 to 3.2), work and shocks 1.3 (0.5 to 2.2),
 education 0.4 (-0.2 to 1.0), living standards 0.3 (-0.5 to 1.0).
 Descriptive only.</li>
 <li><strong>Exploratory</strong> (the same people in 2018/19 and
-2023/24, General Household Survey-Panel): among 10,933 people with no
-severe difficulty in 2018/19, 364 had one by 2023/24. Work: -26.4
-percentage points (-33.2 to -19.7): the share who worked went down by
-more, or up by less, among people whose severe difficulty began between
-the rounds than among comparable people without onset. Consumption:
-0.035 log points (-0.045 to 0.114): the interval includes zero, so the
-survey cannot show a difference in consumption. Two rounds only; the
-comparison assumes the two groups would otherwise have changed alike,
-which cannot be tested.</li>
+2023/24, General Household Survey-Panel): of 15,229 people aged 15 and
+over in 2018/19, 13,266 were found again; 10,933 had no severe
+difficulty in 2018/19 and complete answers, and 364 of them had one by
+2023/24. Work: -26.4 percentage points (-33.2 to -19.7): the share who
+worked went down by more, or up by less, among people whose severe
+difficulty began between the rounds than among comparable people without
+onset. Consumption: 0.035 log points (-0.045 to 0.114): the interval
+includes zero, so the survey cannot show a difference in consumption.
+Two rounds only; the comparison assumes the two groups would otherwise
+have changed alike, which cannot be tested, and the communication and
+work questions are worded differently in the two rounds.</li>
 </ul>
 <h2 id="what-this-suggests-for-policy">What this suggests for
 policy</h2>
 <ul>
 <li><strong>Find these households.</strong> Multidimensional poverty is
-more common in households with a severely disabled member. Poverty
-programmes and social registers can record disability, with the
-Washington Group questions, so that these households can be
-reached.</li>
+more common in households with a severely disabled member (an adjusted
+association). Poverty programmes and social registers can record
+disability, with the Washington Group questions, so that these
+households can be reached.</li>
 <li><strong>Ask everyone the severity questions.</strong> MPI 2021 asked
 how hard seeing, hearing or walking is only of people who use an aid.
 Asking the Washington Group Short Set of every member aged 5 and over
-would close the main measurement gap found here.</li>
+would close the main measurement gap in this survey.</li>
 <li><strong>Read the number as a description.</strong> It shows where
 poverty is concentrated, not what would happen if disability were
 prevented or supported. Policies should be judged on their own
@@ -201,7 +210,9 @@ Microdata Library.</li>
 Demographic and Health Survey 2024 (National Population Commission and
 ICF, The DHS Program); no DHS data are used in this brief.</li>
 <li>Only estimates that passed a disclosure check (at least 30
-households or people in each group) are published.</li>
+households or people in each group; the smallest group behind any
+published estimate has 60 households or people) are published.</li>
 </ul>
 </body>
 </html>
+<!-- source markdown sha256: 96fcbdc4d7f43c96d19f036ccd1acb4f4a5b653073d5fde18c52ec5ffb1261ce -->

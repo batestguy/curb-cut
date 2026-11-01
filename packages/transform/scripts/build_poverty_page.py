@@ -165,7 +165,29 @@ def signed_box(nums: Any, eid: str, heading: str, body: str) -> str:
     return box
 
 
+QUANTILES = ("q01", "q05", "q25", "q50", "q75", "q95", "q99")
+
+
+def quantile_table(nums: Any) -> str:
+    """Section 5.1: the cross-fitted propensity's quantiles, exposed and unexposed."""
+    rows = [
+        [
+            esc(f"{int(key[1:])}% of households below"),
+            nums.num(f"summary.mpi.quantile_exposed_{key}.value", 1, 3),
+            nums.num(f"summary.mpi.quantile_unexposed_{key}.value", 1, 3),
+        ]
+        for key in QUANTILES
+    ]
+    return table(
+        "The model's estimated chance that a household has a member with a severe difficulty "
+        "(propensity, averaged over the repetitions, before the 0.01 cut-off), by group",
+        ["Quantile", "With such a member", "Without"],
+        rows,
+    )
+
+
 def result_section(nums: Any, charts: Mapping[str, Mapping[str, Any]]) -> str:
+    quantiles = quantile_table(nums)
     reasons = "".join(f"<li>{r}</li>" for r in text.reasons(nums, "#sensitivity-heading"))
     overlap = (
         "Few households have a member with a severe difficulty: "
@@ -198,13 +220,18 @@ def result_section(nums: Any, charts: Mapping[str, Mapping[str, Any]]) -> str:
         signed_box(
             nums,
             "overlap_population",
-            "Households where the comparison is better supported",
+            "Secondary: households where the comparison is better supported",
             "Comparable households without such a member: "
             f"{nums.num('estimates.overlap_population.mu0')}% poor.",
         )
     }
 </div>
 <p>{overlap}</p>
+<p>{text.missing_line(nums)}</p>
+<details class="more">
+<summary>How the estimated chance of having such a member was spread</summary>
+{quantiles}
+</details>
 <div class="caveat">
 <h3 id="reasons-heading">An adjusted association, not a causal effect</h3>
 <p>This does not show that disability makes households poorer. Two reasons:</p>
@@ -274,7 +301,6 @@ def checks_section(nums: Any) -> str:
     names = dict(LEARNERS)
     chosen_y = names[nums.raw(f"{sel}.outcome_chosen.value_text")].lower()
     chosen_d = names[nums.raw(f"{sel}.propensity_chosen.value_text")].lower()
-    rcc = "passed" if nums.flag("rcc_pass") else "failed"
     as_extreme = nums.raw("derived.placebo_as_extreme")
     placebo_far = (
         "None of them was as far from zero as the real estimate"
@@ -308,9 +334,7 @@ re-ran the analysis each time. The fake estimates averaged
 {nums.share("placebo_share_ci_excluding_0", decimals=0)} of their intervals left out zero
 (about 5% expected). {placebo_far}: empirical p =
 {nums.value("placebo_empirical_p", decimals=3)}.</li>
-<li><strong>A random extra factor.</strong> Adding a factor made of pure noise moved the
-estimate by {nums.num("summary.mpi.rcc_moved.value", 100, 2)} points; up to
-{nums.num("summary.mpi.rcc_allowed.value", 100, 2)} was allowed. The check {rcc}.</li>
+<li><strong>A random extra factor.</strong> {text.rcc_line(nums)}</li>
 <li><strong>Leaving out one zone at a time.</strong> The estimate stayed between
 {nums.num("derived.leave_one_zone_out.min")} and {nums.num("derived.leave_one_zone_out.max")}
 points.</li>
@@ -459,7 +483,8 @@ S2 (NBS's broad definition) and S3 (the head has the difficulty) were registered
 {sec}
 <h3 id="dimensions-heading">Where the difference sits (S4)</h3>
 <p>The poverty index has four dimensions. This shows how much of the difference in the
-deprivation score (S1) sits in each. It is descriptive: it shows where, not why.</p>
+deprivation score (S1) sits in each. It is descriptive: it shows where, not why. The four parts
+are separate estimates and do not add exactly to S1.</p>
 {figure(charts["poverty_dimensions"], "dimensions-chart", "The same figures as a table:")}
 <details class="more">
 <summary>Within urban and rural areas and within each zone (exploratory)</summary>
@@ -498,10 +523,9 @@ def ghs_section(nums: Any) -> str:
         return "The interval does not include zero."
 
     def mde(outcome: str) -> str:
-        run = "run" if nums.flag(f"{outcome}_run", "ghs") else "not run"
-        return (
-            f"{nums.value(f'{outcome}_mde_sd', 'ghs', 2)} standard deviations of the change ({run})"
-        )
+        run = "analysed" if nums.flag(f"{outcome}_run", "ghs") else "not analysed"
+        value = nums.value(f"{outcome}_mde_sd", "ghs", 2)
+        return f"{value} standard deviations of the change, so it was {run}"
 
     agree = max(
         nums.raw("summary.ghs.dlog_consumption_r_max_abs_diff.value"),
@@ -569,11 +593,7 @@ def ghs_section(nums: Any) -> str:
 exploratory: two outcomes, intervals only, no claim that a difference is supported.</p>
 </div>
 <p>The General Household Survey-Panel visited the same households in 2018/19 and 2023/24, and
-both rounds asked the Washington Group's six questions. We followed people aged 15 and over
-who had no severe difficulty in 2018/19. Of {nums.n("w4_people_15plus", "ghs")} such people,
-{nums.n("found_in_w5", "ghs")} were found again ({nums.share("linkage_rate", "ghs")}), and
-{nums.n("analysis_sample", "ghs")} could be used. {nums.n("onset_cases", "ghs")} of them had a
-severe difficulty by 2023/24.</p>
+both rounds asked the Washington Group's six questions. {text.ghs_sample_line(nums)}</p>
 <p>A rule fixed in advance said each outcome is analysed only if the survey could detect a
 difference of at most half a standard deviation of the change. The smallest detectable
 difference was {mde("dlog_consumption")} for consumption and {mde("dwork")} for work.</p>
@@ -588,8 +608,8 @@ difference was {mde("dlog_consumption")} for consumption and {mde("dwork")} for 
 survey's weight for people followed over time.</p>
 <p><strong>What cannot be tested.</strong> The comparison assumes that, without the onset, people
 with onset would have changed like the comparison group. That assumption cannot be checked
-with two rounds. Work can also change first: losing work can come before, or alongside, a
-difficulty.</p>
+with two rounds. Onset is only seen at the second round, so the order of change (the
+difficulty first, or the change in work first) is unknown.</p>
 <p><strong>Questions that differ between the rounds.</strong> In 2023/24 the communication
 question adds "using your usual language". The work questions cover the same three kinds of
 work in both rounds (for someone outside the household, on the household's farm, and in the
@@ -614,26 +634,28 @@ def reading_section(nums: Any) -> str:
 {nums.ci("primary")}. A survey talks to a sample of households, not to everyone, so a
 different sample would give a slightly different figure. The interval shows that uncertainty: if
 the survey were repeated many times and an interval made the same way each time, about 95 in
-100 of them would contain the true value. Values near the middle are more likely than values
-near the ends. This interval does not include zero, so the survey can show a difference. It
-does not cover other kinds of uncertainty, such as factors that were not measured.</p>
+100 of them would contain the true value. This interval does not include zero, so the survey
+can show a difference. It does not cover other kinds of uncertainty, such as factors that were
+not measured.</p>
 <h3 id="read-weights-heading">Survey weights</h3>
-<p>Each household in the survey stands for many households in Nigeria, and some kinds of
-household were sampled more than others. Weights correct for this, so that the
-{nums.n("weights_n")} households in the analysis represent the whole population. The price is
-precision: with these weights, the sample carries about as much information as
-{nums.count("summary.mpi.kish_effective_n.value")} households sampled in equal proportion.</p>
+<p>Each household in the survey stands for many people in Nigeria, and some kinds of household
+were sampled more than others. The weights used here are population weights (the household's
+weight times its number of members), so that the {nums.n("weights_n")} households in the
+analysis represent the whole population. The price is precision: with these unequal weights,
+the households carry about as much information as
+{nums.count("summary.mpi.kish_effective_n.value")} households with equal weights would.</p>
 <h3 id="read-association-heading">An adjusted association, not an effect</h3>
-<p>In hot weather, more ice cream is sold and more people drown. Ice cream does not make people
-drown: the heat drives both. Comparing only days with the same weather takes the heat out of the
-comparison. That is what adjusting does. Here we compared households in the same senatorial
+<p>On rainy days, more people carry umbrellas and more pavements are wet. Umbrellas do not wet
+pavements: the rain does both. Comparing only days with the same weather takes the rain out of
+the comparison. That is what adjusting does. Here we compared households in the same senatorial
 district, urban or rural, with the same mix of ages, and with a head of the same sex and similar
 age and education. What remains is an adjusted association. It could still come from a factor
 nobody measured, or from poverty coming first, so it is not proof that one leads to the
 other.</p>
 <h3 id="read-points-heading">Percentage points and percent</h3>
 <p>Among comparable households without such a member, {nums.num("estimates.primary.mu0")}% of
-people are poor; with such a member, {nums.num("derived.primary_implied")}%. The difference is
+people are poor; standardised to the same mix of households, the figure with such a member would
+be {nums.num("derived.primary_implied")}%. The difference is
 {nums.est("primary")} percentage points: points are a simple subtraction of two percentages.
 Said another way, the share is {nums.num("derived.relative_increase", 100, 0)}% higher than
 the comparison households' share: percent compares the difference with the starting figure.
@@ -657,7 +679,8 @@ def registration_section(nums: Any) -> str:
 <dt>Plan and code frozen</dt><dd>tag {nums.text(f"{reg}.freeze_tag.value_text")}, commit
 <a href="{REPO}/commit/{esc(commit)}"><code>{nums.text(f"{reg}.freeze_commit.value_text")}</code>
 </a></dd>
-<dt>Deviations from the plan</dt><dd>{nums.text(f"{reg}.deviations.value_text")} so far</dd>
+<dt>Deviations from the plan</dt><dd>{nums.text(f"{reg}.deviations.value_text")} so far
+(<a href="{REPO}/blob/main/docs/preregistration-deviations.md">deviations log</a>)</dd>
 </dl>
 <p><a href="{text.PREREG_AT_FREEZE}">The pre-registration as frozen</a> (on GitHub, at the
 freeze tag). The published estimates and checks are
@@ -678,19 +701,22 @@ comparison reproduced above.</li>
 <li>NBS and the World Bank, <cite>General Household Survey-Panel</cite>, Wave 4 (2018/19,
 NGA_2018_GHSP-W4_v03_M) and Wave 5 (2023/24, NGA_2023_GHSP-W5_v02_M), World Bank Microdata
 Library.</li>
-<li>Only estimates that passed the project's disclosure check leave the restricted zone: none
-rests on fewer than 30 households (or people) in either group. No household-level data are
-published.</li>
+<li>Only estimates that passed the project's disclosure check leave the restricted zone: no
+estimate rests on fewer than 30 households (or people) in either group, and the smallest group
+behind any published estimate has {nums.count("derived.smallest_group")} (households for MPI,
+people for GHS). No household-level
+data are published.</li>
 </ul>
 </section>"""
 
 
-def head_html() -> str:
+def head_html(plain: Any) -> str:
     title = "Disability and poverty: Curb Cut"
     description = (
-        "Pre-registered analysis of NBS MPI 2021: how much more likely people in households "
-        "with a severely disabled member are to be multidimensionally poor, with intervals, "
-        "checks and plain-English explanations."
+        "Adjusted association, pre-registered, NBS MPI 2021: people in households with a "
+        f"severely disabled member are {plain.est('primary')} percentage points (95% confidence "
+        f"interval {plain.ci('primary')}) more likely to be multidimensionally poor than people "
+        "in comparable households. With checks and plain-English explanations."
     )
     return (
         '<!doctype html>\n<html lang="en-NG">\n<head>\n<meta charset="utf-8" />\n'
@@ -717,7 +743,10 @@ def nav_html() -> str:
 def page_html(payload: Mapping[str, Any], charts: Mapping[str, Mapping[str, Any]]) -> str:
     nums = text.Numbers(payload, html_mode=True)
     css = dot_svg.theme_css(charts["poverty_headline"])
-    return f"""{head_html()}<style>{css}</style>
+    plain = text.Numbers(payload, html_mode=False)
+    if plain.raw("derived.verdict") != "higher":
+        raise ValueError("the page's description is written for the 'higher' verdict")
+    return f"""{head_html(plain)}<style>{css}</style>
 </head>
 <body>
 <a class="skip-link" href="#main">Skip to main content</a>

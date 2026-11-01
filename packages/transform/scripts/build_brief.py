@@ -20,6 +20,7 @@ pre-registration rules out (``poverty_text.forbidden``).
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import os
@@ -115,7 +116,8 @@ Exposure is rare, so the main estimate leans on few households. Among households
 comparison is better supported (those whose estimated chance of having such a member was
 between 0.01 and 0.99, {nums.num("derived.share_inside_overlap")}% of people), the difference
 is {nums.est("overlap_population")} points (95% confidence interval
-{nums.ci("overlap_population")}). Both estimates are shown with equal weight.
+{nums.ci("overlap_population")}). It is a secondary estimate, reported next to the main one.
+{text.missing_line(nums)}
 
 ## What this does and does not show
 
@@ -124,11 +126,13 @@ makes households poorer. Two reasons:
 
 {reasons}
 
-A hidden factor would not need to be strong: one accounting for {nums.share("rv")} of what is
-left unexplained in both poverty and in which households have such a member could bring the
-estimate to zero (E-value {nums.value("evalue")}). But a factor as strong as any measured one
-(the head's education, place, or urban or rural) would move it only to between
-{nums.num("derived.benchmarks.min")} and {nums.num("derived.benchmarks.max")} points.
+How strong would a hidden factor need to be? Two answers to two different questions. In the
+worst case, a factor lined up perfectly with both poverty and which households have such a
+member, accounting for {nums.share("rv")} of what is left unexplained in each, could bring the
+estimate to zero. A factor as strong as the head's education, place or urban or rural, and
+lined up with poverty and exposure the way each of those is, would move it only to between
+{nums.num("derived.benchmarks.min")} and {nums.num("derived.benchmarks.max")} points. On the
+risk-ratio scale, the E-value is {nums.value("evalue")}.
 
 {text.misclassification(nums)}
 
@@ -136,7 +140,8 @@ estimate to zero (E-value {nums.value("evalue")}). But a factor as strong as any
 
 The plan was registered publicly before any poverty figure was split by disability
 ({nums.text(f"{reg}.osf_url.value_text")}, {nums.text(f"{reg}.registered_utc.value_text")}),
-with no deviations so far. Our rebuilt index reproduces NBS's published comparison (Table 7:
+with deviations logged so far: {nums.text(f"{reg}.deviations.value_text")}.
+Our rebuilt index reproduces NBS's published comparison (Table 7:
 {nums.value("table7_exposed", decimals=1)}% against NBS's
 {nums.value("table7_exposed_nbs", decimals=1)}% poor with a person with a disability,
 {nums.value("table7_unexposed", decimals=1)}% against
@@ -144,10 +149,12 @@ with no deviations so far. Our rebuilt index reproduces NBS's published comparis
 reasonable choices give {nums.num("derived.robustness.min")} to
 {nums.num("derived.robustness.max")} points; leaving out one zone at a time gives
 {nums.num("derived.leave_one_zone_out.min")} to {nums.num("derived.leave_one_zone_out.max")}.
-Shuffling exposure {nums.value("placebo_n", decimals=0)} times gave estimates centred near zero,
-and a random extra factor moved the estimate by only
-{nums.num("summary.mpi.rcc_moved.value", 100, 2)} points (check {rcc}). A survey-weighted linear
-model gives {nums.est("survey_lpm")} points ({nums.ci("survey_lpm")}).
+Shuffling exposure {nums.value("placebo_n", decimals=0)} times gave estimates centred near zero.
+A random extra factor moved the one-repetition estimate by
+{nums.num("summary.mpi.rcc_moved.value", 100, 2)} points, within the
+{nums.num("summary.mpi.rcc_allowed.value", 100, 2)} points that the fold split alone moves it
+(check {rcc}). A survey-weighted linear model gives {nums.est("survey_lpm")} points
+({nums.ci("survey_lpm")}).
 
 ## Other registered results
 
@@ -159,21 +166,25 @@ model gives {nums.est("survey_lpm")} points ({nums.ci("survey_lpm")}).
   {nums.est("s4_education")} ({nums.ci("s4_education")}), living standards
   {nums.est("s4_living_standards")} ({nums.ci("s4_living_standards")}). Descriptive only.
 - **Exploratory** (the same people in 2018/19 and 2023/24, General Household Survey-Panel):
-  among {nums.n("analysis_sample", "ghs")} people with no severe difficulty in 2018/19,
-  {nums.n("onset_cases", "ghs")} had one by 2023/24. Work: {nums.est("ghs_dwork")} percentage
+  of {nums.n("w4_people_15plus", "ghs")} people aged 15 and over in 2018/19,
+  {nums.n("found_in_w5", "ghs")} were found again; {nums.n("analysis_sample", "ghs")} had no
+  severe difficulty in 2018/19 and complete answers, and {nums.n("onset_cases", "ghs")} of
+  them had one by 2023/24. Work: {nums.est("ghs_dwork")} percentage
   points ({nums.ci("ghs_dwork")}): {work_line}. Consumption:
   {nums.est("ghs_dlog_consumption", decimals=3)} log points
   ({nums.ci("ghs_dlog_consumption", 3)}): {cons_line}. Two rounds only; the comparison
-  assumes the two groups would otherwise have changed alike, which cannot be tested.
+  assumes the two groups would otherwise have changed alike, which cannot be tested, and the
+  communication and work questions are worded differently in the two rounds.
 
 ## What this suggests for policy
 
 - **Find these households.** Multidimensional poverty is more common in households with a
-  severely disabled member. Poverty programmes and social registers can record disability,
-  with the Washington Group questions, so that these households can be reached.
+  severely disabled member (an adjusted association). Poverty programmes and social
+  registers can record disability, with the Washington Group questions, so that these
+  households can be reached.
 - **Ask everyone the severity questions.** MPI 2021 asked how hard seeing, hearing or walking
   is only of people who use an aid. Asking the Washington Group Short Set of every member
-  aged 5 and over would close the main measurement gap found here.
+  aged 5 and over would close the main measurement gap in this survey.
 - **Read the number as a description.** It shows where poverty is concentrated, not what
   would happen if disability were prevented or supported. Policies should be judged on their
   own evaluations.
@@ -193,7 +204,8 @@ model gives {nums.est("survey_lpm")} points ({nums.ci("survey_lpm")}).
   Survey 2024 (National Population Commission and ICF, The DHS Program); no DHS data are used
   in this brief.
 - Only estimates that passed a disclosure check (at least 30 households or people in each
-  group) are published.
+  group; the smallest group behind any published estimate has
+  {nums.count("derived.smallest_group")} households or people) are published.
 """
 
 
@@ -203,6 +215,20 @@ def build(payload: Mapping[str, Any]) -> str:
     if bad:
         raise ValueError(f"wording the pre-registration rules out: {sorted(set(bad))}")
     return out
+
+
+SOURCE_STAMP = "source markdown sha256:"
+
+
+def md_sha256(text_: str) -> str:
+    return hashlib.sha256(text_.encode("utf-8")).hexdigest()
+
+
+def html_matches(md_text: str, html_path: Path) -> bool:
+    """Whether the committed HTML was made from this markdown (its stamp)."""
+    if not html_path.exists():
+        return False
+    return f"<!-- {SOURCE_STAMP} {md_sha256(md_text)} -->" in html_path.read_text(encoding="utf-8")
 
 
 def to_html(md: Path, html: Path, pandoc: str) -> None:
@@ -223,8 +249,11 @@ def to_html(md: Path, html: Path, pandoc: str) -> None:
         ],
         check=True,
     )
-    # LF endings, as for every committed text file (.gitattributes).
-    html.write_text(html.read_text(encoding="utf-8"), encoding="utf-8", newline="\n")
+    # LF endings, as for every committed text file (.gitattributes), and the SHA-256 of the
+    # markdown it was made from, so that --check can tell a stale HTML in CI without pandoc.
+    body = html.read_text(encoding="utf-8").rstrip("\n")
+    stamp = f"<!-- {SOURCE_STAMP} {md_sha256(md.read_text(encoding='utf-8'))} -->"
+    html.write_text(f"{body}\n{stamp}\n", encoding="utf-8", newline="\n")
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -249,7 +278,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                 file=sys.stderr,
             )
             return 1
-        print(f"{args.md} matches the exported data")
+        if not html_matches(out, args.html_out):
+            print(
+                f"{args.html_out} was not made from the current markdown; rerun with --html",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"{args.md} matches the exported data, and {args.html_out.name} matches it")
         return 0
     args.md.parent.mkdir(parents=True, exist_ok=True)
     args.md.write_text(out, encoding="utf-8", newline="\n")

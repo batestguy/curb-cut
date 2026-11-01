@@ -30,7 +30,7 @@ from pathlib import Path
 from types import ModuleType
 
 import duckdb
-from disability_access_charts import Reference, Series, bar, choropleth, dot
+from disability_access_charts import Reference, Series, audit, bar, choropleth, dot
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DATA = ROOT / "site" / "public" / "data"
@@ -218,6 +218,7 @@ def _poverty_dot(
     title: str,
     value_label: str,
     chart_id: str,
+    unit_words: str,
 ) -> dict:
     """A dot plot of P5 estimates, x100 (percentage points or score points), with intervals.
 
@@ -227,7 +228,7 @@ def _poverty_dot(
     hidden = [label for label, e in found if e["suppressed"]]
     if hidden:
         raise SystemExit(f"{chart_id}: suppressed estimates {hidden}; no chart")
-    return dot(
+    doc = dot(
         [label for label, _ in found],
         [
             Series(
@@ -246,6 +247,38 @@ def _poverty_dot(
         chart_id=chart_id,
         findings=False,
     )
+    return neutral_alt_text(doc, unit_words)
+
+
+def _fixed(value: float) -> str:
+    text = f"{value:.1f}"
+    return text.lstrip("-") if float(text) == 0 else text
+
+
+def neutral_alt_text(doc: dict, unit_words: str) -> dict:
+    """Replace describe()'s alt-text with a neutral one built from the document's own data.
+
+    describe() names the highest and lowest estimates and whether the survey can show a
+    difference from the next one. These estimates come from one sample (not independent
+    groups), and no comparison between them was pre-registered, so the poverty charts say
+    only what each estimate and interval is, in table order, every row. The audit is rerun on
+    the new text (alt-text-matches-data must still pass).
+    """
+    data = doc["data"]
+    series = data["series"][0]
+    items = "; ".join(
+        f"{name} {_fixed(v)} {unit_words} (95% confidence interval {_fixed(lo)} to {_fixed(hi)})"
+        for name, v, lo, hi in zip(
+            data["categories"], series["values"], series["lower"], series["upper"], strict=True
+        )
+    )
+    n = len(data["categories"])
+    doc["alt_text"] = (
+        f"Dot plot: {doc['title']}. {n} dots, in table order: {items}. "
+        f"Source: {doc['meta']['source']}."
+    )
+    doc["audit"] = audit(doc)
+    return doc
 
 
 def poverty_charts(data_dir: Path) -> dict[str, dict]:
@@ -260,6 +293,7 @@ def poverty_charts(data_dir: Path) -> dict[str, dict]:
             ),
             value_label="Difference (percentage points)",
             chart_id="poverty_headline",
+            unit_words="percentage points",
         ),
         "poverty_dimensions": _poverty_dot(
             payload,
@@ -270,6 +304,7 @@ def poverty_charts(data_dir: Path) -> dict[str, dict]:
             ),
             value_label="Difference (points out of 100)",
             chart_id="poverty_dimensions",
+            unit_words="points",
         ),
     }
 

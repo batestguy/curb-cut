@@ -218,11 +218,21 @@ def test_page_structure_and_wording(payload: dict[str, Any], built: str) -> None
     assert "under 30" in plain
     assert "2 of S1, S2 and S3 are supported" in plain
     # Every <details> has a summary, every table a caption, inside a focusable region.
-    assert built.count("<details") == built.count("<summary>") == 3
+    assert built.count("<details") == built.count("<summary>") == 4
     assert built.count("<table>") == built.count("<caption>")
     assert built.count('role="region" tabindex="0"') == built.count("<table>")
-    # The overlap estimate has the same box as the main one.
+    # The overlap estimate has the same box as the main one, labelled secondary.
     assert built.count('<div class="p5-result">') == 2
+    assert "Secondary: households where the comparison is better supported" in plain
+    # Reporting the reviewer asked for: missing counts, quantiles, the RCC allowance, S4 note.
+    assert "were left out for missing poverty data" in plain
+    assert "of households below" in plain
+    assert "the fold split alone moves it that much" in plain
+    assert "do not add exactly to S1" in plain
+    assert "so it is not an upper bound" in plain
+    assert "two bounds" not in plain
+    assert "Values near the middle" not in plain
+    assert "Of 1,200 people aged 15 and over in 2018/19, 1,000 were found again" in plain
 
 
 @pytest.mark.parametrize(
@@ -267,6 +277,11 @@ def test_charts_pass_their_audits_and_use_the_payload(payload: dict[str, Any], t
     docs = charts_mod.poverty_charts(tmp_path)
     for doc in docs.values():
         assert doc["audit"]["passed"]
+        # Neutral alt-text: every row, in table order, no ranking or difference claims.
+        alt = doc["alt_text"]
+        assert "Highest" not in alt and "Lowest" not in alt and "difference from" not in alt
+        for name in doc["data"]["categories"]:
+            assert name in alt
         assert doc["meta"]["generator"] == "disability_access_charts.plots.dot"
         assert "findings" not in doc
     head = docs["poverty_headline"]["data"]["series"][0]
@@ -301,14 +316,20 @@ def test_brief_from_fixtures(payload: dict[str, Any], tmp_path: Path) -> None:
     assert "https://osf.io/abcde/" in flat
     assert "no DHS data are used in this brief" in flat
     assert "National Data Archive" in flat
-    assert len(md.split()) < 1100  # two printed pages; the PDF's page count is tested too
+    assert len(md.split()) < 1250  # about two printed pages; the PDF's page count is tested too
     data = tmp_path / "poverty.json"
     data.write_text(json.dumps(payload), encoding="utf-8")
     out = tmp_path / "brief.md"
-    assert brief_mod.main(["--data", str(data), "--md", str(out)]) == 0
-    assert brief_mod.main(["--data", str(data), "--md", str(out), "--check"]) == 0
+    page = tmp_path / "brief.html"
+    args = ["--data", str(data), "--md", str(out), "--html-out", str(page)]
+    assert brief_mod.main(args) == 0
+    # No HTML made from this markdown yet: the check fails.
+    assert brief_mod.main([*args, "--check"]) == 1
+    stamp = f"<!-- {brief_mod.SOURCE_STAMP} {brief_mod.md_sha256(md)} -->"
+    page.write_text(f"<html></html>\n{stamp}\n", encoding="utf-8")
+    assert brief_mod.main([*args, "--check"]) == 0
     out.write_text(md + "edited\n", encoding="utf-8")
-    assert brief_mod.main(["--data", str(data), "--md", str(out), "--check"]) == 1
+    assert brief_mod.main([*args, "--check"]) == 1
 
 
 def test_long_date() -> None:
