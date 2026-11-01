@@ -14,7 +14,7 @@ The one page to read first. It says where things stand and what happens next. Th
 | P3 Restricted zone + warehouse | ✅ done 2026-10-24 (author): PR #1 merged, CI green; all aggregates incl. MPI 2021 public | `dbt build` green on fixtures; disclosure check passes |
 | P4 Prevalence | ✅ P4a passed 2026-10-29; P4b passed 2026-10-30 (author): 37 state pages live, 0.2.0 on PyPI | P4a: map and comparison live · P4b: state pages live, 0.2 on PyPI |
 | P5 Poverty analysis | ✅ passed 2026-11-01 (author): PR #4 merged and deployed; results page https://batestguy.github.io/curb-cut/poverty.html and brief live; NBS National Data Archive copy sent the same day. Pre-registered (OSF https://osf.io/kes3p/, tag `p5-freeze`), no deviations. Details: Next actions → "P5: pick up here" | Pre-registration committed first; brief and results page live |
-| P6 API + site polish | 🟡 starting 2026-11-01 with the map redesign (option C, decisions log), branch `p6-map-redesign` | Accessibility 100 in CI; walkthrough video recorded; author's NVDA check; regular screen-reader user's feedback sought, not blocking (2026-10-24); acted on |
+| P6 API + site polish | 🟡 started 2026-11-01 with the map redesign (option C, decisions log), branch `p6-map-redesign`: **built, awaiting review** (library 0.3.0 prepared, not published; see Next actions) | Accessibility 100 in CI; walkthrough video recorded; author's NVDA check; regular screen-reader user's feedback sought, not blocking (2026-10-24); acted on |
 | P7 Launch | ⚪ not started | — |
 
 ## Done so far (P0)
@@ -86,6 +86,13 @@ The one page to read first. It says where things stand and what happens next. Th
 | Gemini / Groq real quotas | Accounts (P2) | 2026-10-16 |
 
 ## Next actions (pick up here)
+
+### P6: map redesign (2026-11-01): built, awaiting review
+
+Branch `p6-map-redesign`, not pushed. Option C from the decisions log, built in two commits:
+- **Library `disability-access-charts` 0.3.0** (prepared, **not published**, no tag): `choropleth(scheme="ylgnbu")` is the new default (light: ColorBrewer YlGnBu 5 `#ffffcc #a1dab4 #41b6c4 #2c7fb8 #253494`; dark, drawn for the library: `#4a4512 #2b7340 #1b8f96 #77bdf2 #d4ebff`); `scheme="green"` is the 0.2 look. Cased boundaries (edge over a wider halo) with their own 3:1 rule; map patterns by ink weight (plain, dots, lines, crosshatch, solid) with an ink per class; a colour-vision check (Machado 2009 simulation, CIEDE2000: error under 5, warning under 10; default minimum 10.3 light, 11.6 dark); legend-filter metadata checked against the data; schema 1.1. Details in `packages/disability-access-charts/docs/maps.md`.
+- **Site:** the map draws the casing and per-class ink; the legend is a vertical list of `aria-pressed` toggle buttons with 40 × 28 px patterned swatches (one class at a time; a second press or Esc shows all) and one polite live region ("Showing 6 states in 4% to under 6%: Adamawa, …" / "Showing all 37 states."). The legend adds five Tab stops before the map.
+- **Next:** `reviewer`, then the author's look (screenshots in the session scratchpad) and a keyboard + NVDA pass on the legend buttons; then a PR. Publishing 0.3.0 to PyPI (tag `charts-v0.3.0`) needs the author's go-ahead.
 
 ### P5: pick up here (2026-11-01)
 

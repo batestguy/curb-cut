@@ -4,7 +4,24 @@
 
 Built for [Curb Cut](https://github.com/batestguy/curb-cut), an accessible platform for Nigerian disability data. Every chart ships with alt-text built from its data, and the library then **checks that text against the data**: every number, and every comparison it recognises ("highest", "higher than", "twice", "ranked 3rd"). With survey estimates, it tests whether the confidence intervals actually support the claim. The same checker gates any LLM rewording and runs on any Plotly figure in CI.
 
-**Status: 0.2 (alpha).** English only, built so other languages can be added.
+**Status: 0.3 (alpha).** English only, built so other languages can be added.
+
+## New in 0.3: maps that are easier to read
+
+- **A clearer default map scheme.** `choropleth(scheme="ylgnbu")`, now the default: a colour-blind-safe yellow to green to blue scale (ColorBrewer's YlGnBu in the light theme, a matching dark palette that gets brighter with the value) with larger lightness steps than 0.2's greens. `MAP_SCHEMES` lists the schemes.
+- **Cased boundaries.** No one boundary colour stands out from both a pale yellow and a dark blue, so a theme can add a `halo`: the page draws a wide halo stroke under a narrow edge stroke. The audit asks that the edge is 3:1 against the background and the halo, and that the edge or the halo is 3:1 against the background and every fill.
+- **Map patterns ordered by ink weight**, lowest class lightest: plain, dots, lines, crosshatch, solid (`MAP_PATTERNS`; ordered subsets for fewer classes). **Each class has its own ink**, black or white, whichever contrasts more with its fill, audited at 3:1. Bars are unchanged.
+- **A colour-vision check.** Neighbouring fills are compared under simulated deuteranopia, protanopia and tritanopia (Machado et al. 2009) with CIEDE2000: an error under 5, a warning under 10. The default scheme's closest pair is 10.3 (light) and 11.6 (dark). Pure Python, in `disability_access_charts.vision`.
+- **Legend-filter metadata.** Each class lists its regions and the sentence a page announces when a legend button shows only that class ("Showing 6 states in 4% to under 6%: …"), checked against the data.
+
+What changed from 0.2, precisely:
+
+- **Changed default:** `choropleth()` uses `scheme="ylgnbu"` (and `MAP_THEMES` is now its themes). For the 0.2 look, pass `scheme="green"`: the 0.2 greens, one boundary colour, the 0.2 pattern order and one ink per theme. Its audit now adds a `colour-vision-target` warning (the greens reach 7.5 and 8.2), so `check --strict` fails on it.
+- Map documents use schema `"1.1"`: `themes` may have a `halo`, `patterns` has `sequence` and (outside the green scheme) `class_ink` in place of `ink`, classes have `regions` and `announce`, and there are `legend`, `keyboard.legend_filter` and `meta.scheme`. `legend_filter=False` leaves the legend metadata out.
+- New audit checks: cased-boundary contrast, `colour-vision`, `colour-vision-target`, `legend-filter-matches-data`, and `patterns-ink-rule` for maps.
+- `svg_pattern()` takes `ink=None` for a tile with no ink. Bars, dot plots and everything else are unchanged apart from the version number.
+
+See [the maps note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/maps.md) and [the patterns note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/patterns.md).
 
 ## New in 0.2
 
@@ -84,7 +101,7 @@ check_alt_text("Area A is higher than Area B.", data)
 | `audit` | every check, each with a WCAG criterion and a severity |
 | `meta` | generator, library version, source, alt-text language and origin |
 | `findings` | with `findings=True`: the comparisons, their tests, the FDR result and the sentences |
-| `patterns` | with patterns on: the tiles, each series' or class's tile, and each theme's ink |
+| `patterns` | with patterns on: the tiles, each series' or class's tile, and the ink (each theme's, or since 0.3 each map class's) |
 
 Also: `audit(fig)` for a document or any Plotly figure, `theme(fig, "dark")`, `to_html(doc)` and `to_csv(doc)`, `figure(doc)` for a Plotly `Figure`, and a CLI for CI:
 
@@ -115,7 +132,7 @@ disability-access-charts check --strict charts/*.json   # warnings fail too
 ## More
 
 - **Languages:** one table of templates and claim words per language (`_lang/en.py`); only English ships so far. Numbers stay as digits in every language, so the checker still works.
-- **Maps:** `choropleth()` builds a shaded-map document in fixed classes, each with its own pattern (up to five classes), with the same alt-text checks, a table and an audit; `audit()` and `check` handle it. The page draws the SVG from the document. How its colours and patterns meet WCAG is in [the maps note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/maps.md).
+- **Maps:** `choropleth()` builds a shaded-map document in fixed classes, each with its own pattern (up to five classes, ordered by ink weight) on a colour-blind-safe scale with cased boundaries, with the same alt-text checks, a table and an audit; `audit()` and `check` handle it. The page draws the SVG from the document. How its colours and patterns meet WCAG is in [the maps note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/maps.md).
 - **Python:** 3.10 or later. Tests and CI run on 3.12; 3.10 is checked by installing the wheel and running the examples.
 - **Examples** (in the source distribution and the repository's `examples/`): JONAPWD's 2025 *assumed* figures by disability type (a WHO 15% benchmark applied to population, not survey estimates), a synthetic dot plot with intervals and findings, a synthetic patterned map written out as a standalone SVG page, and an audit of a plain Plotly figure. The installed package holds no data.
 
