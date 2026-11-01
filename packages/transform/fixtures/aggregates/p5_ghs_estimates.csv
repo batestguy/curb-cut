@@ -1,0 +1,5 @@
+source,dataset_version,analysis,group,estimate_id,label,outcome,exposure,scale,learners,estimate,se,ci_low,ci_high,pval,holm_p,supported,mu0,n,n_exposed,n_unexposed,suppressed
+ghs_w4_w5,FIXTURE (invented),ghs,e1,ghs_dlog_consumption,Change in log household consumption per person,dlog_consumption,onset,difference in the change of log consumption per person (log points),,0.03,0.04,-0.05,0.11,,,,,900,40,860,False
+ghs_w4_w5,FIXTURE (invented),ghs,r_check,ghs_dlog_consumption_r,Change in log household consumption per person (R fixest check),dlog_consumption,onset,difference in the change of log consumption per person (log points),,0.03,0.04,-0.05,0.11,,,,,900,40,860,False
+ghs_w4_w5,FIXTURE (invented),ghs,e1,ghs_dwork,Change in whether the person worked in the last 7 days,dwork,onset,difference in the change of the share working (proportion; x100 = points),,-0.2,0.04,-0.28,-0.12,,,,,900,40,860,False
+ghs_w4_w5,FIXTURE (invented),ghs,r_check,ghs_dwork_r,Change in whether the person worked in the last 7 days (R fixest check),dwork,onset,difference in the change of the share working (proportion; x100 = points),,-0.2,0.04,-0.28,-0.12,,,,,900,40,860,False

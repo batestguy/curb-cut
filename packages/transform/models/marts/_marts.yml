@@ -250,3 +250,40 @@ models:
               arguments:
                 min_value: 0
                 max_value: 1
+
+  - name: mart_p5_estimates
+    description: >
+      P5 estimates (pre-registered, OSF https://osf.io/kes3p/) for the poverty page and the
+      brief, with the display factor (x100 for percentage points or score points). Adjusted
+      associations, not causal effects; exposure uses MPI's own disability questions.
+      Exported into poverty.json. assert_p5_estimates_valid checks each interval.
+    columns:
+      - name: estimate_id
+        data_tests: [unique, not_null]
+      - name: display_factor
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [1, 100]
+                quote: false
+      - name: group_order
+        data_tests: [not_null]
+      - name: se
+        data_tests: [non_negative]
+      - name: n_exposed
+        data_tests: [non_negative]
+      - name: n_unexposed
+        data_tests: [non_negative]
+      - name: mu0
+        data_tests: [non_negative]
+
+  - name: mart_p5_summary
+    description: P5 scalar results for the poverty page and the brief. Exported into poverty.json.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [analysis, item_id]
+    columns:
+      - name: value
+        description: Null only for text items and suppressed counts.

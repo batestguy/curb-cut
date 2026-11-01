@@ -70,6 +70,26 @@ sources:
           include_mpi is true (the default).
         meta:
           external_location: "read_csv('{{ var('mpi_aggregates_path') }}', header = true, all_varchar = true)"
+      - name: p5_mpi_estimates
+        description: >
+          P5 (pre-registered, OSF https://osf.io/kes3p/): MPI 2021 model estimates, one per
+          row with its 95% interval (adjusted associations, not causal effects). Written by
+          disclosure.publish_estimates: suppressed when the exposed or the comparison group
+          has fewer than 30 unweighted households.
+        meta:
+          external_location: "read_csv('{{ var('aggregates_dir') }}/p5_mpi_estimates.csv', header = true, all_varchar = true)"
+      - name: p5_ghs_estimates
+        description: P5 exploratory E1 (GHS-Panel W4 to W5), the two estimates and R's check.
+        meta:
+          external_location: "read_csv('{{ var('aggregates_dir') }}/p5_ghs_estimates.csv', header = true, all_varchar = true)"
+      - name: p5_mpi_summary
+        description: P5 scalar results for MPI (checks, sensitivity, overlap, sample, registration).
+        meta:
+          external_location: "read_csv('{{ var('aggregates_dir') }}/p5_mpi_summary.csv', header = true, all_varchar = true)"
+      - name: p5_ghs_summary
+        description: P5 scalar results for GHS E1 (linkage, attrition, power, run rule, R check).
+        meta:
+          external_location: "read_csv('{{ var('aggregates_dir') }}/p5_ghs_summary.csv', header = true, all_varchar = true)"
 
   - name: worldpop
     description: >

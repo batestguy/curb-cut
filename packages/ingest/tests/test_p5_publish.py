@@ -223,6 +223,15 @@ def fake_ghs() -> dict[str, Any]:
                 "attriters": 32.0,
                 "standardised_difference": 0.3,
             },
+            *(
+                {
+                    "characteristic": name,
+                    "stayers": 0.5,
+                    "attriters": 0.4,
+                    "standardised_difference": 0.1,
+                }
+                for name in ("female", "urban", "severe_w4")
+            ),
             {
                 "characteristic": "zone=1. North Central",
                 "stayers": 0.17,
@@ -235,7 +244,11 @@ def fake_ghs() -> dict[str, Any]:
     }
 
 
-MANIFEST = {"mode": "real", "git": {"commit": "a" * 40, "dirty": False}, "created": "x"}
+MANIFEST = {
+    "mode": "real",
+    "git": {"commit": "a" * 40, "dirty": False},
+    "created": "2026-11-01T09:28:07+00:00",
+}
 
 
 def _read(path: Path) -> list[dict[str, str]]:
@@ -361,7 +374,7 @@ DATASET = disclosure.Dataset("t", "v1", "Test", "Invented", "Invented", "Invente
 
 
 def _estimate(**over: Any) -> dict[str, Any]:
-    row = {c: None for c in disclosure.ESTIMATE_COLUMNS}
+    row: dict[str, Any] = {c: None for c in disclosure.ESTIMATE_COLUMNS}
     row.update(
         analysis="mpi",
         group="headline",
@@ -389,7 +402,7 @@ def test_gate_estimates_rules() -> None:
     )
     out = disclosure.gate_estimates(frame, DATASET).set_index("estimate_id")
     assert list(out["suppressed"]) == [False, True, False]
-    assert math.isnan(out.loc["b", "estimate"])
+    assert pd.isna(out.loc["b", "estimate"])
     assert out.loc["c", "estimate"] == 0.1
     with pytest.raises(disclosure.GateError, match="share"):
         disclosure.gate_estimates(pd.DataFrame([_estimate(), _estimate()]), DATASET)

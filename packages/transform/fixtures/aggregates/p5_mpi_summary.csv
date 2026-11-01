@@ -1,0 +1,99 @@
+source,dataset_version,analysis,section,item_id,label,kind,value,value_text,suppressed
+mpi2021,FIXTURE (invented),mpi,table7,table7_exposed,"Ours: People who are poor, households with a person with a disability (%)",number,72.0,,False
+mpi2021,FIXTURE (invented),mpi,table7,table7_exposed_nbs,"NBS Table 7: People who are poor, households with a person with a disability (%)",number,71.4,,False
+mpi2021,FIXTURE (invented),mpi,table7,table7_exposed_pass,"Within tolerance: People who are poor, households with a person with a disability (%)",flag,1.0,,False
+mpi2021,FIXTURE (invented),mpi,table7,table7_unexposed,"Ours: People who are poor, households without (%)",number,61.8,,False
+mpi2021,FIXTURE (invented),mpi,table7,table7_unexposed_nbs,"NBS Table 7: People who are poor, households without (%)",number,61.8,,False
+mpi2021,FIXTURE (invented),mpi,table7,table7_unexposed_pass,"Within tolerance: People who are poor, households without (%)",flag,1.0,,False
+mpi2021,FIXTURE (invented),mpi,table7,table7_gap,Ours: Gap (percentage points),number,10.2,,False
+mpi2021,FIXTURE (invented),mpi,table7,table7_gap_nbs,NBS Table 7: Gap (percentage points),number,9.6,,False
+mpi2021,FIXTURE (invented),mpi,table7,table7_gap_pass,Within tolerance: Gap (percentage points),flag,1.0,,False
+mpi2021,FIXTURE (invented),mpi,table7,table7_tolerance,"Tolerance (points, each figure)",number,2.0,,False
+mpi2021,FIXTURE (invented),mpi,table7,table7_all_pass,Table 7 check passed,flag,1.0,,False
+mpi2021,FIXTURE (invented),mpi,evalue,evalue_rr,Risk ratio,number,1.17,,False
+mpi2021,FIXTURE (invented),mpi,evalue,evalue_rr_ci_low,"Risk ratio, 95% interval lower",number,1.1,,False
+mpi2021,FIXTURE (invented),mpi,evalue,evalue_rr_ci_high,"Risk ratio, 95% interval upper",number,1.25,,False
+mpi2021,FIXTURE (invented),mpi,evalue,evalue,E-value for the estimate,number,1.6,,False
+mpi2021,FIXTURE (invented),mpi,evalue,evalue_ci,E-value for the interval limit closer to 1,number,1.4,,False
+mpi2021,FIXTURE (invented),mpi,sensitivity,rv,DoubleML robustness value RV,share,0.3,,False
+mpi2021,FIXTURE (invented),mpi,sensitivity,rva,DoubleML robustness value RVa (interval),share,0.2,,False
+mpi2021,FIXTURE (invented),mpi,sensitivity,default_theta_lower,"Bound at 3% strength, lower",number,-0.07,,False
+mpi2021,FIXTURE (invented),mpi,sensitivity,default_ci_lower,"Interval at 3% strength, lower",number,-0.11,,False
+mpi2021,FIXTURE (invented),mpi,sensitivity,default_theta_upper,"Bound at 3% strength, upper",number,0.3,,False
+mpi2021,FIXTURE (invented),mpi,sensitivity,default_ci_upper,"Interval at 3% strength, upper",number,0.34,,False
+mpi2021,FIXTURE (invented),mpi,sensitivity,default_cf_y,Assumed strength on poverty (cf_y),share,0.1,,False
+mpi2021,FIXTURE (invented),mpi,sensitivity,default_cf_d,Assumed strength on exposure (cf_d),share,0.01,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_head_education_cf_y,head_education: cf_y,number,0.1,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_head_education_cf_d,head_education: cf_d,number,0.01,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_head_education_rho,head_education: rho,number,0.05,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_head_education_theta_lower,"head_education: bound, lower",number,0.09,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_head_education_ci_lower,"head_education: interval, lower",number,0.05,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_head_education_theta_upper,"head_education: bound, upper",number,0.11,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_head_education_ci_upper,"head_education: interval, upper",number,0.15,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_place_cf_y,place: cf_y,number,0.1,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_place_cf_d,place: cf_d,number,0.01,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_place_rho,place: rho,number,0.05,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_place_theta_lower,"place: bound, lower",number,0.09,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_place_ci_lower,"place: interval, lower",number,0.05,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_place_theta_upper,"place: bound, upper",number,0.11,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_place_ci_upper,"place: interval, upper",number,0.15,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_sector_cf_y,sector: cf_y,number,0.1,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_sector_cf_d,sector: cf_d,number,0.01,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_sector_rho,sector: rho,number,0.05,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_sector_theta_lower,"sector: bound, lower",number,0.09,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_sector_ci_lower,"sector: interval, lower",number,0.05,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_sector_theta_upper,"sector: bound, upper",number,0.11,,False
+mpi2021,FIXTURE (invented),mpi,benchmark,bench_sector_ci_upper,"sector: interval, upper",number,0.15,,False
+mpi2021,FIXTURE (invented),mpi,sensemakr,sensemakr_estimate,Weighted linear model estimate,number,0.08,,False
+mpi2021,FIXTURE (invented),mpi,sensemakr,sensemakr_se,Weighted linear model standard error,number,0.016,,False
+mpi2021,FIXTURE (invented),mpi,sensemakr,sensemakr_rv_q,sensemakr robustness value,share,0.02,,False
+mpi2021,FIXTURE (invented),mpi,sensemakr,sensemakr_rv_qa,sensemakr robustness value (interval),share,0.013,,False
+mpi2021,FIXTURE (invented),mpi,sensemakr,sensemakr_partial_r2,Partial R2 of exposure with poverty,share,0.0005,,False
+mpi2021,FIXTURE (invented),mpi,sensemakr,survey_lpm_df,Survey linear model degrees of freedom,number,300.0,,False
+mpi2021,FIXTURE (invented),mpi,sensemakr,version_survey,R survey version,text,,4.5,False
+mpi2021,FIXTURE (invented),mpi,sensemakr,version_sensemakr,R sensemakr version,text,,0.1.6,False
+mpi2021,FIXTURE (invented),mpi,sensemakr,version_r,R r version,text,,4.5.2,False
+mpi2021,FIXTURE (invented),mpi,placebo,placebo_n,Placebo permutations,number,100.0,,False
+mpi2021,FIXTURE (invented),mpi,placebo,placebo_mean,"Placebo estimates, mean",number,0.001,,False
+mpi2021,FIXTURE (invented),mpi,placebo,placebo_sd,"Placebo estimates, standard deviation",number,0.02,,False
+mpi2021,FIXTURE (invented),mpi,placebo,placebo_share_ci_excluding_0,Share of placebo intervals excluding 0,share,0.05,,False
+mpi2021,FIXTURE (invented),mpi,placebo,placebo_empirical_p,Empirical p of the real estimate,number,0.0099,,False
+mpi2021,FIXTURE (invented),mpi,random_common_cause,rcc_reference,Reference estimate (one repetition),number,0.12,,False
+mpi2021,FIXTURE (invented),mpi,random_common_cause,rcc_with,With a random covariate added,number,0.117,,False
+mpi2021,FIXTURE (invented),mpi,random_common_cause,rcc_moved,How far it moved,number,0.003,,False
+mpi2021,FIXTURE (invented),mpi,random_common_cause,rcc_allowed,How far it may move,number,0.02,,False
+mpi2021,FIXTURE (invented),mpi,random_common_cause,rcc_pass,Random common cause check passed,flag,1.0,,False
+mpi2021,FIXTURE (invented),mpi,overlap,overlap_clipped_share_weighted,Share of people whose propensity was clipped,share,0.6,,False
+mpi2021,FIXTURE (invented),mpi,overlap,overlap_clipped_share_unweighted,Share of households clipped,share,0.62,,False
+mpi2021,FIXTURE (invented),mpi,overlap,outside_households,Households outside the overlap population,count,600.0,,False
+mpi2021,FIXTURE (invented),mpi,overlap,outside_weighted_share,Share of people outside the overlap population,share,0.59,,False
+mpi2021,FIXTURE (invented),mpi,overlap,clip_low,"Clip, lower",number,0.01,,False
+mpi2021,FIXTURE (invented),mpi,overlap,clip_high,"Clip, upper",number,0.99,,False
+mpi2021,FIXTURE (invented),mpi,sample,weights_n,Households in the primary analysis,count,1000.0,,False
+mpi2021,FIXTURE (invented),mpi,sample,kish_effective_n,Kish effective sample size,number,600.5,,False
+mpi2021,FIXTURE (invented),mpi,sample,max_weight_share,Largest weight's share of the total,share,0.001,,False
+mpi2021,FIXTURE (invented),mpi,sample,households_in_sample,Households in the sample,count,1010.0,,False
+mpi2021,FIXTURE (invented),mpi,sample,missing_poor_households,Households with poverty missing,count,,,True
+mpi2021,FIXTURE (invented),mpi,sample,missing_poor_share,Share of people with poverty missing,share,0.01,,False
+mpi2021,FIXTURE (invented),mpi,sample,missing_exposure_primary_households,Households with exposure missing,count,40.0,,False
+mpi2021,FIXTURE (invented),mpi,sample,missing_exposure_primary_share,Share of people with exposure missing,share,0.002,,False
+mpi2021,FIXTURE (invented),mpi,learners,folds,Cross-fitting folds,number,5.0,,False
+mpi2021,FIXTURE (invented),mpi,learners,n_rep,Repetitions,number,5.0,,False
+mpi2021,FIXTURE (invented),mpi,learners,outcome_chosen,Chosen outcome learner,text,,logistic,False
+mpi2021,FIXTURE (invented),mpi,learners,outcome_lowest,"Lowest mean loss, outcome",text,,logistic,False
+mpi2021,FIXTURE (invented),mpi,learners,outcome_logistic_mean_loss,"outcome: logistic, mean log loss",number,0.5,,False
+mpi2021,FIXTURE (invented),mpi,learners,outcome_forest_mean_loss,"outcome: forest, mean log loss",number,0.51,,False
+mpi2021,FIXTURE (invented),mpi,learners,outcome_boosting_mean_loss,"outcome: boosting, mean log loss",number,0.52,,False
+mpi2021,FIXTURE (invented),mpi,learners,propensity_chosen,Chosen propensity learner,text,,logistic,False
+mpi2021,FIXTURE (invented),mpi,learners,propensity_lowest,"Lowest mean loss, propensity",text,,logistic,False
+mpi2021,FIXTURE (invented),mpi,learners,propensity_logistic_mean_loss,"propensity: logistic, mean log loss",number,0.5,,False
+mpi2021,FIXTURE (invented),mpi,learners,propensity_forest_mean_loss,"propensity: forest, mean log loss",number,0.51,,False
+mpi2021,FIXTURE (invented),mpi,learners,propensity_boosting_mean_loss,"propensity: boosting, mean log loss",number,0.52,,False
+mpi2021,FIXTURE (invented),mpi,registration,osf_url,OSF registration,text,,https://osf.io/abcde/,False
+mpi2021,FIXTURE (invented),mpi,registration,registered_utc,Registered (UTC),text,,2026-11-01 05:49:21 UTC,False
+mpi2021,FIXTURE (invented),mpi,registration,freeze_tag,Code freeze tag,text,,p5-freeze,False
+mpi2021,FIXTURE (invented),mpi,registration,freeze_commit,Code freeze commit,text,,22b8acee10b304f25201627d5cf4da47c2544a19,False
+mpi2021,FIXTURE (invented),mpi,registration,preregistration_sha256,SHA-256 of the pre-registration at the freeze,text,,65d0a4b2a3047e499f497aa8b59e5917ad74612c63fc8b2c66bd25af69e82955,False
+mpi2021,FIXTURE (invented),mpi,registration,deviations,Deviations logged,text,,none,False
+mpi2021,FIXTURE (invented),mpi,registration,run_commit,Commit the real run was made from,text,,aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa,False
+mpi2021,FIXTURE (invented),mpi,registration,run_created,Real run finished (UTC),text,,2026-11-01T09:28:07+00:00,False

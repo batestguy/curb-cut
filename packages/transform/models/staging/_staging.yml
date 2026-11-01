@@ -202,3 +202,50 @@ models:
         data_tests: [not_null, non_negative]
       - name: wp2020_pop_18plus
         data_tests: [not_null, non_negative]
+
+  - name: stg_p5__estimates
+    description: P5 model estimates (MPI 2021 and GHS-Panel W4/W5), typed; one row per estimate.
+    columns:
+      - name: estimate_id
+        data_tests: [unique, not_null]
+      - name: analysis
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [mpi, ghs]
+      - name: estimate_group
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values:
+                  [headline, secondary, dimension, robustness, leave_one_zone_out, subgroup, sensemakr, e1, r_check]
+      - name: label
+        data_tests: [not_null]
+      - name: scale
+        data_tests: [not_null]
+      - name: n
+        data_tests: [not_null, non_negative]
+      - name: suppressed
+        data_tests: [not_null]
+
+  - name: stg_p5__summary
+    description: P5 scalar results (MPI 2021 and GHS-Panel W4/W5), typed.
+    data_tests:
+      - unique_combination:
+          arguments:
+            columns: [analysis, item_id]
+    columns:
+      - name: item_id
+        data_tests: [not_null]
+      - name: section
+        data_tests: [not_null]
+      - name: label
+        data_tests: [not_null]
+      - name: kind
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [count, share, number, flag, text]

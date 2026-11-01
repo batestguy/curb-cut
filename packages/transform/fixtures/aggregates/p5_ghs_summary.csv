@@ -1,0 +1,46 @@
+source,dataset_version,analysis,section,item_id,label,kind,value,value_text,suppressed
+ghs_w4_w5,FIXTURE (invented),ghs,linkage,w4_people_15plus,People aged 15+ in W4,count,1200.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,linkage,found_in_w5,Found in W5,count,1000.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,linkage,found_with_w5_answers,Found with W5 answers,count,950.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,linkage,analysis_sample,In the analysis sample,count,900.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,linkage,onset_cases,Onset of a severe difficulty by W5,count,40.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,linkage,linkage_rate,Linkage rate,share,0.83,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_age_stayers,age: stayers,number,37.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_age_attriters,age: attriters,number,32.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_age_standardised_difference,age: standardised_difference,number,0.3,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_female_stayers,female: stayers,number,0.5,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_female_attriters,female: attriters,number,0.4,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_female_standardised_difference,female: standardised_difference,number,0.1,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_urban_stayers,urban: stayers,number,0.5,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_urban_attriters,urban: attriters,number,0.4,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_urban_standardised_difference,urban: standardised_difference,number,0.1,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_severe_w4_stayers,severe_w4: stayers,number,0.5,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_severe_w4_attriters,severe_w4: attriters,number,0.4,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_severe_w4_standardised_difference,severe_w4: standardised_difference,number,0.1,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_zone_1_north_central_stayers,zone=1. North Central: stayers,number,0.17,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_zone_1_north_central_attriters,zone=1. North Central: attriters,number,0.14,,False
+ghs_w4_w5,FIXTURE (invented),ghs,attrition,attrition_zone_1_north_central_standardised_difference,zone=1. North Central: standardised_difference,number,0.09,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dlog_consumption_n,dlog_consumption: n,count,900.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dlog_consumption_onset_cases,dlog_consumption: onset_cases,count,40.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dlog_consumption_onset_share,dlog_consumption: onset_share,number,0.044,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dlog_consumption_sd_change,dlog_consumption: sd_change,number,0.5,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dlog_consumption_deff_kish,dlog_consumption: deff_kish,number,2.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dlog_consumption_icc,dlog_consumption: icc,number,0.1,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dlog_consumption_deff,dlog_consumption: deff,number,5.8,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dlog_consumption_mde_sd,dlog_consumption: mde_sd,number,0.45,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dlog_consumption_mde,dlog_consumption: mde,number,0.22,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dlog_consumption_run,dlog_consumption: run under the MDE rule,flag,1.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,r_check,dlog_consumption_r_max_abs_diff,"dlog_consumption: largest difference, R vs Python",number,0.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,r_check,dlog_consumption_fixest,dlog_consumption: R fixest version,text,,0.14.2,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dwork_n,dwork: n,count,900.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dwork_onset_cases,dwork: onset_cases,count,40.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dwork_onset_share,dwork: onset_share,number,0.044,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dwork_sd_change,dwork: sd_change,number,0.5,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dwork_deff_kish,dwork: deff_kish,number,2.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dwork_icc,dwork: icc,number,0.1,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dwork_deff,dwork: deff,number,5.8,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dwork_mde_sd,dwork: mde_sd,number,0.45,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dwork_mde,dwork: mde,number,0.22,,False
+ghs_w4_w5,FIXTURE (invented),ghs,power,dwork_run,dwork: run under the MDE rule,flag,1.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,r_check,dwork_r_max_abs_diff,"dwork: largest difference, R vs Python",number,0.0,,False
+ghs_w4_w5,FIXTURE (invented),ghs,r_check,dwork_fixest,dwork: R fixest version,text,,0.14.2,False
