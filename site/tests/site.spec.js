@@ -58,13 +58,13 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   await page.keyboard.press('Enter');
   await expect(page.locator('main')).toBeFocused();
 
-  // Tab from <main>: the state pages link, the methodology link, five comparison source links
-  // and the map come first, then "Skip the state table" (the 9th stop), which jumps the 37
-  // state links in the map's table. After it: "Why", the findings' <summary>, "Methods and
-  // limits", the Moran <summary>, then the select. Exact counts, so a trap or a new stop
-  // fails the test.
+  // Tab from <main>: the state pages link, the methodology link, five comparison source links,
+  // the map key's five buttons and the map come first, then "Skip the state table" (the 14th
+  // stop), which jumps the 37 state links in the map's table. After it: "Why", the findings'
+  // <summary>, "Methods and limits", the Moran <summary>, then the select. Exact counts, so a
+  // trap or a new stop fails the test.
   const select = page.locator('#state-select');
-  for (let i = 0; i < 9; i += 1) await page.keyboard.press('Tab');
+  for (let i = 0; i < 14; i += 1) await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip the state table' })).toBeFocused();
   await page.keyboard.press('Enter');
   for (let i = 0; i < 5; i += 1) await page.keyboard.press('Tab');
@@ -90,12 +90,12 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   await expect(page.getByRole('heading', { level: 3, name: 'Lagos' })).toBeFocused();
 });
 
-test('keyboard: without the skip, the select is the 51st stop after <main>', async ({ page }) => {
+test('keyboard: without the skip, the select is the 56th stop after <main>', async ({ page }) => {
   await loaded(page);
   await page.locator('main').focus();
-  // 9 stops up to and including "Skip the state table", the 37 state links, then "Why", the
+  // 14 stops up to and including "Skip the state table", the 37 state links, then "Why", the
   // findings' <summary>, "Methods and limits", the Moran <summary> and the select.
-  for (let i = 0; i < 50; i += 1) await page.keyboard.press('Tab');
+  for (let i = 0; i < 55; i += 1) await page.keyboard.press('Tab');
   await expect(page.locator('#state-select')).not.toBeFocused();
   await page.keyboard.press('Tab');
   await expect(page.locator('#state-select')).toBeFocused();

@@ -62,7 +62,12 @@
       <section aria-labelledby="map-heading">
         <h2 id="map-heading">Disability among adults, by state</h2>
         <figure class="choropleth-figure" aria-labelledby="prevalence-map-title">
-          <ul id="prevalence-map-legend" class="map-legend" aria-label="Map key"></ul>
+          <div class="map-key">
+            <p id="prevalence-map-key-label" class="map-key-label">Map key: press a range to show only its states</p>
+            <ul id="prevalence-map-legend" class="map-legend" aria-labelledby="prevalence-map-key-label"></ul>
+            <!-- One polite live region for the legend's buttons: "Showing 6 states in …". -->
+            <p id="prevalence-map-filter-status" class="map-filter-status" role="status"></p>
+          </div>
           <div class="choropleth-holder">
             <div id="prevalence-map" class="choropleth" role="img" tabindex="0" aria-label="Loading the map…"></div>
             <!-- Shown on hover, tap or focus; the same figures are in the table below, and

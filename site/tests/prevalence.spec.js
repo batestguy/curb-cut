@@ -108,15 +108,23 @@ test('the map is one image named by its data-derived alt-text, with no state Tab
   await expect(page.locator('#lisa-sentence')).toContainText('no hotspot outlines');
 });
 
+// A hex colour as the browser reports a computed fill or stroke.
+function rgb(hex) {
+  return `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(', ')})`;
+}
+
 for (const colorScheme of ['light', 'dark']) {
-  test(`each map class has its own pattern, in the audited ink (${colorScheme})`, async ({
+  test(`the map draws the audited fills, patterns, inks and cased boundaries (${colorScheme})`, async ({
     page,
     request,
   }) => {
     const doc = await (await request.get('data/charts/prevalence_map.json')).json();
     expect(doc.audit.passed).toBe(true);
+    expect(doc.meta.scheme).toBe('ylgnbu');
+    // Patterns by ink weight, lowest class lightest; one pattern per class.
     const ids = doc.classes.map((c) => c.pattern);
-    expect(new Set(ids).size).toBe(doc.classes.length); // one pattern per class
+    expect(ids).toEqual(['plain', 'dots', 'lines', 'crosshatch', 'solid']);
+    const theme = doc.themes[colorScheme];
     await page.emulateMedia({ colorScheme });
     await ready(page);
     const map = page.locator('#prevalence-map');
@@ -129,18 +137,250 @@ for (const colorScheme of ['light', 'dark']) {
     for (const [code, fill] of fills) {
       expect(fill).toContain(`prevalence_map-pattern-${classOf.get(code)}`);
     }
-    // The ink drawn is the document's ink for this scheme.
-    const ink = await map
-      .locator('svg pattern path.tile')
-      .first()
-      .evaluate((el) => getComputedStyle(el).fill);
-    const hex = doc.patterns.ink[colorScheme];
-    const rgb = `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(', ')})`;
-    expect(ink).toBe(rgb);
+    // Each pattern draws the class's fill from the document, and the class's own ink in front
+    // (no ink for plain and solid).
+    const drawn = await map.locator('svg pattern').evaluateAll((patterns) =>
+      patterns.map((p) => {
+        const tile = p.querySelector('path.tile');
+        return {
+          id: p.id,
+          pattern: p.dataset.pattern,
+          fill: getComputedStyle(p.querySelector('rect')).fill,
+          ink: tile ? getComputedStyle(tile).fill : null,
+        };
+      }),
+    );
+    expect(drawn).toHaveLength(doc.classes.length);
+    for (const [k, d] of drawn.entries()) {
+      expect(d.id).toBe(`prevalence_map-pattern-${k}`);
+      expect(d.pattern).toBe(ids[k]);
+      expect(d.fill).toBe(rgb(theme.classes[k]));
+      const ink = doc.patterns.class_ink[colorScheme][k];
+      expect(d.ink).toBe(ink ? rgb(ink) : null);
+    }
+    // The legend swatches draw the same fills and inks.
+    const swatches = await page.locator('#prevalence-map-legend svg.swatch').evaluateAll((svgs) =>
+      svgs.map((svg) => {
+        const tile = svg.querySelector('path.tile');
+        return {
+          fill: getComputedStyle(svg.querySelector('pattern rect')).fill,
+          ink: tile ? getComputedStyle(tile).fill : null,
+        };
+      }),
+    );
+    for (const [k, s] of swatches.entries()) {
+      expect(s.fill).toBe(rgb(theme.classes[k]));
+      const ink = doc.patterns.class_ink[colorScheme][k];
+      expect(s.ink).toBe(ink ? rgb(ink) : null);
+    }
+    // Cased boundaries: every fill first, then 37 halos, then 37 narrower edges on top, in the
+    // theme's colours.
+    const layers = await map
+      .locator('svg > g')
+      .evaluateAll((groups) => groups.map((g) => g.getAttribute('class')));
+    expect(layers.slice(0, 3)).toEqual(['map-fills', 'map-halos', 'map-edges']);
+    await expect(map.locator('g.map-halos path')).toHaveCount(37);
+    await expect(map.locator('g.map-edges path')).toHaveCount(37);
+    const strokes = await map.evaluate((holder) => {
+      const halo = getComputedStyle(holder.querySelector('.map-halos path'));
+      const edge = getComputedStyle(holder.querySelector('.map-edges path'));
+      return {
+        halo: halo.stroke,
+        haloWidth: parseFloat(halo.strokeWidth),
+        edge: edge.stroke,
+        edgeWidth: parseFloat(edge.strokeWidth),
+      };
+    });
+    expect(strokes.halo).toBe(rgb(theme.halo));
+    expect(strokes.edge).toBe(rgb(theme.edge));
+    expect(strokes.haloWidth).toBeGreaterThan(strokes.edgeWidth);
     const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
     expect(results.violations).toEqual([]);
   });
 }
+
+// Which states are drawn at full strength: [code, fill opacity, edge opacity].
+async function strengths(page) {
+  return page.locator('#prevalence-map').evaluate((holder) =>
+    [...holder.querySelectorAll('path[data-state]')].map((p) => [
+      p.dataset.state,
+      getComputedStyle(p).opacity,
+      getComputedStyle(
+        holder.querySelector(`.map-edges path[data-outline="${p.dataset.state}"]`),
+      ).opacity,
+    ]),
+  );
+}
+
+test('the legend buttons show one class at a time, by keyboard, and Esc shows all', async ({
+  page,
+  request,
+}) => {
+  const doc = await (await request.get('data/charts/prevalence_map.json')).json();
+  expect(doc.keyboard.legend_filter).toBe(true);
+  await ready(page);
+  const legend = page.locator('#prevalence-map-legend');
+  const buttons = legend.getByRole('button');
+  const status = page.locator('#prevalence-map-filter-status');
+  // A visible label names the list; one button per class, lowest first.
+  await expect(page.locator('#prevalence-map-key-label')).toBeVisible();
+  await expect(legend).toHaveAccessibleName('Map key: press a range to show only its states');
+  await expect(buttons).toHaveCount(doc.classes.length);
+  for (const [i, c] of doc.classes.entries()) {
+    await expect(buttons.nth(i)).toHaveAccessibleName(`${c.label}: ${c.count} states`);
+    await expect(buttons.nth(i)).toHaveAttribute('aria-pressed', 'false');
+    await expect(buttons.nth(i)).toHaveAttribute('type', 'button');
+  }
+  // One live region for the whole legend, polite, and none on the buttons.
+  await expect(status).toHaveAttribute('role', 'status');
+  await expect(status).toBeEmpty();
+  await expect(legend.locator('[aria-live], [role="status"], [role="alert"]')).toHaveCount(0);
+
+  // Tab reaches every button in order, after the comparison's links and before the map.
+  await page.locator('#comparison-list a').last().focus();
+  for (let i = 0; i < doc.classes.length; i += 1) {
+    await page.keyboard.press('Tab');
+    await expect(buttons.nth(i)).toBeFocused();
+  }
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#prevalence-map')).toBeFocused();
+
+  // Enter on "4% to under 6%": only that class at full strength, and the names announced.
+  const k = 3;
+  const names = doc.regions
+    .filter((r) => r.class === k)
+    .map((r) => r.name)
+    .sort();
+  expect(doc.classes[k].regions).toEqual(names);
+  await buttons.nth(k).focus();
+  await page.keyboard.press('Enter');
+  await expect(buttons.nth(k)).toHaveAttribute('aria-pressed', 'true');
+  await expect(status).toHaveText(doc.classes[k].announce);
+  await expect(status).toHaveText(
+    `Showing ${names.length} states in ${doc.classes[k].label}: ${names.join(', ')}.`,
+  );
+  const codesIn = new Set(doc.regions.filter((r) => r.class === k).map((r) => r.code));
+  for (const [code, fill, edge] of await strengths(page)) {
+    if (codesIn.has(code)) {
+      expect([fill, edge]).toEqual(['1', '1']);
+    } else {
+      expect(Number(fill)).toBeLessThan(0.5); // dimmed
+      expect(Number(edge)).toBeGreaterThan(0); // its boundary still shows, faintly
+      expect(Number(edge)).toBeLessThan(1);
+    }
+  }
+  for (let i = 0; i < doc.classes.length; i += 1) {
+    if (i !== k) await expect(buttons.nth(i)).toHaveAttribute('aria-pressed', 'false');
+  }
+
+  // Space on another class moves the filter: only one class at a time.
+  await buttons.nth(0).focus();
+  await page.keyboard.press('Space');
+  await expect(buttons.nth(0)).toHaveAttribute('aria-pressed', 'true');
+  await expect(buttons.nth(k)).toHaveAttribute('aria-pressed', 'false');
+  await expect(status).toHaveText(doc.classes[0].announce);
+  // Pressing it again shows all.
+  await page.keyboard.press('Space');
+  await expect(buttons.nth(0)).toHaveAttribute('aria-pressed', 'false');
+  await expect(status).toHaveText('Showing all 37 states.');
+  await expect(status).toHaveText(doc.legend.announce_all);
+  for (const [, fill, edge] of await strengths(page)) expect([fill, edge]).toEqual(['1', '1']);
+
+  // Esc in the legend shows all; focus stays on the button.
+  await buttons.nth(1).click();
+  await expect(buttons.nth(1)).toHaveAttribute('aria-pressed', 'true');
+  await expect(status).toHaveText(doc.classes[1].announce);
+  await buttons.nth(1).focus();
+  await page.keyboard.press('Escape');
+  await expect(buttons.nth(1)).toHaveAttribute('aria-pressed', 'false');
+  await expect(buttons.nth(1)).toBeFocused();
+  await expect(status).toHaveText('Showing all 37 states.');
+
+  // Esc on the map shows all too (and closes the tip).
+  await buttons.nth(2).click();
+  await buttons.nth(2).focus();
+  await page.keyboard.press('Tab'); // past the other buttons to the map
+  await page.keyboard.press('Tab');
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#prevalence-map')).toBeFocused();
+  await expect(page.locator('.choropleth-figure .map-tip')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.choropleth-figure .map-tip')).toBeHidden();
+  await expect(buttons.nth(2)).toHaveAttribute('aria-pressed', 'false');
+  await expect(status).toHaveText('Showing all 37 states.');
+
+  // Esc elsewhere on the page leaves the filter alone.
+  await buttons.nth(4).click();
+  await page.locator('#state-select').focus();
+  await page.keyboard.press('Escape');
+  await expect(buttons.nth(4)).toHaveAttribute('aria-pressed', 'true');
+});
+
+for (const colorScheme of ['light', 'dark']) {
+  test(`with a class shown, the page has no WCAG A/AA violations (${colorScheme})`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme });
+    await ready(page);
+    await page.locator('#prevalence-map-legend').getByRole('button').nth(3).click();
+    await expect(page.locator('#prevalence-map-filter-status')).not.toBeEmpty();
+    const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
+    expect(results.violations).toEqual([]);
+  });
+}
+
+test('the legend filter and the state highlight work together', async ({ page, request }) => {
+  const doc = await (await request.get('data/charts/prevalence_map.json')).json();
+  await ready(page);
+  const lagos = doc.regions.find((r) => r.name === 'Lagos');
+  const other = doc.classes.findIndex((_, i) => i !== lagos.class);
+  const buttons = page.locator('#prevalence-map-legend').getByRole('button');
+  const map = page.locator('#prevalence-map');
+  // Show a class Lagos is not in, then choose Lagos: it is dimmed but still outlined on top.
+  await buttons.nth(other).click();
+  await chooseState(page, 'Lagos');
+  await expect(map.locator('path.selected')).toHaveAttribute('data-state', 'NG-LA');
+  await expect(map.locator('.map-outline-selected .outline-edge')).toHaveAttribute(
+    'd',
+    doc.map.paths['NG-LA'],
+  );
+  await expect(buttons.nth(other)).toHaveAttribute('aria-pressed', 'true');
+  // Clearing the filter keeps the highlight; choosing another state moves it.
+  await buttons.nth(other).click();
+  await expect(map.locator('path.selected')).toHaveAttribute('data-state', 'NG-LA');
+  await chooseState(page, 'Kano');
+  await expect(map.locator('path.selected')).toHaveAttribute('data-state', 'NG-KN');
+  await expect(map.locator('.map-outline-selected .outline-edge')).toHaveAttribute(
+    'd',
+    doc.map.paths['NG-KN'],
+  );
+});
+
+test('at 320px the legend fits, with no sideways scroll, before and after a press', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await ready(page);
+  const buttons = page.locator('#prevalence-map-legend').getByRole('button');
+  for (const press of [false, true]) {
+    if (press) await buttons.nth(0).click();
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+    expect(overflow).toBeLessThanOrEqual(0);
+    for (const box of await buttons.evaluateAll((els) =>
+      els.map((el) => el.getBoundingClientRect().toJSON()),
+    )) {
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(320);
+      expect(box.height).toBeGreaterThanOrEqual(24); // WCAG 2.2 SC 2.5.8
+    }
+    // The swatch is large enough to show its tile.
+    const swatch = await page.locator('#prevalence-map-legend svg.swatch').first().boundingBox();
+    expect(swatch.width).toBeGreaterThanOrEqual(36);
+    expect(swatch.height).toBeGreaterThanOrEqual(24);
+  }
+});
 
 test('the findings under the dot plot are plain text from the document, after the chart', async ({
   page,

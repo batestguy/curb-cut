@@ -505,12 +505,29 @@ table:focus-visible {
 }
 
 /* The prevalence map. Colours come from the chart document's themes (map.js sets the
-   --map-* properties), so they always match the audited values. Boundaries are the theme's
-   edge colour, 3:1 against the background and every fill; the chosen state also gets a thick
-   outline, so it is never marked by colour alone. */
+   --map-* properties), so they always match the audited values. Boundaries are cased: a wide
+   halo stroke under a narrow edge stroke, drawn after every fill, so at each border one of
+   the two is 3:1 against the fills either side (audited; a 0.2 document has one edge colour,
+   3:1 against every fill, and no halo layer). The chosen state also gets a thick outline, so
+   it is never marked by colour alone. On wide screens the legend sits to the left of the map;
+   on narrow ones, above it. */
 .choropleth-figure {
   position: relative;
   margin: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem 1.5rem;
+  align-items: start;
+}
+
+@media (min-width: 46rem) {
+  .choropleth-figure {
+    grid-template-columns: minmax(11rem, 15rem) minmax(0, 1fr);
+  }
+
+  .choropleth-figure figcaption {
+    grid-column: 1 / -1;
+  }
 }
 
 .choropleth {
@@ -528,30 +545,71 @@ table:focus-visible {
   height: auto;
 }
 
-.choropleth path {
-  stroke: var(--map-edge);
-  stroke-width: 1;
-  stroke-linejoin: round;
-  vector-effect: non-scaling-stroke;
+.choropleth .map-fills path {
+  stroke: none;
   cursor: pointer;
 }
 
-.choropleth path.c0 { fill: var(--map-c0); }
-.choropleth path.c1 { fill: var(--map-c1); }
-.choropleth path.c2 { fill: var(--map-c2); }
-.choropleth path.c3 { fill: var(--map-c3); }
-.choropleth path.c4 { fill: var(--map-c4); }
+.choropleth .map-fills path.c0 { fill: var(--map-c0); }
+.choropleth .map-fills path.c1 { fill: var(--map-c1); }
+.choropleth .map-fills path.c2 { fill: var(--map-c2); }
+.choropleth .map-fills path.c3 { fill: var(--map-c3); }
+.choropleth .map-fills path.c4 { fill: var(--map-c4); }
 
-.choropleth path:hover,
-.choropleth path.selected {
+.choropleth .map-halos path,
+.choropleth .map-edges path,
+.choropleth .map-outline path {
+  fill: none;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  pointer-events: none;
+}
+
+.choropleth .map-halos path {
+  stroke: var(--map-halo);
   stroke-width: 3;
 }
 
-/* Pattern tiles (inside <pattern> elements): ink only, no boundary stroke. The ink colour is
-   the document's pattern ink for the scheme, 3:1 against every class fill (audited). */
+.choropleth .map-edges path {
+  stroke: var(--map-edge);
+  stroke-width: 1;
+}
+
+/* The chosen and the hovered state: a thick edge over a wider halo, over everything. */
+.choropleth .map-outline .outline-halo {
+  stroke: var(--map-halo);
+  stroke-width: 6;
+}
+
+.choropleth .map-outline .outline-edge {
+  stroke: var(--map-edge);
+  stroke-width: 3;
+}
+
+/* The legend filter: the shown class keeps its full fill and pattern and gets a heavier
+   boundary; the other states are dimmed, their boundaries still faint. So the shown states
+   differ in lightness, pattern strength and outline weight, not in hue alone. */
+.choropleth .map-fills path.dim {
+  opacity: 0.15;
+}
+
+.choropleth .map-halos path.dim,
+.choropleth .map-edges path.dim {
+  opacity: 0.3;
+}
+
+.choropleth .map-halos path.active {
+  stroke-width: 5;
+}
+
+.choropleth .map-edges path.active {
+  stroke-width: 2;
+}
+
+/* Pattern tiles (inside <pattern> elements): ink only, no boundary stroke. Each class's ink
+   is set inline from the document (--map-ink0 … --map-ink4), 3:1 against its fill (audited). */
 .choropleth path.tile,
 .map-legend path.tile {
-  fill: var(--map-ink);
   stroke: none;
   cursor: default;
 }
@@ -564,27 +622,77 @@ table:focus-visible {
   vector-effect: non-scaling-stroke;
 }
 
+.map-key-label {
+  margin: 0 0 0.4rem;
+  font-weight: 700;
+}
+
 .map-legend {
   list-style: none;
-  margin: 0 0 0.75rem;
+  margin: 0;
   padding: 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1.25rem;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
 .map-legend li {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.6rem;
+}
+
+/* Legend items are toggle buttons, at least 44px tall (WCAG 2.2 SC 2.5.8 asks 24px). Pressed:
+   a thick outline and bold text, so the state is shown by more than colour. */
+.legend-button {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 2.75rem;
+  margin: 0;
+  padding: 0.35rem 0.5rem;
+  font: inherit;
+  text-align: left;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.legend-button:hover {
+  border-color: var(--text);
+}
+
+.legend-button[aria-pressed='true'] {
+  padding: calc(0.35rem - 2px) calc(0.5rem - 2px);
+  border: 3px solid var(--text);
+  font-weight: 700;
+}
+
+.legend-button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
 }
 
 .map-legend .swatch {
-  display: inline-block;
-  width: 1.5rem;
-  height: 1rem;
-  border: 1px solid var(--map-edge);
+  display: block;
   flex: none;
+  width: 2.5rem;
+  height: 1.75rem;
+  border: 1px solid var(--map-edge);
+}
+
+.map-filter-status {
+  margin: 0.5rem 0 0;
+  font-size: 0.9rem;
+}
+
+/* Empty until a legend button is pressed; kept in the accessibility tree (not display: none)
+   so the first announcement is not lost. */
+.map-filter-status:empty {
+  margin: 0;
 }
 
 .findings-count {
