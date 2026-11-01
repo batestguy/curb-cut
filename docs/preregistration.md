@@ -229,4 +229,4 @@ Section 11 is the only part of this file changed after the freeze. The hashes ar
   - `uv.lock`: `a190dc1cb31e2f51d6192f28f4dcea8f6203c1c0bb9d320e4224da25d185269e`
   - `renv.lock`: `544618bebb922958811b2d4488f0cff71ce3611072593708057cd338ea18e57a`
 - **Section 5.6 check re-run on the frozen commit** (2026-10-31): the same shares as section 2.2 item 9 (primary 1.33%, S2 11.07%, S3 0.61%, S5 8.78%, S6 0.92%); S2 passes.
-- **OSF registration:** https://osf.io/kes3p/ , registered 2026-11-01 05:49:21 UTC (OSF `date_registered`); Secondary Data Preregistration template, with the file frozen at `p5-freeze` attached (SHA-256 above). At recording, OSF's admin approval was still pending (it becomes public on approval, or automatically after 48 hours); no embargo.
+- **OSF registration:** https://osf.io/kes3p/ , registered 2026-11-01 05:49:21 UTC (OSF `date_registered`); Secondary Data Preregistration template, with the file frozen at `p5-freeze` attached (SHA-256 above). Approved by the author on 2026-11-01 and public, no embargo; the attached file's SHA-256 on OSF matches the one above.
