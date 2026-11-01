@@ -2,7 +2,7 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-10-31 · **Current phase:** **P4 done: the P4b gate passed 2026-10-30** (author: "pass"; PR #3): 37 state pages live, `disability-access-charts` 0.2.0 on PyPI. **P5 in progress** on branch `p5-poverty` (plan agreed 2026-10-30, `PLAN.md` steps 15–21): steps 15–16 done; step 17: pre-registration revision 3 awaits the author's final read, then code freeze and OSF registration; the analysis code is written and reviewed (synthetic data only) and the section 5.6 exposure check passed on 2026-10-31 (S2 11.07% vs NBS 11.0%). No outcome by disability has been computed. DHS and NBS publication copies for the site as of 2026-10-30 sent by the author on 2026-10-30 (PDF of all 40 pages; NBS copy to Feedback@nigerianstat.gov.ng, the catalogue's data-access contact, as no archive address is listed). Still owed: P1's NVDA check (before P6). P4a gate passed 2026-10-29 (PR #2 merged); P4b plan agreed 2026-10-29, step 10 (law facts, D25) done; P4 planned 2026-10-27 (`PLAN.md` → P4: P4a numbers, map and comparison; P4b chart library 0.2 and state pages); P4a step 0 done 2026-10-27 (the pipeline reproduces the NDHS report tables; R and svy agree, `verification.md` D48); step 1 (direct estimates) next. `disability-access-charts` 0.1.0 is on PyPI (2026-10-22). P1 is live; its NVDA check is deferred.
+**Last updated:** 2026-11-01 · **Current phase:** **P5 passed 2026-11-01** (PR #4; results page and brief live; NBS copy sent). **P6 in progress:** the map redesign (option C) is merged and live (PR #5) and `disability-access-charts` **0.3.0 is on PyPI** (tag `charts-v0.3.0`, pushed by the author). Next: the rest of P6, see Next actions → "P6: pick up here".
 
 ## Phases
 
@@ -14,7 +14,7 @@ The one page to read first. It says where things stand and what happens next. Th
 | P3 Restricted zone + warehouse | ✅ done 2026-10-24 (author): PR #1 merged, CI green; all aggregates incl. MPI 2021 public | `dbt build` green on fixtures; disclosure check passes |
 | P4 Prevalence | ✅ P4a passed 2026-10-29; P4b passed 2026-10-30 (author): 37 state pages live, 0.2.0 on PyPI | P4a: map and comparison live · P4b: state pages live, 0.2 on PyPI |
 | P5 Poverty analysis | ✅ passed 2026-11-01 (author): PR #4 merged and deployed; results page https://batestguy.github.io/curb-cut/poverty.html and brief live; NBS National Data Archive copy sent the same day. Pre-registered (OSF https://osf.io/kes3p/, tag `p5-freeze`), no deviations. Details: Next actions → "P5: pick up here" | Pre-registration committed first; brief and results page live |
-| P6 API + site polish | 🟡 started 2026-11-01 with the map redesign (option C, decisions log), branch `p6-map-redesign`: **built, awaiting review** (library 0.3.0 prepared, not published; see Next actions) | Accessibility 100 in CI; walkthrough video recorded; author's NVDA check; regular screen-reader user's feedback sought, not blocking (2026-10-24); acted on |
+| P6 API + site polish | 🟡 in progress: map redesign done 2026-11-01 (PR #5 merged and deployed; library 0.3.0 on PyPI; scripted keyboard/NVDA pass and the author's Windows High Contrast check passed). Remaining items in Next actions → "P6: pick up here" | Accessibility 100 in CI; walkthrough video recorded; author's NVDA check; regular screen-reader user's feedback sought, not blocking (2026-10-24); acted on |
 | P7 Launch | ⚪ not started | — |
 
 ## Done so far (P0)
@@ -87,7 +87,27 @@ The one page to read first. It says where things stand and what happens next. Th
 
 ## Next actions (pick up here)
 
-### P6: map redesign (2026-11-01): built, awaiting review
+### P6: pick up here (handoff 2026-11-01)
+
+**Done in P6 so far:** the map redesign (option C). PR #5 merged and deployed 2026-11-01; the live `prevalence_map.json` is scheme `ylgnbu`, schema 1.1, library 0.3.0. `disability-access-charts` 0.3.0 published to PyPI from tag `charts-v0.3.0` (publish workflow green; a clean Python 3.12 install from PyPI imports 0.3.0 and audits a map). Checks: reviewer (ship; fixes in 505f41d), CI green, scripted NVDA pass of the legend (below), and the **author's Windows High Contrast check on the live map: fine** (2026-11-01). Dark "Under 2%" stays #4a4512 (author compared three).
+
+**Working notes for the next session:**
+- **Claude Code blocks Claude from merging PRs and from pushing release tags** (auto-mode "merge without review" / "create public surface"). The author runs `gh pr ready N && gh pr merge N --merge` and `git push origin charts-vX.Y.Z` themselves (one line each; a line break before `&&` broke the tag command once). Claude prepares everything else and checks the result.
+- Gate checks may be automated at the author's request (keyboard pass with Playwright + NVDA transcript with Guidepup 0.35.0; scripts live in the session scratchpad, not the repo). The NVDA script must bring Chrome for Testing to the front first (`WScript.Shell.AppActivate`) and stop if focus leaves the page; once it pressed Tab in the author's own browser.
+- Merged branches `p5-poverty` and `p6-map-redesign` can be deleted; this handoff is on `p6-handoff`.
+
+**Next, in suggested order** (`PLAN.md` P6; pick with the author, one at a time, gate at the end):
+1. **"Report a problem" without a GitHub account** on every page (a `mailto:` link, keyboard reachable), small and self-contained.
+2. **CSV/JSON downloads** next to every table and chart (the public aggregates already exist; check sizes and licences per source).
+3. **Lighthouse CI** with accessibility 100 as a hard gate (the P6 gate needs it); fix what it finds.
+4. **Long tables read in full on Tab** (NVDA reads the whole table when a scrollable table region gets focus, on every page): consider a shorter `aria-label` (caption only) for the region; check with an NVDA transcript.
+5. **Type check:** Atkinson Hyperlegible Next or Noto Sans coverage of ẹ̀ ọ́ ṣ ɓ ɗ ƙ ƴ ị ụ ṅ (D29); self-host a woff2 subset.
+6. **GoatCounter** visit counts: check terms and data handling first; third-party script, so the "same origin only" test needs an agreed exception.
+7. **API (optional):** FastAPI on Render Free; the site must never depend on it.
+8. **Languages** (Hausa, Yoruba, Igbo, Pidgin) and the **adire band** need outside reviewers (native speakers; a Nigerian designer). The author works alone and nothing may wait on outside replies, so plan them so the rest of P6 never blocks on them.
+9. **Before the P6 gate:** the author's deferred P1 NVDA check (state card), the walkthrough video, accessibility 100 in CI, and the author's keyboard + NVDA check (automation allowed if the author asks). Feedback from a regular screen-reader user is sought, not blocking.
+
+### P6: map redesign (2026-11-01): history
 
 **Update 2026-11-01:** reviewed (`reviewer`: ship; fixes in 505f41d), CI green on draft PR #5. Scripted NVDA pass of the legend (Guidepup, Chromium, `vite preview`): the key is announced as "Map key: press a range to show only its states, list with 5 items"; each button as "4 percent to under 6 percent: 6 states, toggle button, not pressed"; Space and Enter announce "Showing 6 states in 4 percent to under 6 percent: Adamawa, Ebonyi, Enugu, Kano, Kogi, Plateau."; a second press and Escape announce "Showing all 37 states."; browse mode reads label, buttons, status line, then the map description. The author compared three dark-mode colours for "Under 2%" (#4a4512, #4f4a00, #5c5200; all pass) and kept **#4a4512**. Next: the author merges PR #5, then the `charts-v0.3.0` tag (PyPI), then the author's Windows High Contrast check on the live site.
 
