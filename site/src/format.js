@@ -43,6 +43,53 @@ export function stateHref(name) {
 }
 
 /**
+ * The line under a table with its downloads, from an entry of downloads/main/index.json
+ * (written by build_charts.py from the same table spec the page renders; the browser never
+ * computes a file). Each link's accessible name starts with its visible text ("CSV, 2 KB")
+ * and then names the table, so names are unique and make sense in a list of links.
+ *
+ * @param {{name: string, files: {href: string, text: string}[]}} entry
+ * @param {string} dataUrl the data folder's URL, ending in "/"
+ */
+export function downloadLine(entry, dataUrl) {
+  const p = document.createElement('p');
+  p.className = 'table-download';
+  p.append('Download this table: ');
+  entry.files.forEach((file, i) => {
+    if (i > 0) p.append(' · ');
+    const a = document.createElement('a');
+    a.href = `${dataUrl}${file.href}`;
+    a.setAttribute('download', '');
+    a.setAttribute('aria-label', `${file.text}: ${entry.name}`);
+    a.textContent = file.text;
+    p.append(a);
+  });
+  return p;
+}
+
+/** The line under a JONAPWD table: cited, all rights reserved, so no download. */
+export function citedLine(name) {
+  const p = document.createElement('p');
+  p.className = 'table-source';
+  const a = document.createElement('a');
+  a.href = 'https://jonapwdng.org/10865-2/';
+  a.textContent = "JONAPWD's publication";
+  // A unique accessible name that starts with the visible text (WCAG 2.2 SC 2.5.3).
+  a.setAttribute('aria-label', `JONAPWD's publication: ${name}`);
+  p.append(
+    'Figures cited from ',
+    a,
+    '. © JONAPWD, all rights reserved; the PDF is not redistributed, and no download is offered for this table.',
+  );
+  return p;
+}
+
+/** Put a line directly after a table, or after its scroll wrapper. */
+export function placeAfterTable(table, line) {
+  if (line) (table.closest('.table-wrap') ?? table).after(line);
+}
+
+/**
  * Render an accessible data table: <caption>, column headers with scope="col", the first
  * cell of each row as a row header with scope="row", and numbers right-aligned.
  *

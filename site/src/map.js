@@ -25,7 +25,7 @@
 // of the map (the state chosen in the explorer, or a hint). Esc closes it, the pointer can
 // move onto it, and it stays until the pointer leaves the map (WCAG 2.2 SC 1.4.13). It is
 // hidden from screen readers, which get the same figures from the name and the table.
-import { formatValue, renderTable, stateHref } from './format.js';
+import { formatValue, placeAfterTable, renderTable, stateHref } from './format.js';
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -182,13 +182,19 @@ function renderLegend(legendEl, doc, onToggle) {
 
 /**
  * Render the map, its legend and its table. Returns a handle whose highlight(stateName)
- * outlines that state (null clears it); the map's name does not change.
+ * outlines that state (null clears it); the map's name does not change. `tableNote`, if
+ * given, goes directly after the table (its download line).
  */
-export function renderChoropleth(doc, { figure, holder, legendEl, titleEl, tableEl, statusEl }) {
+export function renderChoropleth(
+  doc,
+  { figure, holder, legendEl, titleEl, tableEl, statusEl, tableNote = null },
+) {
   titleEl.textContent = doc.title;
   holder.setAttribute('aria-label', doc.alt_text);
   // Each state's name links to its own page.
-  tableEl.replaceChildren(renderTable({ ...doc.table, rowHref: stateHref }));
+  const table = renderTable({ ...doc.table, rowHref: stateHref });
+  tableEl.replaceChildren(table);
+  placeAfterTable(table, tableNote);
   applyTheme(figure, doc);
   darkQuery.addEventListener('change', () => applyTheme(figure, doc));
 

@@ -18,6 +18,9 @@ a data table and an accessibility audit. The build fails if any audit fails.
   plots in percentage points (or score points out of 100). ``findings=False``: comparisons
   between these estimates were not pre-registered. The library has no percentage-point unit,
   so ``unit="number"`` is used with the unit in the value label.
+
+It also writes the main page's table downloads (``main_page_downloads``) to
+``downloads/main/`` with a manifest, ``downloads/main/index.json``, that the page reads.
 """
 
 from __future__ import annotations
@@ -25,6 +28,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
 import sys
 from pathlib import Path
 from types import ModuleType
@@ -34,6 +38,8 @@ from disability_access_charts import Reference, Series, audit, bar, choropleth, 
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DATA = ROOT / "site" / "public" / "data"
+# The live site, for the downloads' page URL (as build_state_pages.py). Override: SITE_URL.
+DEFAULT_SITE_URL = "https://batestguy.github.io/curb-cut/"
 
 SOURCE = "JONAPWD, 2025 Assumptive Disability Disaggregated Data"
 DHS_SOURCE = "Nigeria DHS 2024 (NPC and ICF), Curb Cut estimates"
@@ -61,6 +67,18 @@ def _load_build_map() -> ModuleType:
     )
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def _load_sibling(name: str) -> ModuleType:
+    """A sibling script, registered in sys.modules (its dataclasses need that)."""
+    if name in sys.modules:
+        return sys.modules[name]
+    spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name(f"{name}.py"))
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
 
@@ -309,9 +327,48 @@ def poverty_charts(data_dir: Path) -> dict[str, dict]:
     }
 
 
+def main_page_downloads(docs: dict[str, dict], data_dir: Path, site_url: str) -> Path:
+    """The main page's table downloads (``downloads.py``), written from the same table specs
+    the page renders: the two DHS chart documents' tables and the Moran table in
+    ``spatial.json``. ``downloads/main/index.json`` tells the page each table's links. The
+    JONAPWD tables get none (all rights reserved; the page cites the publication instead)."""
+    downloads = _load_sibling("downloads")
+    if not site_url.endswith("/"):
+        site_url += "/"
+    collector = downloads.Collector(site_url, "main", "downloads/")
+    spatial = json.loads((data_dir / "spatial.json").read_text(encoding="utf-8"))
+    for table_id, spec, name, provenance in (
+        (
+            "prevalence-map",
+            docs["prevalence_map"]["table"],
+            "adults with disability by state, with map classes",
+            downloads.DHS,
+        ),
+        (
+            "prevalence-by-state",
+            docs["prevalence_by_state"]["table"],
+            "adults with disability by state, highest first",
+            downloads.DHS,
+        ),
+        (
+            "moran",
+            spatial["moran_table"],
+            "Moran's I by measure (clustering across the country)",
+            downloads.DHS_SPATIAL,
+        ),
+    ):
+        collector.add(downloads.from_spec(spec, table_id, name, provenance))
+    return downloads.write_manifest(collector, data_dir / "downloads")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build chart JSON documents for the site.")
     parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA)
+    parser.add_argument(
+        "--site-url",
+        default=os.environ.get("SITE_URL", DEFAULT_SITE_URL),
+        help="the live site, for the downloads' page URL",
+    )
     args = parser.parse_args()
     out_dir = args.data_dir / "charts"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -333,6 +390,7 @@ def main() -> int:
     if failed:
         print("A chart failed its accessibility audit.", file=sys.stderr)
         return 1
+    print(f"wrote {main_page_downloads(docs, args.data_dir, args.site_url)} and its tables' files")
     return 0
 
 

@@ -94,15 +94,24 @@ def payload() -> dict[str, Any]:
 
 
 @pytest.fixture(scope="module")
-def built(payload: dict[str, Any], tmp_path_factory: pytest.TempPathFactory) -> str:
+def site_build(
+    payload: dict[str, Any], tmp_path_factory: pytest.TempPathFactory
+) -> tuple[str, Path]:
+    """The page's HTML and the data folder it was built from (downloads in downloads/)."""
     data = tmp_path_factory.mktemp("data")
     (data / "charts").mkdir()
     (data / "poverty.json").write_text(json.dumps(payload), encoding="utf-8")
     for name, doc in charts_mod.poverty_charts(data).items():
         (data / "charts" / f"{name}.json").write_text(json.dumps(doc), encoding="utf-8")
     out = tmp_path_factory.mktemp("site") / "poverty.html"
-    assert page_mod.main(["--data-dir", str(data), "--page", str(out)]) == 0
-    return out.read_text(encoding="utf-8")
+    args = ["--data-dir", str(data), "--page", str(out), "--site-url", "https://x.test/cc"]
+    assert page_mod.main(args) == 0
+    return out.read_text(encoding="utf-8"), data
+
+
+@pytest.fixture(scope="module")
+def built(site_build: tuple[str, Path]) -> str:
+    return site_build[0]
 
 
 # --- export -------------------------------------------------------------------------------
@@ -334,3 +343,92 @@ def test_brief_from_fixtures(payload: dict[str, Any], tmp_path: Path) -> None:
 
 def test_long_date() -> None:
     assert brief_mod.long_date("2026-11-01T09:28:07+00:00") == "1 November 2026"
+
+
+# --- Downloads (P6 item 2) -------------------------------------------------------------------
+
+TABLE_AND_LINE = re.compile(
+    r"<table><caption>(.*?)</caption><thead>.*?</thead><tbody>(.*?)</tbody></table></div>"
+    r'(<p class="table-download">.*?</p>)?',
+    re.S,
+)
+CELL = re.compile(r"<t([hd])[^>]*>(.*?)</t[hd]>", re.S)
+SPAN = re.compile(
+    r'<span class="n" data-key="[^"]+" data-factor="[^"]+" data-decimals="(\d+)" '
+    r'data-format="(\w+)">([^<]*)</span>'
+)
+LINK = re.compile(r'<a href="([^"]+)" download aria-label="([^"]+)">([^<]+)</a>')
+
+
+def _plain(cell: str) -> str:
+    return html.unescape(re.sub(r"<[^>]+>", "", cell))
+
+
+def test_every_table_has_downloads_equal_to_its_rows(site_build: tuple[str, Path]) -> None:
+    """All 13 tables are followed by their download line; each CSV holds the table's rows
+    (numbers unrounded: each rounds to the number shown) and the JSON the same rows."""
+    downloads = page_mod.downloads
+    page, data = site_build
+    tables = TABLE_AND_LINE.findall(page)
+    assert len(tables) == page.count("<table>") == 13
+    labels: list[str] = []
+    for caption, body, line in tables:
+        assert line, caption
+        files = {}
+        for href, label, shown in LINK.findall(line):
+            labels.append(label)
+            assert label.startswith(f"{shown}: ")
+            assert href.startswith("./data/downloads/poverty/")
+            content = (data / href.removeprefix("./data/")).read_bytes()
+            fmt = shown.split(",")[0]
+            assert shown == f"{fmt}, {downloads.size_text(len(content))}"
+            files[fmt] = content
+        assert sorted(files) == ["CSV", "JSON"]
+        csv_rows = downloads.parse_csv(files["CSV"])
+        document = json.loads(files["JSON"])
+        assert document["caption"] == html.unescape(caption)
+        assert document["page"] == "https://x.test/cc/poverty.html"
+        assert document["terms"].startswith(downloads.COMMON_TERMS)
+        assert "licen" not in document["terms"].lower()
+        assert csv_rows[0] == [c["label"] for c in document["columns"]]
+        assert downloads.same_rows(csv_rows[1:], document["rows"])
+        rows = re.findall(r"<tr>(.*?)</tr>", body, re.S)
+        assert len(csv_rows) - 1 == len(rows)
+        for row, got in zip(rows, csv_rows[1:], strict=True):
+            values = iter(got)
+            for kind, cell in CELL.findall(row):
+                spans = SPAN.findall(cell)
+                if not spans or all(fmt == "text" for _, fmt, _ in spans):
+                    value = next(values)
+                    shown = _plain(cell)
+                    if kind == "d" and value and shown != value:  # a chart table's number
+                        assert shown == text.fixed(float(value), 1), (value, shown)
+                    else:
+                        assert value == shown
+                    continue
+                for decimals, fmt, shown in spans:  # one value per number, "a to b" gives two
+                    value, shown = float(next(values)), html.unescape(shown)
+                    if fmt == "int":
+                        assert shown == f"{round(value):,}"
+                    elif fmt == "p":
+                        assert shown == ("<0.0001" if value < 0.0001 else text.fixed(value, 4))
+                    else:
+                        assert shown == text.fixed(value, int(decimals))
+            assert next(values, None) is None
+    assert len(labels) == len(set(labels)) == 26
+    files = sorted(p.name for p in (data / "downloads" / "poverty").iterdir())
+    assert len(files) == 26
+
+
+def test_a_range_cell_downloads_as_two_columns(site_build: tuple[str, Path]) -> None:
+    _, data = site_build
+    header = page_mod.downloads.parse_csv(
+        (data / "downloads" / "poverty" / "benchmarks.csv").read_bytes()
+    )[0]
+    assert header == [
+        "Hidden factor",
+        "Estimate between, lower (percentage points)",
+        "Estimate between, upper (percentage points)",
+        "95% interval, lower (percentage points)",
+        "95% interval, upper (percentage points)",
+    ]

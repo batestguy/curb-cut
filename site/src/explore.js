@@ -6,7 +6,7 @@
 // After "Show figures", a state card (facts from states.json, the state's DHS 2024 figure with
 // the national one for comparison, a locator map) appears above the state's table, and focus
 // moves to the card's heading; the table follows it.
-import { formatValue, renderTable, stateHref } from './format.js';
+import { citedLine, formatValue, renderTable, stateHref } from './format.js';
 import { interval, pct } from './prevalence.js';
 
 const PARQUET = 'jonapwd_state_by_type.parquet';
@@ -311,7 +311,8 @@ export function setUpExplorer({
       });
       hideMapTip();
       renderCard(card, profiles.get(state), map, total, nationalCell);
-      tableEl.replaceChildren(table);
+      // JONAPWD's figures are cited, not redistributed: no download, a citation instead.
+      tableEl.replaceChildren(table, citedLine(`persons with disabilities by type, ${state}`));
       status.textContent = `Showing ${rows.length} disability types for ${state}.`;
       onStateShown(state);
       // Move focus to the card's heading: screen readers then read the state's name at once,

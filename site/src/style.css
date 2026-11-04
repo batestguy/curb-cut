@@ -222,6 +222,12 @@ figcaption {
   margin-bottom: 0.25rem;
 }
 
+/* The line directly under a table: its downloads, or (JONAPWD) the citation. */
+.table-download,
+.table-source {
+  margin-top: 0;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
