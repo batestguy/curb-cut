@@ -986,6 +986,12 @@ h3[tabindex="-1"]:focus {
   }
 }
 
+/* The contents list's heading looks like the sections' headings. */
+.dictionary-page > nav > h2 {
+  border-left: 0.3rem solid var(--flag-green);
+  padding-left: 0.6rem;
+}
+
 .dictionary-page .file-facts {
   color: var(--muted);
 }
