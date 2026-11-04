@@ -53,7 +53,7 @@ Status: **met** (the repository has it), **partly** (present but incomplete, or 
 | 2 | Background and rationale | partly | `docs/preregistration.md:14-16`, `:42-43` (NBS Table 7); no literature review of disability–poverty studies in Nigeria or sub-Saharan Africa anywhere in the repo |
 | 3 | Objectives, pre-specified hypotheses | met | `docs/preregistration.md:14-28` (Q1, S1–S6, X1, E1; two-sided test) |
 | 4 | Study design early in the paper | met | `docs/preregistration.md:10`, `:16`, `:123` |
-| 5 | Setting, dates, data collection | partly | Fieldwork 2021–22 at `docs/preregistration.md:34`; sampling (102 EAs per state) only in `docs/verification.md:62` (D40) and `:24` (D1); no description of the survey's fieldwork months in the plan |
+| 5 | Setting, dates, data collection | partly | Fieldwork 2021–22 at `docs/preregistration.md:34`; sampling (102 EAs per state) only in `docs/verification.md:62` (D40) and `:23` (D1); no description of the survey's fieldwork months in the plan |
 | 6a | Eligibility, sources, selection | met | `docs/preregistration.md:58-61` |
 | 7 | Outcomes, exposure, confounders defined | met | `docs/preregistration.md:63-103`; MPI indicators at `docs/verification.md:86` (D64) |
 | 8 | Data sources and measurement, comparability | met | `docs/verification.md:61`, `:65` (D39, D43: MPI items are not the WG-SS; routing) |
@@ -66,7 +66,7 @@ Status: **met** (the repository has it), **partly** (present but incomplete, or 
 | 12d | Sampling strategy in the analysis | partly | Weights in the score, EA clusters without strata (`docs/preregistration.md:61`, `:135`); the strata are an assumption (`docs/verification.md:62`, D40) |
 | 12e | Sensitivity analyses | met | `docs/preregistration.md:152-168` |
 | 13a | Numbers at each stage | partly | `p5_mpi_summary.csv` (households in sample 52,022; poverty missing 545; exposure missing 59; analysed 51,422) |
-| 13b | Reasons for non-participation | partly | Survey response 91.9% in `docs/verification.md:23` (D1) and `:63` (D40), which disagree on the interviewed count (52,022 vs 53,415); not in the plan or brief |
+| 13b | Reasons for non-participation | partly | Survey response 91.9% in `docs/verification.md:23` (D1) and `:62` (D40), which disagree on the interviewed count (52,022 vs 53,415); not in the plan or brief |
 | 13c | Flow diagram | missing | Manuscript; numbers exist |
 | 14a | Characteristics by exposure | **missing** | No published table of confounders by exposure; it can be produced through the disclosure gate (weighted shares only) |
 | 14b | Missing data per variable | partly | Only for exposure and outcome |
@@ -100,7 +100,7 @@ Status: **met** (the repository has it), **partly** (present but incomplete, or 
 | Design, setting, data source | met | `data/public/aggregates/README.md:71-76`; `docs/reproduce.md:7-16` |
 | Case definition | met | DISABILITY3 per WG Document 7A (`data/public/aggregates/README.md:55`; `docs/verification.md:45`, D23) |
 | Population and age groups | met | De facto members 5+, 18+ headline, 5–17 separate (`data/public/aggregates/README.md:40`, `:72`) |
-| Weights, strata, PSU | met | `data/public/aggregates/README.md:72-76` |
+| Weights, strata, PSU | met | `data/public/aggregates/README.md:73-76` |
 | Variance estimation method | met | Taylor linearisation, R `survey` (`data/public/aggregates/README.md:45`); lonely PSUs `:76` |
 | Interval method | met | Korn–Graubard (`data/public/aggregates/README.md:46`) |
 | Design df, effective n, design effect | met | Columns `df`, `n_effective` (`data/public/aggregates/README.md:48-49`) |
@@ -132,7 +132,7 @@ Criteria from `JOSS2026Review` (review criteria) and `JOSS2026Submitting` (submi
 | 5 | Example usage, ideally on a real problem | **Met** | `README.md:60-87` (claim checker example); `examples/` (four scripts: JONAPWD 2025 figures, synthetic dot plot, synthetic patterned map, plain Plotly audit), run by `tests/test_examples.py` |
 | 6 | API / functionality documentation | **Partly met** | Narrative docs: `docs/claim-checker.md`, `docs/findings.md`, `docs/maps.md`, `docs/patterns.md`; detailed module docstrings (e.g. `src/disability_access_charts/describe.py:1-60`, `vision.py:1-42`, `audit.py:1-24`). No generated API reference (Sphinx / mkdocs) and no hosted documentation site |
 | 7 | Functionality (reviewer installs and verifies) | **Met, as far as can be checked here** | `uv run pytest packages/disability-access-charts`: 436 passed (2026-11-04). Clean installs from PyPI checked by hand for 0.2.0 (3.12 and 3.10) and 0.3.0 (3.12 only) (`docs/STATUS.md:92`, `:330`) |
-| 8 | Automated tests with CI | **Met** | 17 test files under `packages/disability-access-charts/tests/`; CI runs pytest with an 85% coverage floor (`.github/workflows/ci.yml:37`) and `disability-access-charts check --strict` on the site's chart JSON (`ci.yml:98`). CI runs Python 3.12 only, although `requires-python = ">=3.10"` (`pyproject.toml:6`) |
+| 8 | Automated tests with CI | **Met** | 16 test files (plus `conftest.py`) under `packages/disability-access-charts/tests/`; CI runs pytest with an 85% coverage floor (`.github/workflows/ci.yml:37`) and `disability-access-charts check --strict` on the site's chart JSON (`ci.yml:98`). CI runs Python 3.12 only, although `requires-python = ">=3.10"` (`pyproject.toml:6`) |
 | 9 | Community guidelines (contributing, issues, support) | **Missing** | No `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, issue templates or support statement. Only an Issues URL in `pyproject.toml:36` |
 | 10 | Development timeline (preferably 6+ months, steady) | **Missing** | First commit touching the library 2026-10-16 (`git log --reverse -- packages/disability-access-charts`), commits on 7 distinct dates |
 | 11 | Open development (releases, issues, PRs) | **Partly met** | Tags `charts-v0.0.1`, `charts-v0.1.0`, `charts-v0.2.0`, `charts-v0.3.0`; PRs #2–#6 merged. Few or no public issues |
@@ -236,10 +236,11 @@ Source: `docs/brief/p5-poverty-brief.md` (generated by `packages/transform/scrip
 - `CLAUDE.md` ("What the project is" → Analysis) and `PLAN.md:286`, `:288`: DoWhy refutations and an "event study … checked against R `did`". The code has no DoWhy dependency (`packages/ingest/pyproject.toml`) and writes its refutations around DoubleML (`docs/verification.md:84`, D62); the GHS check uses R `fixest` 0.14.2 (`DESCRIPTION`; `p5_ghs_summary.csv` `*_fixest`), and the design is a two-period comparison, which `poverty_text.py:32` forbids calling an event study.
 - `CLAUDE.md` names `emdi` with `sae`; only `sae` is used (`DESCRIPTION`; D47).
 - `docs/verification.md:84` (D62) lists R `EValue` 4.1.4; it is not in `renv.lock`, and the E-value is computed in Python (`packages/ingest/src/curbcut_ingest/restricted/p5_mpi.py:825-833`).
-- `docs/verification.md:23` (D1, 52,022 interviewed) vs `:63` (D40, 53,415 interviewed); `docs/preregistration.md:34` uses 53,415 in the identification file and `:59` 52,022 completed. Likely file rows vs completed interviews; one sentence should reconcile them.
+- `docs/verification.md:23` (D1, 52,022 interviewed) vs `:62` (D40, 53,415 interviewed); `docs/preregistration.md:34` uses 53,415 in the identification file and `:59` 52,022 completed. Likely file rows vs completed interviews; one sentence should reconcile them.
 - `docs/reproduce.md:18-35`: the hash table covers MPI Sections A, B and D only, but `mpi2021_poverty` and `p5_exposure` read further sections (C, E, F, H, I, J, K, Q, R, T per D64 and `docs/reproduce.md:73`), and `p5_ghs` reads GHS consumption and labour files; their hashes are in each run's manifest but not in the doc. Adding them needs restricted access.
 - `docs/verification.md:45` (D23) says WG Doc 7A judges disability "without the use of assistive technology"; the WG-SS seeing and hearing questions say "even if wearing glasses / using a hearing aid". Re-read the source before citing D23's wording.
 - Fixed in this pass (doc-only, no code touched): `data/README.md` said the MPI aggregates were git-ignored until NBS replied (they have been public since 2026-10-24, D4); `data/public/aggregates/README.md` said the files were "not shown on the site yet" and listed 168 suppressed cells in `dhs2024_state.csv` (the file has 413: 168 primary, 245 complementary); `README.md` "Status" still described P2; `docs/reproduce.md` said `renv::restore()` installs three packages (it installs the seven in `DESCRIPTION`).
+- Open for the author: the licence of the derived result files in `data/public/aggregates/`, `sae/` and `spatial/`. The repository is MIT, but the DHS terms limit use to the registered project and the NBS written confirmation is still open (`docs/verification.md` D4). This pass words the READMEs as "reuse subject to the source terms"; a paper's data-availability statement needs a decision.
 
 ### 6.2 Library docs
 
@@ -249,7 +250,7 @@ Recorded, not fixed in code. Where this pass changed only a doc's wording to sto
 2. **Claim checker on "any Plotly figure".** The README said the checker "runs on any Plotly figure in CI". `audit()` runs it on a plain figure only when `alt_text=` is passed and only for bar and scatter traces with string categories and numeric values (`src/disability_access_charts/audit.py:626-657`, `:720`); otherwise it warns `alt-text-not-checked` (`audit.py:236-245`). **README wording narrowed** (`README.md:5`) to match the code; code unchanged.
 3. **Python 3.10.** The README said "3.10 is checked by installing the wheel and running the examples", implying a standing check. CI runs 3.12 only (`.github/workflows/ci.yml`; `tests/test_smoke.py:8` says so), and the 3.10 install was checked by hand for 0.2.0 but not for 0.3.0 (`docs/STATUS.md:92`, `:151`, `:330`). **README wording corrected** to say so (`README.md:136`).
 4. **Version of the claim-checker reference.** `docs/claim-checker.md` said it was the reference "in 0.2". `describe.py` has not changed since before the 0.2.0 tag (`git log -- src/disability_access_charts/describe.py`: last commit `6d778e8`, the commit tagged `charts-v0.2.0`). **Changed to "0.3; the rules have not changed since 0.2".**
-5. **"Colour-blind-safe."** The README called the default scheme "colour-blind-safe". The code checks only simulated full dichromacy against design thresholds (section 6.2, item 1; section 3.2.4). **README wording narrowed** to "chosen to stay distinguishable under simulated colour-vision deficiency". The same phrase remains in `CHANGELOG.md` (not in this executor's files).
+5. **"Colour-blind-safe."** The README called the default scheme "colour-blind-safe". The code checks only simulated full dichromacy against design thresholds (section 6.2, item 1; section 3.2.4). **README wording narrowed** (two places) to "chosen to stay distinguishable under simulated colour-vision deficiency". The same phrase remains in `CHANGELOG.md` and in `docs/STATUS.md` (process docs, out of scope for this pass).
 6. **Description vs PyPI.** The README's a11yviz description was checked against 0.1.8 (2026-10-29); PyPI shows 0.1.9 on 2026-11-04. Not a contradiction (the check is dated), but it needs rechecking before a paper.
 
 No numerical value in the library docs disagreed with the code: every contrast ratio, CIEDE2000 minimum, CIELAB L\* value and ink ratio in `docs/maps.md` and `docs/patterns.md`, and the 73 / 20 / 15 counts in `docs/findings.md` (against `site/public/data/charts/prevalence_by_state.json`), were recomputed from the 0.3.0 code on 2026-11-04 and match.
@@ -321,7 +322,7 @@ One list for all three papers. Use these terms, with these meanings, in any manu
 | Legend filter (library) | Legend buttons that show one class at a time, with announced sentences | `docs/maps.md` ("The legend filter") |
 | Chart document (library) | The JSON dict each builder returns (`plotly`, `alt_text`, `table`, `data`, `themes`, `audit`, …) | `README.md` ("What you get") |
 
-Terms used but not defined at first use anywhere: "PSU" (used in `data/public/aggregates/README.md:72-76` without expansion), "EA" (enumeration area, expanded only in `docs/preregistration.md:61`).
+Terms used but not defined at first use anywhere: "PSU" (used in `data/public/aggregates/README.md:73-76` without expansion), "EA" (enumeration area, expanded only in `docs/preregistration.md:61`).
 
 ## 9. What to do next
 

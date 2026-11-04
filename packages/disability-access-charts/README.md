@@ -132,7 +132,7 @@ disability-access-charts check --strict charts/*.json   # warnings fail too
 ## More
 
 - **Languages:** one table of templates and claim words per language (`_lang/en.py`); only English ships so far. Numbers stay as digits in every language, so the checker still works.
-- **Maps:** `choropleth()` builds a shaded-map document in fixed classes, each with its own pattern (up to five classes, ordered by ink weight) on a colour-blind-safe scale with cased boundaries, with the same alt-text checks, a table and an audit; `audit()` and `check` handle it. The page draws the SVG from the document. How its colours and patterns meet WCAG is in [the maps note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/maps.md).
+- **Maps:** `choropleth()` builds a shaded-map document in fixed classes, each with its own pattern (up to five classes, ordered by ink weight) on a scale chosen to stay distinguishable under simulated colour-vision deficiency, with cased boundaries, with the same alt-text checks, a table and an audit; `audit()` and `check` handle it. The page draws the SVG from the document. How its colours and patterns meet WCAG is in [the maps note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/maps.md).
 - **Python:** 3.10 or later. Tests and CI run on 3.12 only. Python 3.10 was checked by hand for the 0.2.0 release (installing the wheel and running the examples); it is not part of CI.
 - **Examples** (in the source distribution and the repository's `examples/`): JONAPWD's 2025 *assumed* figures by disability type (a WHO 15% benchmark applied to population, not survey estimates), a synthetic dot plot with intervals and findings, a synthetic patterned map written out as a standalone SVG page, and an audit of a plain Plotly figure. The installed package holds no data.
 
@@ -142,7 +142,7 @@ In a search of PyPI, GitHub and the literature (2026-10-21) we found no other li
 
 - [a11yviz](https://pypi.org/project/a11yviz/) has WCAG-tagged palettes, alt-text scaffolds and audits for plotnine, plotly and Quarto.
 - [maidr](https://pypi.org/project/maidr/), the Python package of the MAIDR system (Seo et al., 2024), makes charts explorable by keyboard, with sound, braille and text descriptions.
-- The Highcharts accessibility module (a JavaScript charting library, not Python) adds keyboard navigation and ARIA markup and exposes the title, axis titles, series names and an author-written description to screen readers; it does not write a description from the data.
+- The Highcharts accessibility module (a JavaScript charting library, not Python) adds keyboard navigation and ARIA markup and exposes the title, axis titles, series names and an author-written description to screen readers; the page we checked does not describe generated summaries.
 
 Use maidr for multimodal exploration. Use this library to catch numbers and comparisons in a description that contradict the data, and to report which differences in a chart survive a multiple-comparison correction. The two are complementary rather than alternatives. (The a11yviz and maidr descriptions were checked against their PyPI pages on 2026-10-29: a11yviz 0.1.8, maidr 1.28.1. The Highcharts description was checked against its accessibility-module documentation on 2026-11-04.) No benchmark comparison with these tools has been run.
 

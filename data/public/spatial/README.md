@@ -25,7 +25,7 @@ Built from public files only (`data/public/aggregates/dhs2024_state.csv`, `data/
 
 ## Licence and terms
 
-The inputs are the public DHS 2024 aggregates (DHS terms: aggregates only, cited; see `data/public/aggregates/README.md`), geoBoundaries (CC BY 4.0) and GRID3 NGA Health Facilities v2.0 (CC BY 4.0; CIESIN, 2024, doi:10.7916/kv1n-0743). The files here are results, released with the repository under MIT; cite the sources with them.
+The inputs are the public DHS 2024 aggregates (DHS terms: aggregates only, cited; see `data/public/aggregates/README.md`), geoBoundaries (CC BY 4.0) and GRID3 NGA Health Facilities v2.0 (CC BY 4.0; CIESIN, 2024, doi:10.7916/kv1n-0743). The files here are results derived from these inputs; reuse is subject to the source terms, so cite the sources with them (the repository's MIT licence covers its code; a separate licence for these files has not been confirmed).
 
 ## References
 

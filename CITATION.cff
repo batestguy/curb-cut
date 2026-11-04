@@ -35,6 +35,7 @@ keywords:
 references:
   - type: report
     title: "Nigeria Demographic and Health Survey 2024: Final Report (FR395)"
+    # TODO(verify): author list and year from a search result; the DHS page returned 403 (see docs/references.bib, NDHS2024).
     authors:
       - name: "Federal Ministry of Health and Social Welfare"
       - name: "National Population Commission"

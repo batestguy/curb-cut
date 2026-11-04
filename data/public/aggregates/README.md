@@ -79,7 +79,7 @@ Written by `uv run python -I -m curbcut_ingest.restricted.p5_publish` from the r
 
 - The state estimates are **direct** survey estimates: each uses only that state's sample, and a state × domain × breakdown cell can rest on few events; read the precision flag and the interval. A model-based (Fay-Herriot) alternative was tried and not used (`data/public/sae/`, `docs/verification.md` D56).
 - Suppression is not random: it falls on state × wealth quintile cells in 16 states. Analyses that need every quintile in every state can't be done from these files.
-- DISABILITY3 is a reported measure of functional difficulty, collected in the household interview (so often reported by another household member), not a medical diagnosis or a registration count.
+- DISABILITY3 is a reported measure of functional difficulty, collected in the household interview (so it can be reported by another household member), not a medical diagnosis or a registration count.
 - The DHS and GHS surveys use the WG-SS; MPI 2021 does not, so its measures are not comparable with DISABILITY3.
 
 ## Terms and citation
@@ -87,4 +87,4 @@ Written by `uv run python -I -m curbcut_ingest.restricted.p5_publish` from the r
 - **DHS:** Nigeria DHS 2024 microdata (National Population Commission and ICF, The DHS Program; release NG2024DHS). Data used only for the registered project "Curb Cut: disability prevalence and poverty in Nigeria"; no microdata in any tool or dashboard; a PDF of every publication goes to references@dhsprogram.com.
 - **NBS MPI:** National Bureau of Statistics, Multidimentional Poverty index Survey 2021 v1.0 (`NGA-NBS-MPI-2021-v1.0`; the required citation, spelling as given by NBS). Used solely for reporting aggregated information; no redistribution of the microdata; an electronic copy of every publication goes to the National Data Archive (`docs/verification.md` D3).
 - **GHS-Panel:** National Bureau of Statistics, Nigeria, General Household Survey-Panel W4 (NGA_2018_GHSP-W4_v03_M) and W5 (NGA_2023_GHSP-W5_v02_M), World Bank Microdata Library. Public-use files under a confidentiality declaration; citation required (`docs/verification.md` D5).
-- The aggregates here may be reused with these citations. Full citations are in `manifest.json` and `docs/references.bib`.
+- Reuse is subject to the source terms above; cite the sources. The repository's MIT licence covers its code; a separate licence for these derived files has not been confirmed with the data owners. Full citations are in `manifest.json` and `docs/references.bib`.

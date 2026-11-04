@@ -13,4 +13,4 @@ If a later run passes the diagnostics (for example after the direct estimates ch
 
 ## Licence and references
 
-Built only from public inputs (DHS aggregates, cited; covariates as licensed in `data/public/covariates/README.md`). The files are results, released with the repository under MIT. References (`docs/references.bib`): `FayHerriot1979`, `MolinaMarhuenda2015`, `Schwarz1978`, `ShapiroWilk1965`.
+Built only from public inputs (DHS aggregates, cited; covariates as licensed in `data/public/covariates/README.md`). The files are results derived from the DHS aggregates; reuse is subject to the DHS terms in `data/public/aggregates/README.md` (the repository's MIT licence covers its code; a separate licence for these files has not been confirmed). References (`docs/references.bib`): `FayHerriot1979`, `MolinaMarhuenda2015`, `Schwarz1978`, `ShapiroWilk1965`.
