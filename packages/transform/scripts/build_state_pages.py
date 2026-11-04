@@ -50,6 +50,26 @@ DEFAULT_CHARTS = ROOT / "site" / "public" / "data" / "charts" / "states"
 DEFAULT_SITE_URL = "https://batestguy.github.io/curb-cut/"
 REPO = "https://github.com/batestguy/curb-cut"
 REPORT_URL = f"{REPO}/issues/new"
+# "Report a problem" without a GitHub account (P6 item 1): a mailto link with a backup
+# address. site/index.html and site/methodology.html repeat REPORT_HTML by hand;
+# site/tests/site.spec.js checks every page carries both addresses.
+REPORT_EMAIL = "batesthommie@gmail.com"
+REPORT_EMAIL_BACKUP = "jzbannister@atbu.edu.ng"
+REPORT_MAIL_QUERY = (
+    "?subject=Curb%20Cut%3A%20problem%20report"
+    "&amp;body=Page%20address%3A%0A%0AWhat%20went%20wrong%3A%0A%0A"
+    "Browser%20and%20screen%20reader%2C%20if%20any%3A%0A"
+)
+REPORT_HTML = (
+    "<p>This site has automated accessibility tests (axe, keyboard); "
+    + f"""\
+it has not yet been tested
+by a regular screen-reader user. If anything is hard to use or looks wrong, email
+<a href="mailto:{REPORT_EMAIL}{REPORT_MAIL_QUERY}">{REPORT_EMAIL}</a>
+(backup: <a href="mailto:{REPORT_EMAIL_BACKUP}{REPORT_MAIL_QUERY}">{REPORT_EMAIL_BACKUP}</a>);
+no account is needed. With a GitHub account you can also
+<a href="{REPORT_URL}">report a problem on GitHub</a>.</p>"""
+)
 # Each page must load in about a second on a phone (site/tests/states.spec.js checks the
 # total); the HTML alone may be at most this many bytes.
 HTML_BUDGET = 60 * 1024
@@ -523,9 +543,7 @@ def header_html(crumb: str) -> str:
 
 FOOTER_HTML = f"""<footer class="site-footer">
 <h2 class="footer-heading">Accessibility and feedback</h2>
-<p>This site has automated accessibility tests (axe, keyboard); it has not yet been tested
-by a regular screen-reader user. If anything is hard to use or looks wrong,
-<a href="{REPORT_URL}">report a problem on GitHub</a>.</p>
+{REPORT_HTML}
 <p><a href="../methodology.html">Methodology: definitions, sources and limits</a>.
 <a href="../">Back to the main page</a>. Source code and data notes:
 <a href="{REPO}">github.com/batestguy/curb-cut</a>.</p>

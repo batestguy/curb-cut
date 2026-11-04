@@ -384,3 +384,16 @@ def test_the_build_refuses_a_page_over_budget(warehouse, tmp_path, monkeypatch) 
     monkeypatch.setattr(pages, "HTML_BUDGET", 1000)
     with pytest.raises(ValueError, match="page budget"):
         pages.build(pages.load(warehouse), pages.locator_geo(), tmp_path, tmp_path, "https://x/")
+
+
+def test_report_paragraph_matches_hand_written_pages() -> None:
+    """index.html and methodology.html repeat REPORT_HTML by hand; keep the links in step."""
+    hrefs = re.findall(r'href="([^"]+)"', pages.REPORT_HTML)
+    assert any(h.startswith(f"mailto:{pages.REPORT_EMAIL}?") for h in hrefs)
+    assert any(h.startswith(f"mailto:{pages.REPORT_EMAIL_BACKUP}?") for h in hrefs)
+    assert pages.REPORT_URL in hrefs
+    for name in ("index.html", "methodology.html"):
+        html = (ROOT / "site" / name).read_text(encoding="utf-8")
+        for href in hrefs:
+            assert f'href="{href}"' in html, (name, href)
+    assert pages.REPORT_HTML in pages.FOOTER_HTML

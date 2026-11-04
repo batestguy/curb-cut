@@ -2,7 +2,7 @@
 
 The one page to read first. It says where things stand and what happens next. The rules live in `CLAUDE.md`, the roadmap in `PLAN.md`, and the P0 evidence in `docs/verification.md`. Update this page at every working session and every gate.
 
-**Last updated:** 2026-11-04 · **Current phase:** **P5 passed 2026-11-01** (PR #4; results page and brief live; NBS copy sent). **P6 in progress:** the map redesign (option C) is merged and live (PR #5) and `disability-access-charts` **0.3.0 is on PyPI** (tag `charts-v0.3.0`, pushed by the author). **Detour (author-approved, 2026-11-04):** P6 paused for an academic polish of the technical write-ups and a gap report (`docs/publication-readiness.md`), on branch `academic-polish` as a draft PR for the author to merge. After it, resume at P6 item 1, see Next actions → "P6: pick up here".
+**Last updated:** 2026-11-04 · **Current phase:** **P5 passed 2026-11-01** (PR #4; results page and brief live; NBS copy sent). **P6 in progress:** the map redesign (option C) is merged and live (PR #5) and `disability-access-charts` **0.3.0 is on PyPI** (tag `charts-v0.3.0`, pushed by the author). The academic-polish detour (gap report `docs/publication-readiness.md`) merged as PR #7 on 2026-11-04. P6 item 1 (report a problem by email on every page) is on branch `p6-report-link`. Next: P6 item 2, see Next actions → "P6: pick up here".
 
 ## Phases
 
@@ -97,7 +97,7 @@ The one page to read first. It says where things stand and what happens next. Th
 - Merged branches `p5-poverty` and `p6-map-redesign` can be deleted; this handoff is on `p6-handoff`.
 
 **Next, in suggested order** (`PLAN.md` P6; pick with the author, one at a time, gate at the end):
-1. **"Report a problem" without a GitHub account** on every page (a `mailto:` link, keyboard reachable), small and self-contained.
+1. ~~**"Report a problem" without a GitHub account**~~ **done 2026-11-04** (branch `p6-report-link`): every page's footer (main, methodology, poverty, state index, 37 state pages) has an "Accessibility and feedback" section with `mailto:` links to batesthommie@gmail.com and, as a backup, jzbannister@atbu.edu.ng (author's choice), with a subject and a short body template, plus the GitHub link. One source: `REPORT_HTML` in `build_state_pages.py`; `index.html` and `methodology.html` repeat it by hand, and `test_report_paragraph_matches_hand_written_pages` keeps them in step. `site.spec.js` checks both addresses and focus on all five page types.
 2. **CSV/JSON downloads** next to every table and chart (the public aggregates already exist; check sizes and licences per source).
 3. **Lighthouse CI** with accessibility 100 as a hard gate (the P6 gate needs it); fix what it finds.
 4. **Long tables read in full on Tab** (NVDA reads the whole table when a scrollable table region gets focus, on every page): consider a shorter `aria-label` (caption only) for the region; check with an NVDA transcript.

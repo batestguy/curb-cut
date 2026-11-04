@@ -53,6 +53,7 @@ text = _load("poverty_text")
 esc = pages.esc
 REPO = pages.REPO
 REPORT_URL = pages.REPORT_URL
+REPORT_HTML = pages.REPORT_HTML
 
 SECONDARY_ROWS = (
     "s1_score",
@@ -779,9 +780,7 @@ list of health, education, living standards, and work and shocks.</p>
 </main>
 <footer class="site-footer">
 <h2 class="footer-heading">Accessibility and feedback</h2>
-<p>This site has automated accessibility tests (axe, keyboard); it has not yet been tested
-by a regular screen-reader user. If anything is hard to use or looks wrong,
-<a href="{REPORT_URL}">report a problem on GitHub</a>.</p>
+{REPORT_HTML}
 <p><a href="./methodology.html">Methodology: definitions, sources and limits</a>.
 <a href="./">Back to the main page</a>. Source code and data notes:
 <a href="{REPO}">github.com/batestguy/curb-cut</a>.</p>
