@@ -1,0 +1,24 @@
+# Render Blueprint for the optional Curb Cut API (docs/api.md). Free plan: $0, sleeps after
+# 15 minutes without traffic and takes about a minute to wake.
+# Keys checked against https://render.com/docs/blueprint-spec on 2026-11-04.
+services:
+  - type: web
+    name: curb-cut-api
+    runtime: python
+    plan: free
+    # Nearest Render region to Nigeria; it can't be changed after the service is created.
+    region: frankfurt
+    # Python 3.12 comes from the repo's .python-version; Render adds uv because uv.lock is at
+    # the repo root. Install only the API and its dependencies (no dbt, no analysis stack).
+    buildCommand: uv sync --locked --package curbcut-api --no-default-groups
+    startCommand: uv run --no-sync uvicorn curbcut_api.app:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /status
+    # Deploy a commit on main only after its GitHub checks (CI, including the Pages deploy)
+    # pass, so the API restarts after the site's data have been published and loads them.
+    autoDeployTrigger: checksPass
+    envVars:
+      # Behind Render's proxy: rate-limit on the X-Forwarded-For entry its proxies add.
+      - key: CURBCUT_TRUST_PROXY
+        value: "1"
+      - key: CURBCUT_RATE_LIMIT
+        value: 60/minute
