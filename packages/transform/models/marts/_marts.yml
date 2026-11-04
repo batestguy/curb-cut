@@ -21,9 +21,11 @@ models:
               Assumptive Disability Disaggregated Data
             url: https://jonapwdng.org/10865-2/
             terms: >-
-              (c) JONAPWD, all rights reserved. Cited, not redistributed: no download is
-              offered. The figures are an assumption (the global 15% disability rate applied
-              to population projections), not a count of anyone.
+              Cited, not redistributed (all rights reserved): the type-by-state tables are
+              not offered for download; state totals appear in states.json, and the national
+              figure in the comparison, as cited figures. The figures are an assumption (the
+              global 15% disability rate applied to population projections), not a count of
+              anyone.
     data_tests:
       - unique_combination:
           arguments:
@@ -240,7 +242,8 @@ models:
       - name: source
         description: &d_source >-
           Survey the cell comes from: dhs2024 (Nigeria DHS 2024), ghs_w4 or ghs_w5
-          (GHS-Panel waves 4 and 5) or mpi2021 (NBS MPI Survey 2021).
+          (GHS-Panel waves 4 and 5, national and zone only) or mpi2021 (NBS MPI Survey
+          2021). The public files hold only dhs2024 rows.
       - name: dataset_version
         description: &d_dataset_version The microdata release the estimate was made from (e.g. "NG2024DHS, recode 8B (NGPR8BFL)").
       - name: measure
@@ -715,8 +718,8 @@ models:
       meta:
         sources: &p5_sources
           - citation: >-
-              National Bureau of Statistics, Multidimentional Poverty index Survey 2021 v1.0
-              (NGA-NBS-MPI-2021-v1.0)
+              National Bureau of Statistics, Multidimentional [sic] Poverty index Survey 2021
+              v1.0 (NGA-NBS-MPI-2021-v1.0); the spelling is NBS's required citation
             url: https://microdata.nigerianstat.gov.ng/index.php/catalog/71
             terms: >-
               NBS MPI Survey 2021: used solely for reporting aggregated information; no
@@ -725,12 +728,16 @@ models:
               subject to the source terms; cite the sources.
           - citation: >-
               National Bureau of Statistics, Nigeria, General Household Survey-Panel Wave 4
-              (NGA_2018_GHSP-W4_v03_M) and Wave 5 (NGA_2023_GHSP-W5_v02_M), World Bank
-              Microdata Library
-            url: https://microdata.worldbank.org/
-            terms: >-
+              (NGA_2018_GHSP-W4_v03_M), World Bank Microdata Library
+            url: https://microdata.worldbank.org/index.php/catalog/3557
+            terms: &ghs_terms >-
               GHS-Panel: public-use files under a confidentiality declaration; no
               re-identification; citation required.
+          - citation: >-
+              National Bureau of Statistics, Nigeria, General Household Survey-Panel Wave 5
+              (NGA_2023_GHSP-W5_v02_M), World Bank Microdata Library
+            url: https://microdata.worldbank.org/index.php/catalog/6410
+            terms: *ghs_terms
           - citation: Curb Cut P5 analysis, pre-registered at https://osf.io/kes3p/
             url: https://osf.io/kes3p/
             terms: >-
@@ -762,8 +769,15 @@ models:
           it in words.
       - name: exposure
         description: >-
-          Code of the exposure definition in the pre-registration: primary (section 3.2),
-          s2, s3, s5 or s6 (the secondary definitions of those names); for GHS, onset
+          Code of the exposure definition (pre-registration sections 1 and 3.2). primary: a
+          household member aged 5+ has "a lot of difficulty" or "cannot do at all" in
+          self-care, remembering or concentrating, communication, or (when MPI asked the
+          severity) seeing, hearing or walking; people whose severity was not asked count as
+          not severe. s2: NBS's broad definition, "some difficulty" or worse in any item,
+          including lifting, using the hands and the skin item (albinism or vitiligo). s3: the
+          household head has a severe difficulty. s5: as primary, but people whose seeing,
+          hearing or walking severity was not asked count as severe. s6: routing-free, a
+          severe difficulty in self-care, remembering or communication only. For GHS, onset
           (disability that began between the waves).
       - name: scale
         description: >-
@@ -776,9 +790,10 @@ models:
           the sensemakr bounds and GHS).
       - name: estimate
         description: >-
-          The adjusted difference between exposed and comparison households (or people), on
-          the row's scale (a proportion, a 0-1 score, or log points for consumption). Null
-          when suppressed.
+          The adjusted difference between exposed and unexposed households (or people for
+          GHS), on the row's scale (a proportion, a 0-1 score, or log points for
+          consumption). For the MPI rows estimated with DoubleML it is standardised to the
+          whole population (population-weighted). Null when suppressed.
         config:
           meta: {unit: &u_scale "as in scale; multiply by display_factor for the page"}
       - name: se
@@ -795,13 +810,18 @@ models:
         config:
           meta: {unit: *u_scale}
       - name: pval
-        description: p-value for a difference of 0 (null when not computed or suppressed).
+        description: >-
+          Two-sided p-value for a difference of 0 (DoubleML, standard errors clustered by
+          enumeration area). Only the primary estimate's is a pre-registered test; on the
+          secondary, dimension, robustness, leave-one-zone-out and subgroup rows it is
+          descriptive. Null on the survey benchmark, sensemakr and GHS rows, and when
+          suppressed.
         config:
           meta: {unit: *u_p}
       - name: holm_p
         description: >-
-          pval adjusted with Holm's method across the pre-registered secondary family;
-          only for S1 to S3, otherwise null.
+          pval adjusted with Holm's method across S1, S2 and S3 (the pre-registered family
+          for saying a secondary difference "is supported"); null on every other row.
         config:
           meta: {unit: *u_p}
       - name: supported
@@ -809,10 +829,11 @@ models:
           True when holm_p is below 0.05; only for S1 to S3, otherwise null.
       - name: mu0
         description: >-
-          The comparison group's standardised mean outcome on the 0-1 scale (for poverty,
-          the comparison households' standardised poverty share), so mu0 + estimate is the
-          implied rate for the exposed. Null where not computed (survey benchmark, sensemakr
-          bounds, GHS).
+          The outcome if no household had a member with a severe difficulty, standardised to
+          the whole population (weighted doubly robust estimate): for poverty, the share of
+          people who would be multidimensionally poor. mu0 plus the estimate is the same
+          standardised share with such a member; neither is the observed rate of either
+          group. Null where not computed (survey benchmark, sensemakr bounds, GHS).
         config:
           meta: {unit: *u_prop}
         data_tests: [non_negative]
@@ -823,19 +844,20 @@ models:
       - name: n_exposed
         description: >-
           Unweighted exposed households (MPI) or people with onset (GHS). The estimate is
-          suppressed if this or n_unexposed is under 30.
+          suppressed if this or n_unexposed is under 30; both counts are then null.
         config:
           meta: {unit: *u_units}
         data_tests: [non_negative]
       - name: n_unexposed
-        description: Unweighted comparison households or people.
+        description: Unweighted comparison households or people; null when suppressed.
         config:
           meta: {unit: *u_units}
         data_tests: [non_negative]
       - name: suppressed
         description: >-
-          True when the exposed or the comparison group has fewer than 30 unweighted units;
-          the numbers and both counts are then null.
+          True when the exposed or the comparison group has fewer than 30 unweighted units.
+          The estimate, se, interval, pval, holm_p, supported, mu0, n_exposed and n_unexposed
+          are then null; n, display_factor and the descriptive columns stay.
       - name: display_factor
         description: >-
           Multiplier for display: 100 turns proportions into percentage points and 0-1

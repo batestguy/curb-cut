@@ -215,12 +215,14 @@ def test_builds_from_synthetic_inputs(inputs: dict[str, Path], capsys) -> None:
     assert "<td>list of text</td>" in html
     # Names wrap only after "_" or ".", never inside a word.
     assert "<code>results.<wbr>{result_<wbr>id}<wbr>.<wbr>label</code>" in html
-    assert "<td>number or null</td><td>The result.</td><td>none</td>" in html
+    assert f"<td>number or null</td><td>The result.</td><td>{dd.NO_UNIT}</td>" in html
+    assert '<span class="visually-hidden">not applicable</span>' in dd.NO_UNIT
     # Sources and terms from the marts' meta; the link to each file, except a cited one.
     assert '<a href="https://example.test/a">Survey A</a>. Aggregates only.' in html
     assert '<a href="./data/cells.parquet">cells.parquet</a> (Parquet, 1 KB, 2 rows)' in html
     assert 'href="./data/hidden.parquet"' not in html
-    assert "<code>data/hidden.parquet</code>" in html
+    assert "data/hidden.parquet" not in html
+    assert "Not offered for download" in html
     # The downloads' structure and the API, which the site does not call.
     assert 'id="table-downloads--columns-item-label"' in html
     assert '<a href="https://api.example.test/docs">' in html
@@ -268,6 +270,24 @@ def test_page_structure(inputs: dict[str, Path]) -> None:
     assert dd.pages.REPORT_HTML in html
     assert '<link rel="stylesheet" href="./src/style.css" />' in html
     assert '<link rel="canonical" href="https://x.test/cc/data-dictionary.html" />' in html
+
+
+def test_a_file_description_overrides_the_marts(inputs: dict[str, Path]) -> None:
+    """A field the registry describes takes that wording, not its mart's (states.json's
+    headline cell is never suppressed, so the mart's "null when suppressed" would mislead)."""
+
+    def change(d: dict[str, Any]) -> None:
+        d["files"][2]["fields"]["results.{result_id}.value"] = {
+            "description": "Always published here.",
+            "unit": "points",
+        }
+
+    _edit_yaml(inputs["registry"], change)
+    html = _build(inputs)
+    row = re.search(r'id="results-json--results-result-id-value">.*?</tr>', html, re.S)
+    assert row is not None
+    assert "Always published here." in row.group(0) and "points" in row.group(0)
+    assert "The result." not in row.group(0)
 
 
 # --- Failures -------------------------------------------------------------------------------

@@ -986,6 +986,12 @@ h3[tabindex="-1"]:focus {
   }
 }
 
+/* "Not applicable" (visually hidden) in a units cell stays inside its table's scroll area,
+   so it never widens the page. */
+.dictionary-page td {
+  position: relative;
+}
+
 /* The contents list's heading looks like the sections' headings. */
 .dictionary-page > nav > h2 {
   border-left: 0.3rem solid var(--flag-green);

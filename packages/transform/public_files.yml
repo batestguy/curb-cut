@@ -89,8 +89,33 @@ files:
     fields:
       "[]": One object per state (36 states and the Federal Capital Territory), by name.
       "[].dhs2024": >-
-        The state's DHS 2024 headline cell: DISABILITY3, adults 18+, both sexes. Null where
-        the state has no published headline (suppressed or no cell).
+        The state's DHS 2024 headline cell: DISABILITY3, adults 18+, both sexes. The whole
+        object is null where the state has no published headline (suppressed, or no cell);
+        when present, none of its numbers is null.
+      # The headline cell carries only published values, so these replace the mart's wording
+      # (which allows for suppressed and missing cells).
+      "[].dhs2024.estimate": &h_estimate
+        description: Survey-weighted share of adults 18+ with a lot of difficulty, or unable, in at least one of six activities (DISABILITY3).
+        unit: proportion (0 to 1)
+      "[].dhs2024.se": &h_se
+        description: Design-based standard error of the estimate (Taylor linearisation, R survey).
+        unit: proportion (0 to 1)
+      "[].dhs2024.ci_low": &h_ci_low
+        description: Lower end of the 95% confidence interval (Korn-Graubard).
+        unit: proportion (0 to 1)
+      "[].dhs2024.ci_high": &h_ci_high
+        description: Upper end of the 95% confidence interval (Korn-Graubard).
+        unit: proportion (0 to 1)
+      "[].dhs2024.n_unweighted": &h_n
+        description: Unweighted number of respondents in the denominator (at least 30).
+        unit: respondents
+      "[].dhs2024.precision_flag": &h_flag
+        description: >-
+          How far the estimate can be trusted (NCHS standards for proportions plus a
+          fewer-than-10-events rule): "reliable", "review" or "unreliable". Suppressed cells
+          never appear here.
+      "[].dhs2024.precision_reason": &h_reason
+        description: The rule that set the flag (e.g. "low_events<10"); null when the estimate is reliable.
 
   - file: prevalence.json
     title: The national headline and the comparison
@@ -106,7 +131,14 @@ files:
         description: The headline's age group, "18+".
         unit: years of age
       source: Citation of the headline figure.
-      national: The national headline cell (DHS 2024, DISABILITY3, adults 18+, both sexes).
+      national: The national headline cell (DHS 2024, DISABILITY3, adults 18+, both sexes); always published.
+      national.estimate: *h_estimate
+      national.se: *h_se
+      national.ci_low: *h_ci_low
+      national.ci_high: *h_ci_high
+      national.n_unweighted: *h_n
+      national.precision_flag: *h_flag
+      national.precision_reason: *h_reason
       comparison: The comparison rows, in the order the main page shows them.
       "comparison[]": One figure in the comparison.
 
@@ -212,10 +244,15 @@ files:
         points of 0; otherwise "higher" or "lower" if the interval excludes 0, else
         "inconclusive".
       derived.primary_implied:
-        description: The primary estimate's mu0 plus the estimate, the implied poverty rate of exposed households.
+        description: >-
+          The share of people who would be multidimensionally poor if every household had a
+          member with a severe difficulty, standardised to the whole population (the primary
+          estimate's mu0 plus the estimate); not the observed rate of exposed households.
         unit: proportion (0 to 1)
       derived.overlap_implied:
-        description: The same for the overlap-population estimate.
+        description: >-
+          The same standardised share for the overlap-population estimate (its mu0 plus the
+          estimate); not an observed rate.
         unit: proportion (0 to 1)
       derived.share_inside_overlap:
         description: 1 minus the share of people outside the overlap population (summary.mpi.outside_weighted_share).

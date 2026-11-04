@@ -56,7 +56,10 @@ DEFAULT_DATA = ROOT / "site" / "public" / "data"
 DEFAULT_PAGE = ROOT / "site" / "data-dictionary.html"
 # The page is long by nature but has no script and no images; keep it light on a phone.
 HTML_BUDGET = 200 * 1024
-NO_UNIT = "none"
+# A column with no unit: a dash on screen, "not applicable" for screen readers.
+NO_UNIT = (
+    '<span aria-hidden="true">\u2013</span><span class="visually-hidden">not applicable</span>'
+)
 
 
 def _load(name: str) -> ModuleType:
@@ -513,11 +516,14 @@ def file_section(section: FileSection) -> str:
     if spec.link:
         where = f'<a href="./data/{esc(spec.file)}">{esc(spec.file)}</a> ({size})'
     else:
-        where = (
-            f"<code>data/{esc(spec.file)}</code> ({size}). Not linked for download: the "
-            "figures are cited from an all-rights-reserved publication; the site reads the "
-            "file for its own tables and charts"
-        )
+        where = None
+    facts_line = (
+        f"File: {where}"
+        if where
+        else "Not offered for download: JONAPWD's tables by type are cited from an "
+        "all-rights-reserved publication, and the site reads them only for its own tables "
+        "and charts"
+    )
     made_from = spec.made_from or (
         "the warehouse's " + " and ".join(f"<code>{esc(m)}</code>" for m in spec.marts.values())
     )
@@ -527,14 +533,14 @@ def file_section(section: FileSection) -> str:
             row_header(column_anchor(anchor, r.path), r.path),
             esc(r.type),
             esc(r.described.description),
-            esc(r.described.unit or NO_UNIT),
+            esc(r.described.unit) if r.described.unit else NO_UNIT,
         )
         for r in section.rows
     ]
     return f"""<section aria-labelledby="{anchor}">
 <h2 id="{anchor}">{name_html(spec.file)}: {esc(spec.title)}</h2>
 <p>{esc(spec.about)}</p>
-<p class="file-facts">File: {where}. Made from {made_from}.</p>
+<p class="file-facts">{facts_line}. Made from {made_from}.</p>
 <h3 id="{anchor}--sources">Sources and terms</h3>
 {sources_html(section.sources)}
 {table_html(f"The {len(rows)} {noun} of {spec.file}", ("Name", "Type", "Meaning", "Units"), rows)}
@@ -544,7 +550,11 @@ def file_section(section: FileSection) -> str:
 def downloads_section(fields: Mapping[str, Described]) -> str:
     anchor = "table-downloads"
     rows = [
-        (row_header(column_anchor(anchor, path), path), esc(d.description), esc(d.unit or NO_UNIT))
+        (
+            row_header(column_anchor(anchor, path), path),
+            esc(d.description),
+            esc(d.unit) if d.unit else NO_UNIT,
+        )
         for path, d in fields.items()
     ]
     return f"""<section aria-labelledby="{anchor}">
@@ -619,11 +629,15 @@ proportions from 0 to 1 (0.03 is 3%). The comparison figures
 (<code>prevalence_comparison.parquet</code>, and <code>comparison</code> in
 <code>prevalence.json</code>) are percentages from 0 to 100. The Units column says which.</li>
 <li><strong>Intervals.</strong> Every interval is a 95% confidence interval.</li>
-<li><strong>Suppressed cells.</strong> No figure rests on fewer than 30 people (or, for the
-poverty estimates, 30 households or people in either group compared). Such a cell keeps its
-row, with <code>suppressed</code> true and every number empty (null); so does a cell withheld
-so that a small neighbouring cell cannot be worked out by subtraction. Missing numbers are
-never estimated or filled in.</li>
+<li><strong>Suppressed cells.</strong> No survey estimate rests on fewer than 30 unweighted
+respondents. Such a survey cell keeps its row, with <code>suppressed</code> true and its
+estimate, standard error, interval, counts and degrees of freedom empty (null); so does a cell
+withheld so that a small neighbouring cell cannot be worked out by subtraction. A poverty
+(model) estimate is suppressed when either group compared has fewer than 30 households or
+people: its estimate, standard error, interval, p-values, <code>mu0</code> and both group
+counts are then null, while <code>n</code> and <code>display_factor</code> stay. Missing
+numbers are never estimated or filled in. JONAPWD's figures are assumptions, not survey cells,
+so these rules do not apply to them.</li>
 <li><strong>Precision.</strong> <code>precision_flag</code> says how far an estimate can be
 trusted (reliable, review or unreliable, under the US National Center for Health Statistics'
 standards for proportions plus one stricter rule of our own); <code>precision_reason</code>
