@@ -148,6 +148,18 @@ jobs:
         run: npm run build
       - name: Playwright + axe
         run: npm test
+      # Accessibility 100 on every page type is a hard gate (P6 item 3; site/lighthouserc.cjs).
+      - name: Lighthouse CI (accessibility must be 100)
+        run: |
+          CHROME_PATH="$(node -e "import('@playwright/test').then(m => console.log(m.chromium.executablePath()))")"
+          export CHROME_PATH
+          npm run lighthouse
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: lighthouse-reports
+          path: site/.lighthouseci/reports/
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v7
         if: failure()
         with:

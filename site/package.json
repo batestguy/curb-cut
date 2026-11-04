@@ -15,7 +15,8 @@
     "brief-pdf": "node scripts/make-brief-pdf.mjs",
     "build": "vite build",
     "preview": "vite preview --port 4173 --strictPort",
-    "test": "playwright test"
+    "test": "playwright test",
+    "lighthouse": "lhci autorun --config=./lighthouserc.cjs"
   },
   "dependencies": {
     "@duckdb/duckdb-wasm": "1.32.0",
@@ -23,6 +24,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
+    "@lhci/cli": "0.15.1",
     "@playwright/test": "1.63.0",
     "vite": "8.3.2"
   }
