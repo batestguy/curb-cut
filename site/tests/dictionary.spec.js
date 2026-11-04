@@ -143,8 +143,13 @@ test('data dictionary: headings in order, captions and scoped headers, no sidewa
   expect(tables).toHaveLength(13);
   for (const t of tables) expect(t).toEqual({ ...t, tabStop: true, wrapped: true, unscoped: 0 });
   expect(tables.every((t) => t.caption !== '')).toBe(true);
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
-  expect(overflow).toBeLessThanOrEqual(0);
+  const overflow = () =>
+    page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(await overflow()).toBeLessThanOrEqual(0);
+  // Fonts differ by platform (Linux CI's fallback is wider than Windows'): long names must
+  // still wrap with wider letters, so a pass here does not depend on the machine's fonts.
+  await page.addStyleTag({ content: 'main * { letter-spacing: 0.12em; }' });
+  expect(await overflow()).toBeLessThanOrEqual(0);
 });
 
 test('data dictionary: within the byte budget, everything from this origin', async ({ page, baseURL }) => {

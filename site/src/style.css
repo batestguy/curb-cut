@@ -974,6 +974,15 @@ h3[tabindex="-1"]:focus {
   overflow-wrap: anywhere;
 }
 
+/* Prose and links name long files (e.g. jonapwd_national_by_type.parquet). With a wider
+   fallback font (Linux CI's DejaVu Sans) they overflowed 320 px by 42 px, so outside the
+   tables they may break anywhere too. */
+.dictionary-page p,
+.dictionary-page li,
+.dictionary-page a {
+  overflow-wrap: anywhere;
+}
+
 .dictionary-page h2,
 .dictionary-page th code {
   overflow-wrap: normal;
