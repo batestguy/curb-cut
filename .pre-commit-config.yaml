@@ -1,4 +1,4 @@
-exclude: ^(CurbCut\.txt|renv/activate\.R)$  # original spec kept verbatim; renv-generated file
+exclude: ^(CurbCut\.txt|renv/activate\.R|site/public/fonts/.*)$  # original spec kept verbatim; renv-generated file; font and its licence verbatim
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0

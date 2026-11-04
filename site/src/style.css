@@ -85,6 +85,25 @@ body {
   line-height: 1.55;
 }
 
+/* Nigerian-language text (P6 item 5, verification.md D29): a self-hosted Noto Sans subset
+   that covers the Yoruba, Hausa and Igbo letters, stacked tone marks and the naira sign
+   (make_font_subset.py). Only text marked lang="yo", "ha", "ig" or "pcm" uses it, and a
+   browser downloads a font only when text uses it, so English pages fetch nothing extra. */
+@font-face {
+  font-family: "Noto Sans Nigeria";
+  src: url("/fonts/noto-sans-nigeria.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:lang(yo),
+:lang(ha),
+:lang(ig),
+:lang(pcm) {
+  font-family: "Noto Sans Nigeria", "Noto Sans", system-ui, sans-serif;
+}
+
 main,
 .site-header,
 .site-footer {
