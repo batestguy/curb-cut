@@ -36,27 +36,39 @@ Render does not document how it passes on the client's address. Requests reach i
 
 So with `CURBCUT_TRUST_PROXY=1` and `CURBCUT_CLIENT_IP_HEADER=cf-connecting-ip` (both set in `render.yaml`) the API keys the limit on `CF-Connecting-IP`. A request without that header falls back to the `X-Forwarded-For` entry `CURBCUT_PROXY_HOPS` (default 2) from the right and is counted: `/status` shows `client_ip_header_missing_seen` (a count, no addresses). Without `CURBCUT_TRUST_PROXY` the API uses the TCP peer and ignores both headers (right for local runs).
 
+**After the fix, 2026-11-04** (commit f1cead0, keyed on `CF-Connecting-IP`):
+- 61 requests with forged `X-Forwarded-For`: 60 got 200, then 429. A forged header no longer buys requests.
+- Any request that brings its own `CF-Connecting-IP` is refused by Cloudflare before it reaches Render (HTTP 403, "Error code: 1000"), so that header can't be forged.
+- A different client still gets through: right after this computer got its first 429, check-host.net nodes in Germany, India, Italy and Japan all got 200 (this computer was still refused 2 seconds later; check-host gives no exact per-node time, only that the nodes ran within seconds).
+- `client_ip_header_missing_seen` was 0.
+
+The limit counts in fixed one-minute windows, so a burst that crosses a window boundary can get up to twice the limit through before a 429. That is expected, not a bypass.
+
 ### Check the client address after a deploy
 
-Two checks, within the same minute. In each command, replace `curb-cut-api.onrender.com` with your service's address if Render gave it a different one.
+Two checks, straight after each other. In each command, replace `curb-cut-api.onrender.com` with your service's address if Render gave it a different one.
 
 **Step 1: forged headers must not buy extra requests.** In Git Bash on your computer, run:
 
 ```
-for i in $(seq 1 61); do curl -s -o /dev/null -w '%{http_code}\n' -H "X-Forwarded-For: 192.0.2.$i" -H "CF-Connecting-IP: 198.51.100.$i" https://curb-cut-api.onrender.com/compare; done | sort | uniq -c
+for i in $(seq 1 130); do c=$(curl -s -o /dev/null -w '%{http_code}' -H "X-Forwarded-For: 192.0.2.$i" https://curb-cut-api.onrender.com/compare); [ "$c" = 429 ] && { echo "429 after $i requests"; break; }; done
 ```
 
-- Good: two lines, `60 200` and `1 429` (fewer 200s is also fine if you made other requests in the last minute).
-- Bad: one line, `61 200`. A forged header moves the key; tell Claude and don't rely on the limit.
+- Good: it prints `429 after N requests`, with N at most 121 (60, or up to 120 if the burst crossed a window boundary).
+- Bad: it prints nothing. A forged header moves the key; tell Claude and don't rely on the limit.
 
-**Step 2: a different real client must still get through.** Straight after step 1 (while your computer is limited), on a phone using mobile data (Wi-Fi off), open:
+**Step 2: a different client must still get through.** Within 10 seconds of step 1, run:
 
 ```
-https://curb-cut-api.onrender.com/compare
+curl -s -H "Accept: application/json" "https://check-host.net/check-http?host=https://curb-cut-api.onrender.com/compare&max_nodes=4"
 ```
 
-- Good: the page shows JSON starting `{"count":`.
-- Bad: it shows `Rate limit exceeded`. Your phone and computer share one key; tell Claude.
+Wait 15 seconds, then open the `permanent_link` it printed in a browser.
+
+- Good: every node shows OK with code 200 (your computer is limited, they are not).
+- Bad: the nodes show 429. Everyone shares one key; tell Claude.
+
+(A phone on mobile data, Wi-Fi off, opening `/compare` works as well; it should show JSON starting `{"count":`.)
 
 Then open this and check `client_ip_header_missing_seen` is `0`:
 
