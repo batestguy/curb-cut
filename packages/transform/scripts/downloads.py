@@ -39,7 +39,8 @@ VALUES_RULE = (
     "Numbers are the values behind the page, not rounded for display (at most 12 significant "
     "digits); the page rounds each column to its 'decimals'. Where the page shows words "
     "instead of figures (a figure not shown), the first value column has the same words and "
-    "the row's other figures are empty."
+    "the row's other figures are empty. Where the page shows a floor such as '<0.1' or "
+    "'<0.0001', the file has the value itself."
 )
 # Short table names go into each link's accessible name ("CSV, 2 KB: <name>").
 MAX_NAME = 64

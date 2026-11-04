@@ -68,6 +68,9 @@ async function checkDownloads(page, request, { expectTables, expectJonapwd }) {
       expect(t.afterClass, t.caption).toBe('table-source');
       expect(t.afterText).toContain('© JONAPWD, all rights reserved');
       expect(t.links.map((l) => l.href)).toEqual(['https://jonapwdng.org/10865-2/']);
+      // Unique accessible name that starts with the visible text (SC 2.5.3).
+      expect(t.links[0].label.startsWith(`${t.links[0].text}: `), t.links[0].label).toBe(true);
+      names.push(t.links[0].label);
       continue;
     }
     expect(t.afterClass, t.caption).toBe('table-download');
@@ -139,7 +142,9 @@ test('main page: every table has its downloads; JONAPWD tables are cited, not do
   await expect(page.locator('#state-table table')).toBeVisible({ timeout: 30_000 });
   // Map table, dot-plot table and Moran table; two JONAPWD charts and the explorer's table.
   const names = await checkDownloads(page, request, { expectTables: 6, expectJonapwd: 3 });
-  expect(names).toHaveLength(6);
+  // Six download links and three JONAPWD citation links, all with distinct names.
+  expect(names).toHaveLength(9);
+  expect(names).toContain("JONAPWD's publication: persons with disabilities by type, Kano");
   await expect(page.locator('#state-table .table-source')).toBeVisible();
   await expect(page.locator('#state-table .table-download')).toHaveCount(0);
 });

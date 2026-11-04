@@ -312,7 +312,7 @@ export function setUpExplorer({
       hideMapTip();
       renderCard(card, profiles.get(state), map, total, nationalCell);
       // JONAPWD's figures are cited, not redistributed: no download, a citation instead.
-      tableEl.replaceChildren(table, citedLine());
+      tableEl.replaceChildren(table, citedLine(`persons with disabilities by type, ${state}`));
       status.textContent = `Showing ${rows.length} disability types for ${state}.`;
       onStateShown(state);
       // Move focus to the card's heading: screen readers then read the state's name at once,

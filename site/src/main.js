@@ -16,12 +16,15 @@ async function getJson(path) {
 const downloadsPromise = getJson('downloads/main/index.json').catch(() => null);
 
 // JONAPWD's charts: all rights reserved, so their tables cite the publication instead.
-const JONAPWD_CHARTS = new Set(['national_by_type', 'national_by_state']);
+const JONAPWD_CHARTS = new Map([
+  ['national_by_type', 'persons with disabilities by type, Nigeria'],
+  ['national_by_state', 'persons with disabilities by state'],
+]);
 
 // The line under a table: its download links, or the JONAPWD citation. Download table ids
 // are the chart names with hyphens ("prevalence_map" -> "prevalence-map").
 async function tableNote(name) {
-  if (JONAPWD_CHARTS.has(name)) return citedLine();
+  if (JONAPWD_CHARTS.has(name)) return citedLine(JONAPWD_CHARTS.get(name));
   const entry = (await downloadsPromise)?.tables?.[name.replaceAll('_', '-')];
   return entry ? downloadLine(entry, DATA_URL) : null;
 }

@@ -68,13 +68,19 @@ export function downloadLine(entry, dataUrl) {
 }
 
 /** The line under a JONAPWD table: cited, all rights reserved, so no download. */
-export function citedLine() {
+export function citedLine(name) {
   const p = document.createElement('p');
   p.className = 'table-source';
   const a = document.createElement('a');
   a.href = 'https://jonapwdng.org/10865-2/';
   a.textContent = "JONAPWD's publication";
-  p.append('Figures cited from ', a, '. © JONAPWD, all rights reserved: not redistributed here.');
+  // A unique accessible name that starts with the visible text (WCAG 2.2 SC 2.5.3).
+  a.setAttribute('aria-label', `JONAPWD's publication: ${name}`);
+  p.append(
+    'Figures cited from ',
+    a,
+    '. © JONAPWD, all rights reserved; the PDF is not redistributed, and no download is offered for this table.',
+  );
   return p;
 }
 
