@@ -1,7 +1,7 @@
 // The measured figures: the national headline, the comparison of published figures, and the
 // spatial findings. All numbers come from the build's JSON files (export_marts.py); the
 // spatial sentences are used exactly as written by the analysis (data/public/spatial/).
-import { formatValue, renderTable } from './format.js';
+import { formatValue, placeAfterTable, renderTable } from './format.js';
 
 export function pct(value, decimals = 1) {
   return `${formatValue(value, 'number', decimals)}%`;
@@ -76,25 +76,17 @@ export function renderComparison(messageEl, listEl, prevalence) {
   listEl.replaceChildren(list);
 }
 
-/** The spatial sentences, the Moran table, the cluster lists and the services caveats. */
-export function renderSpatial(spatial, els) {
+/**
+ * The spatial sentences, the Moran table, the cluster lists and the services caveats. The
+ * Moran table's spec comes from spatial.json (export_marts.py), the same spec its download
+ * is written from; `moranNote`, if given, goes after the table.
+ */
+export function renderSpatial(spatial, els, moranNote = null) {
   const [primary, ...others] = spatial.moran;
   els.moranSentence.textContent = primary.sentence;
-  els.moranTable.replaceChildren(
-    renderTable({
-      caption:
-        "Global Moran's I by measure (one-sided permutation p; adjusted p: Benjamini-Hochberg across the 8 tests)",
-      columns: [
-        { label: 'Measure', type: 'text' },
-        { label: 'Ages', type: 'text' },
-        { label: "Moran's I", type: 'number', decimals: 2 },
-        { label: 'p', type: 'number', decimals: 3 },
-        { label: 'Adjusted p', type: 'number', decimals: 3 },
-        { label: 'Imprecise state estimates (of 37)', type: 'integer' },
-      ],
-      rows: spatial.moran.map((m) => [m.label, m.age_group, m.moran_i, m.p_perm, m.p_bh, m.n_imprecise]),
-    }),
-  );
+  const moranTable = renderTable(spatial.moran_table);
+  els.moranTable.replaceChildren(moranTable);
+  placeAfterTable(moranTable, moranNote);
   els.moranSentences.replaceChildren(
     ...others.map((m) => {
       const li = document.createElement('li');

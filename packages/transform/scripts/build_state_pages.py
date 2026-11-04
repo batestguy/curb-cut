@@ -14,7 +14,10 @@ artefacts (git-ignored):
   ``disability_access_charts.dot`` with its findings and audit. The page draws it as a static
   SVG (``dot_svg.py``), names it with the alt-text and shows the library's data table;
 * ``site/states/share-images.json``: each page's headline sentence, for the share images
-  (``site/scripts/make-share-images.mjs`` screenshots one PNG per state before ``vite build``).
+  (``site/scripts/make-share-images.mjs`` screenshots one PNG per state before ``vite build``);
+* ``site/public/data/downloads/states/<slug>/<table-id>.csv`` and ``.json`` (with
+  ``--downloads-dir``, by default the site's): every table's download (``downloads.py``),
+  written from the same values the table shows and linked under it.
 
 Slugs are the state name in lower case with every run of other characters replaced by one
 hyphen (``Akwa Ibom`` -> ``akwa-ibom``, ``Federal Capital Territory`` ->
@@ -32,6 +35,7 @@ import importlib.util
 import json
 import os
 import re
+import shutil
 import sys
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
@@ -46,6 +50,9 @@ ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DB = ROOT / "data" / "curbcut.duckdb"
 DEFAULT_PAGES = ROOT / "site" / "states"
 DEFAULT_CHARTS = ROOT / "site" / "public" / "data" / "charts" / "states"
+DEFAULT_DOWNLOADS = ROOT / "site" / "public" / "data" / "downloads"
+# How a state page (states/<slug>.html) links the downloads folder.
+DOWNLOADS_HREF = "../data/downloads/"
 # Absolute URLs for the share meta tags (Open Graph needs them). Override with SITE_URL.
 DEFAULT_SITE_URL = "https://batestguy.github.io/curb-cut/"
 REPO = "https://github.com/batestguy/curb-cut"
@@ -140,15 +147,20 @@ FAVICON = (
 
 
 def _load(name: str) -> ModuleType:
-    """Sibling scripts are not a package; load them by path."""
+    """Sibling scripts are not a package; load them by path (registered, so that dataclasses
+    in them work and every script shares one copy)."""
+    if name in sys.modules:
+        return sys.modules[name]
     spec = importlib.util.spec_from_file_location(name, Path(__file__).with_name(f"{name}.py"))
     assert spec and spec.loader
     module = importlib.util.module_from_spec(spec)
+    sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
 
 
 dot_svg = _load("dot_svg")
+downloads = _load("downloads")
 
 
 def state_slug(name: str) -> str:
@@ -338,22 +350,43 @@ CELL_COLUMNS = ("Estimate (%)", "Low (%)", "High (%)", "Precision")
 INTERVAL_NOTE = ". Low and High: the 95% confidence interval."
 
 
-def cell_tds(cell: Cell | None, *, missing: str = TOO_FEW) -> str:
-    """The four value cells of a row; a cell not shown gets one spanning cell saying why.
+CellValues = tuple[str, None, None, None] | tuple[float, float, float, str]
+
+
+def cell_values(cell: Cell | None, *, missing: str = TOO_FEW) -> CellValues:
+    """What a row shows after its label: the estimate, Low and High as percentages (not yet
+    rounded for display) and the precision flag; or, for a cell not shown, the words saying
+    why.
 
     Estimates flagged unreliable are not shown (figures appear only where precision passes);
     those flagged for review are shown with their hedge.
     """
     if cell is None:
-        return f'<td colspan="4">{esc(missing)}</td>'
+        return (missing, None, None, None)
     if not cell.shown:
-        return f'<td colspan="4">{esc(hidden_text(cell))}</td>'
+        return (hidden_text(cell), None, None, None)
     if cell.flag == "unreliable":
-        return f'<td colspan="4">{TOO_IMPRECISE}</td>'
+        return (TOO_IMPRECISE, None, None, None)
     assert cell.estimate is not None and cell.ci_low is not None and cell.ci_high is not None
-    values = (100 * cell.estimate, 100 * cell.ci_low, 100 * cell.ci_high)
-    nums = "".join(f'<td class="num">{esc(num1(v))}</td>' for v in values)
-    return f"{nums}<td>{esc(FLAG_TEXT.get(cell.flag, cell.flag))}</td>"
+    return (
+        100 * cell.estimate,
+        100 * cell.ci_low,
+        100 * cell.ci_high,
+        FLAG_TEXT.get(cell.flag, cell.flag),
+    )
+
+
+def values_tds(values: CellValues) -> str:
+    """The four value cells of a row; a cell not shown gets one spanning cell saying why."""
+    first = values[0]
+    if isinstance(first, str):
+        return f'<td colspan="4">{esc(first)}</td>'
+    nums = "".join(f'<td class="num">{esc(num1(float(v or 0.0)))}</td>' for v in values[:3])
+    return f"{nums}<td>{esc(values[3])}</td>"
+
+
+def cell_tds(cell: Cell | None, *, missing: str = TOO_FEW) -> str:
+    return values_tds(cell_values(cell, missing=missing))
 
 
 def cell_table(
@@ -361,21 +394,39 @@ def cell_table(
     first: str,
     rows: Iterable[tuple[str, Cell | None]],
     *,
+    dl: Any,
+    table_id: str,
+    name: str,
+    provenance: Any = None,
     missing: str = TOO_FEW,
 ) -> str:
+    """A table of survey cells, then its download line (``dl``: the page's
+    ``downloads.Collector``). The HTML and the files come from the same values."""
+    values = [(label, cell_values(cell, missing=missing)) for label, cell in rows]
     head = f'<th scope="col">{esc(first)}</th>' + "".join(
         f'<th scope="col"{"" if c == "Precision" else ' class="num"'}>{esc(c)}</th>'
         for c in CELL_COLUMNS
     )
     body = "".join(
-        f'<tr><th scope="row">{esc(label)}</th>{cell_tds(cell, missing=missing)}</tr>'
-        for label, cell in rows
+        f'<tr><th scope="row">{esc(label)}</th>{values_tds(v)}</tr>' for label, v in values
     )
     table = (
         f"<table><caption>{esc(caption + INTERVAL_NOTE)}</caption>"
         f"<thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>"
     )
-    return wide_table(table, caption)
+    data = downloads.TableData(
+        table_id,
+        name,
+        caption + INTERVAL_NOTE,
+        (
+            downloads.Column(first),
+            *(downloads.Column(c, "number", 1, "%") for c in CELL_COLUMNS[:3]),
+            downloads.Column(CELL_COLUMNS[3]),
+        ),
+        tuple((label, *v) for label, v in values),
+        provenance or downloads.DHS,
+    )
+    return wide_table(table, caption) + dl.add(data)
 
 
 def doc_table(doc: Mapping[str, Any]) -> str:
@@ -464,9 +515,12 @@ def findings_html(doc: Mapping[str, Any]) -> str:
     )
 
 
-def chart_html(doc: Mapping[str, Any], national_table: str = "") -> str:
+def chart_html(doc: Mapping[str, Any], dl: Any, where: str, national_table: str = "") -> str:
     title = doc["title"]
     caption = doc["table"]["caption"]
+    data = downloads.from_spec(
+        doc["table"], "by-activity", f"adults in {where} by activity", downloads.DHS
+    )
     return (
         '<figure class="chart-figure dot-chart" aria-labelledby="domains-chart-title">'
         f"{dot_svg.legend_html(doc)}"
@@ -479,7 +533,7 @@ def chart_html(doc: Mapping[str, Any], national_table: str = "") -> str:
         "</figcaption></figure>"
         f"{findings_html(doc)}"
         '<p class="table-intro">The same figures as a table:</p>'
-        f"{wide_table(doc_table(doc), caption)}"
+        f"{wide_table(doc_table(doc), caption)}{dl.add(data)}"
         f"{national_table}"
     )
 
@@ -597,6 +651,7 @@ class Page:
     sentence: str
     html: str
     chart: dict[str, Any] | None
+    downloads: Any  # downloads.Collector: the page's table files
 
 
 def domain_chart(state: Mapping[str, Any], data: SiteData) -> dict[str, Any] | None:
@@ -648,7 +703,11 @@ def domain_chart(state: Mapping[str, Any], data: SiteData) -> dict[str, Any] | N
 
 
 def dhs_section(
-    state: Mapping[str, Any], data: SiteData, sentence: str, chart: dict[str, Any] | None
+    state: Mapping[str, Any],
+    data: SiteData,
+    sentence: str,
+    chart: dict[str, Any] | None,
+    dl: Any,
 ) -> str:
     code, name, zone = state["state_code"], state["state"], state["zone"]
     where = in_name(name)
@@ -670,19 +729,23 @@ def dhs_section(
         (label, data.breakdowns.get(("state", code, "wealth_quintile", level, "18+")))
         for level, label in WEALTH
     ]
-    national_domains = cell_table(
-        f"{NATIONAL_LABEL}: adults 18+ by activity, DHS 2024, for comparison",
-        "Activity",
-        [(label, data.national.get(("dhs2024", m, "18+", "all"))) for m, label in DOMAINS],
-        missing=NO_ESTIMATE,
-    )
-    national_part = (
-        '<p class="table-intro">For comparison, the same activities for Nigeria as a whole. '
-        "The findings above do not compare the state with Nigeria.</p>"
-        f"{national_domains}"
-    )
     if chart is not None:
-        chart_part = chart_html(chart, national_part)
+        # Built only when shown: building it adds its download files.
+        national_domains = cell_table(
+            f"{NATIONAL_LABEL}: adults 18+ by activity, DHS 2024, for comparison",
+            "Activity",
+            [(label, data.national.get(("dhs2024", m, "18+", "all"))) for m, label in DOMAINS],
+            dl=dl,
+            table_id="nigeria-by-activity",
+            name="adults in Nigeria by activity, for comparison",
+            missing=NO_ESTIMATE,
+        )
+        national_part = (
+            '<p class="table-intro">For comparison, the same activities for Nigeria as a whole. '
+            "The findings above do not compare the state with Nigeria.</p>"
+            f"{national_domains}"
+        )
+        chart_part = chart_html(chart, dl, where, national_part)
     else:
         chart_part = (
             "<p>The activity chart is not shown: fewer than two of the six activities have a "
@@ -706,6 +769,9 @@ lot, the survey cannot tell the figures apart.</p>
             f"Disability in {where} by sex and age, DHS 2024",
             "Group",
             groups,
+            dl=dl,
+            table_id="by-sex-and-age",
+            name=f"disability in {where} by sex and age",
             missing=NO_ESTIMATE,
         )
     }
@@ -722,6 +788,9 @@ out.</p>
             f"Disability among adults in {where}, urban and rural, DHS 2024",
             "Area",
             sectors,
+            dl=dl,
+            table_id="urban-rural",
+            name=f"adults in {where}, urban and rural",
         )
     }
 <h3 id="wealth-heading">Household wealth</h3>
@@ -734,6 +803,9 @@ Nigeria, ranked by the DHS wealth index (household assets).</p>
             f"Disability among adults in the {zone} zone by household wealth, DHS 2024",
             "Wealth group",
             zone_wealth,
+            dl=dl,
+            table_id="zone-by-wealth",
+            name=f"adults in the {zone} zone by household wealth",
         )
     }
 <details class="more">
@@ -745,13 +817,16 @@ wherever it could otherwise be worked out by subtraction.</p>
             f"Disability among adults in {where} by household wealth, DHS 2024",
             "Wealth group",
             state_wealth,
+            dl=dl,
+            table_id="by-wealth",
+            name=f"adults in {where} by household wealth",
         )
     }
 </details>
 </section>"""
 
 
-def mpi_section(state: Mapping[str, Any], data: SiteData) -> str:
+def mpi_section(state: Mapping[str, Any], data: SiteData, dl: Any) -> str:
     code, where = state["state_code"], in_name(state["state"])
     rows = [
         (label, data.cells.get((code, "mpi2021", measure, "18+", "all")))
@@ -763,6 +838,10 @@ def mpi_section(state: Mapping[str, Any], data: SiteData) -> str:
             f"MPI 2021: adults 18+ in {where}, by MPI's own disability questions",
             "MPI question",
             rows,
+            dl=dl,
+            table_id="mpi-2021",
+            name=f"MPI 2021 questions, adults in {where}",
+            provenance=downloads.MPI,
         )
     else:
         table = f"<p>No MPI 2021 disability figures are published for {esc(where)}.</p>"
@@ -784,13 +863,14 @@ def page_html(state: Mapping[str, Any], data: SiteData, geo: Mapping[str, Any], 
     national = data.national.get(("dhs2024", "disability3", "18+", "all"))
     sentence = headline_sentence(name, headline, national)
     chart = domain_chart(state, data)
+    url = f"{site_url}states/{slug}.html"
+    dl = downloads.Collector(url, f"states/{slug}", DOWNLOADS_HREF)
     title = f"Disability in {where}: Curb Cut"
     description = (
         f"Disability in {where} from the DHS 2024 survey, with intervals: by sex, age, activity, "
         "urban and rural areas and wealth; with MPI 2021, JONAPWD's assumed figure, population "
         "and Nigeria's disability law."
     )
-    url = f"{site_url}states/{slug}.html"
     head = head_html(
         title=title,
         description=description,
@@ -818,7 +898,7 @@ def page_html(state: Mapping[str, Any], data: SiteData, geo: Mapping[str, Any], 
 {header_html(crumb)}
 <main id="main" tabindex="-1" class="state-page">
 <h1>Disability in {esc(where)}</h1>
-{dhs_section(state, data, sentence, chart)}
+{dhs_section(state, data, sentence, chart, dl)}
 <section aria-labelledby="about-heading">
 <h2 id="about-heading">About {esc(where)}</h2>
 <div class="state-card-body">
@@ -836,7 +916,7 @@ def page_html(state: Mapping[str, Any], data: SiteData, geo: Mapping[str, Any], 
 Annex 3 (source: National Population Commission); capital and zone,
 <a href="https://en.wikipedia.org/wiki/States_of_Nigeria">Wikipedia</a>.</p>
 </section>
-{mpi_section(state, data)}
+{mpi_section(state, data, dl)}
 <section aria-labelledby="jonapwd-heading">
 <h2 id="jonapwd-heading">Assumed, not counted: JONAPWD's 2025 figure</h2>
 <div class="caveat">
@@ -872,7 +952,7 @@ The published survey aggregates are
 </body>
 </html>
 """
-    return Page(slug, name, sentence, head + body, chart)
+    return Page(slug, name, sentence, head + body, chart, dl)
 
 
 def index_html(pages: Sequence[Page], site_url: str) -> str:
@@ -908,9 +988,15 @@ Nigeria's disability law.</p>
 
 
 def build(
-    data: SiteData, geo: Mapping[str, Any], pages_dir: Path, charts_dir: Path, site_url: str
+    data: SiteData,
+    geo: Mapping[str, Any],
+    pages_dir: Path,
+    charts_dir: Path,
+    site_url: str,
+    downloads_dir: Path | None = None,
 ) -> list[Page]:
-    """Write every page, its chart document, the index and the share-image list."""
+    """Write every page, its chart document, the index and the share-image list; with
+    ``downloads_dir``, also every table's files (its ``states/`` folder is replaced)."""
     if not site_url.endswith("/"):
         site_url += "/"
     pages = [page_html(s, data, geo, site_url) for s in data.states]
@@ -920,6 +1006,8 @@ def build(
     heavy = [p.slug for p in pages if len(p.html.encode("utf-8")) > HTML_BUDGET]
     if heavy:
         raise ValueError(f"over the {HTML_BUDGET:,}-byte page budget: {', '.join(heavy)}")
+    for p in pages:
+        p.downloads.check_linked(p.html)
     failed = [p.slug for p in pages if p.chart is not None and not p.chart["audit"]["passed"]]
     if failed:
         raise ValueError(f"chart audit failed for: {', '.join(failed)}")
@@ -933,6 +1021,11 @@ def build(
             (charts_dir / f"{p.slug}.json").write_text(
                 json.dumps(p.chart, indent=2) + "\n", encoding="utf-8", newline="\n"
             )
+    if downloads_dir is not None:
+        if (downloads_dir / "states").exists():
+            shutil.rmtree(downloads_dir / "states")
+        for p in pages:
+            p.downloads.write(downloads_dir)
     (pages_dir / "index.html").write_text(
         index_html(pages, site_url), encoding="utf-8", newline="\n"
     )
@@ -954,12 +1047,20 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--db", type=Path, default=DEFAULT_DB)
     parser.add_argument("--pages-dir", type=Path, default=DEFAULT_PAGES)
     parser.add_argument("--charts-dir", type=Path, default=DEFAULT_CHARTS)
+    parser.add_argument(
+        "--downloads-dir",
+        type=Path,
+        default=DEFAULT_DOWNLOADS,
+        help="the site's downloads folder; each page's table files go to states/<slug>/",
+    )
     parser.add_argument("--site-url", default=os.environ.get("SITE_URL", DEFAULT_SITE_URL))
     args = parser.parse_args(argv)
     try:
         with duckdb.connect(str(args.db), read_only=True) as con:
             data = load(con)
-        pages = build(data, locator_geo(), args.pages_dir, args.charts_dir, args.site_url)
+        pages = build(
+            data, locator_geo(), args.pages_dir, args.charts_dir, args.site_url, args.downloads_dir
+        )
     except ValueError as error:
         print(f"State pages failed: {error}", file=sys.stderr)
         return 1

@@ -1,5 +1,6 @@
 import { renderChart } from './chart.js';
 import { setUpExplorer } from './explore.js';
+import { citedLine, downloadLine } from './format.js';
 import { renderChoropleth } from './map.js';
 import { renderComparison, renderFindings, renderHeadline, renderSpatial } from './prevalence.js';
 
@@ -9,6 +10,20 @@ async function getJson(path) {
   const response = await fetch(`${DATA_URL}${path}`);
   if (!response.ok) throw new Error(`could not fetch ${path} (HTTP ${response.status})`);
   return response.json();
+}
+
+// The tables' downloads (build_charts.py). Optional: without it, the tables show no links.
+const downloadsPromise = getJson('downloads/main/index.json').catch(() => null);
+
+// JONAPWD's charts: all rights reserved, so their tables cite the publication instead.
+const JONAPWD_CHARTS = new Set(['national_by_type', 'national_by_state']);
+
+// The line under a table: its download links, or the JONAPWD citation. Download table ids
+// are the chart names with hyphens ("prevalence_map" -> "prevalence-map").
+async function tableNote(name) {
+  if (JONAPWD_CHARTS.has(name)) return citedLine();
+  const entry = (await downloadsPromise)?.tables?.[name.replaceAll('_', '-')];
+  return entry ? downloadLine(entry, DATA_URL) : null;
 }
 
 function fail(statusId, message) {
@@ -51,7 +66,10 @@ function showFindings(doc, id) {
 async function showChart(name, id) {
   const titleEl = document.getElementById(`${id}-title`);
   try {
-    const doc = await getJson(`charts/${name}.json`);
+    const [doc, note] = await Promise.all([
+      getJson(`charts/${name}.json`),
+      tableNote(name),
+    ]);
     showFindings(doc, id);
     return await renderChart(doc, {
       container: document.getElementById(id),
@@ -59,6 +77,7 @@ async function showChart(name, id) {
       descEl: document.getElementById(`${id}-desc`),
       tableEl: document.getElementById(id === 'national-chart' ? 'national-table' : `${id}-table`),
       highlight: id === 'state-chart' ? chosenState : null,
+      tableNote: note,
     });
   } catch (error) {
     const message = `The chart could not be loaded: ${error.message}.`;
@@ -76,8 +95,12 @@ async function showChart(name, id) {
 async function showMap() {
   const holder = document.getElementById('prevalence-map');
   try {
-    const doc = await getJson('charts/prevalence_map.json');
+    const [doc, note] = await Promise.all([
+      getJson('charts/prevalence_map.json'),
+      tableNote('prevalence_map'),
+    ]);
     prevalenceMap = renderChoropleth(doc, {
+      tableNote: note,
       figure: holder.closest('figure'),
       holder,
       legendEl: document.getElementById('prevalence-map-legend'),
@@ -119,7 +142,7 @@ async function showPrevalence() {
 
 async function showSpatial() {
   try {
-    const spatial = await getJson('spatial.json');
+    const [spatial, note] = await Promise.all([getJson('spatial.json'), tableNote('moran')]);
     renderSpatial(spatial, {
       moranSentence: document.getElementById('moran-sentence'),
       moranTable: document.getElementById('moran-table'),
@@ -130,7 +153,7 @@ async function showSpatial() {
       clusterGroups: document.getElementById('cluster-groups'),
       servicesSentence: document.getElementById('services-sentence'),
       servicesCaveats: document.getElementById('services-caveats'),
-    });
+    }, note);
   } catch (error) {
     fail('spatial-status', `The spatial findings could not be loaded: ${error.message}.`);
   }

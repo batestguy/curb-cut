@@ -152,7 +152,12 @@ def built(warehouse: duckdb.DuckDBPyConnection, tmp_path_factory: pytest.TempPat
     out = tmp_path_factory.mktemp("site")
     geo = pages.locator_geo()
     result = pages.build(
-        pages.load(warehouse), geo, out / "states", out / "charts", "https://x.test/cc"
+        pages.load(warehouse),
+        geo,
+        out / "states",
+        out / "charts",
+        "https://x.test/cc",
+        out / "downloads",
     )
     return out, result
 
@@ -273,9 +278,12 @@ def test_main_writes_from_a_warehouse_file(warehouse, tmp_path) -> None:
         str(tmp_path / "p"),
         "--charts-dir",
         str(tmp_path / "c"),
+        "--downloads-dir",
+        str(tmp_path / "d"),
     ]
     assert pages.main(args) == 0
     assert len(list((tmp_path / "p").glob("*.html"))) == 38
+    assert len(list((tmp_path / "d" / "states").glob("*"))) == 37
 
 
 def test_main_fails_without_37_states(tmp_path) -> None:
@@ -397,3 +405,78 @@ def test_report_paragraph_matches_hand_written_pages() -> None:
         for href in hrefs:
             assert f'href="{href}"' in html, (name, href)
     assert pages.REPORT_HTML in pages.FOOTER_HTML
+
+
+# --- Downloads (P6 item 2) -------------------------------------------------------------------
+
+TABLE_AND_LINE = re.compile(
+    r"<table><caption>(.*?)</caption>.*?<tbody>(.*?)</tbody></table></div>"
+    r'(<p class="table-download">.*?</p>)?',
+    re.S,
+)
+ROW = re.compile(r'<tr><th scope="row">(.*?)</th>(.*?)</tr>', re.S)
+TD = re.compile(r"<td([^>]*)>(.*?)</td>", re.S)
+LINK = re.compile(r'<a href="([^"]+)" download aria-label="([^"]+)">([^<]+)</a>')
+
+
+def _unescape(text: str) -> str:
+    import html as html_lib
+
+    return html_lib.unescape(text)
+
+
+@pytest.mark.parametrize("slug", ["kano", "edo", "zamfara"])
+def test_every_table_has_downloads_equal_to_its_rows(built, slug: str) -> None:
+    """Each table is followed by its download line; the CSV holds the table's rows (numbers
+    unrounded, so they round to what the page shows), and the JSON the same rows."""
+    downloads = pages.downloads
+    out, _ = built
+    html = (out / "states" / f"{slug}.html").read_text(encoding="utf-8")
+    tables = TABLE_AND_LINE.findall(html)
+    assert len(tables) == html.count("<table>") >= 4  # Zamfara: no chart, no MPI table
+    labels: list[str] = []
+    for caption, body, line in tables:
+        assert line, caption
+        links = LINK.findall(line)
+        assert [text.split(",")[0] for _, _, text in links] == ["CSV", "JSON"]
+        files = {}
+        for href, label, text in links:
+            labels.append(label)
+            assert label.startswith(f"{text}: "), label
+            assert href.startswith(f"../data/downloads/states/{slug}/")
+            body_bytes = (out / "downloads" / href.removeprefix("../data/downloads/")).read_bytes()
+            assert text == f"{text.split(',')[0]}, {downloads.size_text(len(body_bytes))}"
+            files[text.split(",")[0]] = body_bytes
+        csv_rows = downloads.parse_csv(files["CSV"])
+        document = json.loads(files["JSON"])
+        assert document["caption"] == _unescape(caption)
+        assert document["page"] == f"https://x.test/cc/states/{slug}.html"
+        assert document["terms"].startswith(downloads.COMMON_TERMS)
+        assert "licen" not in document["terms"].lower() and "MIT" not in document["terms"]
+        assert csv_rows[0] == [c["label"] for c in document["columns"]]
+        assert downloads.same_rows(csv_rows[1:], document["rows"])
+        rows = ROW.findall(body)
+        assert len(csv_rows) - 1 == len(rows)
+        for (head, cells), got in zip(rows, csv_rows[1:], strict=True):
+            assert got[0] == _unescape(head)
+            tds = TD.findall(cells)
+            if 'colspan="4"' in tds[0][0]:  # a figure not shown: the same words, no numbers
+                assert got[1:] == [_unescape(tds[0][1]), "", "", ""]
+                continue
+            for (attrs, shown), value in zip(tds, got[1:], strict=True):
+                shown = _unescape(shown)
+                if 'class="num"' in attrs:
+                    assert shown in (pages.num1(float(value)), f"{float(value):,.1f}"), shown
+                else:
+                    assert value == shown
+    assert len(labels) == len(set(labels))
+    assert all(len(label.split(": ", 1)[1]) <= downloads.MAX_NAME for label in labels)
+    assert len(list((out / "downloads" / "states" / slug).glob("*"))) == 2 * len(tables)
+
+
+def test_a_suppressed_cell_is_downloaded_as_words(built) -> None:
+    out, _ = built
+    body = (out / "downloads" / "states" / "edo" / "by-wealth.csv").read_bytes()
+    rows = pages.downloads.parse_csv(body)
+    assert [pages.TOO_FEW, "", "", ""] in [r[1:] for r in rows]
+    assert [pages.WITHHELD, "", "", ""] in [r[1:] for r in rows]

@@ -105,7 +105,11 @@ test('poverty page: no other number appears outside the data and the chart table
   await open(page);
   const text = await page.locator('main').evaluate((main) => {
     const copy = main.cloneNode(true);
-    copy.querySelectorAll('span.n, svg, .chart-table, .chart-desc, .chart-title, code').forEach((el) => el.remove());
+    // .table-download: the file sizes in the download links ("CSV, 2 KB"), checked against
+    // the files in downloads.spec.js.
+    copy
+      .querySelectorAll('span.n, svg, .chart-table, .chart-desc, .chart-title, code, .table-download')
+      .forEach((el) => el.remove());
     return copy.textContent;
   });
   const tokens = text.match(/(?<![A-Za-z0-9._-])-?\d+(?:,\d{3})*(?:\.\d+)?/g) ?? [];

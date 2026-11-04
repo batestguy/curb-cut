@@ -8,7 +8,7 @@
 // highlighted bar differs in colour (theme.highlight, audited at 3:1 against the bars and
 // the background) and also without colour: a thick outline and a bold label and value.
 import Plotly from 'plotly.js-basic-dist-min';
-import { renderTable } from './format.js';
+import { placeAfterTable, renderTable } from './format.js';
 
 const darkQuery = window.matchMedia('(prefers-color-scheme: dark)');
 const narrowQuery = window.matchMedia('(max-width: 30rem)');
@@ -90,12 +90,18 @@ const config = { staticPlot: true, displayModeBar: false, responsive: true };
 
 /**
  * Render a chart document. Returns a handle whose highlight(category) redraws the chart with
- * that bar highlighted (null clears it); unknown categories highlight nothing.
+ * that bar highlighted (null clears it); unknown categories highlight nothing. `tableNote`,
+ * if given, goes directly after the table (its download line, or the JONAPWD citation).
  */
-export async function renderChart(doc, { container, titleEl, descEl, tableEl, highlight = null }) {
+export async function renderChart(
+  doc,
+  { container, titleEl, descEl, tableEl, highlight = null, tableNote = null },
+) {
   titleEl.textContent = doc.title;
   descEl.textContent = doc.alt_text;
-  tableEl.replaceChildren(renderTable(doc.table));
+  const table = renderTable(doc.table);
+  tableEl.replaceChildren(table);
+  placeAfterTable(table, tableNote);
 
   const plot = container.querySelector('.chart-plot');
   let current = highlight;

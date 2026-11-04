@@ -60,14 +60,16 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
 
   // Tab from <main>: the state pages link, the methodology link, five comparison source links,
   // the map key's five buttons and the map come first, then "Skip the state table" (the 14th
-  // stop), which jumps the 37 state links in the map's table. After it: "Why", the findings'
-  // <summary>, "Methods and limits", the Moran <summary>, then the select. Exact counts, so a
-  // trap or a new stop fails the test.
+  // stop), which jumps the 37 state links in the map's table and its two download links. After
+  // it: "Why", the findings' <summary>, the dot-plot table's two download links, "Methods and
+  // limits", the Moran <summary> (its table and downloads are inside), the two JONAPWD
+  // citation links under the JONAPWD tables, then the select. Exact counts, so a trap or a
+  // new stop fails the test.
   const select = page.locator('#state-select');
   for (let i = 0; i < 14; i += 1) await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip the state table' })).toBeFocused();
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 5; i += 1) await page.keyboard.press('Tab');
+  for (let i = 0; i < 9; i += 1) await page.keyboard.press('Tab');
   await expect(select).toBeFocused();
 
   // Choose Lagos by typing its name, as a keyboard user would on a closed select. Nothing loads
@@ -90,12 +92,14 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   await expect(page.getByRole('heading', { level: 3, name: 'Lagos' })).toBeFocused();
 });
 
-test('keyboard: without the skip, the select is the 56th stop after <main>', async ({ page }) => {
+test('keyboard: without the skip, the select is the 62nd stop after <main>', async ({ page }) => {
   await loaded(page);
   await page.locator('main').focus();
-  // 14 stops up to and including "Skip the state table", the 37 state links, then "Why", the
-  // findings' <summary>, "Methods and limits", the Moran <summary> and the select.
-  for (let i = 0; i < 55; i += 1) await page.keyboard.press('Tab');
+  // 14 stops up to and including "Skip the state table", the 37 state links, the map table's
+  // two download links, then "Why", the findings' <summary>, the dot-plot table's two download
+  // links, "Methods and limits", the Moran <summary>, the two JONAPWD citation links and the
+  // select.
+  for (let i = 0; i < 61; i += 1) await page.keyboard.press('Tab');
   await expect(page.locator('#state-select')).not.toBeFocused();
   await page.keyboard.press('Tab');
   await expect(page.locator('#state-select')).toBeFocused();

@@ -87,6 +87,7 @@ jobs:
           uv run python packages/transform/scripts/build_state_pages.py
           --db data/fixtures.duckdb --pages-dir "$RUNNER_TEMP/fixture-pages"
           --charts-dir "$RUNNER_TEMP/fixture-charts"
+          --downloads-dir "$RUNNER_TEMP/fixture-downloads"
       # P5: the poverty page from the exported estimates (fails on a failed chart audit or on
       # wording the pre-registration rules out), and the committed brief must match the data.
       - name: Build the poverty page

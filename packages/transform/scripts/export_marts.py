@@ -12,7 +12,8 @@ artefacts (git-ignored) under ``site/public/data/``, which Vite copies into the 
   headline (DISABILITY3, adults 18+, both sexes);
 * ``prevalence.json``: the national headline and the comparison rows;
 * ``spatial.json``: the plain-English spatial sentences from
-  ``data/public/spatial/summary.json``, with cluster members named and sorted by name;
+  ``data/public/spatial/summary.json``, with cluster members named and sorted by name, and
+  the Moran table's spec (``moran_table``: caption, columns, rows);
 * ``poverty.json``: the P5 estimates and scalar results (``mart_p5_estimates``,
   ``mart_p5_summary``) for the poverty page and the brief, with a few values derived from
   them (the implied poverty rate, the section 4 wording verdict, ranges); see
@@ -154,9 +155,30 @@ def spatial_payload(con: duckdb.DuckDBPyConnection, summary: dict[str, Any]) -> 
         for g in summary["clusters"]["profiles"]
     ]
     services = summary["services"]
+    # The Moran table as the page renders it (site/src/prevalence.js) and as build_charts.py
+    # writes its download: one spec for both.
+    moran_table = {
+        "caption": (
+            "Global Moran's I by measure (one-sided permutation p; adjusted p: "
+            f"Benjamini-Hochberg across the {len(moran)} tests)"
+        ),
+        "columns": [
+            {"label": "Measure", "type": "text"},
+            {"label": "Ages", "type": "text"},
+            {"label": "Moran's I", "type": "number", "decimals": 2},
+            {"label": "p", "type": "number", "decimals": 3},
+            {"label": "Adjusted p", "type": "number", "decimals": 3},
+            {"label": "Imprecise state estimates (of 37)", "type": "integer"},
+        ],
+        "rows": [
+            [m["label"], m["age_group"], m["moran_i"], m["p_perm"], m["p_bh"], m["n_imprecise"]]
+            for m in moran
+        ],
+    }
     return {
         "note": summary["note"],
         "moran": moran,
+        "moran_table": moran_table,
         "lisa": {
             "classes": summary["lisa"]["classes"],
             "significant_states": sorted(

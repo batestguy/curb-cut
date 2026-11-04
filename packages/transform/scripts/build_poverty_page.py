@@ -7,7 +7,9 @@ Reads ``site/public/data/poverty.json`` (disclosure-gated P5 estimates, exported
 warehouse) and the two chart documents ``poverty_headline.json`` and
 ``poverty_dimensions.json`` (made by ``disability_access_charts.dot`` in
 ``build_charts.py``), and writes ``site/poverty.html`` (git-ignored; Vite takes it as an
-input). Every number on the page comes from those files: each is wrapped in a span naming
+input), and every table's CSV and JSON download to ``site/public/data/downloads/poverty/``
+(``downloads.py``, from the same cells the table shows). Every number on the page comes
+from those files: each is wrapped in a span naming
 its path in ``poverty.json`` (``poverty_text.Numbers``), which ``site/tests/
 poverty.spec.js`` checks. The charts are drawn as static SVG (``dot_svg.py``), named by the
 library's alt-text and followed by the library's data table.
@@ -19,10 +21,14 @@ page uses wording the pre-registration rules out (``poverty_text.forbidden``).
 from __future__ import annotations
 
 import argparse
+import html
 import importlib.util
 import json
+import os
+import re
 import sys
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from types import ModuleType
 from typing import Any
@@ -49,11 +55,22 @@ def _load(name: str) -> ModuleType:
 pages = _load("build_state_pages")
 dot_svg = _load("dot_svg")
 text = _load("poverty_text")
+downloads = _load("downloads")
 
 esc = pages.esc
 REPO = pages.REPO
 REPORT_URL = pages.REPORT_URL
 REPORT_HTML = pages.REPORT_HTML
+# The page links its downloads (data/downloads/poverty/<table-id>.csv and .json).
+DOWNLOADS_HREF = "./data/downloads/"
+
+
+@dataclass
+class PageDownloads(downloads.Collector):
+    """The page's downloads, with the numbers the tables' spans name."""
+
+    nums: Any = None
+
 
 SECONDARY_ROWS = (
     "s1_score",
@@ -89,15 +106,107 @@ LEARNERS = (
 )
 
 
+NUMBER_SPAN = re.compile(
+    r'<span class="n" data-key="([^"]*)" data-factor="([^"]*)" data-decimals="(\d+)" '
+    r'data-format="(\w+)">(.*?)</span>'
+)
+
+
+def cell_values(nums: Any, cell: str) -> list[Any]:
+    """The values behind one table cell, for its download: a number span gives its value in
+    poverty.json times its factor (not rounded for display), two spans joined by "to" (a
+    range) give two values, and any other cell gives its text."""
+    spans = list(NUMBER_SPAN.finditer(cell))
+    if all(m.group(4) == "text" for m in spans):  # words, perhaps with a label span inside
+        return [html.unescape(NUMBER_SPAN.sub(lambda m: m.group(5), cell))]
+    values = []
+    for m in spans:
+        key, factor, _, kind, _ = m.groups()
+        raw = nums.raw(html.unescape(key))
+        if kind == "text":
+            values.append(str(raw))
+        elif kind == "fixed":
+            values.append(float(factor) * float(raw))
+        else:  # "int" and "p": the value as exported
+            values.append(raw)
+    rest = NUMBER_SPAN.sub("", cell)
+    if len(spans) == 1 and rest == "":
+        return values
+    if len(spans) == 2 and rest == " to ":
+        return values
+    raise ValueError(f"cannot read the value of a table cell: {cell!r}")
+
+
+def table_download(
+    nums: Any,
+    caption: str,
+    columns: Sequence[str],
+    rows: Sequence[Sequence[str]],
+    *,
+    table_id: str,
+    name: str,
+    provenance: Any,
+    unit: str | None,
+) -> Any:
+    """The download of a table built by :func:`table`, from the same cells. A column whose
+    cells are ranges ("1.2 to 3.4") becomes two columns, ", lower" and ", upper"."""
+    values = [[cell_values(nums, c) for c in row] for row in rows]
+    out_columns = []
+    for j, label in enumerate(columns):
+        cells = [row[j] for row in values]
+        spans = [m for row in rows for m in NUMBER_SPAN.finditer(row[j])]
+        kinds = {m.group(4) for m in spans}
+        decimals = int(spans[0].group(3)) if spans else None
+        if kinds <= {"text"}:
+            column = downloads.Column(label)
+        elif kinds == {"int"}:
+            column = downloads.Column(label, "integer", 0, unit=None)
+        else:
+            column = downloads.Column(label, "number", decimals, unit if j > 0 else None)
+        if any(len(c) == 2 for c in cells):
+            if not all(len(c) == 2 for c in cells):
+                raise ValueError(f"{table_id}: column {label!r} mixes ranges and single cells")
+            out_columns += [
+                downloads.Column(f"{label}, lower", column.type, column.decimals, column.unit),
+                downloads.Column(f"{label}, upper", column.type, column.decimals, column.unit),
+            ]
+        else:
+            out_columns.append(column)
+    return downloads.TableData(
+        table_id,
+        name,
+        caption,
+        tuple(out_columns),
+        tuple(tuple(v for cell in row for v in cell) for row in values),
+        provenance,
+    )
+
+
 def table(
     caption: str,
     columns: Sequence[str],
     rows: Sequence[Sequence[str]],
     *,
+    dl: Any,
+    table_id: str,
+    name: str,
+    provenance: Any = None,
+    unit: str | None = None,
     numeric: Sequence[bool] | None = None,
 ) -> str:
-    """A captioned table (first cell of each row is its header) in a scrollable region.
-    Cells are HTML already (they may hold number spans)."""
+    """A captioned table (first cell of each row is its header) in a scrollable region, then
+    its download line (``dl``: the page's ``downloads.Collector``, whose ``nums`` reads the
+    values behind the number spans). Cells are HTML already (they may hold number spans)."""
+    data = table_download(
+        dl.nums,
+        caption,
+        columns,
+        rows,
+        table_id=table_id,
+        name=name,
+        provenance=provenance or downloads.P5_MPI,
+        unit=unit,
+    )
     numeric = numeric or [False] + [True] * (len(columns) - 1)
     head = "".join(
         f'<th scope="col"{' class="num"' if numeric[i] else ""}>{esc(c)}</th>'
@@ -118,13 +227,15 @@ def table(
         f"<table><caption>{esc(caption)}</caption><thead><tr>{head}</tr></thead>"
         f"<tbody>{body}</tbody></table>",
         caption,
-    )
+    ) + dl.add(data)
 
 
-def figure(doc: Mapping[str, Any], key: str, intro: str) -> str:
-    """A library dot plot: static SVG named by the alt-text, then the library's table."""
+def figure(doc: Mapping[str, Any], key: str, intro: str, dl: Any, table_id: str, name: str) -> str:
+    """A library dot plot: static SVG named by the alt-text, then the library's table and its
+    download (from the same table)."""
     if not doc["audit"]["passed"]:
         raise ValueError(f"chart {doc['id']} failed its audit")
+    data = downloads.from_spec(doc["table"], table_id, name, downloads.P5_MPI)
     return (
         f'<figure class="chart-figure dot-chart" aria-labelledby="{key}-title">'
         f'<div class="chart dot-holder" role="img" aria-labelledby="{key}-desc">'
@@ -136,7 +247,7 @@ def figure(doc: Mapping[str, Any], key: str, intro: str) -> str:
         "</figcaption></figure>"
         f'<p class="table-intro">{intro}</p>'
         f'<div class="chart-table" data-chart="{esc(doc["id"])}">'
-        f"{pages.wide_table(pages.doc_table(doc), doc['table']['caption'])}</div>"
+        f"{pages.wide_table(pages.doc_table(doc), doc['table']['caption'])}{dl.add(data)}</div>"
     )
 
 
@@ -169,7 +280,7 @@ def signed_box(nums: Any, eid: str, heading: str, body: str) -> str:
 QUANTILES = ("q01", "q05", "q25", "q50", "q75", "q95", "q99")
 
 
-def quantile_table(nums: Any) -> str:
+def quantile_table(nums: Any, dl: Any) -> str:
     """Section 5.1: the cross-fitted propensity's quantiles, exposed and unexposed."""
     rows = [
         [
@@ -184,11 +295,14 @@ def quantile_table(nums: Any) -> str:
         "(propensity, averaged over the repetitions, before the 0.01 cut-off), by group",
         ["Quantile", "With such a member", "Without"],
         rows,
+        dl=dl,
+        table_id="propensity-quantiles",
+        name="the estimated chance of having such a member, by group",
     )
 
 
-def result_section(nums: Any, charts: Mapping[str, Mapping[str, Any]]) -> str:
-    quantiles = quantile_table(nums)
+def result_section(nums: Any, charts: Mapping[str, Mapping[str, Any]], dl: Any) -> str:
+    quantiles = quantile_table(nums, dl)
     reasons = "".join(f"<li>{r}</li>" for r in text.reasons(nums, "#sensitivity-heading"))
     overlap = (
         "Few households have a member with a severe difficulty: "
@@ -245,11 +359,20 @@ def result_section(nums: Any, charts: Mapping[str, Mapping[str, Any]]) -> str:
 and two secondary definitions (S2: NBS's broad definition; S3: the household head has the
 difficulty). They answer slightly different questions, so they are not ranked against each
 other: no comparison between them was planned.</p>
-{figure(charts["poverty_headline"], "headline-chart", "The same figures as a table:")}
+{
+        figure(
+            charts["poverty_headline"],
+            "headline-chart",
+            "The same figures as a table:",
+            dl,
+            "five-ways",
+            "the main comparison, five ways",
+        )
+    }
 </section>"""
 
 
-def checks_section(nums: Any) -> str:
+def checks_section(nums: Any, dl: Any) -> str:
     t7_rows = []
     for key, label in (
         ("exposed", "People who are poor, households with a person with a disability (%)"),
@@ -269,6 +392,10 @@ def checks_section(nums: Any) -> str:
         "Reproducing NBS Table 7 (broad definition, unadjusted)",
         ["Figure", "Ours", "NBS Table 7", "Within tolerance"],
         t7_rows,
+        dl=dl,
+        table_id="nbs-table-7",
+        name="reproducing NBS Table 7",
+        provenance=downloads.P5_TABLE7,
         numeric=[False, True, True, False],
     )
     passed = "passed" if nums.flag("table7_all_pass") else "failed"
@@ -277,6 +404,10 @@ def checks_section(nums: Any) -> str:
         "the 95% confidence interval",
         ["Choice", "Difference", "Low", "High"],
         [[nums.text(f"estimates.{e}.label"), *est_cells(nums, e)] for e in ROBUSTNESS_ROWS],
+        dl=dl,
+        table_id="robustness",
+        name="the main estimate under other reasonable choices",
+        unit="percentage points",
     )
     lozo_ids = [e for e in nums.payload["estimates"] if e.startswith("lozo_")]
     lozo = table(
@@ -284,6 +415,10 @@ def checks_section(nums: Any) -> str:
         "points. Low and High: the 95% confidence interval",
         ["Left out", "Difference", "Low", "High"],
         [[nums.text(f"estimates.{e}.label"), *est_cells(nums, e)] for e in lozo_ids],
+        dl=dl,
+        table_id="leave-one-zone-out",
+        name="the main estimate with one zone left out at a time",
+        unit="percentage points",
     )
     sel = "summary.mpi"
     learners = table(
@@ -298,6 +433,9 @@ def checks_section(nums: Any) -> str:
             ]
             for key, label in LEARNERS
         ],
+        dl=dl,
+        table_id="learners",
+        name="how well each method predicted (mean log loss)",
     )
     names = dict(LEARNERS)
     chosen_y = names[nums.raw(f"{sel}.outcome_chosen.value_text")].lower()
@@ -359,7 +497,7 @@ exposure.</p>
 </section>"""
 
 
-def sensitivity_section(nums: Any) -> str:
+def sensitivity_section(nums: Any, dl: Any) -> str:
     bench_rows = []
     for key, label in BENCHMARKS:
         p = f"summary.mpi.bench_{key}"
@@ -375,6 +513,10 @@ def sensitivity_section(nums: Any) -> str:
         "percentage points (DoubleML bounds)",
         ["Hidden factor", "Estimate between", "95% interval"],
         bench_rows,
+        dl=dl,
+        table_id="benchmarks",
+        name="hidden factors as strong as measured ones (DoubleML bounds)",
+        unit="percentage points",
     )
     sm = table(
         "Weighted linear model (ignoring the survey design), adjusted for hidden factors "
@@ -385,6 +527,10 @@ def sensitivity_section(nums: Any) -> str:
             [nums.text(f"estimates.{e}.label"), *est_cells(nums, e)]
             for e in ("sensemakr_1x", "sensemakr_2x", "sensemakr_3x")
         ],
+        dl=dl,
+        table_id="sensemakr",
+        name="the linear model adjusted for hidden factors (sensemakr)",
+        unit="percentage points",
     )
     return f"""<section aria-labelledby="sensitivity-heading">
 <h2 id="sensitivity-heading">How strong would a hidden factor need to be?</h2>
@@ -428,7 +574,7 @@ cannot go above about {nums.num("derived.rr_ceiling", 1, 2)} (1 divided by
 </section>"""
 
 
-def secondaries_section(nums: Any, charts: Mapping[str, Mapping[str, Any]]) -> str:
+def secondaries_section(nums: Any, charts: Mapping[str, Mapping[str, Any]], dl: Any) -> str:
     rows = []
     for eid in SECONDARY_ROWS:
         cells = est_cells(nums, eid)
@@ -447,6 +593,9 @@ def secondaries_section(nums: Any, charts: Mapping[str, Mapping[str, Any]]) -> s
         "Low and High: the 95% confidence interval; Holm: the p-value corrected across S1-S3",
         ["Question", "Difference", "Low", "High", "Holm", "Wording"],
         rows,
+        dl=dl,
+        table_id="secondary-questions",
+        name="secondary questions S1 to S6",
         numeric=[False, True, True, True, True, False],
     )
     x1_ids = [e for e in nums.payload["estimates"] if e.startswith("x1_")]
@@ -467,6 +616,10 @@ def secondaries_section(nums: Any, charts: Mapping[str, Mapping[str, Any]]) -> s
             ]
             for e in x1_ids
         ],
+        dl=dl,
+        table_id="within-groups",
+        name="the main comparison within groups (exploratory X1)",
+        unit="percentage points",
     )
     supported = [e for e in HOLM if nums.raw(f"estimates.{e}.supported")]
     holm_line = (
@@ -486,7 +639,16 @@ S2 (NBS's broad definition) and S3 (the head has the difficulty) were registered
 <p>The poverty index has four dimensions. This shows how much of the difference in the
 deprivation score (S1) sits in each. It is descriptive: it shows where, not why. The four parts
 are separate estimates and do not add exactly to S1.</p>
-{figure(charts["poverty_dimensions"], "dimensions-chart", "The same figures as a table:")}
+{
+        figure(
+            charts["poverty_dimensions"],
+            "dimensions-chart",
+            "The same figures as a table:",
+            dl,
+            "dimensions",
+            "the difference by MPI dimension (S4)",
+        )
+    }
 <details class="more">
 <summary>Within urban and rural areas and within each zone (exploratory)</summary>
 <p>Exploratory and noisy: each group has few households with such a member, so these
@@ -497,7 +659,7 @@ other.</p>
 </section>"""
 
 
-def ghs_section(nums: Any) -> str:
+def ghs_section(nums: Any, dl: Any) -> str:
     def work_plain() -> str:
         lo, hi = nums.raw("estimates.ghs_dwork.ci_low"), nums.raw("estimates.ghs_dwork.ci_high")
         if hi < 0:
@@ -570,6 +732,10 @@ def ghs_section(nums: Any) -> str:
         "characteristics",
         ["Characteristic", "Stayers", "Leavers", "Standardised difference"],
         attr_rows,
+        dl=dl,
+        table_id="attrition",
+        name="who was found again in 2023/24 (attrition)",
+        provenance=downloads.P5_GHS,
     )
     ghs = table(
         "Exploratory: change between 2018/19 and 2023/24 for people whose severe difficulty "
@@ -590,6 +756,10 @@ def ghs_section(nums: Any) -> str:
                 nums.count("estimates.ghs_dwork.n_exposed"),
             ],
         ],
+        dl=dl,
+        table_id="ghs-change",
+        name="change for people whose severe difficulty began (exploratory)",
+        provenance=downloads.P5_GHS,
     )
     return f"""<section aria-labelledby="ghs-heading">
 <h2 id="ghs-heading">Exploratory: the same people five years apart</h2>
@@ -750,8 +920,22 @@ def nav_html() -> str:
     )
 
 
-def page_html(payload: Mapping[str, Any], charts: Mapping[str, Mapping[str, Any]]) -> str:
+def page_downloads(payload: Mapping[str, Any], site_url: str) -> Any:
+    """An empty collector for the page's table downloads."""
+    if not site_url.endswith("/"):
+        site_url += "/"
+    collector = PageDownloads(f"{site_url}poverty.html", "poverty", DOWNLOADS_HREF)
+    collector.nums = text.Numbers(payload, html_mode=False)
+    return collector
+
+
+def page_html(
+    payload: Mapping[str, Any], charts: Mapping[str, Mapping[str, Any]], dl: Any = None
+) -> str:
+    """The page. Its tables' download files go into ``dl`` (``page_downloads``)."""
     nums = text.Numbers(payload, html_mode=True)
+    if dl is None:
+        dl = page_downloads(payload, pages.DEFAULT_SITE_URL)
     css = dot_svg.theme_css(charts["poverty_headline"])
     plain = text.Numbers(payload, html_mode=False)
     if plain.raw("derived.verdict") != "higher":
@@ -770,11 +954,11 @@ with the National Bureau of Statistics' Multidimensional Poverty Index survey 20
 analysis whose plan was registered publicly before any poverty figure was split by disability.
 Poverty here is NBS's multidimensional poverty: being deprived in at least 26% of a weighted
 list of health, education, living standards, and work and shocks.</p>
-{result_section(nums, charts)}
-{checks_section(nums)}
-{sensitivity_section(nums)}
-{secondaries_section(nums, charts)}
-{ghs_section(nums)}
+{result_section(nums, charts, dl)}
+{checks_section(nums, dl)}
+{sensitivity_section(nums, dl)}
+{secondaries_section(nums, charts, dl)}
+{ghs_section(nums, dl)}
 {reading_section(nums)}
 {registration_section(nums)}
 </main>
@@ -790,18 +974,22 @@ list of health, education, living standards, and work and shocks.</p>
 """
 
 
-def build(data_dir: Path, page: Path) -> str:
+def build(data_dir: Path, page: Path, site_url: str = pages.DEFAULT_SITE_URL) -> str:
+    """Write the page, and its tables' downloads to ``data_dir/downloads/poverty/``."""
     payload = json.loads((data_dir / "poverty.json").read_text(encoding="utf-8"))
     charts = {
         name: json.loads((data_dir / "charts" / f"{name}.json").read_text(encoding="utf-8"))
         for name in ("poverty_headline", "poverty_dimensions")
     }
-    out = page_html(payload, charts)
+    dl = page_downloads(payload, site_url)
+    out = page_html(payload, charts, dl)
     bad = text.forbidden(out)
     if bad:
         raise ValueError(f"wording the pre-registration rules out: {sorted(set(bad))}")
+    dl.check_linked(out)
     page.parent.mkdir(parents=True, exist_ok=True)
     page.write_text(out, encoding="utf-8", newline="\n")
+    dl.write(data_dir / "downloads")
     return out
 
 
@@ -809,9 +997,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Build site/poverty.html (P5 results).")
     parser.add_argument("--data-dir", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--page", type=Path, default=DEFAULT_PAGE)
+    parser.add_argument("--site-url", default=os.environ.get("SITE_URL", pages.DEFAULT_SITE_URL))
     args = parser.parse_args(argv)
     try:
-        out = build(args.data_dir, args.page)
+        out = build(args.data_dir, args.page, args.site_url)
     except (ValueError, KeyError) as error:
         print(f"Poverty page failed: {error!r}", file=sys.stderr)
         return 1
