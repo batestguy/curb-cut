@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en-NG">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Data explorer: Curb Cut</title>
+    <meta
+      name="description"
+      content="Filter and sort every DHS 2024 disability estimate for Nigeria's states, zones and the country, by activity, age group and sex, with intervals, precision flags and CSV or JSON downloads."
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Cpath fill='%23008751' d='M0 0h3v2H0z'/%3E%3Cpath fill='%23fff' d='M1 0h1v2H1z'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <div class="flag-band" aria-hidden="true"></div>
+    <header class="site-header">
+      <p class="site-name"><a href="./">Curb Cut</a></p>
+      <nav class="site-nav" aria-label="Site">
+        <ul>
+          <li><a href="./">Main page</a></li>
+          <li><a href="./states/">State pages</a></li>
+          <li><a href="./explorer.html" aria-current="page">Data explorer</a></li>
+          <li><a href="./poverty.html">Disability and poverty</a></li>
+          <li><a href="./methodology.html">Methodology</a></li>
+          <li><a href="./data-dictionary.html">Data dictionary</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main" tabindex="-1" class="explorer-page">
+      <h1>Data explorer: disability in the DHS 2024 survey</h1>
+      <p>
+        Every DHS 2024 disability figure the site publishes, for each state, each geopolitical
+        zone and Nigeria as a whole: choose what to show, then press
+        <strong>Show figures</strong>. The table has each figure's 95% confidence interval, its
+        precision flag and the number of respondents behind it, and you can sort it by any
+        column. Figures for fewer than 30 respondents are never shown. The data are queried in
+        your browser with DuckDB-WASM; nothing is sent to a server.
+        <a href="./methodology.html#precision-heading">What the precision flags mean</a>.
+      </p>
+
+      <noscript>
+        <p class="status error">The data explorer needs JavaScript. The same figures are here:</p>
+      </noscript>
+      <form id="explorer-form" class="explorer-form" hidden>
+        <fieldset>
+          <legend>Choose what to show</legend>
+          <div class="explorer-fields">
+            <div class="field-stack">
+              <label for="f-level">Level</label>
+              <select id="f-level" name="level"></select>
+            </div>
+            <div class="field-stack">
+              <label for="f-measure">Measure</label>
+              <select id="f-measure" name="measure"></select>
+            </div>
+            <div class="field-stack">
+              <label for="f-age">Age group</label>
+              <select id="f-age" name="age"></select>
+            </div>
+            <div class="field-stack">
+              <label for="f-sex">Sex</label>
+              <select id="f-sex" name="sex"></select>
+            </div>
+            <div class="field-stack">
+              <label for="f-place">State or zone (optional)</label>
+              <select id="f-place" name="place"></select>
+            </div>
+          </div>
+          <button type="submit" id="f-show">Show figures</button>
+        </fieldset>
+      </form>
+
+      <p id="url-message" class="status error" hidden></p>
+      <!-- The page's one live region: loading, "Showing N rows: …", sorting and failures. -->
+      <p id="explorer-status" class="status" role="status" aria-live="polite"></p>
+
+      <!-- Shown without JavaScript, and when the explorer cannot start; hidden while it works. -->
+      <div id="explorer-fallback" class="fallback">
+        <ul class="sentences">
+          <li>
+            <a href="./states/">The 37 state pages</a>: every DHS 2024 figure for each state, with a
+            CSV and a JSON download under each table.
+          </li>
+          <li>
+            The data files the explorer reads,
+            <a href="./data/dhs2024_state_prevalence.parquet">dhs2024_state_prevalence.parquet</a>
+            and <a href="./data/dhs2024_national_zone.parquet">dhs2024_national_zone.parquet</a>
+            (Parquet), described column by column in the
+            <a href="./data-dictionary.html">data dictionary</a>.
+          </li>
+        </ul>
+      </div>
+
+      <section id="results" aria-labelledby="results-heading" hidden>
+        <h2 id="results-heading" tabindex="-1">Results</h2>
+        <div id="results-table" class="table-wrap"></div>
+        <div id="results-downloads"></div>
+        <p id="results-columns"></p>
+
+        <h3 id="chart-heading">Chart of this view</h3>
+        <p id="chart-note"></p>
+        <figure id="explorer-chart-figure" class="chart-figure" aria-labelledby="explorer-chart-title" hidden>
+          <div id="explorer-chart" class="chart" role="img" aria-labelledby="explorer-chart-desc">
+            <div class="chart-plot tall" aria-hidden="true"></div>
+          </div>
+          <figcaption>
+            <span id="explorer-chart-title" class="chart-title"></span>
+            <!-- Read once, as the chart's accessible name; hidden here so screen readers don't hear it twice. -->
+            <span id="explorer-chart-desc" class="chart-desc" aria-hidden="true"></span>
+          </figcaption>
+        </figure>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <h2 class="footer-heading">Sources</h2>
+      <p>
+        The DHS Program, <cite>Nigeria Demographic and Health Survey 2024</cite> (National
+        Population Commission and ICF), Washington Group Short Set; estimates by Curb Cut from the
+        survey microdata, used for the registered project "Curb Cut: disability prevalence and
+        poverty in Nigeria". Only disclosure-checked aggregates are published. Reuse is subject to
+        the source terms; cite the sources.
+      </p>
+      <p>
+        <a href="./methodology.html">Methodology: definitions, sources and limits</a>.
+        <a href="./data-dictionary.html">Data dictionary: every public file and column</a>.
+      </p>
+      <h2 class="footer-heading">Accessibility and feedback</h2>
+      <!-- Same text as REPORT_HTML in packages/transform/scripts/build_state_pages.py -->
+      <p>
+        This site has automated accessibility tests (axe, keyboard); it has not yet been tested
+        by a regular screen-reader user. If anything is hard to use or looks wrong, email
+        <a
+          href="mailto:batesthommie@gmail.com?subject=Curb%20Cut%3A%20problem%20report&amp;body=Page%20address%3A%0A%0AWhat%20went%20wrong%3A%0A%0ABrowser%20and%20screen%20reader%2C%20if%20any%3A%0A"
+          >batesthommie@gmail.com</a
+        >
+        (backup:
+        <a
+          href="mailto:jzbannister@atbu.edu.ng?subject=Curb%20Cut%3A%20problem%20report&amp;body=Page%20address%3A%0A%0AWhat%20went%20wrong%3A%0A%0ABrowser%20and%20screen%20reader%2C%20if%20any%3A%0A"
+          >jzbannister@atbu.edu.ng</a
+        >); no account is needed. With a GitHub account you can also
+        <a href="https://github.com/batestguy/curb-cut/issues/new">report a problem on GitHub</a>.
+      </p>
+    </footer>
+
+    <script type="module" src="./src/explorer.js"></script>
+  </body>
+</html>

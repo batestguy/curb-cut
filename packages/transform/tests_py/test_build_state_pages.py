@@ -398,12 +398,13 @@ def test_the_build_refuses_a_page_over_budget(warehouse, tmp_path, monkeypatch) 
 
 
 def test_report_paragraph_matches_hand_written_pages() -> None:
-    """index.html and methodology.html repeat REPORT_HTML by hand; keep the links in step."""
+    """index.html, methodology.html and explorer.html repeat REPORT_HTML by hand; keep the
+    links in step."""
     hrefs = re.findall(r'href="([^"]+)"', pages.REPORT_HTML)
     assert any(h.startswith(f"mailto:{pages.REPORT_EMAIL}?") for h in hrefs)
     assert any(h.startswith(f"mailto:{pages.REPORT_EMAIL_BACKUP}?") for h in hrefs)
     assert pages.REPORT_URL in hrefs
-    for name in ("index.html", "methodology.html"):
+    for name in ("index.html", "methodology.html", "explorer.html"):
         html = (ROOT / "site" / name).read_text(encoding="utf-8")
         for href in hrefs:
             assert f'href="{href}"' in html, (name, href)

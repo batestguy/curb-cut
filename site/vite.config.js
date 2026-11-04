@@ -5,7 +5,7 @@ import { defineConfig } from 'vite';
 // The state pages are generated before the build (packages/transform/scripts/
 // build_state_pages.py writes site/states/*.html); each one is an input of its own, so it gets
 // the shared stylesheet and the base path. Without them (no data built yet) the build still
-// works, with the two hand-written pages only.
+// works, with the three hand-written pages only.
 const statesDir = resolve(import.meta.dirname, 'states');
 let statePages = {};
 try {
@@ -36,12 +36,13 @@ export default defineConfig({
     target: 'es2022',
     // Plotly and the DuckDB-WASM bundles are large by nature; they are loaded once.
     chunkSizeWarningLimit: 4000,
-    // The main page, the methodology note, the poverty page, the data dictionary and the 37
-    // state pages with their index.
+    // The main page, the methodology note, the data explorer, the poverty page, the data
+    // dictionary and the 37 state pages with their index.
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
         methodology: resolve(import.meta.dirname, 'methodology.html'),
+        explorer: resolve(import.meta.dirname, 'explorer.html'),
         ...generated,
         ...statePages,
       },
