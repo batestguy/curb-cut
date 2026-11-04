@@ -243,12 +243,15 @@ def test_page_shape_and_share_tags(built) -> None:
     assert "has automated accessibility tests (axe, keyboard)" in html
     assert "has not yet been tested\nby a regular screen-reader user" in html
     assert "checked by keyboard" not in html
-    # Every table is a focusable, named region, so a table that scrolls is reachable.
+    # Every table's caption is its Tab stop (so a table that scrolls is reachable); the
+    # wrapper itself is plain, so NVDA does not read the whole table on Tab.
     wraps = re.findall(r'<div class="table-wrap"[^>]*>', html)
-    assert wraps and all('role="region" tabindex="0" aria-label="' in w for w in wraps)
+    assert wraps and all(w == '<div class="table-wrap">' for w in wraps)
+    assert html.count('<caption tabindex="0">') == html.count("<table>") == len(wraps)
+    assert 'role="region"' not in html
     assert not re.search(r"\bthe first\b|\bfirst[\s-]+ever\b", html, re.I)
     for table in re.findall(r"<table>.*?</table>", html, re.S):
-        assert "<caption>" in table
+        assert '<caption tabindex="0">' in table
         assert not re.search(r"<th(?=[\s>])(?![^>]*scope=)", table)
 
 
@@ -410,7 +413,7 @@ def test_report_paragraph_matches_hand_written_pages() -> None:
 # --- Downloads (P6 item 2) -------------------------------------------------------------------
 
 TABLE_AND_LINE = re.compile(
-    r"<table><caption>(.*?)</caption>.*?<tbody>(.*?)</tbody></table></div>"
+    r'<table><caption tabindex="0">(.*?)</caption>.*?<tbody>(.*?)</tbody></table></div>'
     r'(<p class="table-download">.*?</p>)?',
     re.S,
 )

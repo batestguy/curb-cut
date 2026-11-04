@@ -505,9 +505,11 @@ table:focus-visible {
   overflow-x: auto;
 }
 
-.table-wrap:focus-visible {
+/* The caption is the table's Tab stop (P6 item 4). Inset outline: the wrapper's overflow
+   would clip an outline drawn outside the caption. */
+.table-wrap caption:focus-visible {
   outline: 3px solid var(--focus);
-  outline-offset: 2px;
+  outline-offset: -3px;
 }
 
 /* The prevalence map. Colours come from the chart document's themes (map.js sets the
