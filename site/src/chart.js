@@ -91,7 +91,9 @@ const config = { staticPlot: true, displayModeBar: false, responsive: true };
 /**
  * Render a chart document. Returns a handle whose highlight(category) redraws the chart with
  * that bar highlighted (null clears it); unknown categories highlight nothing. `tableNote`,
- * if given, goes directly after the table (its download line, or the JONAPWD citation).
+ * if given, goes directly after the table (its download line, or the JONAPWD citation). With
+ * `tableEl` null, the document's table is not drawn (the page has its own with the same
+ * figures).
  */
 export async function renderChart(
   doc,
@@ -99,9 +101,12 @@ export async function renderChart(
 ) {
   titleEl.textContent = doc.title;
   descEl.textContent = doc.alt_text;
-  const table = renderTable(doc.table);
-  tableEl.replaceChildren(table);
-  placeAfterTable(table, tableNote);
+  // Without tableEl the page shows the same figures in a table of its own (the explorer).
+  if (tableEl) {
+    const table = renderTable(doc.table);
+    tableEl.replaceChildren(table);
+    placeAfterTable(table, tableNote);
+  }
 
   const plot = container.querySelector('.chart-plot');
   let current = highlight;
@@ -117,6 +122,11 @@ export async function renderChart(
     highlight(category) {
       current = category;
       return draw();
+    },
+    // Stop redrawing on theme or width changes (before the container gets another chart).
+    dispose() {
+      darkQuery.removeEventListener('change', draw);
+      narrowQuery.removeEventListener('change', draw);
     },
   };
 }

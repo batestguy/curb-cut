@@ -1,6 +1,6 @@
 import { renderChart } from './chart.js';
 import { setUpExplorer } from './explore.js';
-import { citedLine, downloadLine } from './format.js';
+import { citedLine, downloadLine, watchTableWraps } from './format.js';
 import { renderChoropleth } from './map.js';
 import { renderComparison, renderFindings, renderHeadline, renderSpatial } from './prevalence.js';
 
@@ -186,24 +186,6 @@ async function showExplorer() {
   } catch (error) {
     status.classList.add('error');
     status.textContent = `The list of states could not be loaded: ${error.message}.`;
-  }
-}
-
-// A wide table that scrolls sideways (at 320px, say) gets a Tab stop on its caption, so a
-// keyboard user can scroll it with the arrow keys; when it fits, no extra Tab stop. The
-// caption, not the wrapper, takes focus: NVDA reads a focused wrapper's every row, but a
-// focused caption as caption plus table size (P6 item 4, NVDA transcript 2026-11-04).
-function watchTableWraps() {
-  const update = (wrap) => {
-    const caption = wrap.querySelector('caption');
-    if (!caption) return;
-    if (wrap.scrollWidth > wrap.clientWidth + 1) caption.tabIndex = 0;
-    else caption.removeAttribute('tabindex');
-  };
-  const resized = new ResizeObserver((entries) => entries.forEach((e) => update(e.target)));
-  for (const wrap of document.querySelectorAll('.table-wrap')) {
-    resized.observe(wrap);
-    new MutationObserver(() => update(wrap)).observe(wrap, { childList: true, subtree: true });
   }
 }
 
