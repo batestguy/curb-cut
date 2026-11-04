@@ -60,6 +60,8 @@ def state_cells() -> list[dict[str, Any]]:
     rows[3].update(suppressed=True, precision_flag="unreliable", precision_reason="n < 30")
     # A cell with no data.
     rows[5].update(has_data=False, estimate=None, ci_low=None, ci_high=None)
+    # A cell under 30 respondents that the file does not mark suppressed.
+    rows[6].update(n_unweighted=12)
     return rows
 
 
@@ -109,10 +111,25 @@ def states_doc() -> list[dict[str, Any]]:
             "jonapwd_total": 150_000 + i,
             "share_of_national": 0.027,
             "rank_of_37": i + 1,
-            "dhs2024": None,
+            "dhs2024": _headline(i),
         }
         for i, (name, code) in enumerate(zip(NAMES, CODES, strict=True))
     ]
+
+
+def _headline(i: int) -> dict[str, Any] | None:
+    # State 0's headline rests on 12 respondents (must be dropped), state 1's on 500.
+    if i > 1:
+        return None
+    return {
+        "estimate": 0.05,
+        "se": 0.01,
+        "ci_low": 0.03,
+        "ci_high": 0.07,
+        "n_unweighted": 12 if i == 0 else 500,
+        "precision_flag": "reliable",
+        "precision_reason": None,
+    }
 
 
 def poverty_doc() -> dict[str, Any]:

@@ -60,3 +60,13 @@ def test_response_wording(client: TestClient) -> None:
         for text in strings(client.get(path).json()):
             assert poverty_text.forbidden(text) == [], (path, text)
     assert client.get("/poverty").json()["wording"].endswith("not a causal effect.")
+
+
+def test_dhs_citation_matches_the_export() -> None:
+    # app.py repeats export_marts.DHS_CITATION (a script, not a package); drift fails here.
+    path = SCRIPT.parent / "export_marts.py"
+    export_spec = importlib.util.spec_from_file_location("export_marts", path)
+    assert export_spec is not None and export_spec.loader is not None
+    export_marts = importlib.util.module_from_spec(export_spec)
+    export_spec.loader.exec_module(export_marts)
+    assert app_module.DHS_CITATION == export_marts.DHS_CITATION

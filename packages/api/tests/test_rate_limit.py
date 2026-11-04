@@ -65,6 +65,19 @@ def test_trusted_proxy_keys_on_the_proxy_added_entry(
     assert other.status_code == 200
 
 
+def test_status_counts_short_chains(make_client: Callable[..., TestClient]) -> None:
+    client = make_client({"CURBCUT_TRUST_PROXY": "1"})
+    assert client.get("/status").json()["proxy_chain_shorter_than_hops_seen"] == 0
+    client.get("/states", headers={"X-Forwarded-For": "203.0.113.7"})
+    client.get("/states", headers={"X-Forwarded-For": "203.0.113.7, 104.16.0.1"})
+    body = client.get("/status").json()
+    assert body["proxy_chain_shorter_than_hops_seen"] == 1
+    assert body["proxy_hops"] == 2
+    assert "203.0.113.7" not in str(body)
+    untrusted = make_client().get("/status").json()
+    assert untrusted["proxy_chain_shorter_than_hops_seen"] is None
+
+
 def test_client_key_rules() -> None:
     untrusted = client_key(trust_proxy=False, hops=2)
     assert untrusted(_request("1.1.1.1, 2.2.2.2")) == "10.0.0.1"
@@ -72,6 +85,12 @@ def test_client_key_rules() -> None:
     assert trusted(_request("9.9.9.9, 1.1.1.1, 2.2.2.2")) == "1.1.1.1"
     assert trusted(_request("1.1.1.1, 2.2.2.2")) == "1.1.1.1"
     assert trusted(_request("1.1.1.1")) == "1.1.1.1"  # fewer entries than hops
+    # A short chain falls back to the rightmost entry, never the client-controlled leftmost.
+    short: list[int] = []
+    three = client_key(trust_proxy=True, hops=3, on_short=lambda: short.append(1))
+    assert three(_request("1.1.1.1, 2.2.2.2")) == "2.2.2.2"
+    assert three(_request("9.9.9.9, 1.1.1.1, 2.2.2.2")) == "9.9.9.9"
+    assert short == [1]
     assert trusted(_request(None)) == "10.0.0.1"
     assert trusted(_request(" , ")) == "10.0.0.1"
     assert client_key(trust_proxy=True, hops=1)(_request("9.9.9.9, 1.1.1.1")) == "1.1.1.1"

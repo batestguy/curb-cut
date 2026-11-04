@@ -63,6 +63,52 @@ def test_load_rejects(data_dir: Path, name: str, content: Any, message: str) -> 
         load(dir_fetcher(data_dir))
 
 
+@pytest.mark.parametrize(
+    ("column", "value", "message"),
+    [
+        ("suppressed", "no", "column suppressed is not all bool"),
+        ("has_data", None, "column has_data is not all bool"),
+        ("estimate", "0.1", "column estimate is not all num"),
+        ("n_unweighted", True, "column n_unweighted is not all num"),
+        ("state_code", None, "column state_code is not all str"),
+    ],
+)
+def test_load_rejects_wrong_types(
+    data_dir: Path, fx: SimpleNamespace, column: str, value: Any, message: str
+) -> None:
+    rows = [r | {column: value} for r in fx.state_cells()]
+    _break(data_dir, "dhs2024_state_prevalence.parquet", rows)
+    with pytest.raises(DataError, match=message):
+        load(dir_fetcher(data_dir))
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("state", 1, "must be text"),
+        ("dhs2024", [0.1], "object or null"),
+    ],
+)
+def test_load_rejects_wrong_state_types(
+    data_dir: Path, field: str, value: Any, message: str
+) -> None:
+    states = json.loads((data_dir / "states.json").read_text("utf-8"))
+    states[3][field] = value
+    _break(data_dir, "states.json", states)
+    with pytest.raises(DataError, match=message):
+        load(dir_fetcher(data_dir))
+
+
+def test_error_detail_stays_out_of_the_message(data_dir: Path) -> None:
+    (data_dir / "prevalence_comparison.parquet").write_bytes(b"not parquet")
+    with pytest.raises(DataError) as caught:
+        load(dir_fetcher(data_dir))
+    assert (
+        str(caught.value) == "prevalence_comparison.parquet failed validation: not readable Parquet"
+    )
+    assert caught.value.detail  # DuckDB's own text, kept for the log
+
+
 def test_load_rejects_duplicate_codes(data_dir: Path) -> None:
     states = json.loads((data_dir / "states.json").read_text("utf-8"))
     states[1]["state_code"] = states[0]["state_code"]
@@ -141,7 +187,7 @@ def test_url_fetcher_refuses_large(monkeypatch: pytest.MonkeyPatch) -> None:
 
 def test_store_from_env(data_dir: Path) -> None:
     local = store_from_env({"CURBCUT_DATA_DIR": str(data_dir)})
-    assert local.source.startswith("directory ")
+    assert local.source == "local directory"
     assert local.ensure() is not None
     assert store_from_env({}).source == data.DEFAULT_BASE
     assert store_from_env({"CURBCUT_DATA_BASE": "https://x.invalid/d/"}).source == (

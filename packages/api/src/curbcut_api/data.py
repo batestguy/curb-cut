@@ -8,13 +8,15 @@ Python rows: the files are small (about 150 KB in all).
 
 If loading fails, the app still runs and reports itself not ready; the next attempt waits
 for a backoff (30 s, doubling to 10 minutes), so a failing source is not hit on every
-request.
+request. The public error message names the file and the check; the detail (exception text,
+temporary paths) goes only to the log.
 """
 
 from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import re
 import tempfile
 import threading
@@ -34,6 +36,10 @@ TIMEOUT_S = 30
 BACKOFF_START_S = 30.0
 BACKOFF_MAX_S = 600.0
 N_STATES = 37
+# The disclosure threshold: a cell resting on fewer respondents is never served with numbers.
+MIN_N = 30
+
+log = logging.getLogger(__name__)
 
 CELL_COLUMNS = (
     "measure",
@@ -90,11 +96,59 @@ POVERTY_KEYS = ("note", "estimates", "summary")
 JSON_FILES = ("states.json", "poverty.json")
 FILES = (*PARQUET_FILES, *JSON_FILES)
 
+# Basic column types: "num" (number or null), "bool" (true or false), "str" (text), "str?"
+# (text or null). Columns not listed are only required to exist.
+_CELL_KINDS = {
+    "measure": "str",
+    "age_group": "str",
+    "sex": "str",
+    "estimate": "num",
+    "se": "num",
+    "ci_low": "num",
+    "ci_high": "num",
+    "n_unweighted": "num",
+    "n_effective": "num",
+    "df": "num",
+    "precision_flag": "str?",
+    "precision_reason": "str?",
+    "suppressed": "bool",
+}
+KINDS: dict[str, dict[str, str]] = {
+    "dhs2024_state_prevalence.parquet": {
+        "state": "str",
+        "state_code": "str",
+        "zone": "str",
+        **_CELL_KINDS,
+        "has_data": "bool",
+        "population_2023": "num",
+    },
+    "dhs2024_national_zone.parquet": {
+        "geography_level": "str",
+        "geography": "str",
+        **_CELL_KINDS,
+    },
+    "prevalence_comparison.parquet": {
+        "figure_id": "str",
+        "sort_order": "num",
+        "value_percent": "num",
+        "ci_low_percent": "num",
+        "ci_high_percent": "num",
+    },
+}
+
 Fetch = Callable[[str], bytes]
 
 
 class DataError(ValueError):
-    """A public file is missing, unreadable or not what the API expects."""
+    """A public file is missing, unreadable or not what the API expects.
+
+    ``str(exc)`` is the public message (file and check, written here, never exception text
+    or paths); ``detail`` holds the underlying error, for the log only.
+    """
+
+    def __init__(self, message: str, detail: str | None = None) -> None:
+        super().__init__(message)
+        self.detail = detail
 
 
 def slug(name: str) -> str:
@@ -158,20 +212,39 @@ def _parquet_rows(name: str, body: bytes, required: tuple[str, ...]) -> list[dic
                 columns = [d[0] for d in cursor.description]
                 rows = [dict(zip(columns, row, strict=True)) for row in cursor.fetchall()]
         except duckdb.Error as exc:
-            raise DataError(f"{name} is not readable Parquet: {exc}") from exc
+            raise DataError(f"{name} failed validation: not readable Parquet", str(exc)) from exc
     missing = [c for c in required if c not in columns]
     if missing:
         raise DataError(f"{name} lacks columns {missing}")
     if not rows:
         raise DataError(f"{name} has no rows")
+    _check_kinds(name, rows, KINDS[name])
     return rows
+
+
+def _is_num(value: Any) -> bool:
+    return isinstance(value, int | float) and not isinstance(value, bool)
+
+
+_KIND_CHECKS: dict[str, Callable[[Any], bool]] = {
+    "num": lambda v: v is None or _is_num(v),
+    "bool": lambda v: isinstance(v, bool),
+    "str": lambda v: isinstance(v, str),
+    "str?": lambda v: v is None or isinstance(v, str),
+}
+
+
+def _check_kinds(name: str, rows: list[dict[str, Any]], kinds: Mapping[str, str]) -> None:
+    for column, kind in kinds.items():
+        if not all(_KIND_CHECKS[kind](row[column]) for row in rows):
+            raise DataError(f"{name} failed validation: column {column} is not all {kind}")
 
 
 def _json(name: str, body: bytes) -> Any:
     try:
         return json.loads(body.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise DataError(f"{name} is not valid JSON: {exc}") from exc
+        raise DataError(f"{name} failed validation: not valid JSON", str(exc)) from exc
 
 
 def _check_states(states: Any) -> list[dict[str, Any]]:
@@ -183,9 +256,27 @@ def _check_states(states: Any) -> list[dict[str, Any]]:
         missing = [k for k in STATE_KEYS if k not in state]
         if missing:
             raise DataError(f"states.json entry lacks keys {missing}")
+        if not isinstance(state["state"], str) or not isinstance(state["state_code"], str):
+            raise DataError("states.json failed validation: state and state_code must be text")
+        if state["dhs2024"] is not None and not isinstance(state["dhs2024"], dict):
+            raise DataError("states.json failed validation: dhs2024 must be an object or null")
     if len({s["state_code"] for s in states}) != N_STATES:
         raise DataError("states.json state codes are not unique")
-    return states
+    return [_safe_state(s) for s in states]
+
+
+def small(n: Any) -> bool:
+    """True if ``n`` respondents is under the disclosure threshold."""
+    return _is_num(n) and n < MIN_N
+
+
+def _safe_state(state: dict[str, Any]) -> dict[str, Any]:
+    """Drop a state's DHS headline if it rests on fewer than ``MIN_N`` respondents (the
+    disclosure gate already does this; this is a second check)."""
+    headline = state["dhs2024"]
+    if headline is not None and small(headline.get("n_unweighted")):
+        return {**state, "dhs2024": None}
+    return state
 
 
 def _check_poverty(poverty: Any) -> dict[str, Any]:
@@ -219,7 +310,7 @@ def load(fetch: Fetch) -> Dataset:
         except DataError:
             raise
         except Exception as exc:  # network, HTTP or file errors, reported as one kind
-            raise DataError(f"could not fetch {name}: {exc}") from exc
+            raise DataError(f"could not fetch {name}", f"{type(exc).__name__}: {exc}") from exc
     tables = {name: _parquet_rows(name, bodies[name], cols) for name, cols in PARQUET_FILES.items()}
     states = _check_states(_json("states.json", bodies["states.json"]))
     poverty = _check_poverty(_json("poverty.json", bodies["poverty.json"]))
@@ -265,10 +356,16 @@ class Store:
         self._lock = threading.Lock()
 
     def ensure(self) -> Dataset | None:
-        """The dataset, loading it if it is missing and the backoff has passed."""
+        """The dataset, loading it if it is missing and the backoff has passed.
+
+        Never waits for another thread's load (which can take minutes on a bad network):
+        while one runs, other callers get the current state at once (None, so a 503).
+        """
         if self.data is not None:
             return self.data
-        with self._lock:
+        if not self._lock.acquire(blocking=False):
+            return self.data
+        try:
             if self.data is None and self.clock() >= self._next_try:
                 self.attempts += 1
                 try:
@@ -276,8 +373,11 @@ class Store:
                     self.error = None
                 except DataError as exc:
                     self.error = str(exc)
+                    log.warning("loading the public data failed: %s (%s)", exc, exc.detail)
                     self._next_try = self.clock() + self._backoff
                     self._backoff = min(self._backoff * 2, BACKOFF_MAX_S)
+        finally:
+            self._lock.release()
         return self.data
 
     def retry_in(self) -> float | None:
@@ -290,7 +390,7 @@ class Store:
 def store_from_env(env: Mapping[str, str]) -> Store:
     directory = env.get("CURBCUT_DATA_DIR")
     if directory:
-        path = Path(directory).resolve()
-        return Store(dir_fetcher(path), f"directory {path}")
+        # /status is public, so it names the mode, not the path.
+        return Store(dir_fetcher(Path(directory).resolve()), "local directory")
     base = env.get("CURBCUT_DATA_BASE") or DEFAULT_BASE
     return Store(url_fetcher(base), base)

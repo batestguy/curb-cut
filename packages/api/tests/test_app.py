@@ -30,6 +30,49 @@ def test_status_git_commit(make_client: Callable[..., TestClient]) -> None:
     assert body["git_commit"] == "abc123"
 
 
+def test_small_headline_is_dropped(client: TestClient) -> None:
+    states = client.get("/states").json()["states"]
+    assert states[0]["dhs2024"] is None  # 12 respondents
+    assert states[1]["dhs2024"]["n_unweighted"] == 500
+    assert client.get("/states/akwa-ibom").json()["state"]["dhs2024"] is None
+
+
+def test_small_cell_is_suppressed(client: TestClient) -> None:
+    # Row 6 of the fixture: Akwa Ibom, seeing_3plus, 5-17, both sexes, 12 respondents.
+    params = {"state": "akwa-ibom", "measure": "seeing_3plus", "age_group": "5-17"}
+    cell = client.get("/prevalence", params=params).json()["cells"][0]
+    assert cell["suppressed"] is True
+    for name in ("estimate", "se", "ci_low", "ci_high", "n_unweighted", "n_effective", "df"):
+        assert cell[name] is None
+
+
+def test_prevalence_values_case_insensitive(client: TestClient) -> None:
+    body = client.get("/prevalence", params={"measure": "DISABILITY3", "sex": "All"}).json()
+    assert body["query"]["measure"] == "disability3"
+    assert body["count"] == 37
+
+
+def test_status_hides_local_path(client: TestClient, data_dir: Path) -> None:
+    from curbcut_api.data import store_from_env
+
+    store = store_from_env({"CURBCUT_DATA_DIR": str(data_dir)})
+    from curbcut_api.app import create_app
+
+    body = TestClient(create_app({}, store)).get("/status").json()
+    assert body["data_source"] == "local directory"
+    assert str(data_dir) not in str(body)
+    assert data_dir.name not in body["data_source"]
+
+
+def test_status_error_has_no_internal_detail(
+    data_dir: Path, make_client: Callable[..., TestClient]
+) -> None:
+    (data_dir / "dhs2024_national_zone.parquet").write_bytes(b"not parquet")
+    body = make_client().get("/status").json()
+    assert body["error"] == "dhs2024_national_zone.parquet failed validation: not readable Parquet"
+    assert "tmp" not in body["error"].lower()
+
+
 def test_states(client: TestClient) -> None:
     body = client.get("/states").json()
     assert body["count"] == 37
@@ -259,7 +302,8 @@ def test_download_failure_then_recovery(
     assert status.status_code == 503
     body = status.json()
     assert body["ready"] is False
-    assert "network unreachable" in body["error"]
+    # The public message names the file; the exception text goes only to the log.
+    assert body["error"] == "could not fetch dhs2024_state_prevalence.parquet"
     assert body["next_retry_in_seconds"] == 30
     response = client.get("/states")
     assert response.status_code == 503
@@ -277,6 +321,30 @@ def test_download_failure_then_recovery(
     status = client.get("/status")
     assert status.status_code == 200
     assert status.json()["next_retry_in_seconds"] is None
+
+
+def test_concurrent_request_does_not_wait_for_a_load(data_dir: Path) -> None:
+    import threading
+
+    started, release = threading.Event(), threading.Event()
+    inner = dir_fetcher(data_dir)
+
+    def slow_fetch(name: str) -> bytes:
+        started.set()
+        release.wait(10)
+        return inner(name)
+
+    store = Store(slow_fetch, "x")
+    loader = threading.Thread(target=store.ensure)
+    loader.start()
+    assert started.wait(10)
+    # Another request while the load runs gets the current state at once (None -> 503).
+    assert store.ensure() is None
+    assert store.attempts == 1
+    release.set()
+    loader.join(10)
+    assert store.ensure() is not None
+    assert store.attempts == 1
 
 
 def test_backoff_doubles_and_caps(data_dir: Path) -> None:

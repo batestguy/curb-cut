@@ -32,7 +32,7 @@ from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 
-from curbcut_api.data import Dataset, Store, slug, store_from_env
+from curbcut_api.data import Dataset, Store, slug, small, store_from_env
 
 VERSION = version("curbcut-api")
 SITE = "https://batestguy.github.io/curb-cut/"
@@ -120,20 +120,29 @@ NUMBER_FIELDS = ("estimate", "se", "ci_low", "ci_high", "n_unweighted", "n_effec
 UNITS = "estimate, se, ci_low and ci_high are proportions (0 to 1); ci is a 95% interval"
 
 
-def client_key(trust_proxy: bool, hops: int) -> Callable[[Request], str]:
+def client_key(
+    trust_proxy: bool, hops: int, on_short: Callable[[], None] | None = None
+) -> Callable[[Request], str]:
     """The rate limit's client key.
 
     Without ``trust_proxy`` it is the TCP peer. With it, it is the ``X-Forwarded-For``
     entry ``hops`` places from the right: proxies append, so entries a client sends
     itself sit to the left of the ones the trusted proxies add and can't move the key.
+    A header with fewer entries than ``hops`` means the proxy chain is shorter than
+    configured: the key is then the rightmost entry (added by the last proxy, never the
+    client's own leftmost one) and ``on_short`` is called so ``/status`` can say so.
     """
 
     def key(request: Request) -> str:
         if trust_proxy:
             header = request.headers.get("x-forwarded-for", "")
             entries = [e.strip() for e in header.split(",") if e.strip()]
+            if len(entries) >= hops:
+                return entries[-hops]
             if entries:
-                return entries[-hops] if len(entries) >= hops else entries[0]
+                if on_short is not None:
+                    on_short()
+                return entries[-1]
         return request.client.host if request.client else "unknown"
 
     return key
@@ -144,8 +153,14 @@ def _error(status: int, message: str, **extra: Any) -> HTTPException:
 
 
 def _cell(row: Mapping[str, Any]) -> dict[str, Any]:
-    """A survey cell as served: a suppressed or empty cell keeps null numbers, never a value."""
+    """A survey cell as served: a suppressed or empty cell keeps null numbers, never a value.
+
+    A cell resting on fewer than 30 respondents is also served as suppressed, whatever the
+    file says (the disclosure gate already does this; this is a second check).
+    """
     cell = dict(row)
+    if small(cell.get("n_unweighted")):
+        cell["suppressed"] = True
     if cell.get("suppressed") or cell.get("has_data") is False:
         for name in NUMBER_FIELDS:
             cell[name] = None
@@ -166,8 +181,14 @@ def create_app(env: Mapping[str, str] | None = None, store: Store | None = None)
     rate_limit = env.get("CURBCUT_RATE_LIMIT") or DEFAULT_RATE_LIMIT
     trust_proxy = env.get("CURBCUT_TRUST_PROXY") == "1"
     hops = max(1, int(env.get("CURBCUT_PROXY_HOPS") or 2))
+    # Requests whose X-Forwarded-For had fewer entries than `hops` (a count, no addresses).
+    short_chains = [0]
+
+    def on_short() -> None:
+        short_chains[0] += 1
+
     limiter = Limiter(
-        key_func=client_key(trust_proxy, hops),
+        key_func=client_key(trust_proxy, hops, on_short),
         # One budget per client across all routes (default_limits would be per route).
         application_limits=[rate_limit],
         # Off: slowapi would add Retry-After to every response and overwrite the 503's.
@@ -177,7 +198,9 @@ def create_app(env: Mapping[str, str] | None = None, store: Store | None = None)
 
     @asynccontextmanager
     async def lifespan(_: FastAPI) -> AsyncIterator[None]:
-        store.ensure()  # a failure is kept and reported by /status, never raised
+        # Deliberately blocks start-up until the first load finishes (or fails), so the
+        # first health check sees loaded data; a failure is kept for /status, never raised.
+        store.ensure()
         yield
 
     app = FastAPI(
@@ -271,6 +294,9 @@ def create_app(env: Mapping[str, str] | None = None, store: Store | None = None)
             "version": VERSION,
             "git_commit": env.get("RENDER_GIT_COMMIT") or None,
             "rate_limit": f"{rate_limit} per client address",
+            "proxy_hops": hops if trust_proxy else None,
+            # Non-zero means the proxy chain looks shorter than proxy_hops (docs/api.md).
+            "proxy_chain_shorter_than_hops_seen": short_chains[0] if trust_proxy else None,
             "cold_start": COLD_START,
             "site": SITE,
         }
@@ -357,11 +383,11 @@ def create_app(env: Mapping[str, str] | None = None, store: Store | None = None)
             if state is not None:
                 raise _error(422, "'state' needs level=state; use 'geography' for a zone.")
             rows = [r for r in dataset.national_zone_cells if r["geography_level"] == level]
-        measure = _choose("measure", measure.strip(), sorted({r["measure"] for r in rows}))
+        measure = _choose("measure", measure.strip().lower(), sorted({r["measure"] for r in rows}))
         age_group = _choose(
             "age_group",
             # An unencoded "+" in a query string arrives as a space.
-            age_group.replace(" ", "+").strip(),
+            age_group.replace(" ", "+").strip().lower(),
             sorted({r["age_group"] for r in rows}),
         )
         sex = _choose("sex", sex.strip().lower(), sorted({r["sex"] for r in rows}))
