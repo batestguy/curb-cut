@@ -377,3 +377,26 @@ test('a chart failure is announced and the chart keeps an accessible name', asyn
   // The state explorer is independent of the chart and still works.
   await expect(page.locator('#state-select')).toBeEnabled();
 });
+
+// P6 item 1: every page offers a way to report a problem without a GitHub account.
+const REPORT_PAGES = ['./', 'methodology.html', 'poverty.html', 'states/', 'states/edo.html'];
+const REPORT_EMAILS = ['batesthommie@gmail.com', 'jzbannister@atbu.edu.ng'];
+for (const path of REPORT_PAGES) {
+  test(`${path}: report a problem by email (main and backup) and on GitHub, from the footer`, async ({
+    page,
+  }) => {
+    await page.goto(path);
+    const footer = page.locator('footer.site-footer');
+    await expect(footer).toContainText('it has not yet been tested by a regular screen-reader user');
+    for (const email of REPORT_EMAILS) {
+      const link = footer.getByRole('link', { name: email, exact: true });
+      await expect(link).toBeVisible();
+      const href = await link.getAttribute('href');
+      expect(href.startsWith(`mailto:${email}?subject=Curb%20Cut%3A%20problem%20report&body=`)).toBe(true);
+      expect(await link.getAttribute('tabindex')).toBeNull();
+      await link.focus();
+      await expect(link).toBeFocused();
+    }
+    await expect(footer.getByRole('link', { name: 'report a problem on GitHub' })).toBeVisible();
+  });
+}
