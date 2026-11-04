@@ -2,11 +2,12 @@
 
 `state_disability_type.csv` holds the per-state, per-type figures published by the Joint National Association of Persons with Disabilities (JONAPWD), 370 rows (37 states × 10 types). `manifest.json` is written by the extraction script and records the hash, date and cross-checks.
 
-**These are assumption-based figures, not survey estimates.** JONAPWD applied the global 15% disability benchmark to population projections and then split the result by type. Treat them as JONAPWD's estimates, not as measured prevalence.
+**These are assumption-based figures, not survey estimates and not registration counts.** JONAPWD applied the global 15% disability benchmark to population projections and then split the result by type. Treat them as JONAPWD's estimates, not as measured prevalence: they carry no sampling error that could be stated, and their state pattern follows population (`docs/verification.md` D17: r = 0.998 with NBS 2023 state population). The site shows them with this caveat.
 
 ## Source
 
-- Publication: JONAPWD, *2025 Assumptive Disability Disaggregated Data*. © JONAPWD. All rights reserved.
+- Publication: Joint National Association of Persons with Disabilities (2025), *2025 Assumptive Disability Disaggregated Data* (`JONAPWD2025` in `docs/references.bib`).
+- **Licence: all rights reserved.** No open licence was found (the publisher's web page footer reads "© 2021 JONAPWD. All rights reserved.", `docs/verification.md` D6). The figures are cited with attribution; the PDF is not redistributed.
 - PDF: https://jonapwdng.org/wp-content/uploads/2026/03/2025-Assumptive-Disability-Disaggregated-Data-2.pdf
 - Publisher page: https://jonapwdng.org/10865-2/
 - PDF SHA-256: `c861f33cdfd8ed79e83598acb853dc2295667b9d169cd511e4beb1a54d638732` (50 pages)

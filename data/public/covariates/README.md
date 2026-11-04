@@ -34,7 +34,7 @@ Built on 2026-10-28 by `uv run python -I -m curbcut_ingest.covariates` (`package
 - **Citation:** Bondarenko M., Kerr D., Sorichetta A., and Tatem, A.J. 2020. Estimates of total number of people per grid square, adjusted to match the corresponding UNPD 2020 estimates and broken down by gender and age groupings, produced using Ecopia.AI and Maxar Technologies building footprints. WorldPop, University of Southampton, UK. doi:10.5258/SOTON/WP00699
 - WorldPop publishes no admin-1 table for this release, so the script sums each raster over the committed geoBoundaries ADM1 polygons (`data/public/geoboundaries/`). A cell belongs to the polygon containing its centre. Numerator: bands 60, 65, 70, 75 and 80 (80+), both sexes. Denominator: all 18 bands, both sexes.
 - Checks: the 36 rasters sum to 206,139,587 (the UN 2020 total the product is adjusted to); 0.018% of it falls outside the simplified polygons and is dropped. The national share aged 60+ is 4.95%. State values range from 2.4% (FCT) to 7.1% (Enugu).
-- The age structure is modelled (method of Pezzulo et al. 2017, Sci Data 4:170089, per the hub page), with country totals adjusted to UN WPP 2019; it is not a state census count.
+- The age structure is modelled (method of Pezzulo et al., 2017, per the hub page), with country totals adjusted to UN WPP 2019; it is not a state census count.
 
 ### C2: urban share (D51)
 
@@ -55,7 +55,7 @@ Built on 2026-10-28 by `uv run python -I -m curbcut_ingest.covariates` (`package
 ### C5: population density (D54)
 
 - Population: NBS Demographic Bulletin 2023, Annex 3, 2023 projection (seed `state_facts.population_2023`, D14).
-- Area: the committed geoBoundaries ADM1 polygons (simplified file, D11; CC BY 4.0; Runfola et al. 2020, "geoBoundaries: A global database of political administrative boundaries", PLoS ONE 15(4): e0231866; boundaries from GRID3, 2022; attribution in `data/public/geoboundaries/README.md`) reprojected to EPSG:6933 (equal area) with GDAL, then the planar area of each polygon. The 37 areas sum to 912,729 km². Areas come from the simplified boundaries, so each is approximate; no official state-area table was found.
+- Area: the committed geoBoundaries ADM1 polygons (simplified file, D11; CC BY 4.0; Runfola et al., 2020; boundaries from GRID3, 2022; attribution in `data/public/geoboundaries/README.md`) reprojected to EPSG:6933 (equal area) with GDAL, then the planar area of each polygon. The 37 areas sum to 912,729 km². Areas come from the simplified boundaries, so each is approximate; no official state-area table was found.
 - Lagos is the densest state (ln density 8.20, about 3,640 people per km²) and Taraba the least dense (4.14).
 
 ### C4: literacy of women 15–49 (D53)
@@ -77,3 +77,7 @@ Built on 2026-10-28 by `uv run python -I -m curbcut_ingest.covariates` (`package
 ## Dependency
 
 The raster work uses `rasterio` 1.5.2 (BSD-3-Clause, wheels bundle GDAL), added to `packages/ingest` (`docs/verification.md` D55). Polygon areas use rasterio's GDAL reprojection and a plain shoelace sum, so no `shapely` or `pyproj` is needed.
+
+## References
+
+Keys in `docs/references.bib`: Bondarenko et al. (2020) `Bondarenko2020WorldPop`; Pezzulo et al. (2017) `Pezzulo2017`; Schiavina et al. (2023) `Schiavina2023SMOD`, `Schiavina2023POP`; European Commission JRC (2023) `GHSL2023DataPackage`; National Bureau of Statistics (2022) `NBS2022MPI`; National Bureau of Statistics and UNICEF (2022) `MICS2021`; National Bureau of Statistics (2023) `NBS2023Demographic`; Runfola et al. (2020) `Runfola2020`. The model these covariates were built for: Fay and Herriot (1979) `FayHerriot1979`.

@@ -6,7 +6,7 @@
 - Zip SHA-256: `99ac8a6b09edfeecc8a90526b69d0c95882a52cacce8b4446d39731ed8d0004d`
 - CSV SHA-256 as published (CRLF): `707f4a48ff045431cfe9da8e770dcbdfea4d9122441d4cad596a921d896a1ebc`; as committed (LF): `66f4e8a26de9dc5d53cc626e04b0f7d86bba28e735e9e45126ec46bd9d8f36c6`
 - **Licence: CC BY 4.0.** The release README says the data "may be redistributed following the terms of a Creative Commons Attribution 4.0 International (CC BY 4.0) license".
-- **Attribution:** Nnanatu C.C., Gadiaga A., Abbott T.J., Chamberlain H., Lazar A.N., Tatem A.J. (2025). Bottom-up gridded population estimates for Nigeria, version 3.0. WorldPop, University of Southampton. https://dx.doi.org/10.5258/SOTON/WP00782
+- **Attribution:** Nnanatu C.C., Gadiaga A., Abbott T.J., Chamberlain H., Lazar A.N., Tatem A.J. (2025). Bottom-up gridded population estimates for Nigeria, version 3.0. WorldPop, University of Southampton. https://dx.doi.org/10.5258/SOTON/WP00782 (wording from the release README; the DOI's DataCite record titles it "Modelled gridded population estimates for Nigeria 2025 (version 3.0)"; `Nnanatu2025WorldPop` in `docs/references.bib`)
 
 State names are as WorldPop prints them ("Cross-River", "Federal Capital", "plateau"); the warehouse matches them through the alias seed (`stg_worldpop__state_population`).
 
