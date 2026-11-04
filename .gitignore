@@ -38,6 +38,7 @@ site/states/
 site/public/share/
 # The poverty page (build_poverty_page.py) and the brief's PDF (make-brief-pdf.mjs)
 site/poverty.html
+site/data-dictionary.html
 site/public/downloads/
 site/test-results/
 site/.lighthouseci/

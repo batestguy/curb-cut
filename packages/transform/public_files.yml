@@ -1,0 +1,318 @@
+# The public data files the site serves from site/public/data/, for the data dictionary
+# (scripts/build_data_dictionary.py writes site/data-dictionary.html from this and the marts).
+#
+# Column meanings live with the dbt marts (models/marts/_marts.yml), so they are written once.
+# Here: which mart feeds which file (`marts`: a path prefix in the file -> the mart whose
+# column names follow it), and descriptions of the JSON fields that no mart column covers
+# (`fields`: path -> description, or {description, unit}). JSON paths: `a.b` is key b inside
+# a, `[]` is every item of a list, `{name}` stands for every key of an object keyed by name
+# (`maps` lists those objects). Lists of plain values are described once, at the list.
+# `made_from` (HTML) replaces the list of marts on the page; `link: false` leaves the file
+# unlinked (JONAPWD: cited, never offered as a download). The build fails if a field in a
+# file has no description here or in its mart, or if a description here names a field the
+# file does not have.
+#
+# The file list must match export_marts.py (EXPORTS, QUERIES and its JSON documents); a test
+# checks it.
+
+files:
+  - file: dhs2024_state_prevalence.parquet
+    title: Disability by state, DHS 2024
+    about: >-
+      Curb Cut's survey estimates for every state from the Nigeria DHS 2024: DISABILITY3 and
+      each of the six activities, for adults 18+ and children 5-17, both sexes and each sex.
+      One row per state, measure, age group and sex. No extra breakdown (urban/rural and
+      wealth are on the state pages).
+    marts:
+      "": mart_prevalence_state
+
+  - file: dhs2024_national_zone.parquet
+    title: Disability in Nigeria and its zones, DHS 2024
+    about: >-
+      The same estimates for Nigeria as a whole and for each of the six geopolitical zones,
+      including (nationally) the share at each of the four levels of difficulty.
+    marts:
+      "": mart_prevalence_national_zone
+
+  - file: prevalence_comparison.parquet
+    title: Assumed and measured figures compared
+    about: >-
+      The main page's comparison: JONAPWD's assumed 15%, WHO's global 16%, the NDHS 2024
+      report's figures for ages 15+, and Curb Cut's DHS 2024 estimate for adults 18+. Values
+      are percentages, not proportions.
+    marts:
+      "": mart_prevalence_comparison
+
+  - file: spatial_state.parquet
+    title: Spatial results by state
+    about: >-
+      Exploratory and descriptive spatial results for each state, from the DHS 2024 direct
+      estimates: the local Moran's I for DISABILITY3 18+, the profile cluster and GRID3 health
+      facilities.
+    marts:
+      "": mart_spatial_state
+
+  - file: spatial_moran.parquet
+    title: Global Moran's I by measure
+    about: >-
+      Whether states with similar estimates tend to be neighbours, one test per measure,
+      with how many state estimates are imprecise.
+    marts:
+      "": mart_spatial_moran
+
+  - file: jonapwd_state_by_type.parquet
+    title: JONAPWD's assumed figures by state and type
+    about: >-
+      JONAPWD's 2025 figures, as published: an assumption (15% of a population projection,
+      split by type), not a count. The site cites them; it does not offer them as a download.
+    marts:
+      "": mart_jonapwd_state_by_type
+    link: false
+
+  - file: jonapwd_national_by_type.parquet
+    title: JONAPWD's assumed figures by type, all states
+    about: >-
+      JONAPWD's 2025 figures summed over the 37 states, by type. An assumption, not a count;
+      cited, not offered as a download.
+    marts:
+      "": mart_jonapwd_national_by_type
+    link: false
+
+  - file: states.json
+    title: The 37 states
+    about: >-
+      One object per state, ordered by name: the state card's facts, JONAPWD's assumed
+      total, and the DHS 2024 headline (DISABILITY3, adults 18+, both sexes).
+    marts:
+      "[].dhs2024.": mart_prevalence_state
+      "[].": mart_state_profile
+    fields:
+      "[]": One object per state (36 states and the Federal Capital Territory), by name.
+      "[].dhs2024": >-
+        The state's DHS 2024 headline cell: DISABILITY3, adults 18+, both sexes. Null where
+        the state has no published headline (suppressed or no cell).
+
+  - file: prevalence.json
+    title: The national headline and the comparison
+    about: >-
+      The main page's headline figure for Nigeria (DHS 2024 DISABILITY3, adults 18+, both
+      sexes) and the comparison rows.
+    marts:
+      "national.": mart_prevalence_national_zone
+      "comparison[].": mart_prevalence_comparison
+    fields:
+      measure: The headline's measure, "disability3".
+      age_group:
+        description: The headline's age group, "18+".
+        unit: years of age
+      source: Citation of the headline figure.
+      national: The national headline cell (DHS 2024, DISABILITY3, adults 18+, both sexes).
+      comparison: The comparison rows, in the order the main page shows them.
+      "comparison[]": One figure in the comparison.
+
+  - file: spatial.json
+    title: Spatial results in words
+    about: >-
+      The main page's spatial section: each result with the plain-English sentence the page
+      shows verbatim (from data/public/spatial/summary.json), cluster members named, and the
+      Moran table as the page renders it.
+    sources_from: [mart_spatial_state]
+    made_from: >-
+      <code>data/public/spatial/summary.json</code>, with names and labels from the
+      warehouse's <code>dim_states</code> and <code>mart_spatial_moran</code>
+    maps:
+      lisa.classes: lisa_class
+    fields:
+      note: Why every result uses the direct state estimates and none uses JONAPWD.
+      moran: Global Moran's I, one entry per measure tested.
+      "moran[]": One measure's test.
+      "moran[].measure": The DHS 2024 measure tested (disability3 or a domain at "a lot of difficulty" or worse).
+      "moran[].age_group":
+        description: Age group, "18+" or "5-17".
+        unit: years of age
+      "moran[].role": The test's role, "primary" (DISABILITY3 18+), "domain" or "secondary" (DISABILITY3 5-17).
+      "moran[].moran_i":
+        description: Global Moran's I of the 37 state estimates.
+        unit: index (no unit)
+      "moran[].p_perm":
+        description: One-sided permutation p-value (positive clustering only).
+        unit: probability (0 to 1)
+      "moran[].p_bh":
+        description: p_perm adjusted with Benjamini-Hochberg across the measures tested.
+        unit: probability (0 to 1)
+      "moran[].n_imprecise":
+        description: State estimates not flagged reliable, or equal to 0.
+        unit: states
+      "moran[].label": The measure in words, as the page shows it.
+      "moran[].sentence": The result in one plain-English sentence, shown on the page as written.
+      moran_table: The Moran table as the page draws it (and as its download is written).
+      moran_table.caption: The table's caption.
+      moran_table.columns: The table's columns, in order.
+      "moran_table.columns[]": One column.
+      "moran_table.columns[].label": The column heading.
+      "moran_table.columns[].type": How the page formats the column, "text", "number" or "integer".
+      "moran_table.columns[].decimals": Decimal places shown, for number columns.
+      moran_table.rows: The table's rows.
+      "moran_table.rows[]": One row, one value per column (unrounded numbers).
+      lisa: The exploratory local test (LISA) for DISABILITY3 18+.
+      lisa.classes: How many states fall in each LISA class.
+      "lisa.classes.{lisa_class}":
+        description: >-
+          States in the class (High-High, Low-Low, High-Low, Low-High or Not significant,
+          at Benjamini-Hochberg q below 0.05).
+        unit: states
+      lisa.significant_states: Names of the states with a significant local result (may be empty).
+      lisa.sentence: The result in one plain-English sentence.
+      clusters: The descriptive profile clusters.
+      clusters.k:
+        description: Number of clusters, chosen by the highest mean silhouette of k = 2 to 6.
+        unit: clusters
+      clusters.groups: One entry per cluster.
+      "clusters.groups[]": One cluster.
+      "clusters.groups[].cluster": The cluster's number (a label, not an order).
+      "clusters.groups[].n_states":
+        description: States in the cluster.
+        unit: states
+      "clusters.groups[].states": The states in the cluster, by name.
+      clusters.sentence: The result in plain English.
+      services: Health facilities per 100,000 people against DISABILITY3 18+ prevalence, by state (ecological, descriptive).
+      services.spearman_rho:
+        description: Spearman rank correlation across the 37 states.
+        unit: correlation (-1 to 1)
+      services.p_perm_two_sided:
+        description: Two-sided permutation p-value of the correlation.
+        unit: probability (0 to 1)
+      services.caveats: Limits of the comparison, each in one sentence.
+      services.sentence: The result in plain English.
+
+  - file: poverty.json
+    title: Disability and poverty (P5)
+    about: >-
+      The pre-registered poverty analysis for the poverty page and the brief: every estimate
+      by its id, every scalar result by analysis and id, and a few values derived from them.
+      Each estimate is an adjusted association, not a causal effect.
+    marts:
+      "estimates.{estimate_id}.": mart_p5_estimates
+      "summary.{analysis}.{item_id}.": mart_p5_summary
+    maps:
+      estimates: estimate_id
+      summary: analysis
+      summary.{analysis}: item_id
+    fields:
+      note: What the results are and are not (adjusted associations; MPI's own disability questions).
+      estimates: Every published estimate, keyed by its estimate_id (e.g. "primary").
+      "estimates.{estimate_id}": One estimate.
+      summary: Every scalar result, keyed by analysis ("mpi" or "ghs").
+      "summary.{analysis}": One analysis's results, keyed by item_id.
+      "summary.{analysis}.{item_id}": One result.
+      derived: Values computed from the estimates and results above; the page and the brief do no other arithmetic.
+      derived.verdict: >-
+        The pre-registered wording rule (section 4) applied to the primary estimate:
+        "no meaningful difference" only if the whole 95% interval lies within 2 percentage
+        points of 0; otherwise "higher" or "lower" if the interval excludes 0, else
+        "inconclusive".
+      derived.primary_implied:
+        description: The primary estimate's mu0 plus the estimate, the implied poverty rate of exposed households.
+        unit: proportion (0 to 1)
+      derived.overlap_implied:
+        description: The same for the overlap-population estimate.
+        unit: proportion (0 to 1)
+      derived.share_inside_overlap:
+        description: 1 minus the share of people outside the overlap population (summary.mpi.outside_weighted_share).
+        unit: proportion (0 to 1)
+      derived.rr_ceiling:
+        description: 1 / mu0 of the primary estimate, the largest risk ratio the comparison rate allows.
+        unit: ratio
+      derived.relative_increase:
+        description: The risk ratio (summary.mpi.evalue_rr) minus 1, the difference as a share of the comparison rate.
+        unit: proportion
+      derived.placebo_as_extreme:
+        description: Placebo estimates at least as far from 0 as the real one.
+        unit: placebo estimates
+      derived.robustness: Range of the robustness estimates.
+      derived.robustness.min:
+        description: Smallest published robustness estimate.
+        unit: as in the estimates' scale (proportion)
+      derived.robustness.max:
+        description: Largest published robustness estimate.
+        unit: as in the estimates' scale (proportion)
+      derived.leave_one_zone_out: Range of the leave-one-zone-out estimates.
+      derived.leave_one_zone_out.min:
+        description: Smallest published leave-one-zone-out estimate.
+        unit: as in the estimates' scale (proportion)
+      derived.leave_one_zone_out.max:
+        description: Largest published leave-one-zone-out estimate.
+        unit: as in the estimates' scale (proportion)
+      derived.smallest_group:
+        description: The smallest group (exposed or comparison) behind any published estimate.
+        unit: households or people
+      derived.benchmarks: The widest range the three observed-covariate benchmarks (head's education, place, sector) move the primary estimate to.
+      derived.benchmarks.min:
+        description: Lowest of the benchmarks' lower bounds.
+        unit: as in the estimates' scale (proportion)
+      derived.benchmarks.max:
+        description: Highest of the benchmarks' upper bounds.
+        unit: as in the estimates' scale (proportion)
+
+# The per-table downloads (scripts/downloads.py): one CSV and one JSON file per data table.
+# Their JSON keys are checked against what downloads.json_bytes writes.
+downloads:
+  fields:
+    table: The table's id, unique on its page (also the file name).
+    name: The table's short name, as in the download links.
+    caption: The table's caption on the page.
+    page: Address of the page that shows the table.
+    survey: The survey (or source) behind the figures.
+    year: The survey's year or years.
+    sources: Citations of the sources, as a list.
+    terms: The reuse terms. No licence is granted for these files; reuse is subject to the source terms.
+    values: How the numbers relate to the page (unrounded, and how words and floors are written).
+    columns: The columns, in order.
+    "columns[]": One column.
+    "columns[].label": The column heading, as in the CSV's header row (with the unit added where the heading lacks it).
+    "columns[].type": '"text", "number" or "integer".'
+    "columns[].decimals": Decimal places the page shows (number and integer columns).
+    "columns[].unit": The unit, where the column has one (e.g. "%").
+    rows: The rows, one value per column; null where the page shows nothing.
+    "rows[]": One row.
+
+# The optional API (packages/api, docs/api.md). The site never calls it.
+api:
+  url: https://curb-cut-api.onrender.com
+  docs: https://curb-cut-api.onrender.com/docs
+  endpoints:
+    - path: /status
+      what: Whether the data are loaded, from where, and each file's row count and SHA-256.
+      files: [dhs2024_state_prevalence.parquet, dhs2024_national_zone.parquet, prevalence_comparison.parquet, states.json, poverty.json]
+    - path: /states
+      what: The 37 states with their facts and DHS 2024 headline.
+      files: [states.json]
+    - path: /states/{state}
+      what: One state, by the site's slug or its ISO 3166-2 code.
+      files: [states.json]
+    - path: /prevalence
+      what: DHS 2024 cells by state, zone or nation (the headline by default).
+      files: [dhs2024_state_prevalence.parquet, dhs2024_national_zone.parquet]
+    - path: /compare
+      what: The comparison rows, in the site's order.
+      files: [prevalence_comparison.parquet]
+    - path: /poverty
+      what: The pre-registered poverty results (note, estimates, summary).
+      files: [poverty.json]
+
+# Files the site serves that are not data tables: described, not listed column by column.
+other_files:
+  - path: data/charts/
+    about: >-
+      Chart documents made by the disability-access-charts library at build time: the
+      Plotly figure, the alt-text checked against the data, the data table and the
+      accessibility audit result. Each chart's numbers are the same as in the files above.
+  - path: data/nigeria-states.json
+    about: >-
+      The simplified state outlines for the locator map, from geoBoundaries (CC BY 4.0).
+  - path: data/downloads/
+    about: >-
+      The per-table CSV and JSON downloads (see "Table downloads" above), with
+      data/downloads/main/index.json listing the main page's.
+  - path: downloads/p5-poverty-brief.pdf
+    about: The two-page policy brief on disability and poverty, printed from the brief's HTML.

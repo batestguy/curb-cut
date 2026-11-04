@@ -966,3 +966,26 @@ h3[tabindex="-1"]:focus {
   stroke: var(--dot-text);
   stroke-width: 2;
 }
+
+/* The data dictionary (site/data-dictionary.html, built by packages/transform/scripts/
+   build_data_dictionary.py): file and column names wrap only where the page puts a <wbr>
+   (after "_", "." and brackets), never inside a word. */
+.dictionary-page code {
+  overflow-wrap: anywhere;
+}
+
+.dictionary-page h2,
+.dictionary-page th code {
+  overflow-wrap: normal;
+  hyphens: none;
+}
+
+@media (min-width: 40rem) {
+  .dictionary-page th[scope="row"] {
+    min-width: 12rem;
+  }
+}
+
+.dictionary-page .file-facts {
+  color: var(--muted);
+}

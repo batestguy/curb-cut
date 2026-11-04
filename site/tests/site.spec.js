@@ -383,7 +383,7 @@ test('a chart failure is announced and the chart keeps an accessible name', asyn
 });
 
 // P6 item 1: every page offers a way to report a problem without a GitHub account.
-const REPORT_PAGES = ['./', 'methodology.html', 'poverty.html', 'states/', 'states/edo.html'];
+const REPORT_PAGES = ['./', 'methodology.html', 'poverty.html', 'data-dictionary.html', 'states/', 'states/edo.html'];
 const REPORT_EMAILS = ['batesthommie@gmail.com', 'jzbannister@atbu.edu.ng'];
 for (const path of REPORT_PAGES) {
   test(`${path}: report a problem by email (main and backup) and on GitHub, from the footer`, async ({
