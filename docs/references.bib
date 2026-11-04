@@ -4,8 +4,9 @@
 % 2026-11-04 (Crossref API for Crossref DOIs; doi.org redirect plus the DataCite API for
 % DataCite DOIs). Every URL without a DOI returned HTTP 200 on 2026-11-04 unless its
 % note says otherwise. Entries that could not be fully checked carry
-% note = {TODO(verify) ...}; they are listed in docs/publication-readiness.part-a.md.
-% Library-side entries (palettes, colour difference, WCAG) are kept by the chart library.
+% note = {TODO(verify) ...}; they are listed in docs/publication-readiness.md, section 7.
+% Library-side entries (colour, WCAG, claim checking, software venues) were merged in from the
+% chart-library pass and are in the last block; they were checked the same way on 2026-11-04.
 
 % ---------------------------------------------------------------------------------------
 % Disability measurement
@@ -691,4 +692,169 @@
   address      = {Vienna, Austria},
   note         = {Version 4.5.2},
   url          = {https://www.R-project.org/}
+}
+
+% ---------------------------------------------------------------------------------------
+% Chart library (disability-access-charts)
+% ---------------------------------------------------------------------------------------
+
+@misc{W3C2023WCAG22,
+  author       = {{World Wide Web Consortium}},
+  title        = {Web Content Accessibility Guidelines ({WCAG}) 2.2},
+  year         = {2023},
+  howpublished = {W3C Recommendation},
+  url          = {https://www.w3.org/TR/WCAG22/},
+  urldate      = {2026-11-04}
+}
+
+@article{Machado2009,
+  author  = {Machado, Gustavo M. and Oliveira, Manuel M. and Fernandes, Leandro A. F.},
+  title   = {A Physiologically-based Model for Simulation of Color Vision Deficiency},
+  journal = {IEEE Transactions on Visualization and Computer Graphics},
+  year    = {2009},
+  volume  = {15},
+  number  = {6},
+  pages   = {1291--1298},
+  doi     = {10.1109/TVCG.2009.113}
+}
+
+@article{Luo2001CIEDE2000,
+  author  = {Luo, M. Ronnier and Cui, Guihua and Rigg, B.},
+  title   = {The development of the {CIE} 2000 colour-difference formula: {CIEDE2000}},
+  journal = {Color Research and Application},
+  year    = {2001},
+  volume  = {26},
+  number  = {5},
+  pages   = {340--350},
+  doi     = {10.1002/col.1049}
+}
+
+@article{Sharma2005CIEDE2000,
+  author  = {Sharma, Gaurav and Wu, Wencheng and Dalal, Edul N.},
+  title   = {The {CIEDE2000} color-difference formula: Implementation notes, supplementary test data, and mathematical observations},
+  journal = {Color Research and Application},
+  year    = {2005},
+  volume  = {30},
+  number  = {1},
+  pages   = {21--30},
+  doi     = {10.1002/col.20070},
+  note    = {Crossref lists online publication in 2004; the journal issue is 2005}
+}
+
+@article{HarrowerBrewer2003,
+  author  = {Harrower, Mark and Brewer, Cynthia A.},
+  title   = {{ColorBrewer.org}: An Online Tool for Selecting Colour Schemes for Maps},
+  journal = {The Cartographic Journal},
+  year    = {2003},
+  volume  = {40},
+  number  = {1},
+  pages   = {27--37},
+  doi     = {10.1179/000870403235002042}
+}
+
+@article{BenjaminiYekutieli2001,
+  author  = {Benjamini, Yoav and Yekutieli, Daniel},
+  title   = {The control of the false discovery rate in multiple testing under dependency},
+  journal = {The Annals of Statistics},
+  year    = {2001},
+  volume  = {29},
+  number  = {4},
+  pages   = {1165--1188},
+  doi     = {10.1214/aos/1013699998}
+}
+
+@article{Jo2019AggChecker,
+  author  = {Jo, Saehan and Trummer, Immanuel and Yu, Weicheng and Wang, Xuezhi and Yu, Cong and Liu, Daniel and Mehta, Niyati},
+  title   = {{AggChecker}: A Fact-Checking System for Text Summaries of Relational Data Sets},
+  journal = {Proceedings of the VLDB Endowment},
+  year    = {2019},
+  volume  = {12},
+  number  = {12},
+  pages   = {1938--1941},
+  doi     = {10.14778/3352063.3352104},
+  note    = {Demonstration paper. The full method paper is Jo2019Verifying.}
+}
+
+@inproceedings{Jo2019Verifying,
+  author    = {Jo, Saehan and Trummer, Immanuel and Yu, Weicheng and Wang, Xuezhi and Yu, Cong and Liu, Daniel and Mehta, Niyati},
+  title     = {Verifying Text Summaries of Relational Data Sets},
+  booktitle = {Proceedings of the 2019 International Conference on Management of Data (SIGMOD '19)},
+  year      = {2019},
+  pages     = {299--316},
+  doi       = {10.1145/3299869.3300074}
+}
+
+@inproceedings{Seo2024MAIDR,
+  author    = {Seo, JooYoung and Xia, Yilin and Lee, Bongshin and McCurry, Sean and Yam, Yu Jun},
+  title     = {{MAIDR}: Making Statistical Visualizations Accessible with Multimodal Data Representation},
+  booktitle = {Proceedings of the CHI Conference on Human Factors in Computing Systems (CHI '24)},
+  year      = {2024},
+  pages     = {1--22},
+  doi       = {10.1145/3613904.3642730}
+}
+
+@inproceedings{Sharif2023,
+  author    = {Sharif, Ather and Zhong, Ruican and Wang, Yadi},
+  title     = {Conveying Uncertainty in Data Visualizations to Screen-Reader Users Through Non-Visual Means},
+  booktitle = {Proceedings of the 25th International ACM SIGACCESS Conference on Computers and Accessibility (ASSETS '23)},
+  year      = {2023},
+  pages     = {1--6},
+  doi       = {10.1145/3597638.3614502}
+}
+
+@article{Smith2018JOSS,
+  author  = {Smith, Arfon M. and Niemeyer, Kyle E. and Katz, Daniel S. and Barba, Lorena A. and Githinji, George and Gymrek, Melissa and others},
+  title   = {Journal of Open Source Software ({JOSS}): design and first-year review},
+  journal = {PeerJ Computer Science},
+  year    = {2018},
+  volume  = {4},
+  pages   = {e147},
+  doi     = {10.7717/peerj-cs.147}
+}
+
+@misc{JOSS2026Review,
+  author       = {{Journal of Open Source Software}},
+  title        = {Review criteria},
+  howpublished = {JOSS documentation},
+  url          = {https://joss.readthedocs.io/en/latest/review_criteria.html},
+  urldate      = {2026-11-04}
+}
+
+@misc{JOSS2026Submitting,
+  author       = {{Journal of Open Source Software}},
+  title        = {Submitting a paper to {JOSS}},
+  howpublished = {JOSS documentation},
+  url          = {https://joss.readthedocs.io/en/latest/submitting.html},
+  urldate      = {2026-11-04}
+}
+
+@misc{Highcharts2026A11y,
+  author       = {{Highsoft}},
+  title        = {Accessibility module},
+  howpublished = {Highcharts documentation},
+  url          = {https://www.highcharts.com/docs/accessibility/accessibility-module},
+  urldate      = {2026-11-04}
+}
+
+@misc{MAIDR2026PyPI,
+  author       = {Seo, JooYoung and Venkatesh, Saairam},
+  title        = {maidr (Python package), version 1.28.1},
+  howpublished = {PyPI},
+  url          = {https://pypi.org/project/maidr/},
+  urldate      = {2026-11-04}
+}
+
+@misc{A11yviz2026PyPI,
+  title        = {a11yviz (Python package), version 0.1.8},
+  howpublished = {PyPI},
+  url          = {https://pypi.org/project/a11yviz/},
+  urldate      = {2026-10-29},
+  note         = {Version 0.1.9 was current on 2026-11-04; the README description was checked against 0.1.8. Author field not checked: TODO(verify).}
+}
+
+@misc{Machado2009Web,
+  author       = {Machado, Gustavo M. and Oliveira, Manuel M. and Fernandes, Leandro A. F.},
+  title        = {A Physiologically-based Model for Simulation of Color Vision Deficiency: supplementary material (simulation matrices)},
+  url          = {https://www.inf.ufrgs.br/~oliveira/pubs_files/CVD_Simulation/CVD_Simulation.html},
+  urldate      = {2026-11-04}
 }

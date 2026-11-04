@@ -4,6 +4,9 @@ All notable changes to this project are documented here. Entries follow [Convent
 
 ## P6 — in progress (map redesign done 2026-11-01)
 
+### Documentation
+- docs: academic polish of the technical write-ups (P6 detour, 2026-11-04): methods docs, data READMEs, `README.md` and the `disability-access-charts` docs brought to journal standard; one bibliography (`docs/references.bib`); `CITATION.cff`; gap report `docs/publication-readiness.md` for three candidate papers. No numbers changed except where a doc disagreed with its committed source file (listed in the PR).
+
 ### Added
 - feat(charts): `disability-access-charts` 0.3.0, published to PyPI on 2026-11-01 (tag `charts-v0.3.0`):
   - `scheme=` on `choropleth()` and `MAP_SCHEMES`. **Changed default:** `"ylgnbu"`, a colour-blind-safe yellow→green→blue scale (ColorBrewer YlGnBu 5 in the light theme; a matching dark palette, brighter for higher values) with larger lightness steps; `MAP_THEMES` is now its themes. `scheme="green"` gives the 0.2 look. **Custom themes too:** `choropleth(..., themes=...)` without `scheme` now gets the 0.3 pattern style (ink-weight order with an ink per class, no single `patterns.ink`) and the new audit checks, so a custom set of fills can fail the new `colour-vision` error (or the casing rule, if a theme has a halo); pass `scheme="green"` with your `themes=` to keep the 0.2 pattern order and one ink per theme.;
