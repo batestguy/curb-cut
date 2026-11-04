@@ -1,0 +1,694 @@
+% Curb Cut: references cited across the methods docs and data READMEs.
+%
+% Keys are surname + year (e.g. FayHerriot1979). Every DOI below was resolved on
+% 2026-11-04 (Crossref API for Crossref DOIs; doi.org redirect plus the DataCite API for
+% DataCite DOIs). Every URL without a DOI returned HTTP 200 on 2026-11-04 unless its
+% note says otherwise. Entries that could not be fully checked carry
+% note = {TODO(verify) ...}; they are listed in docs/publication-readiness.part-a.md.
+% Library-side entries (palettes, colour difference, WCAG) are kept by the chart library.
+
+% ---------------------------------------------------------------------------------------
+% Disability measurement
+% ---------------------------------------------------------------------------------------
+
+@techreport{WG2020Doc7A,
+  author      = {{Washington Group on Disability Statistics}},
+  title       = {Analytic Guidelines: Creating Disability Identifiers Using the
+                 {Washington Group Short Set on Functioning -- Enhanced (WG-SS Enhanced)}
+                 {SPSS} Syntax},
+  institution = {Washington Group on Disability Statistics},
+  type        = {WG Document},
+  number      = {7A},
+  year        = {2020},
+  month       = may,
+  url         = {https://www.washingtongroup-disability.com/fileadmin/uploads/wg/Documents/WG_Document__7A_-_Analytic_Guidelines_for_the_WG-SS_Enhanced__SPSS_.pdf},
+  note        = {Defines the DISABILITY3 cut-off; see docs/verification.md D23}
+}
+
+@misc{WGSS,
+  author       = {{Washington Group on Disability Statistics}},
+  title        = {The {Washington Group Short Set on Functioning (WG-SS)}},
+  howpublished = {\url{https://www.washingtongroup-disability.com/question-sets/wg-short-set-on-functioning-wg-ss/}},
+  note         = {Accessed 2026-11-04}
+}
+
+@article{Madans2011,
+  author  = {Madans, Jennifer H. and Loeb, Mitchell E. and Altman, Barbara M.},
+  title   = {Measuring disability and monitoring the {UN Convention on the Rights of
+             Persons with Disabilities}: the work of the {Washington Group on Disability
+             Statistics}},
+  journal = {BMC Public Health},
+  volume  = {11},
+  number  = {Suppl 4},
+  pages   = {S4},
+  year    = {2011},
+  doi     = {10.1186/1471-2458-11-S4-S4}
+}
+
+% ---------------------------------------------------------------------------------------
+% Data sources
+% ---------------------------------------------------------------------------------------
+
+@techreport{NDHS2024,
+  author      = {{Federal Ministry of Health and Social Welfare} and
+                 {National Population Commission} and {ICF}},
+  title       = {{Nigeria Demographic and Health Survey 2024}: Final Report},
+  institution = {FMoHSW, NPC and ICF},
+  address     = {Abuja, Nigeria, and Rockville, Maryland, USA},
+  type        = {DHS Final Report},
+  number      = {FR395},
+  year        = {2025},
+  url         = {https://dhsprogram.com/pubs/pdf/FR395/FR395.pdf},
+  note        = {TODO(verify): author list and title taken from the DHS Program listing via a
+                 search snippet (the publication page returned 403 to a scripted fetch on
+                 2026-11-04); fieldwork December 2023 to May 2024. Chapter 14, Tables 14.1,
+                 14.2.1, 14.2.2}
+}
+
+@misc{NDHS2024Data,
+  author       = {{National Population Commission (NPC) [Nigeria]} and {ICF}},
+  title        = {{Nigeria Demographic and Health Survey 2024} [dataset], {NG2024DHS},
+                  Recode 8 ({NGPR8BDT})},
+  howpublished = {The DHS Program, \url{https://dhsprogram.com/data/dataset/Nigeria_Standard-DHS_2024.cfm}},
+  year         = {2025},
+  note         = {Released 2025-10-20. Access by registered project request; used only for
+                  the registered project "Curb Cut: disability prevalence and poverty in
+                  Nigeria"}
+}
+
+@techreport{NBS2022MPI,
+  author      = {{National Bureau of Statistics}},
+  title       = {{Nigeria Multidimensional Poverty Index (2022)}},
+  institution = {National Bureau of Statistics},
+  address     = {Abuja, Nigeria},
+  year        = {2022},
+  url         = {https://ophi.org.uk/sites/default/files/2024-05/Nigeria_MPI_2022_report.pdf},
+  note        = {Produced with OPHI, UNDP and UNICEF. Cited: Table 2 (weights), Table 7
+                 (poverty by disability in the household), Tables D1--D6. PDF SHA-256
+                 0fcfe917...02111 (docs/verification.md D52, D61, D64)}
+}
+
+@misc{NBS2021MPIData,
+  author       = {{National Bureau of Statistics}},
+  title        = {{Multidimentional Poverty index Survey 2021}, v1.0
+                  ({NGA-NBS-MPI-2021-v1.0})},
+  howpublished = {NBS Microdata Catalogue, entry 71,
+                  \url{https://microdata.nigerianstat.gov.ng/index.php/catalog/71}},
+  year         = {2023},
+  note         = {Required citation as worded by NBS (spelling as given;
+                  docs/verification.md D3). Licensed: aggregated reporting only}
+}
+
+@misc{GHSW4,
+  author       = {{National Bureau of Statistics, Nigeria}},
+  title        = {{General Household Survey, Panel 2018--2019, Wave 4}
+                  ({NGA\_2018\_GHSP-W4\_v03\_M})},
+  howpublished = {World Bank Microdata Library, catalog 3557,
+                  \url{https://microdata.worldbank.org/index.php/catalog/3557}},
+  note         = {Licensed public-use file. TODO(verify): exact citation wording and year
+                  from the catalog's "Citation" tab, plus the download date the terms ask for}
+}
+
+@misc{GHSW5,
+  author       = {{National Bureau of Statistics, Nigeria}},
+  title        = {{General Household Survey, Panel 2023--2024, Wave 5}
+                  ({NGA\_2023\_GHSP-W5\_v02\_M})},
+  howpublished = {World Bank Microdata Library, catalog 6410,
+                  \url{https://microdata.worldbank.org/index.php/catalog/6410}},
+  note         = {Licensed public-use file. TODO(verify): exact citation wording and year
+                  from the catalog's "Citation" tab, plus the download date the terms ask for}
+}
+
+@techreport{MICS2021,
+  author      = {{National Bureau of Statistics} and {UNICEF}},
+  title       = {{Multiple Indicator Cluster Survey 2021}, Survey Findings Report},
+  institution = {National Bureau of Statistics and UNICEF},
+  address     = {Abuja, Nigeria},
+  year        = {2022},
+  month       = aug,
+  url         = {https://www.unicef.org/nigeria/media/6316/file/2021%20MICS%20full%20report%20.pdf},
+  note        = {Table SR.6.1W, printed p. 46 (docs/verification.md D53)}
+}
+
+@techreport{NBS2023Demographic,
+  author      = {{National Bureau of Statistics}},
+  title       = {Demographic Bulletin 2023},
+  institution = {National Bureau of Statistics},
+  address     = {Abuja, Nigeria},
+  year        = {2023},
+  url         = {https://microdata.nigerianstat.gov.ng/index.php/catalog/182},
+  note        = {Datasheet Annex 3 (state x sex projections). TODO(verify): publication
+                 year as printed on the bulletin (catalog entry checked 2026-10-16, D8)}
+}
+
+@techreport{JONAPWD2025,
+  author      = {{Joint National Association of Persons with Disabilities}},
+  title       = {2025 Assumptive Disability Disaggregated Data},
+  institution = {JONAPWD},
+  address     = {Abuja, Nigeria},
+  year        = {2025},
+  url         = {https://jonapwdng.org/10865-2/},
+  note        = {All rights reserved; figures cited, PDF not redistributed. PDF SHA-256
+                 c861f33c...638732 (docs/verification.md D6)}
+}
+
+@misc{Bondarenko2020WorldPop,
+  author       = {Bondarenko, Maksym and Kerr, David and Sorichetta, Alessandro and
+                  Tatem, Andrew J.},
+  title        = {Estimates of total number of people per grid square, adjusted to match
+                  the corresponding {UNPD} 2020 estimates and broken down by gender and age
+                  groupings, produced using {Ecopia.AI} and {Maxar Technologies} building
+                  footprints},
+  howpublished = {WorldPop, University of Southampton},
+  year         = {2020},
+  doi          = {10.5258/SOTON/WP00699},
+  note         = {CC BY 4.0}
+}
+
+@misc{Nnanatu2025WorldPop,
+  author       = {Nnanatu, Chibuzor Christopher and Gadiaga, Assane and Abbott, Thomas J.
+                  and Chamberlain, Heather and Lazar, Attila N. and Tatem, Andrew J.},
+  title        = {Modelled gridded population estimates for {Nigeria} 2025 (version 3.0)},
+  howpublished = {WorldPop, University of Southampton},
+  year         = {2025},
+  doi          = {10.5258/SOTON/WP00782},
+  note         = {Title as registered at DataCite. The release README words it "Bottom-up
+                  gridded population estimates for Nigeria, version 3.0". CC BY 4.0}
+}
+
+@article{Pezzulo2017,
+  author  = {Pezzulo, Carla and Hornby, Graeme M. and Sorichetta, Alessandro and
+             Gaughan, Andrea E. and Linard, Catherine and Bird, Tomas J. and Kerr, David
+             and Lloyd, Christopher T. and Tatem, Andrew J.},
+  title   = {Sub-national mapping of population pyramids and dependency ratios in
+             {Africa} and {Asia}},
+  journal = {Scientific Data},
+  volume  = {4},
+  pages   = {170089},
+  year    = {2017},
+  doi     = {10.1038/sdata.2017.89}
+}
+
+@article{Runfola2020,
+  author  = {Runfola, Daniel and Anderson, Austin and Baier, Heather and Crittenden, Matt
+             and Dowker, Elizabeth and Fuhrig, Sydney and Goodman, Seth and Grimsley, Grace
+             and Layko, Rachel and Melville, Graham and Mulder, Maddy and Oberman, Rachel
+             and Panganiban, Joshua and Peck, Andrew and Seitz, Leigh and Shea, Sylvia and
+             Slevin, Hannah and Youngerman, Rebecca and Hobbs, Lauren},
+  title   = {{geoBoundaries}: A global database of political administrative boundaries},
+  journal = {PLoS ONE},
+  volume  = {15},
+  number  = {4},
+  pages   = {e0231866},
+  year    = {2020},
+  doi     = {10.1371/journal.pone.0231866}
+}
+
+@misc{Schiavina2023SMOD,
+  author       = {Schiavina, Marcello and Melchiorri, Michele and Pesaresi, Martino},
+  title        = {{GHS-SMOD R2023A} -- {GHS} settlement layers, application of the Degree of
+                  Urbanisation methodology (stage {I}) to {GHS-POP R2023A} and
+                  {GHS-BUILT-S R2023A}, multitemporal (1975--2030)},
+  howpublished = {European Commission, Joint Research Centre (JRC) [Dataset]},
+  year         = {2023},
+  doi          = {10.2905/A0DF7A6F-49DE-46EA-9BDE-563437A6E2BA}
+}
+
+@misc{Schiavina2023POP,
+  author       = {Schiavina, Marcello and Freire, Sergio and Carioli, Alessandra and
+                  MacManus, Kytt},
+  title        = {{GHS-POP R2023A} -- {GHS} population grid multitemporal (1975--2030)},
+  howpublished = {European Commission, Joint Research Centre (JRC) [Dataset]},
+  year         = {2023},
+  doi          = {10.2905/2FF68A52-5B5B-4A22-8F40-C41DA8332CFE}
+}
+
+@techreport{GHSL2023DataPackage,
+  author      = {{European Commission, Joint Research Centre}},
+  title       = {{GHSL Data Package 2023}},
+  institution = {Publications Office of the European Union},
+  address     = {Luxembourg},
+  number      = {JRC133256},
+  year        = {2023},
+  doi         = {10.2760/098587},
+  note        = {Terms of use, p. 10 (docs/verification.md D51)}
+}
+
+@misc{GRID3HealthV2,
+  author       = {{Center for International Earth Science Information Network (CIESIN),
+                  Columbia University}},
+  title        = {{GRID3 NGA} -- Health Facilities v2.0},
+  year         = {2024},
+  doi          = {10.7916/kv1n-0743},
+  note         = {CC BY 4.0 (docs/verification.md D57)}
+}
+
+@book{WHO2006Growth,
+  author    = {{WHO Multicentre Growth Reference Study Group}},
+  title     = {{WHO} Child Growth Standards: Length/height-for-age, weight-for-age,
+               weight-for-length, weight-for-height and body mass index-for-age: Methods
+               and development},
+  publisher = {World Health Organization},
+  address   = {Geneva},
+  year      = {2006},
+  url       = {https://www.who.int/tools/child-growth-standards/standards},
+  note      = {TODO(verify): ISBN; the project uses the published LMS "expanded tables"
+               (docs/verification.md D64)}
+}
+
+% ---------------------------------------------------------------------------------------
+% Poverty measurement
+% ---------------------------------------------------------------------------------------
+
+@article{AlkireFoster2011,
+  author  = {Alkire, Sabina and Foster, James},
+  title   = {Counting and multidimensional poverty measurement},
+  journal = {Journal of Public Economics},
+  volume  = {95},
+  number  = {7--8},
+  pages   = {476--487},
+  year    = {2011},
+  doi     = {10.1016/j.jpubeco.2010.11.006}
+}
+
+% ---------------------------------------------------------------------------------------
+% Survey estimation and precision
+% ---------------------------------------------------------------------------------------
+
+@article{Lumley2004,
+  author  = {Lumley, Thomas},
+  title   = {Analysis of Complex Survey Samples},
+  journal = {Journal of Statistical Software},
+  volume  = {9},
+  number  = {8},
+  pages   = {1--19},
+  year    = {2004},
+  doi     = {10.18637/jss.v009.i08}
+}
+
+@manual{RSurvey,
+  author = {Lumley, Thomas},
+  title  = {survey: Analysis of Complex Survey Samples},
+  note   = {R package version 4.5},
+  url    = {https://cran.r-project.org/package=survey}
+}
+
+@article{KornGraubard1998,
+  author  = {Korn, Edward L. and Graubard, Barry I.},
+  title   = {Confidence intervals for proportions with small expected number of positive
+             counts estimated from survey data},
+  journal = {Survey Methodology},
+  volume  = {24},
+  number  = {2},
+  pages   = {193--201},
+  year    = {1998},
+  url     = {https://www150.statcan.gc.ca/n1/en/catalogue/12-001-X19980024356},
+  note    = {TODO(verify): page range (from the R survey documentation, which gives volume
+             23; the Statistics Canada record places it in issue 1998002, i.e. volume 24)}
+}
+
+@article{ClopperPearson1934,
+  author  = {Clopper, C. J. and Pearson, E. S.},
+  title   = {The use of confidence or fiducial limits illustrated in the case of the
+             binomial},
+  journal = {Biometrika},
+  volume  = {26},
+  number  = {4},
+  pages   = {404--413},
+  year    = {1934},
+  doi     = {10.1093/biomet/26.4.404}
+}
+
+@techreport{Parker2017NCHS,
+  author      = {Parker, Jennifer D. and Talih, Makram and Malec, Donald J. and others},
+  title       = {National Center for Health Statistics Data Presentation Standards for
+                 Proportions},
+  institution = {National Center for Health Statistics},
+  type        = {Vital and Health Statistics},
+  number      = {Series 2, No. 175},
+  year        = {2017},
+  month       = aug,
+  url         = {https://www.cdc.gov/nchs/data/series/sr_02/sr02_175.pdf},
+  note        = {Read and hashed on 2026-10-24 (docs/verification.md D42). The URL
+                 returned 403 to a scripted check on 2026-11-04. TODO(verify): the full author list
+                 (D42 records "Parker JD, Talih M, Malec DJ, et al.")}
+}
+
+@book{Kish1965,
+  author    = {Kish, Leslie},
+  title     = {Survey Sampling},
+  publisher = {John Wiley \& Sons},
+  address   = {New York},
+  year      = {1965}
+}
+
+@article{SchenkerGentleman2001,
+  author  = {Schenker, Nathaniel and Gentleman, Jane F.},
+  title   = {On judging the significance of differences by examining the overlap between
+             confidence intervals},
+  journal = {The American Statistician},
+  volume  = {55},
+  number  = {3},
+  pages   = {182--186},
+  year    = {2001},
+  doi     = {10.1198/000313001317097960}
+}
+
+@manual{Svy,
+  title = {svy: survey data analysis in {Python}},
+  note  = {Python package version 0.35.0. TODO(verify): authors and preferred citation},
+  url   = {https://pypi.org/project/svy/}
+}
+
+% ---------------------------------------------------------------------------------------
+% Small-area estimation
+% ---------------------------------------------------------------------------------------
+
+@article{FayHerriot1979,
+  author  = {Fay, Robert E. and Herriot, Roger A.},
+  title   = {Estimates of income for small places: an application of {James-Stein}
+             procedures to census data},
+  journal = {Journal of the American Statistical Association},
+  volume  = {74},
+  number  = {366a},
+  pages   = {269--277},
+  year    = {1979},
+  doi     = {10.1080/01621459.1979.10482505}
+}
+
+@article{MolinaMarhuenda2015,
+  author  = {Molina, Isabel and Marhuenda, Yolanda},
+  title   = {sae: An {R} Package for Small Area Estimation},
+  journal = {The R Journal},
+  volume  = {7},
+  number  = {1},
+  pages   = {81--98},
+  year    = {2015},
+  doi     = {10.32614/RJ-2015-007}
+}
+
+@article{Kreutzmann2019,
+  author  = {Kreutzmann, Ann-Kristin and Pannier, S{\"o}ren and Rojas-Perilla, Natalia and
+             Schmid, Timo and Templ, Matthias and Tzavidis, Nikos},
+  title   = {The {R} Package {emdi} for Estimating and Mapping Regionally Disaggregated
+             Indicators},
+  journal = {Journal of Statistical Software},
+  volume  = {91},
+  number  = {7},
+  pages   = {1--33},
+  year    = {2019},
+  doi     = {10.18637/jss.v091.i07},
+  note    = {Considered and not used (docs/verification.md D47)}
+}
+
+@article{Schwarz1978,
+  author  = {Schwarz, Gideon},
+  title   = {Estimating the dimension of a model},
+  journal = {The Annals of Statistics},
+  volume  = {6},
+  number  = {2},
+  pages   = {461--464},
+  year    = {1978},
+  doi     = {10.1214/aos/1176344136}
+}
+
+@article{Duan1983,
+  author  = {Duan, Naihua},
+  title   = {Smearing estimate: a nonparametric retransformation method},
+  journal = {Journal of the American Statistical Association},
+  volume  = {78},
+  number  = {383},
+  pages   = {605--610},
+  year    = {1983},
+  doi     = {10.1080/01621459.1983.10478017}
+}
+
+@article{ShapiroWilk1965,
+  author  = {Shapiro, S. S. and Wilk, M. B.},
+  title   = {An analysis of variance test for normality (complete samples)},
+  journal = {Biometrika},
+  volume  = {52},
+  number  = {3--4},
+  pages   = {591--611},
+  year    = {1965},
+  doi     = {10.1093/biomet/52.3-4.591}
+}
+
+% ---------------------------------------------------------------------------------------
+% Spatial analysis and clustering
+% ---------------------------------------------------------------------------------------
+
+@article{Moran1950,
+  author  = {Moran, P. A. P.},
+  title   = {Notes on continuous stochastic phenomena},
+  journal = {Biometrika},
+  volume  = {37},
+  number  = {1/2},
+  pages   = {17--23},
+  year    = {1950},
+  doi     = {10.2307/2332142}
+}
+
+@article{Anselin1995,
+  author  = {Anselin, Luc},
+  title   = {Local indicators of spatial association---{LISA}},
+  journal = {Geographical Analysis},
+  volume  = {27},
+  number  = {2},
+  pages   = {93--115},
+  year    = {1995},
+  doi     = {10.1111/j.1538-4632.1995.tb00338.x}
+}
+
+@article{BivandWong2018,
+  author  = {Bivand, Roger S. and Wong, David W. S.},
+  title   = {Comparing implementations of global and local indicators of spatial
+             association},
+  journal = {TEST},
+  volume  = {27},
+  number  = {3},
+  pages   = {716--748},
+  year    = {2018},
+  doi     = {10.1007/s11749-018-0599-x}
+}
+
+@article{BenjaminiHochberg1995,
+  author  = {Benjamini, Yoav and Hochberg, Yosef},
+  title   = {Controlling the false discovery rate: a practical and powerful approach to
+             multiple testing},
+  journal = {Journal of the Royal Statistical Society: Series B (Methodological)},
+  volume  = {57},
+  number  = {1},
+  pages   = {289--300},
+  year    = {1995},
+  doi     = {10.1111/j.2517-6161.1995.tb02031.x}
+}
+
+@article{Ward1963,
+  author  = {Ward, Joe H., Jr.},
+  title   = {Hierarchical grouping to optimize an objective function},
+  journal = {Journal of the American Statistical Association},
+  volume  = {58},
+  number  = {301},
+  pages   = {236--244},
+  year    = {1963},
+  doi     = {10.1080/01621459.1963.10500845}
+}
+
+@article{MurtaghLegendre2014,
+  author  = {Murtagh, Fionn and Legendre, Pierre},
+  title   = {Ward's hierarchical agglomerative clustering method: which algorithms
+             implement {Ward's} criterion?},
+  journal = {Journal of Classification},
+  volume  = {31},
+  number  = {3},
+  pages   = {274--295},
+  year    = {2014},
+  doi     = {10.1007/s00357-014-9161-z}
+}
+
+@article{Rousseeuw1987,
+  author  = {Rousseeuw, Peter J.},
+  title   = {Silhouettes: a graphical aid to the interpretation and validation of cluster
+             analysis},
+  journal = {Journal of Computational and Applied Mathematics},
+  volume  = {20},
+  pages   = {53--65},
+  year    = {1987},
+  doi     = {10.1016/0377-0427(87)90125-7}
+}
+
+% ---------------------------------------------------------------------------------------
+% Adjusted association, sensitivity and refutation (P5)
+% ---------------------------------------------------------------------------------------
+
+@article{Chernozhukov2018,
+  author  = {Chernozhukov, Victor and Chetverikov, Denis and Demirer, Mert and Duflo,
+             Esther and Hansen, Christian and Newey, Whitney and Robins, James},
+  title   = {Double/debiased machine learning for treatment and structural parameters},
+  journal = {The Econometrics Journal},
+  volume  = {21},
+  number  = {1},
+  pages   = {C1--C68},
+  year    = {2018},
+  doi     = {10.1111/ectj.12097}
+}
+
+@article{Bach2022DoubleML,
+  author  = {Bach, Philipp and Chernozhukov, Victor and Kurz, Malte S. and Spindler,
+             Martin},
+  title   = {{DoubleML} -- An Object-Oriented Implementation of Double Machine Learning in
+             {Python}},
+  journal = {Journal of Machine Learning Research},
+  volume  = {23},
+  number  = {53},
+  pages   = {1--6},
+  year    = {2022},
+  url     = {https://jmlr.org/papers/v23/21-0862.html}
+}
+
+@techreport{Chernozhukov2022LongStoryShort,
+  author      = {Chernozhukov, Victor and Cinelli, Carlos and Newey, Whitney and Sharma,
+                 Amit and Syrgkanis, Vasilis},
+  title       = {Long Story Short: Omitted Variable Bias in Causal Machine Learning},
+  institution = {National Bureau of Economic Research},
+  type        = {NBER Working Paper},
+  number      = {30302},
+  year        = {2022},
+  doi         = {10.3386/w30302},
+  note        = {Also arXiv:2112.13398}
+}
+
+@article{CinelliHazlett2020,
+  author  = {Cinelli, Carlos and Hazlett, Chad},
+  title   = {Making sense of sensitivity: extending omitted variable bias},
+  journal = {Journal of the Royal Statistical Society: Series B (Statistical
+             Methodology)},
+  volume  = {82},
+  number  = {1},
+  pages   = {39--67},
+  year    = {2020},
+  doi     = {10.1111/rssb.12348}
+}
+
+@article{VanderWeeleDing2017,
+  author  = {VanderWeele, Tyler J. and Ding, Peng},
+  title   = {Sensitivity analysis in observational research: introducing the {E}-value},
+  journal = {Annals of Internal Medicine},
+  volume  = {167},
+  number  = {4},
+  pages   = {268--274},
+  year    = {2017},
+  doi     = {10.7326/M16-2607}
+}
+
+@article{Holm1979,
+  author  = {Holm, Sture},
+  title   = {A simple sequentially rejective multiple test procedure},
+  journal = {Scandinavian Journal of Statistics},
+  volume  = {6},
+  number  = {2},
+  pages   = {65--70},
+  year    = {1979},
+  url     = {https://www.jstor.org/stable/4615733}
+}
+
+@misc{SharmaKiciman2020DoWhy,
+  author        = {Sharma, Amit and Kiciman, Emre},
+  title         = {{DoWhy}: An End-to-End Library for Causal Inference},
+  year          = {2020},
+  eprint        = {2011.04216},
+  archiveprefix = {arXiv},
+  url           = {https://arxiv.org/abs/2011.04216},
+  note          = {Reviewed and not used: the refutations are written around DoubleML
+                   directly (docs/verification.md D62)}
+}
+
+@article{CallawaySantAnna2021,
+  author  = {Callaway, Brantly and Sant'Anna, Pedro H. C.},
+  title   = {Difference-in-differences with multiple time periods},
+  journal = {Journal of Econometrics},
+  volume  = {225},
+  number  = {2},
+  pages   = {200--230},
+  year    = {2021},
+  doi     = {10.1016/j.jeconom.2020.12.001},
+  note    = {Planned for the GHS analysis (R did); not used, because only two waves carry
+             the full WG-SS (docs/verification.md D63)}
+}
+
+@manual{PyFixest,
+  author = {{The PyFixest Authors}},
+  title  = {pyfixest: Fast high-dimensional fixed effect estimation in {Python}},
+  note   = {Python package version 0.60.0; citation as in the project's CITATION.cff},
+  url    = {https://github.com/py-econometrics/pyfixest}
+}
+
+@manual{RFixest,
+  author = {Berg{\'e}, Laurent},
+  title  = {fixest: Fast Fixed-Effects Estimations},
+  note   = {R package version 0.14.2. TODO(verify): the package's preferred citation
+            (CRAN citation page)},
+  url    = {https://cran.r-project.org/package=fixest}
+}
+
+@manual{RSensemakr,
+  author = {Cinelli, Carlos and Ferwerda, Jeremy and Hazlett, Chad},
+  title  = {sensemakr: Sensitivity Analysis Tools for Regression Models},
+  note   = {R package version 0.1.6. TODO(verify): author list against the CRAN page},
+  url    = {https://cran.r-project.org/package=sensemakr}
+}
+
+@article{VandenAkker2021,
+  author  = {Van den Akker, Olmo R. and Weston, Sara and Campbell, Lorne and Chopik,
+             Bill and Damian, Rodica and Davis-Kean, Pamela and Hall, Andrew and Kosie,
+             Jessica and Kruse, Elliott and Olsen, Jerome and Ritchie, Stuart and
+             Valentine, K. D. and Van 't Veer, Anna and Bakker, Marjan},
+  title   = {Preregistration of secondary data analysis: A template and tutorial},
+  journal = {Meta-Psychology},
+  volume  = {5},
+  year    = {2021},
+  doi     = {10.15626/MP.2020.2625},
+  note    = {Author list checked against Crossref, 2026-11-04}
+}
+
+% ---------------------------------------------------------------------------------------
+% Reporting guidelines
+% ---------------------------------------------------------------------------------------
+
+@article{vonElm2007STROBE,
+  author  = {von Elm, Erik and Altman, Douglas G. and Egger, Matthias and Pocock, Stuart J.
+             and G{\o}tzsche, Peter C. and Vandenbroucke, Jan P.},
+  title   = {The Strengthening the Reporting of Observational Studies in Epidemiology
+             ({STROBE}) statement: guidelines for reporting observational studies},
+  journal = {PLoS Medicine},
+  volume  = {4},
+  number  = {10},
+  pages   = {e296},
+  year    = {2007},
+  doi     = {10.1371/journal.pmed.0040296}
+}
+
+% ---------------------------------------------------------------------------------------
+% Software infrastructure
+% ---------------------------------------------------------------------------------------
+
+@inproceedings{RaasveldtMuehleisen2019,
+  author    = {Raasveldt, Mark and M{\"u}hleisen, Hannes},
+  title     = {{DuckDB}: an Embeddable Analytical Database},
+  booktitle = {Proceedings of the 2019 International Conference on Management of Data
+               (SIGMOD '19)},
+  pages     = {1981--1984},
+  year      = {2019},
+  publisher = {ACM},
+  doi       = {10.1145/3299869.3320212}
+}
+
+@manual{RCoreTeam,
+  author       = {{R Core Team}},
+  title        = {R: A Language and Environment for Statistical Computing},
+  organization = {R Foundation for Statistical Computing},
+  address      = {Vienna, Austria},
+  note         = {Version 4.5.2},
+  url          = {https://www.R-project.org/}
+}
