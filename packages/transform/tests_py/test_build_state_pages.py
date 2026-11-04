@@ -484,3 +484,33 @@ def test_a_suppressed_cell_is_downloaded_as_words(built) -> None:
     rows = pages.downloads.parse_csv(body)
     assert [pages.TOO_FEW, "", "", ""] in [r[1:] for r in rows]
     assert [pages.WITHHELD, "", "", ""] in [r[1:] for r in rows]
+
+
+def test_visit_count_matches_hand_written_pages() -> None:
+    """Every built page counts its own path; index.html and methodology.html repeat the
+    pixel and the footer note by hand (P6 item 6)."""
+    assert pages.count_pixel("/states/kano.html", "Disability in Kano") in (
+        f'<img class="visit-count" src="{pages.COUNT_ORIGIN}/count?p=/states/kano.html'
+        '&amp;t=Disability%20in%20Kano" alt="" width="1" height="1" '
+        'referrerpolicy="no-referrer" />'
+    )
+    assert pages.count_note("../methodology.html") in pages.FOOTER_HTML
+    for name, path, title in (
+        ("index.html", "/", "Curb Cut: Nigerian disability data"),
+        ("methodology.html", "/methodology.html", "Methodology: Curb Cut"),
+    ):
+        html = (ROOT / "site" / name).read_text(encoding="utf-8")
+        assert pages.count_pixel(path, title) in html, name
+        assert "Visits are counted with GoatCounter: no cookies, and no IP addresses stored." in (
+            " ".join(html.split())
+        ), name
+        assert re.search(rf"<title>{re.escape(title)}</title>", html), name
+
+
+def test_every_built_page_counts_its_own_path(built) -> None:
+    out, result = built
+    for page in result:
+        pixel = pages.count_pixel(f"/states/{page.slug}.html", f"Disability in {page.state}")
+        assert page.html.count('class="visit-count"') == 1 and pixel in page.html
+    index = (out / "states" / "index.html").read_text(encoding="utf-8")
+    assert pages.count_pixel("/states/", "State pages") in index

@@ -1,5 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { isVisitCount } from './visit-count.js';
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
@@ -333,7 +334,7 @@ test('no horizontal scrolling at 320px wide, and the card stacks inside the page
   expect(map.y).toBeGreaterThanOrEqual(facts.y + facts.height - 1);
 });
 
-test('DuckDB-WASM loads only when needed, and nothing comes from another origin', async ({
+test('DuckDB-WASM loads only when needed, and nothing but the visit count comes from another origin', async ({
   page,
 }) => {
   const siteOrigin = new URL(test.info().project.use.baseURL).origin;
@@ -350,7 +351,8 @@ test('DuckDB-WASM loads only when needed, and nothing comes from another origin'
   // The engine and its Parquet extension, both self-hosted (no CDN at runtime).
   expect(wasm.some((p) => /\/assets\/duckdb-(eh|mvp)-.*\.wasm$/.test(p))).toBe(true);
   expect(wasm.some((p) => p.endsWith('/parquet.duckdb_extension.wasm'))).toBe(true);
-  expect(elsewhere).toEqual([]);
+  expect(elsewhere.filter((u) => !isVisitCount(u))).toEqual([]);
+  expect(elsewhere.filter(isVisitCount)).toHaveLength(1);
 });
 
 test('a data failure is announced and the chart and table still work', async ({ page }) => {

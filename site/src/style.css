@@ -1173,4 +1173,12 @@ thead th.num .sort-button {
 .sensitivity-page p,
 .sensitivity-page li {
   overflow-wrap: anywhere;
+/* The GoatCounter image (P6 item 6): requested like any image, but takes no space. alt=""
+   keeps it out of the accessibility tree. */
+.visit-count {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }

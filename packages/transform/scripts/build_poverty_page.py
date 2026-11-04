@@ -968,10 +968,12 @@ list of health, education, living standards, and work and shocks.</p>
 <footer class="site-footer">
 <h2 class="footer-heading">Accessibility and feedback</h2>
 {REPORT_HTML}
+{pages.count_note("./methodology.html")}
 <p><a href="./methodology.html">Methodology: definitions, sources and limits</a>.
 <a href="./">Back to the main page</a>. Source code and data notes:
 <a href="{REPO}">github.com/batestguy/curb-cut</a>.</p>
 </footer>
+{pages.count_pixel("/poverty.html", "Disability and poverty")}
 </body>
 </html>
 """

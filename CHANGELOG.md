@@ -9,6 +9,7 @@ All notable changes to this project are documented here. Entries follow [Convent
 
 ### Fixed
 - fix(api): the rate limit keys on `CF-Connecting-IP` behind Render (`CURBCUT_CLIENT_IP_HEADER`): the live check on the first deploy showed a forged `X-Forwarded-For` hid the client from that chain, so 61 forged requests all got through. `/status` counts requests without the header.
+- feat(site): visit counts with GoatCounter (P6 item 6, D65): a 1×1 image per page, no script, no cookies, no IP addresses stored; said in every footer and on the methodology page; the only request to another origin, and blocked in test and Lighthouse runs.
 - feat(site): self-hosted Noto Sans subset for Nigerian-language text (P6 item 5, D29): covers the Yoruba, Hausa and Igbo letters, stacked tone marks and ₦ (Atkinson Hyperlegible Next lacks 25 of them); 39.6 KB woff2, used only for `lang` yo/ha/ig/pcm, so English pages download nothing extra.
 - fix(site): NVDA no longer reads a whole table when Tab reaches it (P6 item 4): the caption, not the scroll wrapper, is the table's Tab stop (NVDA transcript: 290–315 words before, 46 after); the wrappers are no longer labelled regions.
 
