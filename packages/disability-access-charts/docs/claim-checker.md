@@ -1,6 +1,8 @@
 # The claim checker: full rules
 
-This page is the complete reference for `check_alt_text` in `disability-access-charts` 0.2. The [README](../README.md) has the short version. The same rules are in the module docstring of `disability_access_charts/describe.py`.
+This page is the complete reference for `check_alt_text` in `disability-access-charts` 0.3; the rules have not changed since 0.2. The [README](../README.md) has the short version. The same rules are in the module docstring of `disability_access_charts/describe.py`.
+
+**Terms.** A *description* is any text about a chart: its alt-text (the text alternative of WCAG 2.2 SC 1.1.1; W3C, 2023), a caption or an LLM's rewording. A *claim* is a statement in it that the checker recognises and can test against the chart's data: a number attributed to a category, an extreme, a pairwise comparison, a ratio, a rank or an equality. A *category* is one labelled position on the chart (a bar, a dot row, a map region); a *series* is one set of values across the categories. An *error* means the checker found a claim false; a *warning* means it found wording it could not test, or a result to read with care.
 
 **What a pass means.** No errors means that **no recognised claim was found false**. Wording the checker does not recognise is warned about where it detects it, and otherwise not checked. A pass does not make a description true, complete or good.
 
@@ -18,7 +20,7 @@ This page is the complete reference for `check_alt_text` in `disability-access-c
 
 **With confidence intervals** the checker tests the claim rather than reading the point estimates:
 
-- "A is higher than B" passes only if |a − b| > 1.96 · √(se_a² + se_b²), with each se = the interval's half-width ÷ 1.96 (or the normal quantile for the level in the interval label, such as "90% CI"). For an asymmetric interval it uses the **larger** half-width, which is conservative. A zero-width interval (such as 0 events, interval 0 to 0) has no standard error to test with, so the claim never passes: the suggestion is "the survey cannot show a difference".
+- "A is higher than B" passes only if |a − b| > 1.96 · √(se_a² + se_b²) (a two-sided z-test of the difference at the 5% level), with each se = the interval's half-width ÷ 1.96 (or the normal quantile for the level in the interval label, such as "90% CI"). For an asymmetric interval it uses the **larger** half-width, which is conservative. A zero-width interval (such as 0 events, interval 0 to 0) has no standard error to test with, so the claim never passes: the suggestion is "the survey cannot show a difference".
 - **Assumptions:** roughly symmetric, normal intervals, **independent groups**, and **no correction for multiple comparisons**. When groups may not be independent (two series for the same category, or categories that are parts of one whole) the result comes with a warning.
 - "A is the highest" fails unless A is separated from **every** other group; "A has the highest estimate" is the accepted hedged form.
 - Ratios are checked on the point estimates and also need a supported difference. Ranks are checked on the point estimates, with a warning when a neighbour in the ranking cannot be separated.
@@ -30,8 +32,20 @@ This page is the complete reference for `check_alt_text` in `disability-access-c
 
 **Unsafe names.** Category and series names that are also checker words ("Highest", "Total", "Twice", "Not", "Second", "the same", …) are refused with a clear error, because the checker could not tell the name from the word. Rename them, for example "Highest group".
 
-Generated alt-text uses the hedged wording ("highest estimate"), gives each interval with its label, says whether the survey can show a difference from the next estimate, and puts the summary before the detail, following a preliminary interview study with screen-reader users (Sharif et al., ASSETS 2023). The tests hold every generated text to its own checker.
+Generated alt-text uses the hedged wording ("highest estimate"), gives each interval with its label, says whether the survey can show a difference from the next estimate, and puts the summary before the detail, following a short-paper interview study with screen-reader users (Sharif et al., 2023). The tests hold every generated text to its own checker.
 
 ## The LLM gate
 
 `polish_alt_text` keeps a model's rewording only if the checker reports **no errors and no warnings** in it, apart from the independence warning that the data-built text can carry too, and only if it keeps every category, every number, the interval label and the source of the data-built text. Otherwise the data-built text stays.
+
+## Limits of the method
+
+- **Coverage is a vocabulary.** The checker tests only the claim forms listed above, in English. Its false-negative rate (false claims it passes because it does not recognise them) has not been measured on a corpus of real descriptions; the test suite exercises the listed forms, not a sample of natural writing.
+- **The interval test is approximate.** It assumes roughly normal, symmetric intervals and independent groups, uses the normal quantile rather than the survey design's degrees of freedom, and applies no multiple-comparison correction (see [the findings method](findings.md) for the corrected version used in findings blocks).
+- **It checks truth, not usefulness.** Whether a description is clear, complete or helpful to a screen-reader user is outside what the checker can test.
+
+## References
+
+Sharif, A., Zhong, R. and Wang, Y. (2023). Conveying uncertainty in data visualizations to screen-reader users through non-visual means. In *Proceedings of the 25th International ACM SIGACCESS Conference on Computers and Accessibility (ASSETS '23)*. https://doi.org/10.1145/3597638.3614502
+
+W3C (2023). *Web Content Accessibility Guidelines (WCAG) 2.2*. W3C Recommendation. https://www.w3.org/TR/WCAG22/

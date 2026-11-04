@@ -88,3 +88,13 @@ Everything above this section was written before any model was fitted. Run: `uv 
   - No model was amended after the failure. The log-scale and robust alternatives were considered and not run, because any of them would change the estimates by only a few per cent.
   - The spatial FH comparison is dropped with it. The step 3 spatial analysis (Moran's I, LISA) runs on the direct estimates.
 - **What the site says:** model-based small-area estimates were tried and change little here. The states differ far more than the survey's sampling error can account for, and the direct estimates are already reliable in all 37 states (CV 10–27%).
+
+## References and software (added 2026-11-04; nothing above was changed)
+
+Keys are in `docs/references.bib`.
+
+- Area-level model: Fay and Herriot (1979) `FayHerriot1979`; fitted with R `sae` 1.3 (Molina and Marhuenda, 2015, `MolinaMarhuenda2015`) on R 4.5.2. `emdi` (Kreutzmann et al., 2019, `Kreutzmann2019`) was considered and not used (`docs/verification.md` D47).
+- Direct estimates and their variances: R `survey` 4.5 (Lumley, 2004, `Lumley2004`) with Korn–Graubard intervals (Korn and Graubard, 1998, `KornGraubard1998`); see `data/public/aggregates/README.md`.
+- Model selection by BIC (Schwarz, 1978, `Schwarz1978`); residual normality by Shapiro–Wilk (Shapiro and Wilk, 1965, `ShapiroWilk1965`); the log-scale back-transform of the GVF uses a normal-theory smearing factor exp(σ²/2), in the spirit of Duan's smearing estimate (Duan, 1983, `Duan1983`).
+- Covariate sources: `data/public/covariates/README.md` (Bondarenko et al., 2020; Schiavina et al., 2023; National Bureau of Statistics, 2022; National Bureau of Statistics and UNICEF, 2022; Runfola et al., 2020).
+- The C2 licence, marked "To confirm" in the candidates table, was confirmed after approval and before any fit: attribution only, under both the JRC terms and CC BY 4.0 (`docs/verification.md` D51).

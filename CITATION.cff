@@ -1,0 +1,67 @@
+cff-version: 1.2.0
+message: >-
+  If you use Curb Cut's code or its public aggregates, please cite it as below.
+  Cite the underlying surveys too (Nigeria DHS 2024, NBS MPI Survey 2021,
+  GHS-Panel Waves 4 and 5); their citations are in docs/references.bib and in
+  each data/public/*/README.md.
+type: software
+title: "Curb Cut: accessible open data on disability in Nigeria"
+abstract: >-
+  Code and disclosure-checked public aggregates for survey-weighted state
+  disability prevalence in Nigeria (Nigeria DHS 2024, Washington Group Short
+  Set), a pre-registered analysis of disability and multidimensional poverty
+  (NBS MPI Survey 2021; an adjusted association, not a causal effect), an
+  exploratory GHS-Panel two-wave comparison, and an accessible static site.
+  Licensed microdata are not included.
+authors:
+  # Name and ORCID as given in the repository README ("Who's building it").
+  # TODO(author): confirm the name form and ORCID, and add an affiliation if wanted.
+  - family-names: Bannister
+    given-names: Jerry
+    orcid: "https://orcid.org/0009-0002-3302-9558"
+    alias: batestguy
+repository-code: "https://github.com/batestguy/curb-cut"
+url: "https://batestguy.github.io/curb-cut/"
+license: MIT
+keywords:
+  - disability
+  - Nigeria
+  - Washington Group Short Set
+  - survey statistics
+  - multidimensional poverty
+  - double machine learning
+  - statistical disclosure control
+  - accessibility
+references:
+  - type: report
+    title: "Nigeria Demographic and Health Survey 2024: Final Report (FR395)"
+    # TODO(verify): author list and year from a search result; the DHS page returned 403 (see docs/references.bib, NDHS2024).
+    authors:
+      - name: "Federal Ministry of Health and Social Welfare"
+      - name: "National Population Commission"
+      - name: "ICF"
+    year: 2025
+    url: "https://dhsprogram.com/pubs/pdf/FR395/FR395.pdf"
+  - type: data
+    title: "Multidimentional Poverty index Survey 2021 v1.0 (NGA-NBS-MPI-2021-v1.0)"
+    authors:
+      - name: "National Bureau of Statistics, Nigeria"
+    url: "https://microdata.nigerianstat.gov.ng/index.php/catalog/71"
+  - type: report
+    title: "Nigeria Multidimensional Poverty Index (2022)"
+    authors:
+      - name: "National Bureau of Statistics, Nigeria"
+    year: 2022
+    url: "https://ophi.org.uk/sites/default/files/2024-05/Nigeria_MPI_2022_report.pdf"
+  - type: data
+    title: "General Household Survey, Panel, Waves 4 (NGA_2018_GHSP-W4_v03_M) and 5 (NGA_2023_GHSP-W5_v02_M)"
+    authors:
+      - name: "National Bureau of Statistics, Nigeria"
+    url: "https://microdata.worldbank.org/index.php/catalog/6410"
+  - type: generic
+    title: "Pre-registration: disability and multidimensional poverty in Nigeria (OSF)"
+    authors:
+      - family-names: Bannister
+        given-names: Jerry
+    year: 2026
+    url: "https://osf.io/kes3p/"

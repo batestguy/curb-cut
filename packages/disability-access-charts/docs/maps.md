@@ -2,6 +2,8 @@
 
 `disability_access_charts.choropleth` (also importable from `disability_access_charts.maps`) builds a shaded-map ("choropleth") document. It is **stable API since 0.2**: exported from the package, with `meta.experimental = false`. In 0.1 it was experimental. 0.2 added `patterns`, which changed the default document: `patterns=None` (the default) means "auto", a pattern per class with five classes or fewer and none with more (there are five tiles), where the audit adds a `shade-alone` **warning** that neighbouring classes differ by shade alone. `patterns=False` gives the 0.1 document (with the same warning); `patterns=True` with more than five classes raises. Curb Cut uses it for its national prevalence map.
 
+**Terms.** A *class* is one range of values, drawn in one fill. *Neighbouring classes* (and *neighbouring fills*) are classes next to each other in the class order (class 1 and class 2, and so on), not regions that share a border on the map. A *contrast ratio* is the WCAG 2.2 ratio of relative luminances, (L1 + 0.05) / (L2 + 0.05) (W3C, 2023). *CIEDE2000* is a perceptual colour difference computed in CIELAB (Luo et al., 2001). A *halo* is a wide stroke drawn under a narrower *edge* stroke so that a boundary shows on both light and dark fills ("cased" boundaries).
+
 **Changed in 0.3** (schema `"1.1"`): a new default colour scheme, `scheme="ylgnbu"`, with cased boundaries; map patterns ordered by ink weight with an ink per class; a colour-vision check; and legend-filter metadata (`legend_filter=True`). `scheme="green"` gives the 0.2 look (see [Getting the 0.2 look](#getting-the-02-look)). Every other argument is unchanged.
 
 ## The document
@@ -27,7 +29,7 @@ Classes come from fixed, rounded breaks (`breaks=[2, 3, 4, 6]`: "Under 2%", "2% 
 
 | Scheme | Light fills (low to high) | Dark fills (low to high) | Boundaries |
 |---|---|---|---|
-| `"ylgnbu"` (default since 0.3) | ColorBrewer YlGnBu 5: `#ffffcc #a1dab4 #41b6c4 #2c7fb8 #253494` | drawn for this library: `#4a4512 #2b7340 #1b8f96 #77bdf2 #d4ebff` (olive yellow, green, teal, blue, pale blue: brighter for higher values) | cased: light, edge `#1a1a1a` on halo `#ffffff`; dark, edge `#ffffff` on halo `#121212` |
+| `"ylgnbu"` (default since 0.3) | ColorBrewer YlGnBu 5 (Harrower and Brewer, 2003): `#ffffcc #a1dab4 #41b6c4 #2c7fb8 #253494` | drawn for this library: `#4a4512 #2b7340 #1b8f96 #77bdf2 #d4ebff` (olive yellow, green, teal, blue, pale blue: brighter for higher values) | cased: light, edge `#1a1a1a` on halo `#ffffff`; dark, edge `#ffffff` on halo `#121212` |
 | `"green"` (the 0.2 look) | `#e4f3e9 #b5dec3 #7dc39a #3fa16f #008751` | `#1b2f23 #1e4b33 #226943 #2a8753 #34a061` | one edge: `#1a1a1a` light, `#ffffff` dark |
 
 The YlGnBu fills take larger lightness steps than the greens (CIELAB L\* 99, 82, 68, 51, 27 in the light theme; 29, 43, 54, 74, 92 in the dark one) and change hue as well, so neighbouring classes are easier to tell apart, including under simulated colour-vision deficiency (below). The darkest dark fill is 1.92:1 against the `#121212` background and at least 17.8 CIEDE2000 from it in every simulated vision. `themes=` replaces a scheme's colours; the pattern style still follows `scheme`.
@@ -56,7 +58,9 @@ Edge against halo: 17.4:1 (light), 18.73:1 (dark).
 
 ## Colour vision (0.3)
 
-The `colour-vision` check simulates deuteranopia, protanopia and tritanopia with the matrices of Machado, Oliveira and Fernandes (2009) at severity 1.0 (on linear RGB) and measures each pair of neighbouring fills with CIEDE2000, in normal vision too. It is an **error** if any pair is under 5 in any of them (`CVD_MIN_DELTA_E`, about twice a just-noticeable difference); `colour-vision-target` is a **warning** under 10 (`CVD_TARGET_DELTA_E`). The check reports the minimum, the vision it occurs in, the minimum per vision and every difference. These are design thresholds, not WCAG numbers; the reasoning is in `disability_access_charts.vision`, which is pure Python and reproduces Sharma, Wu and Dalal's (2005) CIEDE2000 test pairs.
+The `colour-vision` check simulates deuteranopia, protanopia and tritanopia with the matrices of Machado, Oliveira and Fernandes (2009) at severity 1.0 (on linear RGB) and measures each pair of neighbouring fills with CIEDE2000 (Luo et al., 2001), in normal vision too. It is an **error** if any pair is under 5 in any of them (`CVD_MIN_DELTA_E`, about twice a just-noticeable difference); `colour-vision-target` is a **warning** under 10 (`CVD_TARGET_DELTA_E`). The check reports the minimum, the vision it occurs in, the minimum per vision and every difference. These are design thresholds, not WCAG numbers; the reasoning is in `disability_access_charts.vision`, which is pure Python and reproduces the CIEDE2000 test pairs of Sharma, Wu and Dalal (2005).
+
+**Limits of this check.** It simulates complete dichromacy (severity 1.0) only, not anomalous trichromacy (partial deficiency), which the same model covers at severities below 1.0 (Machado et al., 2009); it compares fills as flat colours, not as they appear under a pattern, at small sizes or on a given screen; and its thresholds have not been tested with colour-vision-deficient readers. It is a screening check, not evidence that every reader can tell the classes apart, which is one reason the map also uses patterns and words.
 
 | Scheme, theme | Minimum CIEDE2000 between neighbours (normal / deuteranopia / protanopia / tritanopia) | Closest pair |
 |---|---|---|
@@ -67,7 +71,7 @@ The `colour-vision` check simulates deuteranopia, protanopia and tritanopia with
 
 ## Why colour alone still cannot carry a five-class map
 
-WCAG 2.2 SC 1.4.11 asks for 3:1 contrast for the parts of a graphic needed to understand it. A sequential scale has room for about one 3:1 step, not four: the YlGnBu neighbours are 1.49 to 2.42:1 apart in contrast ratio (the greens 1.3 to 1.6:1). So the map is designed so that **colour is never the only cue** (SC 1.4.1):
+WCAG 2.2 SC 1.4.11 (non-text contrast) asks for 3:1 contrast for the parts of a graphic needed to understand it (W3C, 2023). A sequential scale has room for about one 3:1 step, not four: the YlGnBu neighbours are 1.49 to 2.42:1 apart in contrast ratio (the greens 1.3 to 1.6:1). So the map is designed so that **colour is never the only cue** (SC 1.4.1, use of colour):
 
 | Need | How it is met | Audit check |
 |---|---|---|
@@ -95,6 +99,18 @@ The alt-text has three parts: an introduction ("Map: title. 37 states, each with
 
 ## What the page must do
 
-The document cannot check the page. Curb Cut's page draws the map as one `role="img"` named by the alt-text, with the SVG hidden from assistive technology; the regions are not separate Tab stops; the tooltip closes with Esc, can be hovered, and stays until the pointer leaves (SC 1.4.13); and the table follows the map. With patterns, the page draws one SVG `<pattern>` per class (the class fill behind, the tile in the class's ink in front, scaled by `patterns.scale`; nothing in front for plain and solid), fills each region with its class's pattern, and draws the same pattern in each legend swatch. With a halo it draws every fill, then every halo, then every edge, at the widths in `map.casing`, and the ring round a small chosen region is cased the same way. On a narrow screen it raises the scale so that no tile is drawn under 8 pixels (at 320 px the map is about 288 px wide, and the document's scale alone would give tiles of about 5.5 px); the colours follow the light or dark scheme.
+The document cannot check the page. Curb Cut's page draws the map as one `role="img"` named by the alt-text, with the SVG hidden from assistive technology; the regions are not separate Tab stops; the tooltip closes with Esc, can be hovered, and stays until the pointer leaves (SC 1.4.13, content on hover or focus); and the table follows the map. With patterns, the page draws one SVG `<pattern>` per class (the class fill behind, the tile in the class's ink in front, scaled by `patterns.scale`; nothing in front for plain and solid), fills each region with its class's pattern, and draws the same pattern in each legend swatch. With a halo it draws every fill, then every halo, then every edge, at the widths in `map.casing`, and the ring round a small chosen region is cased the same way. On a narrow screen it raises the scale so that no tile is drawn under 8 pixels (at 320 px the map is about 288 px wide, and the document's scale alone would give tiles of about 5.5 px); the colours follow the light or dark scheme.
 
 With a legend block, Curb Cut's legend is a vertical list of `<button type="button" aria-pressed>` items under a visible label, lowest class first, each with a 40 × 28 px patterned swatch (hidden from assistive technology) and the text "Under 2%: 12 states". Pressing one shows only that class: the other states are dimmed (their boundaries stay, faint) and the shown states keep their full fill and pattern with heavier boundaries, so the difference is not one of hue alone. Pressing it again, or Esc in the legend or on the map, shows all. One polite live region announces `announce` or `announce_all`. Its Playwright and axe tests check all of this in both schemes. The tiles, their sources and the ink rule are in [patterns.md](patterns.md).
+
+## References
+
+Harrower, M. and Brewer, C. A. (2003). ColorBrewer.org: an online tool for selecting colour schemes for maps. *The Cartographic Journal*, 40(1), 27–37. https://doi.org/10.1179/000870403235002042
+
+Luo, M. R., Cui, G. and Rigg, B. (2001). The development of the CIE 2000 colour-difference formula: CIEDE2000. *Color Research and Application*, 26(5), 340–350. https://doi.org/10.1002/col.1049
+
+Machado, G. M., Oliveira, M. M. and Fernandes, L. A. F. (2009). A physiologically-based model for simulation of color vision deficiency. *IEEE Transactions on Visualization and Computer Graphics*, 15(6), 1291–1298. https://doi.org/10.1109/TVCG.2009.113
+
+Sharma, G., Wu, W. and Dalal, E. N. (2005). The CIEDE2000 color-difference formula: implementation notes, supplementary test data, and mathematical observations. *Color Research and Application*, 30(1), 21–30. https://doi.org/10.1002/col.20070
+
+W3C (2023). *Web Content Accessibility Guidelines (WCAG) 2.2*. W3C Recommendation. https://www.w3.org/TR/WCAG22/

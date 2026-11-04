@@ -8,6 +8,7 @@ so that CI can build the site's locator map without network access.
 - **Attribution (shown on the site):** "Boundaries: geoBoundaries (CC BY 4.0)".
 - **Citation:** Runfola, D. et al. (2020) geoBoundaries: A global database of political
   administrative boundaries. *PLoS ONE* 15(4): e0231866. doi:10.1371/journal.pone.0231866
+  (`Runfola2020` in `docs/references.bib`)
 - **Boundary source:** GRID3 Nigeria state boundaries, year represented 2022; geoBoundaries
   build date 12 December 2023; boundary ID `NGA-ADM1-27671186`.
 - **Metadata:** https://www.geoboundaries.org/api/current/gbOpen/NGA/ADM1/

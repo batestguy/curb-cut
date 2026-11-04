@@ -7,10 +7,10 @@ Built from public files only (`data/public/aggregates/dhs2024_state.csv`, `data/
 | File | Contents |
 |---|---|
 | `neighbours.csv` | Queen contiguity from the committed simplified polygons (`spdep::poly2nb`, default snap), as a directed edge list with row-standardised weights. 172 links (86 pairs); every state has 1–10 neighbours; the list is symmetric; Lagos–Ogun, Kano–Jigawa, FCT–Niger and Borno–Yobe are adjacent. No snap tolerance was needed. |
-| `moran_global.csv` | Global Moran's I (`spdep::moran.mc`, one-sided, positive autocorrelation) for 8 measures: DISABILITY3 and the six WG-SS domains for adults 18+, and DISABILITY3 for ages 5–17 (secondary). Raw permutation p, Benjamini-Hochberg adjusted p across the 8, and how many states are `reliable` or `review` |
-| `lisa_disability3_18plus.csv` | **Exploratory.** Local Moran's I (`spdep::localmoran_perm`, two-sided, conditional permutation) for DISABILITY3 18+; Benjamini-Hochberg q across the 37 states; quadrant; class (High-High, Low-Low, High-Low, Low-High, or Not significant at q < 0.05) |
-| `profile_clusters.csv` | **Descriptive.** Each state's six 18+ domain prevalences, their z-scores, and its cluster (Ward.D2 on Euclidean distance of the z-scores) |
-| `profile_silhouette.csv` | Mean silhouette for k = 2–6 and the chosen k (highest mean silhouette; a tie goes to the smaller k) |
+| `moran_global.csv` | Global Moran's I (Moran, 1950; `spdep::moran.mc`, one-sided, positive autocorrelation) for 8 measures: DISABILITY3 and the six WG-SS domains for adults 18+, and DISABILITY3 for ages 5–17 (secondary). Raw permutation p, Benjamini-Hochberg adjusted p (Benjamini and Hochberg, 1995) across the 8, and how many states are `reliable` or `review` |
+| `lisa_disability3_18plus.csv` | **Exploratory.** Local Moran's I (Anselin, 1995; `spdep::localmoran_perm`, two-sided, conditional permutation) for DISABILITY3 18+; Benjamini-Hochberg q across the 37 states; quadrant; class (High-High, Low-Low, High-Low, Low-High, or Not significant at q < 0.05) |
+| `profile_clusters.csv` | **Descriptive.** Each state's six 18+ domain prevalences, their z-scores, and its cluster (Ward's method as implemented by `hclust(method = "ward.D2")` on Euclidean distance of the z-scores; Ward, 1963; Murtagh and Legendre, 2014) |
+| `profile_silhouette.csv` | Mean silhouette (Rousseeuw, 1987) for k = 2–6 and the chosen k (highest mean silhouette; a tie goes to the smaller k) |
 | `facilities_state.csv` | GRID3 NGA - Health Facilities v2.0 (CC BY 4.0, D57) counted by state (total, public, unknown ownership, primary, secondary/tertiary), with NBS 2023 population and facilities per 100,000 people of all ages |
 | `services_vs_need.json` | **Ecological, descriptive.** Spearman correlation of facilities per 100,000 (all ages) with DISABILITY3 18+ prevalence; two-sided permutation p; caveats |
 | `summary.json` | Every headline number, plus one plain-English sentence per result for the site |
@@ -22,3 +22,11 @@ Built from public files only (`data/public/aggregates/dhs2024_state.csv`, `data/
 - **LISA (exploratory).** No state is significant after the FDR correction (smallest q = 0.32), so all 37 are "Not significant". With only 37 states, local tests have low power, so this does not rule out local patterns.
 - **Profile clusters (descriptive).** k = 2 has the highest mean silhouette (0.56). Seven states (Abia, Adamawa, Benue, Enugu, Imo, Kano, Taraba) are, on average, above the state average in every domain; the other 30 are, on average, below it in every domain. "State average" is the unweighted mean of the 37 state estimates, not the national figure. The split mostly reflects the overall level of reported difficulty, not a different mix of difficulties, and is driven by a few high-prevalence states: Taraba, Enugu, Abia and Benue each have at least one domain 2.5 or more standard deviations above the state average (up to 4.9, Taraba).
 - **Services against needs (ecological).** Spearman ρ = 0.29 between facilities per 100,000 people (all ages) and DISABILITY3 prevalence among adults 18+, two-sided permutation p = 0.078. This compares state averages only: no causal claim, no inference about individuals. The rate's denominator is total population while prevalence is for adults, so states with younger populations have more adults per facility than the rate suggests. General health facilities are not disability services. GRID3 v2.0 is non-exhaustive and not validated by government, and 4,626 of its 51,022 facilities have "Unknown" ownership.
+
+## Licence and terms
+
+The inputs are the public DHS 2024 aggregates (DHS terms: aggregates only, cited; see `data/public/aggregates/README.md`), geoBoundaries (CC BY 4.0) and GRID3 NGA Health Facilities v2.0 (CC BY 4.0; CIESIN, 2024, doi:10.7916/kv1n-0743). The files here are results derived from these inputs; reuse is subject to the source terms, so cite the sources with them (the repository's MIT licence covers its code; a separate licence for these files has not been confirmed).
+
+## References
+
+Keys in `docs/references.bib`: `Moran1950`, `Anselin1995`, `BivandWong2018` (the `spdep` implementations), `BenjaminiHochberg1995`, `Ward1963`, `MurtaghLegendre2014`, `Rousseeuw1987`, `GRID3HealthV2`, `Runfola2020`.

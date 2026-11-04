@@ -1,8 +1,10 @@
 # NDHS 2024 report tables (benchmark)
 
-Figures cited from the Nigeria DHS 2023-24 final report (NPC and ICF, FR395), chapter 14,
-transcribed by hand from the PDF on 2026-10-27: https://dhsprogram.com/pubs/pdf/FR395/FR395.pdf.
-The report itself is not redistributed here.
+Figures cited from the Nigeria DHS 2024 final report (DHS report FR395; survey fieldwork
+2023–24; `NDHS2024` in `docs/references.bib`), chapter 14, transcribed by hand from the PDF
+on 2026-10-27: https://dhsprogram.com/pubs/pdf/FR395/FR395.pdf. The report itself is not
+redistributed here; the transcribed figures are cited with attribution. Weighted percentages
+and weighted numbers as printed; the report gives no standard errors for these tables.
 
 - `fr395_table14_1.csv`: Table 14.1 (p. 443), household population 5+ (de facto), by domain
   and by age. Percentages; `number` is the weighted number of persons.

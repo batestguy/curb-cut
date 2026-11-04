@@ -1,6 +1,8 @@
 # Patterns: adire-inspired tiles, and the rules they meet
 
-`disability_access_charts.patterns` adds a second, non-colour cue to bar series and map classes (WCAG 2.2 SC 1.4.1, use of colour). A pattern is added **to** the colour, never instead of it, and the chart keeps its direct labels or legend.
+`disability_access_charts.patterns` adds a second, non-colour cue to bar series and map classes (WCAG 2.2 SC 1.4.1, use of colour; W3C, 2023). A pattern is added **to** the colour, never instead of it, and the chart keeps its direct labels or legend.
+
+**Terms.** A *tile* is the repeating unit of a pattern, a 12 × 12 square. The *ink* is the colour the tile's shapes are drawn in, on top of the *fill* (the series' or class's colour). The *ink weight* of a tile is the share of its area that the ink covers.
 
 ## The tiles
 
@@ -47,7 +49,7 @@ Plotly supports `marker.pattern` (including a custom `path`) on bar, pie, histog
 
 ## The ink rule (SC 1.4.11)
 
-Where the pattern is what tells two neighbouring classes or series apart, it is a graphical object needed to understand the chart, so SC 1.4.11 asks for **3:1 between the ink and the fill it sits on**, in every theme. Two rules meet it:
+SC 1.4.11 (non-text contrast) asks for a contrast ratio of at least 3:1 for the parts of a graphic needed to understand it (W3C, 2023). Where the pattern is what tells two neighbouring classes or series apart, it is a graphical object needed to understand the chart, so SC 1.4.11 asks for **3:1 between the ink and the fill it sits on**, in every theme. Two rules meet it:
 
 - **One ink per theme** (bars, and maps with `scheme="green"`): black or white, whichever has the **higher lowest contrast** against all the fills (`ink_for()`), stored as `patterns.ink`. The audit asks 3:1 against every fill.
 - **One ink per class** (maps, new in 0.3): black or white, whichever contrasts more with **that class's** fill (`best_ink()`, `class_inks()`), stored as `patterns.class_ink` (`null` where the tile draws nothing). The YlGnBu fills run from near-white to dark blue, so no single ink could reach 3:1 on all of them; per class, every inked class does. The audit asks 3:1 per inked class (classes whose tile has no ink are exempt) and warns if an ink is not the better of the two.
@@ -81,4 +83,10 @@ For a bar document with a `patterns` block, and for a map document with one:
 
 For bars, the light theme's ink and fills are read from the Plotly traces themselves, so the check tests what is drawn. Grouped bars **without** patterns get a `not-colour-alone` warning.
 
+**Limits.** The ink weights above are approximate shares of the tile. The audit checks the patterns' contrast and their one-to-one match with series or classes; it does not check that readers can tell the tiles apart at the size a page draws them, and the tiles have not been tested with low-vision or colour-vision-deficient readers.
+
 The page has to draw what the document says; the document cannot check the page. Curb Cut's Playwright tests check that every state on the map is filled with its class's pattern, that each pattern draws the class's fill and the class's ink from the document in light and dark mode (and no ink for plain and solid), that each legend swatch draws the same, and that axe finds no violations in either mode.
+
+## References
+
+W3C (2023). *Web Content Accessibility Guidelines (WCAG) 2.2*. W3C Recommendation. https://www.w3.org/TR/WCAG22/

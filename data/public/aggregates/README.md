@@ -2,7 +2,7 @@
 
 Weighted disability estimates from licensed survey microdata. Every file here was written by the disclosure gate (`packages/ingest/src/curbcut_ingest/disclosure.py`), the only code that writes to this folder. The microdata never leave the git-ignored `data/restricted/`. `manifest.json` records, per file, the source and dataset version, the terms of use, the SHA-256, the commit of the scripts that produced it, the disclosure threshold, the number of suppressed cells and the precision flags.
 
-**Not shown on the site yet.** These are the first aggregates (P3). They go on the site in P4.
+The DHS 2024 files are the site's prevalence source (from P4); MPI 2021 is shown on the state pages under its own definition, and the P5 files on the poverty page. Terms used below: a **cell** is one estimate (source × measure × geography level × geography × age group × sex × breakdown × breakdown level); the **standard error (SE)** is design-based, i.e. it reflects the survey's weights, strata and clustering; the **coefficient of variation (CV)** is SE / estimate.
 
 How to rebuild them from your own copy of the microdata: `docs/reproduce.md`.
 
@@ -10,7 +10,7 @@ How to rebuild them from your own copy of the microdata: `docs/reproduce.md`.
 
 | File | Source | Rows | Suppressed | Contents |
 |---|---|---|---|---|
-| `dhs2024_state.csv` | Nigeria DHS 2024 | 5,138 | 168 | DISABILITY3 and each of the six domains at "a lot of difficulty" or worse, by state (37), for ages 18+ and 5–17: overall, by sex, by urban/rural and by wealth quintile |
+| `dhs2024_state.csv` | Nigeria DHS 2024 | 5,138 | 413 (168 under 30, 245 complementary) | DISABILITY3 and each of the six domains at "a lot of difficulty" or worse, by state (37), for ages 18+ and 5–17: overall, by sex, by urban/rural and by wealth quintile |
 | `dhs2024_national.csv` | Nigeria DHS 2024 | 197 | 0 | National, ages 18+ and 5–17: DISABILITY3, each domain at 3+, the 4-level distribution per domain; DISABILITY3 and domains by sex, urban/rural and wealth quintile; DISABILITY3 by age band |
 | `dhs2024_zone.csv` | Nigeria DHS 2024 | 894 | 0 | By zone (6), ages 18+ and 5–17: DISABILITY3 and domains overall, by sex, urban/rural and wealth quintile; DISABILITY3 by age band |
 | `ghs_w4_national_zone.csv` | GHS-Panel W4 (2018/19) | 13 | 0 | Adults 18+: national DISABILITY3 and domains; DISABILITY3 by zone |
@@ -34,7 +34,7 @@ Written by `uv run python -I -m curbcut_ingest.restricted.p5_publish` from the r
 
 | Column | Meaning |
 |---|---|
-| `source`, `dataset_version` | `dhs2024`, `ghs_w4`, `ghs_w5` (and `mpi2021` when published), with the microdata release used |
+| `source`, `dataset_version` | `dhs2024`, `ghs_w4`, `ghs_w5` or `mpi2021`, with the microdata release used |
 | `measure` | See below |
 | `geography_level`, `geography` | `national` (`NG`), `zone` (zone name), or `state` (ISO 3166-2 code, e.g. `NG-KN`; names in `packages/transform/seeds/dim_states.csv`) |
 | `age_group` | `18+` (the headline) or `5-17` (reported separately) |
@@ -42,8 +42,8 @@ Written by `uv run python -I -m curbcut_ingest.restricted.p5_publish` from the r
 | `breakdown` | `all` (no extra dimension), `sector` (urban/rural), `wealth_quintile` or `age_band` (DHS only) |
 | `breakdown_level` | `all` when `breakdown` is `all`; else `urban`/`rural`; `lowest`, `second`, `middle`, `fourth`, `highest`; or an age band (`5-9`, `10-14`, `15-17` inside 5–17; `18-29`, `30-39`, `40-49`, `50-59`, `60-69`, `70+` inside 18+). Age bands are DISABILITY3 only, national and zone only |
 | `estimate` | Weighted proportion, 0–1 |
-| `se` | Standard error (Taylor linearisation, R `survey`) |
-| `ci_low`, `ci_high` | 95% Korn–Graubard interval: Clopper–Pearson with the effective sample size scaled by (t<sub>n−1</sub> / t<sub>df</sub>)² |
+| `se` | Design-based standard error (Taylor linearisation, R `survey` 4.5; Lumley, 2004) |
+| `ci_low`, `ci_high` | 95% Korn–Graubard interval (Korn and Graubard, 1998): Clopper–Pearson (Clopper and Pearson, 1934) with the effective sample size scaled by (t<sub>n−1</sub> / t<sub>df</sub>)² |
 | `n_unweighted` | Respondents in the denominator (the cell's population with the item answered) |
 | `n_effective` | p(1−p)/se², capped at `n_unweighted` (NCHS) |
 | `df` | Design degrees of freedom: PSUs with a respondent in the cell minus their strata |
@@ -52,7 +52,7 @@ Written by `uv run python -I -m curbcut_ingest.restricted.p5_publish` from the r
 
 ## Measures
 
-- `disability3`: Washington Group Short Set DISABILITY3 (WG Doc 7A): "a lot of difficulty" or "cannot do at all" in at least one of the six domains. 0 when all six are answered and none is at that level; missing (left out of the denominator) otherwise. `docs/verification.md` D23.
+- `disability3`: Washington Group Short Set DISABILITY3 (Washington Group on Disability Statistics, 2020, WG Document 7A): "a lot of difficulty" or "cannot do at all" in at least one of the six domains. 0 when all six are answered and none is at that level; missing (left out of the denominator) otherwise. `docs/verification.md` D23.
 - `<domain>_3plus`: the domain alone at "a lot of difficulty" or worse. Domains: `seeing`, `hearing`, `walking`, `cognition` (remembering or concentrating), `selfcare`, `communication`.
 - `<domain>_level_1` … `_level_4`: share at each level (no difficulty, some, a lot, cannot do at all). National only.
 - "Don't know" and, in GHS W4, "too young" are missing.
@@ -60,8 +60,8 @@ Written by `uv run python -I -m curbcut_ingest.restricted.p5_publish` from the r
 
 ## Disclosure check and precision flag
 
-- **Disclosure (privacy).** The rule is on the denominator: a cell with fewer than 30 unweighted respondents is suppressed (`estimate`, `se`, the interval, `n_unweighted`, `n_effective` and `df` are empty and `suppressed` is `True`). Published cells add up (wealth quintiles to their state, states to their zone and to Nigeria, women and men to both sexes, severity levels to 100%), so one suppressed cell among published siblings could be worked out by subtraction. Wherever a set of cells that add up would hold exactly one suppressed cell, its smallest other cell is suppressed too (*secondary* suppression, `precision_reason` = "complementary suppression (disclosure)"), repeated until no set does. The warehouse re-checks this (`assert_no_lone_suppressed_sibling`). One cell is source × measure × geography level × geography × age group × sex × breakdown × breakdown level. There is no rule on the numerator, which is consistent with DHS practice (DHS final-report tables apply a denominator rule, suppressing figures based on fewer than 25 unweighted cases) and with NCHS (no minimum number of events, Parker et al. 2017 p. 5). The unweighted number of people with the difficulty (`n_events`) is used inside the gate and is **never published**. The only suppressed cells are 413 state × wealth quintile cells in 16 states (168 under 30, 245 secondary); 42 possible state × quintile cells (across measures and age groups) have no respondents at all and so have no row.
-- **Precision (reliability).** `precision_flag` follows the NCHS Data Presentation Standards for Proportions (Parker et al. 2017, `verification.md` D42) plus one stricter project rule:
+- **Disclosure (privacy).** The rule is on the denominator: a cell with fewer than 30 unweighted respondents is suppressed (`estimate`, `se`, the interval, `n_unweighted`, `n_effective` and `df` are empty and `suppressed` is `True`). Published cells add up (wealth quintiles to their state, states to their zone and to Nigeria, women and men to both sexes, severity levels to 100%), so one suppressed cell among published siblings could be worked out by subtraction. Wherever a set of cells that add up would hold exactly one suppressed cell, its smallest other cell is suppressed too (*secondary* suppression, `precision_reason` = "complementary suppression (disclosure)"), repeated until no set does. The warehouse re-checks this (`assert_no_lone_suppressed_sibling`). One cell is source × measure × geography level × geography × age group × sex × breakdown × breakdown level. There is no rule on the numerator, which is consistent with DHS practice (DHS final-report tables apply a denominator rule, suppressing figures based on fewer than 25 unweighted cases) and with NCHS (no minimum number of events; Parker et al., 2017, p. 5). The unweighted number of people with the difficulty (`n_events`) is used inside the gate and is **never published**. The only suppressed cells are 413 state × wealth quintile cells in 16 states (168 under 30, 245 secondary); 42 possible state × quintile cells (across measures and age groups) have no respondents at all and so have no row.
+- **Precision (reliability).** `precision_flag` follows the NCHS Data Presentation Standards for Proportions (Parker et al., 2017; `verification.md` D42) plus one stricter project rule:
   - `unreliable`: n or effective n under 30; or the interval is 0.30 wide or more; or it is wider than 0.05 and wider than 130% of the estimate.
   - `review`: it would be shown, but it rests on 0 events (or all events), or has fewer than 8 degrees of freedom (NCHS), or rests on 1–9 unweighted events (project rule, reason `low_events<10`).
   - `reliable`: passes the NCHS proportion standards **and** the 10-event rule. It is a screening label, not a guarantee that the estimate is accurate: the standards say nothing about measurement error, non-response or a wrong design assumption.
@@ -75,8 +75,16 @@ Written by `uv run python -I -m curbcut_ingest.restricted.p5_publish` from the r
 - **MPI 2021:** person weight `pop_wgt / hhsize` (the household weight with a per-state calibration factor, checked from the data); strata state × senatorial district × sector and PSU = EA, an assumption since no strata variable is shipped (`verification.md` D40).
 - **Lonely PSUs:** `options(survey.lonely.psu = "adjust", survey.adjust.domain.lonely = TRUE)`.
 
+## Limitations
+
+- The state estimates are **direct** survey estimates: each uses only that state's sample, and a state × domain × breakdown cell can rest on few events; read the precision flag and the interval. A model-based (Fay-Herriot) alternative was tried and not used (`data/public/sae/`, `docs/verification.md` D56).
+- Suppression is not random: it falls on state × wealth quintile cells in 16 states. Analyses that need every quintile in every state can't be done from these files.
+- DISABILITY3 is a reported measure of functional difficulty, collected in the household interview (so it can be reported by another household member), not a medical diagnosis or a registration count.
+- The DHS and GHS surveys use the WG-SS; MPI 2021 does not, so its measures are not comparable with DISABILITY3.
+
 ## Terms and citation
 
-- DHS: The DHS Program, Nigeria DHS 2024 (NPC and ICF). Data used only for the registered project "Curb Cut: disability prevalence and poverty in Nigeria"; a PDF of every publication goes to references@dhsprogram.com.
-- GHS-Panel: National Bureau of Statistics, Nigeria, General Household Survey-Panel W4 (NGA_2018_GHSP-W4_v03_M) and W5 (NGA_2023_GHSP-W5_v02_M), World Bank Microdata Library.
-- Full citations are in `manifest.json`.
+- **DHS:** Nigeria DHS 2024 microdata (National Population Commission and ICF, The DHS Program; release NG2024DHS). Data used only for the registered project "Curb Cut: disability prevalence and poverty in Nigeria"; no microdata in any tool or dashboard; a PDF of every publication goes to references@dhsprogram.com.
+- **NBS MPI:** National Bureau of Statistics, Multidimentional Poverty index Survey 2021 v1.0 (`NGA-NBS-MPI-2021-v1.0`; the required citation, spelling as given by NBS). Used solely for reporting aggregated information; no redistribution of the microdata; an electronic copy of every publication goes to the National Data Archive (`docs/verification.md` D3).
+- **GHS-Panel:** National Bureau of Statistics, Nigeria, General Household Survey-Panel W4 (NGA_2018_GHSP-W4_v03_M) and W5 (NGA_2023_GHSP-W5_v02_M), World Bank Microdata Library. Public-use files under a confidentiality declaration; citation required (`docs/verification.md` D5).
+- Reuse is subject to the source terms above; cite the sources. The repository's MIT licence covers its code; a separate licence for these derived files has not been confirmed with the data owners. Full citations are in `manifest.json` and `docs/references.bib`.

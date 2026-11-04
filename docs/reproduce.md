@@ -39,7 +39,20 @@ Zip hashes, for reference: MPI `a3d158a70a031aa1357d7b3d48f112d5198e5b658ad013bb
 ## 3. Install the tools
 
 - Python 3.12 and [uv](https://docs.astral.sh/uv/): `uv sync` from the repo root (installs `curbcut-ingest` with pyreadstat, pandas, pyarrow).
-- R 4.5 with renv: start R in the repo root and run `renv::restore()` (installs `survey`, `nanoparquet`, `jsonlite` at the versions in `renv.lock`). If `Rscript` is not on your `PATH`, set `RSCRIPT` to its full path.
+- R 4.5.2 with renv: start R in the repo root and run `renv::restore()` (installs the packages listed under `Imports:` in `DESCRIPTION`, at the versions in `renv.lock`). If `Rscript` is not on your `PATH`, set `RSCRIPT` to its full path.
+
+Versions used for the published files (from `uv.lock` and `renv.lock`; each run's manifest records what it actually loaded):
+
+| Step | Software |
+|---|---|
+| Harmonise | Python 3.12, pandas 3.0.6, pyreadstat 1.3.6, pyarrow (see `uv.lock`) |
+| Survey estimates (P3, P4) | R 4.5.2, `survey` 4.5 (Lumley, 2004), `nanoparquet` 0.5.2, `jsonlite` 2.0.0 |
+| Cross-check (P4a) | Python `svy` 0.35.0 |
+| Small-area model, spatial (P4a) | R `sae` 1.3 (Molina and Marhuenda, 2015), `spdep` 1.4-2 (Bivand and Wong, 2018) |
+| Poverty analysis (P5) | Python `doubleml` 0.11.4 (Bach et al., 2022), scikit-learn 1.9.1, pyfixest 0.60.0; R `survey` 4.5, `sensemakr` 0.1.6 (Cinelli and Hazlett, 2020), `fixest` 0.14.2 |
+| Warehouse | dbt-core 1.12.6, dbt-duckdb 1.11.0, DuckDB 1.5.6 |
+
+References are in `docs/references.bib`.
 
 ## 4. Harmonise (microdata → person-level Parquet, still restricted)
 
@@ -59,7 +72,9 @@ Counts you should see with the releases above: DHS 148,177 people (de facto, age
 
 **P5 exposure (before registration).** `uv run python -I -m curbcut_ingest.restricted.p5_exposure --check` reads Sections A (weights), B (ages, head), D (disability) and Q (response status) only, and writes `data/restricted/derived/mpi2021_exposure.parquet`: per household the exposure flags of `docs/preregistration.md` 3.2, S2, S3, S5 and S6 with each household's reason (no poverty column). `--check` prints the 5.6 check: the weighted share of people in exposed households under each definition, with S2 against NBS's 11.0% (±1.5 points); exit 1 if it fails.
 
-**P5 analysis (synthetic until registered).** `uv run python -I -m curbcut_ingest.restricted.p5_mpi [--quick] [--no-r]` runs the MPI analysis (sections 3–7: Table 7 check, learner selection, DoubleML primary, overlap, E-values, sensitivity and benchmarks, `R/p5_benchmark.R` survey LPM and sensemakr, refutations, robustness, secondaries with Holm, X1) on an invented household file with a known answer, writing `results.json` and `manifest.json` to `data/restricted/derived/p5/synthetic/`. `uv run python -I -m curbcut_ingest.restricted.p5_ghs [--no-r]` does the same for the GHS E1 comparison (section 8; R cross-check `R/p5_ghs_check.R`). Both take `--real`, which is **refused** until section 11 of the pre-registration holds an OSF URL; with it they read the real files and use the pre-registered sizes. Nothing in these steps writes to `data/public/`.
+**P5 analysis (synthetic until registered).** `uv run python -I -m curbcut_ingest.restricted.p5_mpi [--quick] [--no-r]` runs the MPI analysis (sections 3–7: Table 7 check, learner selection, DoubleML primary, overlap, E-values, sensitivity and benchmarks, `R/p5_benchmark.R` survey LPM and sensemakr, refutations, robustness, secondaries with Holm, X1) on an invented household file with a known answer, writing `results.json` and `manifest.json` to `data/restricted/derived/p5/synthetic/`. `uv run python -I -m curbcut_ingest.restricted.p5_ghs [--no-r]` does the same for the GHS E1 comparison (section 8; R cross-check `R/p5_ghs_check.R`). Both take `--real`, which is **refused** until section 11 of the pre-registration holds an OSF URL; with it they read the real files, use the pre-registered sizes and write to `data/restricted/derived/p5/` (`results.json`, `ghs_results.json`, `manifest.json`). Nothing in these steps writes to `data/public/`. The published run was made on 2026-11-01 from commit `13c078e` (`p5_mpi_summary.csv`, item `run_commit`), which differs from the freeze commit `22b8ace` in documentation only.
+
+**P5 publication (after the real runs).** `uv run python -I -m curbcut_ingest.restricted.p5_publish` reads those three files and writes `p5_mpi_estimates.csv`, `p5_mpi_summary.csv`, `p5_ghs_estimates.csv` and `p5_ghs_summary.csv` to `data/public/aggregates/` through the disclosure gate (an estimate is suppressed if its exposed or comparison group has fewer than 30 unweighted units). It refuses a synthetic, dirty or incomplete run.
 
 ## 5. Estimate, gate and publish
 
@@ -67,7 +82,7 @@ Counts you should see with the releases above: DHS 148,177 people (de facto, age
 uv run python -I -m curbcut_ingest.aggregate
 ```
 
-For each source this adds the 0/1 indicators, runs `packages/ingest/R/estimate.R` (R `survey`: weighted proportions, Taylor-linearised SEs, Korn–Graubard intervals, design df), keeps the raw cells in `data/restricted/derived/estimates/`, then passes them through the disclosure gate (`curbcut_ingest.disclosure`): cells under 30 unweighted respondents are suppressed, every row gets the NCHS precision flag, and `data/public/aggregates/manifest.json` is updated with each file's SHA-256 and the script commit. One source at a time: `--sources dhs2024` (choices `dhs2024`, `ghs_w4`, `ghs_w5`, `mpi2021`). The full run takes about 12 minutes, most of it the DHS state × wealth quintile cells.
+For each source this adds the 0/1 indicators, runs `packages/ingest/R/estimate.R` (R `survey`: weighted proportions, design-based Taylor-linearised SEs, Korn–Graubard intervals (Korn and Graubard, 1998), design degrees of freedom), keeps the raw cells in `data/restricted/derived/estimates/`, then passes them through the disclosure gate (`curbcut_ingest.disclosure`): cells under 30 unweighted respondents are suppressed, every row gets the NCHS precision flag, and `data/public/aggregates/manifest.json` is updated with each file's SHA-256 and the script commit. One source at a time: `--sources dhs2024` (choices `dhs2024`, `ghs_w4`, `ghs_w5`, `mpi2021`). The full run takes about 12 minutes, most of it the DHS state × wealth quintile cells.
 
 What it writes (every file has `breakdown` and `breakdown_level`, which are `all` where a cell has no extra dimension; one cell is source × measure × geography level × geography × age group × sex × breakdown × breakdown level):
 

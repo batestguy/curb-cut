@@ -23,20 +23,20 @@ For more than ten years I've turned incomplete Nigerian data into evidence insti
 
 ## Why
 
-JONAPWD's widely cited 2025 figures (about 35 million people) come from applying the global WHO 15% rate to population projections: no one was counted. National surveys did measure it: Nigeria DHS 2024 with the Washington Group questions, and NBS MPI 2021 with its own disability items. But their results sit in PDF reports and licensed microdata. Curb Cut turns them into public, disclosure-checked state estimates, puts them next to the assumed figures, and says plainly how sure each number is.
+JONAPWD's widely cited 2025 figures (about 35 million people) come from applying the global WHO 15% rate to population projections: no one was counted. National surveys did measure it: Nigeria DHS 2024 with the Washington Group Short Set (WG-SS), and NBS MPI 2021 with its own disability items. The NDHS 2024 report already publishes state tables, for women and men aged 15+ separately and without intervals (`docs/verification.md` D46); everything else sits in licensed microdata. Curb Cut turns the microdata into public, disclosure-checked state estimates for both sexes with 95% intervals, puts them next to the assumed figures, and says plainly how sure each number is.
 
 ## What's built so far
 
 | | What | Where |
 |---|---|---|
 | ✅ | **Accessible site:** static, semantic HTML; every chart has a data table and a description built from its data; keyboard-only and screen-reader friendly; DuckDB-WASM queries Parquet in the browser, with no server | [live](https://batestguy.github.io/curb-cut/), [`site/`](site/) |
-| ✅ | **`disability-access-charts` 0.2** ([PyPI](https://pypi.org/project/disability-access-charts/)): chart descriptions whose numbers *and comparisons* are checked against the data and its confidence intervals; statistical findings with false-discovery-rate control; adire-inspired pattern fills; an accessible choropleth; a WCAG audit that runs in CI; LLM rewording accepted only if it passes | [`packages/disability-access-charts/`](packages/disability-access-charts/) |
+| ✅ | **`disability-access-charts` 0.3** ([PyPI](https://pypi.org/project/disability-access-charts/)): chart descriptions whose numbers *and comparisons* are checked against the data and its confidence intervals; statistical findings with false-discovery-rate control; adire-inspired pattern fills; an accessible choropleth; a WCAG audit that runs in CI; LLM rewording accepted only if it passes | [`packages/disability-access-charts/`](packages/disability-access-charts/) |
 | ✅ | **Ingest and warehouse:** PDF text extraction checked by hand, dbt on DuckDB with data tests, Parquet marts | [`packages/ingest/`](packages/ingest/), [`packages/transform/`](packages/transform/) |
 | ✅ | **CI:** ruff, pyright, ~560 Python tests (90%+ coverage), dbt build, Playwright + axe accessibility tests, deploy to GitHub Pages | [`ci.yml`](.github/workflows/ci.yml) |
 | ✅ | **Restricted zone (P3):** licensed microdata stays local; survey-weighted estimates (R `survey`) pass one disclosure gate and an NCHS precision flag before anything is public; reproducible by anyone with their own access | [`packages/ingest/`](packages/ingest/), [`data/public/aggregates/`](data/public/aggregates/), [`docs/reproduce.md`](docs/reproduce.md) |
 | ✅ | **Measured prevalence on the site (P4a):** DHS 2024 disability by state with 95% intervals and precision flags, an accessible map and interval chart, a sourced comparison of the 15% and 3% figures, spatial analysis, and a methodology page; small-area (Fay-Herriot) estimation was tried and changes little, so direct estimates lead | [live](https://batestguy.github.io/curb-cut/), [methodology](https://batestguy.github.io/curb-cut/methodology.html) |
 | ✅ | **37 state pages (P4b):** plain HTML with no script, each about 50 KB: DHS 2024 with intervals and precision flags, the six activities as a dot plot drawn from a checked chart document, MPI 2021 under its own definition, JONAPWD's assumed figure with its caveat, population, a locator map and the law's national facts; tested with axe, keyboard and an NVDA transcript | [all states](https://batestguy.github.io/curb-cut/states/), [Kano](https://batestguy.github.io/curb-cut/states/kano.html) |
-| ✅ | **Disability and poverty (P5):** a pre-registered analysis (OSF, frozen before any poverty figure was split by disability) of NBS MPI 2021: people in households with a severely disabled member are 11.7 percentage points more likely to be multidimensionally poor than people in comparable households (an adjusted association, DoubleML with sensitivity analysis, refutations and a disclosure-gated release), plus an exploratory GHS-Panel two-round comparison and a two-page policy brief | [results page](https://batestguy.github.io/curb-cut/poverty.html), [pre-registration](https://osf.io/kes3p/) |
+| ✅ | **Disability and poverty (P5):** a pre-registered analysis (OSF, frozen before any poverty figure was split by disability) of NBS MPI 2021: people in households with a member aged 5+ who has a severe difficulty (on MPI's own disability questions, not the WG-SS) are 11.7 percentage points more likely to be multidimensionally poor than people in comparable households (95% interval 6.1 to 17.2; an adjusted association, not a causal effect; DoubleML with sensitivity analysis, refutations and a disclosure-gated release), plus an exploratory GHS-Panel two-round comparison and a two-page policy brief | [results page](https://batestguy.github.io/curb-cut/poverty.html), [pre-registration](https://osf.io/kes3p/) |
 
 ## Start here if you're hiring for…
 
@@ -61,10 +61,23 @@ flowchart LR
   Q --> S[Static site on GitHub Pages<br/>DuckDB-WASM in the browser]
 ```
 
-Survey licences forbid publishing household-level data, so microdata never leaves the author's machine, never goes into CI and never goes to an LLM. Only aggregates that pass a disclosure check (cells under about 30 respondents suppressed) are public. CI runs the warehouse against synthetic fixtures with the same schema.
+Survey licences forbid publishing household-level data, so microdata never leaves the author's machine, never goes into CI and never goes to an LLM. Only aggregates that pass a disclosure check (any cell with fewer than 30 unweighted respondents is suppressed, plus complementary suppression so that it can't be recovered by subtraction) are public. CI runs the warehouse against synthetic fixtures with the same schema.
 
 ## Status
 
-P2 (the chart library 0.1) is built. Next: P3, the restricted data zone and the survey warehouse. See [`docs/STATUS.md`](docs/STATUS.md) for where things stand and [`PLAN.md`](PLAN.md) for the roadmap.
+Phases P0–P5 are done (P1's NVDA check was deferred by the author to the P6 gate at the latest); P6 (site polish) is in progress. See [`docs/STATUS.md`](docs/STATUS.md) for where things stand and [`PLAN.md`](PLAN.md) for the roadmap.
+
+## Methods and data documentation
+
+- [`docs/reproduce.md`](docs/reproduce.md): from licensed microdata to every public aggregate, with software versions.
+- [`docs/preregistration.md`](docs/preregistration.md) (frozen at tag `p5-freeze`, registered at https://osf.io/kes3p/) and [`docs/preregistration-deviations.md`](docs/preregistration-deviations.md).
+- [`docs/fay-herriot-covariates.md`](docs/fay-herriot-covariates.md): the pre-declared small-area model and why it was not used.
+- [`docs/verification.md`](docs/verification.md): every source and check, dated.
+- [`data/README.md`](data/README.md) and the README in each `data/public/` folder: contents, definitions, licence and citation.
+- [`docs/references.bib`](docs/references.bib): every method and data source cited in these documents.
+
+## How to cite
+
+Cite the software and public aggregates with the metadata in [`CITATION.cff`](CITATION.cff) (GitHub's "Cite this repository" button reads it). The P5 analysis plan is citable separately as its OSF registration, https://osf.io/kes3p/. Please also cite the surveys the figures come from (Nigeria DHS 2024, NBS MPI Survey 2021, GHS-Panel Waves 4 and 5); their citations and terms of use are in each data folder's README.
 
 MIT licensed. Figures are cited from their sources; third-party PDFs are not redistributed.
