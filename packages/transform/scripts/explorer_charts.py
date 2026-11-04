@@ -14,9 +14,10 @@ by ``build_charts.py`` after the other charts:
   that has more than one place (each state, or each zone), made by ``disability_access_charts``
   ``dot()`` with its data-derived alt-text and audit. The library has no browser-side
   renderer, so a chart cannot be made at run time without bypassing it; with 84 views
-  (7 measures x 2 age groups x 3 sexes x 2 levels) a pre-built set is small (about 2 MB).
-  A view of one place shows its level's chart with the place highlighted; Nigeria as a whole
-  has one figure per view, so it has no chart.
+  (7 measures x 2 age groups x 3 sexes x 2 levels) a pre-built set is small (1,314,861 bytes
+  in the 2026-11-04 build).
+  A view of one place shows its level's chart with the place highlighted, and that chart's
+  own table; Nigeria as a whole has one figure per view, so it has no chart.
 
 A chart draws exactly the rows whose table cell shows a figure: suppressed cells, cells with no
 data and estimates flagged unreliable (shown as words, as on the state pages) are left out

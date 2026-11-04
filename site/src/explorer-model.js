@@ -207,6 +207,28 @@ export function sortRows(rows, sort) {
   });
 }
 
+// The project's rule for counts (CLAUDE.md): a count under 30 is never shown, only "<30". The
+// disclosure gate means a published cell never has one; this is a second line of defence.
+const MIN_COUNT = 30;
+
+/** A count as the table and the files show it: "<30" under 30, otherwise the number. */
+export function countValue(n) {
+  if (n == null) return null;
+  return n < MIN_COUNT ? `<${MIN_COUNT}` : n;
+}
+
+const oneDecimal = new Intl.NumberFormat('en-NG', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+/**
+ * A percentage as the table shows it, to 1 decimal like format.js; above 0 but under 0.05 is
+ * "<0.1", not a misleading "0.0" (as build_state_pages.py's num1). Exactly 0 stays "0.0". The
+ * downloads keep the value itself (downloads.VALUES_RULE).
+ */
+export function pctText(value) {
+  if (value == null) return '';
+  return value > 0 && value < 0.05 ? '<0.1' : oneDecimal.format(value);
+}
+
 /** "Disability: …. Women 18+, each state" — the view in words, for the caption and status. */
 export function describeView(view, options, meta) {
   const measure = optionLabel(options, 'measure', view.measure);
@@ -289,6 +311,7 @@ export function downloadRows(rows, level) {
   return rows.map((row) =>
     cols.map((c) => {
       if (c.key === 'estimate' && row.words) return row.words;
+      if (c.key === 'n') return countValue(row.n);
       return clean(row[c.key]);
     }),
   );

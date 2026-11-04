@@ -22,9 +22,13 @@ async function ready(page, path = 'explorer.html') {
   await expect(page.locator('#f-show')).toBeEnabled(LOAD);
 }
 
+// A percentage as the table shows it: 1 decimal, "<0.1" above 0 but under 0.05.
+const pct = (v) => (v > 0 && v < 0.05 ? '<0.1' : v.toFixed(1));
+
 async function shown(page, path) {
   await page.goto(path);
-  await expect(status(page)).toHaveText(/^Showing \d+ rows?: /, LOAD);
+  // A link with invalid choices puts its message first.
+  await expect(status(page)).toHaveText(/(^|\. )Showing \d+ rows?: /, LOAD);
   await expect(table(page)).toBeVisible();
 }
 
@@ -241,8 +245,91 @@ test('explorer: an address with invalid values falls back to the defaults, visib
   await expect(page.locator('#f-measure')).toHaveValue('disability3');
   await expect(page.locator('#f-age')).toHaveValue('18+');
   await expect(page.locator('#f-place')).toHaveValue('');
-  await expect(status(page)).toHaveText(/^Showing 37 rows: Disability: .*Adults 18\+, each state\.$/);
+  // The live region says it too, before the result.
+  await expect(status(page)).toHaveText(
+    /^This link's choices were not all valid: .*The defaults are shown instead\. Showing 37 rows: Disability: .*Adults 18\+, each state\.$/,
+  );
   expect(new URL(page.url()).search).toBe('?level=state&measure=disability3&age=18%2B&sex=all');
+});
+
+test('explorer: a choice reset by an earlier one is announced, and focus stays put', async ({ page }) => {
+  await shown(page, 'explorer.html?level=national&measure=seeing_level_1&age=18%2B&sex=all');
+  const level = page.locator('#f-level');
+  await level.focus();
+  await level.selectOption('state');
+  await expect(level).toBeFocused();
+  await expect(page.locator('#f-measure')).toHaveValue('disability3');
+  await expect(status(page)).toHaveText(
+    'Measure reset to Disability: a lot of difficulty or cannot do at all in at least one of six activities: the previous choice is not available for States with the choices above it.',
+  );
+  await page.locator('#f-place').selectOption('Kano');
+  await level.selectOption('zone');
+  await expect(status(page)).toHaveText(/^State or zone reset to All 6 zones: .* for Geopolitical zones /);
+  // A change that keeps every later choice says nothing new.
+  await page.locator('#f-sex').selectOption('male');
+  await expect(status(page)).toHaveText(/^State or zone reset/);
+});
+
+test('explorer: values above 0 but under 0.05% read "<0.1", as on the state pages', async ({ page }) => {
+  await shown(page, 'explorer.html?level=state&measure=cognition_3plus&age=18%2B&sex=all&place=Akwa+Ibom');
+  const row = (await tableText(page))[1];
+  const csv = parseCsv(await download(page, 'CSV'))[1];
+  // Akwa Ibom's lower bound is 0.0257%: the table says "<0.1", the file keeps the value.
+  expect(Number(csv[2])).toBeGreaterThan(0);
+  expect(Number(csv[2])).toBeLessThan(0.05);
+  expect(row[2]).toBe('<0.1');
+  expect(row[1]).toBe(pct(Number(csv[1])));
+  await shown(page, 'explorer.html?level=state&measure=cognition_3plus&age=18%2B&sex=all');
+  const zeros = (await tableText(page)).slice(1).filter((r) => r[1] === '0.0');
+  for (const r of zeros) expect(r[0]).toBeTruthy(); // exactly 0 stays "0.0"
+});
+
+test('explorer: a one-place view gives the chart\'s own table of every place', async ({ page, request }) => {
+  await shown(page, 'explorer.html?level=state&measure=disability3&age=18%2B&sex=all&place=Imo');
+  expect((await tableText(page)).length).toBe(2);
+  const details = page.locator('#chart-data');
+  await expect(details).toBeVisible(LOAD);
+  const doc = await (await request.get('data/charts/explorer/state-disability3-18plus-all.json')).json();
+  const summary = details.locator('summary');
+  await expect(summary).toHaveText(`Chart data: all ${doc.data.categories.length} states in the chart`);
+  await expect(page.locator('#chart-note')).toContainText('under "Chart data" after the chart');
+  // By keyboard: the summary opens it; the table has every place the chart draws.
+  await summary.focus();
+  await page.keyboard.press('Enter');
+  const table = details.locator('table');
+  await expect(table).toBeVisible();
+  await expect(table.locator('caption')).toHaveText(doc.table.caption);
+  await expect(table.locator('tbody tr')).toHaveCount(doc.data.categories.length);
+  await expect(table.locator('tbody th').first()).toHaveText(doc.data.categories[0]);
+  const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
+  expect(results.violations).toEqual([]);
+  // At 320 px its caption is the Tab stop for the scrolling table, and the page does not scroll.
+  await page.setViewportSize({ width: 320, height: 800 });
+  await expect(table.locator('caption')).toHaveAttribute('tabindex', '0');
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth),
+  ).toBeLessThanOrEqual(0);
+  // A view of every state: the page's table is the chart's, so no second one.
+  await page.goto('explorer.html?level=state&measure=disability3&age=18%2B&sex=all');
+  await expect(page.locator('#explorer-chart svg').first()).toBeVisible(LOAD);
+  await expect(details).toBeHidden();
+  await expect(details.locator('table')).toHaveCount(0);
+});
+
+test('explorer: a quick second Show leaves only the newer view and its chart', async ({ page, request }) => {
+  await ready(page);
+  await page.locator('#f-level').selectOption('zone');
+  await page.locator('#f-show').click();
+  await page.locator('#f-level').selectOption('state');
+  await page.locator('#f-place').selectOption('Kano');
+  await page.locator('#f-show').click();
+  await expect(status(page)).toHaveText(/^Showing 1 row: .*Kano\.$/, LOAD);
+  const doc = await (await request.get('data/charts/explorer/state-disability3-18plus-all.json')).json();
+  await expect(page.locator('#explorer-chart-title')).toHaveText(doc.title, LOAD);
+  await page.waitForTimeout(1500);
+  await expect(page.locator('#explorer-chart-title')).toHaveText(doc.title);
+  await expect(page.locator('#explorer-chart')).toHaveAccessibleName(doc.alt_text);
+  await expect(page.locator('#results-data tbody tr')).toHaveCount(1);
 });
 
 test('explorer: suppressed and no-data cells show words, never a number (fixture data)', async ({ page }) => {
@@ -306,7 +393,7 @@ test('explorer: the CSV and JSON downloads hold exactly the rows the table shows
         return;
       }
       for (let j = 1; j <= 3; j += 1) {
-        expect(Number(file[j]).toFixed(1), `${cells[0]} column ${j}`).toBe(cells[j]);
+        expect(pct(Number(file[j])), `${cells[0]} column ${j}`).toBe(cells[j]);
         expect(json[j]).toBe(Number(file[j]));
       }
       expect(file[4]).toBe(cells[4]);

@@ -6,12 +6,14 @@ import { test } from 'node:test';
 import {
   DEFAULT_VIEW,
   caption,
+  countValue,
   csvText,
   downloadRows,
   fileBase,
   jsonText,
   missingText,
   parseQuery,
+  pctText,
   pyFloat,
   resolveView,
   sizeText,
@@ -250,4 +252,28 @@ test('the caption and status describe the view in words', () => {
   assert.match(caption(all, options, META), /Low and High: the 95% confidence interval\.$/);
   assert.equal(sizeText(10), '1 KB');
   assert.equal(sizeText(4000), '4 KB');
+});
+
+test('percentages show 1 decimal, and "<0.1" above 0 but under 0.05, as on the state pages', () => {
+  assert.equal(pctText(0), '0.0');
+  assert.equal(pctText(0.0499), '<0.1');
+  assert.equal(pctText(0.001), '<0.1');
+  assert.equal(pctText(0.05), '0.1');
+  assert.equal(pctText(3.4936), '3.5');
+  assert.equal(pctText(12.25), '12.3');
+  assert.equal(pctText(null), '');
+});
+
+test('a count under 30 is never shown, only "<30", in the table and the files', () => {
+  assert.equal(countValue(29), '<30');
+  assert.equal(countValue(0), '<30');
+  assert.equal(countValue(30), 30);
+  assert.equal(countValue(null), null);
+  const rows = tableRows([cell('Kano', { n_unweighted: 12 })], META);
+  const [values] = downloadRows(rows, 'state');
+  assert.equal(values[6], '<30');
+  assert.match(csvText(rows, 'state'), /,<30\r\n$/);
+  // The figures themselves keep their unrounded values in the files.
+  const tiny = tableRows([cell('Kano', { estimate: 0.0002, ci_low: 0, ci_high: 0.001 })], META);
+  assert.deepEqual(downloadRows(tiny, 'state')[0].slice(1, 4), [0.02, 0, 0.1]);
 });

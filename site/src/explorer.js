@@ -16,10 +16,12 @@ import {
   DEFAULT_VIEW,
   caption,
   columns,
+  countValue,
   csvText,
   fileBase,
   jsonText,
   parseQuery,
+  pctText,
   resolveView,
   sizeText,
   sortRows,
@@ -45,6 +47,9 @@ const downloadsEl = $('results-downloads');
 const columnsEl = $('results-columns');
 const chartNote = $('chart-note');
 const chartFigure = $('explorer-chart-figure');
+const chartData = $('chart-data');
+const chartDataSummary = $('chart-data-summary');
+const chartDataTable = $('chart-data-table');
 const selects = Object.fromEntries(FIELDS.map((f) => [f, $(`f-${f}`)]));
 const showButton = $('f-show');
 
@@ -144,11 +149,12 @@ const FIELD_NAMES = {
   sort: 'sort order',
 };
 
+// Shows (and returns, for the live region) the message about a link's invalid choices.
 function showInvalid(invalid, view) {
   if (invalid.length === 0) {
     urlMessage.hidden = true;
     urlMessage.textContent = '';
-    return;
+    return '';
   }
   const parts = invalid.map(({ field, given }) => {
     const used =
@@ -159,6 +165,7 @@ function showInvalid(invalid, view) {
   });
   urlMessage.textContent = `This link's choices were not all valid: ${parts.join('; ')}. The defaults are shown instead.`;
   urlMessage.hidden = false;
+  return urlMessage.textContent;
 }
 
 // --- The table ------------------------------------------------------------------------------
@@ -227,12 +234,13 @@ function bodyRows(tbody, rows, level) {
       tr.append(td);
     } else {
       for (const key of ['estimate', 'low', 'high']) {
-        tr.append(cell('td', formatValue(row[key], 'number', 1), 'num'));
+        tr.append(cell('td', pctText(row[key]), 'num'));
       }
     }
     tr.append(cell('td', row.flag));
     tr.append(cell('td', row.reason ?? ''));
-    tr.append(cell('td', row.n == null ? '' : formatValue(row.n, 'integer'), 'num'));
+    const n = countValue(row.n);
+    tr.append(cell('td', typeof n === 'number' ? formatValue(n, 'integer') : (n ?? ''), 'num'));
     return tr;
   });
   tbody.replaceChildren(...trs);
@@ -318,12 +326,16 @@ function renderColumnLinks(level) {
 let chartModule;
 let chartHandle;
 
-function chartUnavailable(text) {
+function clearChart(text = '') {
   chartHandle?.dispose();
   chartHandle = null;
   chartFigure.hidden = true;
+  chartData.hidden = true;
+  chartDataTable.replaceChildren();
   chartNote.textContent = text;
 }
+
+const chartUnavailable = clearChart;
 
 async function renderViewChart(view, request) {
   const key = `${view.level}|${view.measure}|${view.age}|${view.sex}`;
@@ -349,8 +361,8 @@ async function renderViewChart(view, request) {
       const inChart = doc.data.categories.includes(view.place);
       notes.push(
         inChart
-          ? `The chart shows all ${drawn} ${plural} with a figure in this view, highest first, with ${view.place} highlighted (thick outline, bold label); the table above shows ${view.place} alone.`
-          : `The chart shows all ${drawn} ${plural} with a figure in this view, highest first. ${view.place} has no figure here, so nothing is highlighted.`,
+          ? `The chart shows all ${drawn} ${plural} with a figure in this view, highest first, with ${view.place} highlighted (thick outline, bold label). The table above shows ${view.place} alone; the chart's figures for all ${drawn} are under "Chart data" after the chart.`
+          : `The chart shows all ${drawn} ${plural} with a figure in this view, highest first; their figures are under "Chart data" after the chart. ${view.place} has no figure here, so nothing is highlighted.`,
       );
     } else {
       notes.push(`The chart shows the ${drawn} ${plural} with a figure in this view, highest first.`);
@@ -362,26 +374,41 @@ async function renderViewChart(view, request) {
     chartNote.textContent = notes.join(' ');
     chartFigure.hidden = false;
     chartHandle?.dispose();
-    chartHandle = await chartModule.renderChart(doc, {
+    chartHandle = null;
+    // A view of every place: the table above holds exactly the chart's figures. A one-place
+    // view: the chart shows the whole level, so its own table (from the same document) goes
+    // under "Chart data".
+    if (!view.place) chartDataTable.replaceChildren();
+    chartDataSummary.textContent = `Chart data: all ${drawn} ${plural} in the chart`;
+    chartData.hidden = !view.place;
+    const handle = await chartModule.renderChart(doc, {
       container: $('explorer-chart'),
       titleEl: $('explorer-chart-title'),
       descEl: $('explorer-chart-desc'),
-      tableEl: null,
+      tableEl: view.place ? chartDataTable : null,
       highlight: view.place || null,
     });
+    if (request !== latest) {
+      // A newer view was asked for while this one drew; that one draws its own chart.
+      handle.dispose();
+      return;
+    }
+    chartHandle = handle;
   } catch (error) {
     if (request !== latest) return;
     chartUnavailable(
-      `The chart could not be loaded: ${error.message}. The table above has every figure.`,
+      `The chart could not be loaded: ${error.message}. The table above has this view's figures.`,
     );
   }
 }
 
 // --- Showing a view -------------------------------------------------------------------------
 
-async function show(view, { focus }) {
+async function show(view, { focus, prefix = '' }) {
   const request = ++latest;
   results.setAttribute('aria-busy', 'true');
+  // The previous view's chart never stays up under a new table.
+  clearChart();
   try {
     const cells = await runQuery(view);
     if (request !== latest) return;
@@ -392,7 +419,8 @@ async function show(view, { focus }) {
     renderColumnLinks(view.level);
     results.hidden = false;
     fallback.hidden = true;
-    setStatus(statusText(shownRows.length, view, options, meta));
+    const shownText = statusText(shownRows.length, view, options, meta);
+    setStatus(prefix ? `${prefix} ${shownText}` : shownText);
     if (focus) heading.focus();
     await renderViewChart(view, request);
   } catch (error) {
@@ -419,7 +447,7 @@ function applyUrl({ focus }) {
   const wanted = parseQuery(window.location.search);
   const resolved = resolveView(meta, combos, places, wanted);
   fillForm(resolved);
-  showInvalid(resolved.invalid, resolved.view);
+  const invalidText = showInvalid(resolved.invalid, resolved.view);
   if (Object.values(wanted).every((v) => v === undefined)) {
     ++latest;
     current = undefined;
@@ -428,13 +456,36 @@ function applyUrl({ focus }) {
     return Promise.resolve();
   }
   if (resolved.invalid.length > 0) history.replaceState(null, '', toQuery(resolved.view));
-  return show(resolved.view, { focus });
+  // The fallback is announced with the result, and stays visible above it.
+  return show(resolved.view, { focus, prefix: invalidText });
 }
 
-form.addEventListener('change', () => {
+const FIELD_LABELS = {
+  level: 'Level',
+  measure: 'Measure',
+  age: 'Age group',
+  sex: 'Sex',
+  place: 'State or zone',
+};
+
+form.addEventListener('change', (event) => {
   // Keep every choice valid for the ones before it (no query: nothing is shown until the
-  // button is pressed).
-  fillForm(resolveView(meta, combos, places, formWanted()));
+  // button is pressed). A later choice that had to change is announced; focus stays put.
+  const before = formWanted();
+  const resolved = resolveView(meta, combos, places, before);
+  fillForm(resolved);
+  const changed = FIELDS.filter(
+    (f) => f !== event.target.name && before[f] !== '' && before[f] !== resolved.view[f],
+  );
+  if (changed.length === 0) return;
+  const level = options.level.find((o) => o.value === resolved.view.level)?.label;
+  const parts = changed.map((f) => {
+    const label = options[f].find((o) => o.value === resolved.view[f])?.label ?? resolved.view[f];
+    return `${FIELD_LABELS[f]} reset to ${label}`;
+  });
+  setStatus(
+    `${parts.join('; ')}: the previous choice is not available for ${level} with the choices above it.`,
+  );
 });
 
 form.addEventListener('submit', (event) => {
