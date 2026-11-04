@@ -7,6 +7,9 @@ All notable changes to this project are documented here. Entries follow [Convent
 ### Documentation
 - docs: academic polish of the technical write-ups (P6 detour, 2026-11-04): methods docs, data READMEs, `README.md` and the `disability-access-charts` docs brought to journal standard; one bibliography (`docs/references.bib`); `CITATION.cff`; gap report `docs/publication-readiness.md` for three candidate papers. No numbers changed except where a doc disagreed with its committed source file (listed in the PR).
 
+### Fixed
+- fix(site): NVDA no longer reads a whole table when Tab reaches it (P6 item 4): the caption, not the scroll wrapper, is the table's Tab stop (NVDA transcript: 290–315 words before, 46 after); the wrappers are no longer labelled regions.
+
 ### Added
 - ci(site): Lighthouse CI with accessibility 100 as a hard gate on 7 pages (P6 item 3); all pages scored 100 on the first run.
 - feat(site): CSV and JSON downloads under every data table (P6 item 2): main page (3 tables), poverty page (13) and each state page (up to 7), written at build time by `packages/transform/scripts/downloads.py` from the same table data the page renders. The CSV is plain (header and rows, unrounded numbers); the JSON adds caption, columns, sources, survey, year, the source terms and the page's URL. Link text shows format and size; each link's accessible name adds the table's short name. JONAPWD's tables (all rights reserved) get a citation line instead of a download.

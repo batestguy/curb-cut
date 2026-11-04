@@ -226,10 +226,10 @@ def test_page_structure_and_wording(payload: dict[str, Any], built: str) -> None
     assert "not shown: too few households" in plain
     assert "under 30" in plain
     assert "2 of S1, S2 and S3 are supported" in plain
-    # Every <details> has a summary, every table a caption, inside a focusable region.
+    # Every <details> has a summary, every table a caption, each caption its Tab stop.
     assert built.count("<details") == built.count("<summary>") == 4
-    assert built.count("<table>") == built.count("<caption>")
-    assert built.count('role="region" tabindex="0"') == built.count("<table>")
+    assert built.count('<caption tabindex="0">') == built.count("<table>")
+    assert 'role="region"' not in built
     # The overlap estimate has the same box as the main one, labelled secondary.
     assert built.count('<div class="p5-result">') == 2
     assert "Secondary: households where the comparison is better supported" in plain
@@ -348,7 +348,8 @@ def test_long_date() -> None:
 # --- Downloads (P6 item 2) -------------------------------------------------------------------
 
 TABLE_AND_LINE = re.compile(
-    r"<table><caption>(.*?)</caption><thead>.*?</thead><tbody>(.*?)</tbody></table></div>"
+    r'<table><caption tabindex="0">(.*?)</caption><thead>.*?</thead>'
+    r"<tbody>(.*?)</tbody></table></div>"
     r'(<p class="table-download">.*?</p>)?',
     re.S,
 )

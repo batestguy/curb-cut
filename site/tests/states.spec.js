@@ -217,7 +217,8 @@ test('keyboard: skip link first, then every link and control in order, with no t
       .filter((el) => el.checkVisibility())
       .map((el) => el.outerHTML.slice(0, 80)),
   );
-  expect(expected.filter((h) => h.includes('role="region"')).length).toBeGreaterThanOrEqual(6);
+  expect(expected.filter((h) => h.startsWith('<caption tabindex="0"')).length).toBeGreaterThanOrEqual(6);
+  expect(expected.filter((h) => h.includes('role="region"'))).toEqual([]);
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip to main content' })).toBeFocused();
   const reached = [];
@@ -267,13 +268,17 @@ test('headings in order, tables with captions and scoped headers, no sideways sc
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(overflow, slug).toBeLessThanOrEqual(0);
-    // A table that scrolls sideways must be reachable by keyboard: a focusable, named region.
+    // A table that scrolls sideways must be reachable by keyboard: its caption is the Tab
+    // stop (the wrapper is not: NVDA would read every row).
     const wraps = await page.evaluate(() =>
-      [...document.querySelectorAll('.table-wrap')].map((w) => ({
-        scrolls: w.scrollWidth > w.clientWidth,
-        focusable: w.getAttribute('tabindex') === '0' && w.getAttribute('role') === 'region',
-        named: Boolean(w.getAttribute('aria-label')),
-      })),
+      [...document.querySelectorAll('.table-wrap')].map((w) => {
+        const caption = w.querySelector('caption');
+        return {
+          scrolls: w.scrollWidth > w.clientWidth,
+          focusable: caption?.getAttribute('tabindex') === '0' && !w.hasAttribute('tabindex'),
+          named: Boolean(caption?.textContent.trim()),
+        };
+      }),
     );
     for (const w of wraps) if (w.scrolls) expect(w, slug).toEqual({ ...w, focusable: true, named: true });
   }

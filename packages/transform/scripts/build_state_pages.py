@@ -464,13 +464,16 @@ def doc_table(doc: Mapping[str, Any]) -> str:
 
 
 def wide_table(table_html: str, caption: str) -> str:
-    """Every table sits in a named, focusable region, so it can be scrolled sideways from the
-    keyboard wherever it does not fit (a phone, or high zoom). No script needed."""
-    label = esc(f"{caption} (table, may scroll sideways)")
-    return (
-        f'<div class="table-wrap" role="region" tabindex="0" aria-label="{label}">'
-        f"{table_html}</div>"
-    )
+    """Every table sits in a scroll wrapper whose caption is the Tab stop, so it can be
+    scrolled sideways from the keyboard wherever it does not fit (a phone, or high zoom); no
+    script needed. The caption, not the wrapper, takes focus: NVDA reads a focused wrapper's
+    whole content (every row), but a focused caption as caption plus table size (P6 item 4,
+    NVDA transcript 2026-11-04). `caption` is kept for the callers; the table carries it."""
+    del caption
+    if table_html.count("<caption>") != 1:
+        raise ValueError("a wide table needs exactly one <caption>")
+    focusable = table_html.replace("<caption>", '<caption tabindex="0">')
+    return f'<div class="table-wrap">{focusable}</div>'
 
 
 def findings_html(doc: Mapping[str, Any]) -> str:

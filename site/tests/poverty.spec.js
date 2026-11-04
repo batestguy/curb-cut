@@ -185,7 +185,7 @@ test('poverty page: keyboard reaches the skip link, every table region and every
       const info = await page.evaluate(() => {
         const el = document.activeElement;
         if (!el || !el.closest('main')) return { inMain: false };
-        const all = [...document.querySelectorAll('main .table-wrap, main details > summary')];
+        const all = [...document.querySelectorAll('main .table-wrap caption, main details > summary')];
         return { inMain: true, index: all.indexOf(el) };
       });
       if (!info.inMain) break;
@@ -194,7 +194,7 @@ test('poverty page: keyboard reaches the skip link, every table region and every
     return reached;
   }
   const closed = await page
-    .locator('main .table-wrap, main details > summary')
+    .locator('main .table-wrap caption, main details > summary')
     .evaluateAll((els) => els.filter((el) => el.tagName === 'SUMMARY' || !el.closest('details')).length);
   expect((await tabThrough()).size).toBe(closed);
   const summaries = page.locator('main details > summary');
@@ -202,7 +202,7 @@ test('poverty page: keyboard reaches the skip link, every table region and every
     await summaries.nth(i).focus();
     await page.keyboard.press('Enter');
   }
-  const all = await page.locator('main .table-wrap, main details > summary').count();
+  const all = await page.locator('main .table-wrap caption, main details > summary').count();
   expect((await tabThrough()).size).toBe(all);
   for (const summary of await summaries.all()) {
     await summary.focus();
@@ -214,7 +214,7 @@ test('poverty page: keyboard reaches the skip link, every table region and every
   await page.keyboard.press('Enter');
   await expect(page.locator('main details').first()).toHaveAttribute('open', '');
   await page.keyboard.press('Tab');
-  await expect(page.locator('main details').first().locator('.table-wrap')).toBeFocused();
+  await expect(page.locator('main details').first().locator('caption')).toBeFocused();
 });
 
 test('poverty page: no sideways scrolling at 320px, with every details open', async ({ page }) => {

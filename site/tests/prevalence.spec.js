@@ -688,13 +688,17 @@ test('at 320px the map fits and wide tables scroll inside a named region', async
   const box = await page.locator('#prevalence-map svg').boundingBox();
   expect(box.x).toBeGreaterThanOrEqual(0);
   expect(box.x + box.width).toBeLessThanOrEqual(320);
-  // A table wider than the screen is a focusable, named region (so it can be scrolled by key).
+  // A table wider than the screen has a focusable caption (so it can be scrolled by key);
+  // the wrapper is never the Tab stop (NVDA would read every row).
   const wraps = await page.locator('.table-wrap').evaluateAll((els) =>
-    els.map((el) => ({
-      scrolls: el.scrollWidth > el.clientWidth + 1,
-      focusable: el.tabIndex === 0,
-      named: Boolean(el.getAttribute('aria-label')),
-    })),
+    els.map((el) => {
+      const caption = el.querySelector('caption');
+      return {
+        scrolls: el.scrollWidth > el.clientWidth + 1,
+        focusable: caption?.tabIndex === 0 && !el.hasAttribute('tabindex'),
+        named: Boolean(caption?.textContent.trim()),
+      };
+    }),
   );
   for (const w of wraps.filter((x) => x.scrolls)) {
     expect(w.focusable && w.named).toBe(true);
