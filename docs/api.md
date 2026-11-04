@@ -30,25 +30,24 @@ Notes:
 
 ### Client address behind Render's proxy
 
-Render does not document how it sets `X-Forwarded-For`. What we found (2026-11-04):
-- Render staff (2021): "we set the first IP in the list to the real client IP" (https://feedback.render.com/features/p/send-the-correct-xforwardedfor).
-- A user's test on the same thread (2024) and a write-up (https://rohitpaulk.com/articles/render-rails-remote-ip): Render's proxy **appends** and keeps whatever the client sent, so the first entry can be forged. Requests reach Render through Cloudflare; the write-up's unforged example is `client, Cloudflare edge`.
-- Cloudflare appends the address connecting to it (https://developers.cloudflare.com/fundamentals/reference/http-headers/).
+Render does not document how it passes on the client's address. Requests reach it through Cloudflare (https://rohitpaulk.com/articles/render-rails-remote-ip), which always sets `CF-Connecting-IP` to the address that connected to it, overwriting any value a client sends (https://developers.cloudflare.com/fundamentals/reference/http-headers/).
 
-So the first entry is the one a client controls. With `CURBCUT_TRUST_PROXY=1` (set in `render.yaml`) the API keys the limit on the entry `CURBCUT_PROXY_HOPS` (default 2) places from the right: the address Cloudflare saw, which a client can't move by sending its own header. If a request's header has fewer entries than that, the API uses the rightmost entry (added by the last proxy, never the client's own) and counts it: `/status` shows the count as `proxy_chain_shorter_than_hops_seen` (no addresses). Without the flag it uses the TCP peer and ignores the header (right for local runs).
+**Measured on the live service, 2026-11-04** (first deploy, commit 5334183, keyed on the `X-Forwarded-For` entry 2 from the right): 61 requests from one computer, each with a different forged `X-Forwarded-For`, all got 200; the same computer without a forged header got 429 after its budget ran out, and no request had a chain shorter than 2. So when a client sends its own `X-Forwarded-For`, the chain the app sees is the forged entry plus a proxy's address, and the client's real address is not in it at all: **no hop count can work with `X-Forwarded-For` on Render.** (Render staff said in 2021 that the first entry is the real client, https://feedback.render.com/features/p/send-the-correct-xforwardedfor; that is not what we measured.)
 
-### Check the client address after the first deploy
+So with `CURBCUT_TRUST_PROXY=1` and `CURBCUT_CLIENT_IP_HEADER=cf-connecting-ip` (both set in `render.yaml`) the API keys the limit on `CF-Connecting-IP`. A request without that header falls back to the `X-Forwarded-For` entry `CURBCUT_PROXY_HOPS` (default 2) from the right and is counted: `/status` shows `client_ip_header_missing_seen` (a count, no addresses). Without `CURBCUT_TRUST_PROXY` the API uses the TCP peer and ignores both headers (right for local runs).
+
+### Check the client address after a deploy
 
 Two checks, within the same minute. In each command, replace `curb-cut-api.onrender.com` with your service's address if Render gave it a different one.
 
-**Step 1: a forged header must not buy extra requests.** In Git Bash on your computer, run:
+**Step 1: forged headers must not buy extra requests.** In Git Bash on your computer, run:
 
 ```
-for i in $(seq 1 61); do curl -s -o /dev/null -w '%{http_code}\n' -H "X-Forwarded-For: 192.0.2.$i" https://curb-cut-api.onrender.com/compare; done | sort | uniq -c
+for i in $(seq 1 61); do curl -s -o /dev/null -w '%{http_code}\n' -H "X-Forwarded-For: 192.0.2.$i" -H "CF-Connecting-IP: 198.51.100.$i" https://curb-cut-api.onrender.com/compare; done | sort | uniq -c
 ```
 
-- Good: two lines, `60 200` and `1 429`.
-- Bad: one line, `61 200`. The limit follows the forged entry, so `CURBCUT_PROXY_HOPS` is too large: Render's chain adds fewer entries. Set it to 1 (below) and repeat both steps.
+- Good: two lines, `60 200` and `1 429` (fewer 200s is also fine if you made other requests in the last minute).
+- Bad: one line, `61 200`. A forged header moves the key; tell Claude and don't rely on the limit.
 
 **Step 2: a different real client must still get through.** Straight after step 1 (while your computer is limited), on a phone using mobile data (Wi-Fi off), open:
 
@@ -57,17 +56,15 @@ https://curb-cut-api.onrender.com/compare
 ```
 
 - Good: the page shows JSON starting `{"count":`.
-- Bad: it shows `Rate limit exceeded`. Your phone and computer share one key, so `CURBCUT_PROXY_HOPS` is too small: the key is a proxy's address, not yours. Set it to 3 (below) and repeat both steps.
+- Bad: it shows `Rate limit exceeded`. Your phone and computer share one key; tell Claude.
 
-Then open this and check `proxy_chain_shorter_than_hops_seen` is `0`:
+Then open this and check `client_ip_header_missing_seen` is `0`:
 
 ```
 https://curb-cut-api.onrender.com/status
 ```
 
-A number above 0 also means `CURBCUT_PROXY_HOPS` is too large for some requests; tell Claude.
-
-**To set `CURBCUT_PROXY_HOPS`:** in the Render Dashboard open `curb-cut-api`, choose **Environment**, add a variable with key `CURBCUT_PROXY_HOPS` and the value (1 or 3), and save it so the service redeploys. Then tell Claude the value, so it goes into `render.yaml` too. If neither 1, 2 nor 3 passes both steps, tell Claude and don't rely on the limit until it's fixed.
+A number above 0 means some requests arrived without `CF-Connecting-IP` (for example if Render stops using Cloudflare); tell Claude.
 
 ## Data source and refresh
 

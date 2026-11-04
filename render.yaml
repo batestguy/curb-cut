@@ -17,8 +17,12 @@ services:
     # pass, so the API restarts after the site's data have been published and loads them.
     autoDeployTrigger: checksPass
     envVars:
-      # Behind Render's proxy: rate-limit on the X-Forwarded-For entry its proxies add.
+      # Behind Render's proxy (Cloudflare in front): rate-limit on CF-Connecting-IP, which
+      # Cloudflare sets itself. X-Forwarded-For can't be used: a forged one hides the client
+      # (measured on the live service, 2026-11-04; docs/api.md).
       - key: CURBCUT_TRUST_PROXY
         value: "1"
+      - key: CURBCUT_CLIENT_IP_HEADER
+        value: cf-connecting-ip
       - key: CURBCUT_RATE_LIMIT
         value: 60/minute

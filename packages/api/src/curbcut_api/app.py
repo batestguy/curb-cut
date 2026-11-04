@@ -8,9 +8,10 @@ Environment:
 * ``CURBCUT_DATA_BASE``: where to download the public files (default: the live site's
   ``/data/``); ``CURBCUT_DATA_DIR`` reads a local directory instead;
 * ``CURBCUT_RATE_LIMIT``: per-client limit (default ``60/minute``);
-* ``CURBCUT_TRUST_PROXY=1``: take the client address from ``X-Forwarded-For`` (set on
-  Render only); ``CURBCUT_PROXY_HOPS`` (default 2) is how many entries the trusted proxies
-  append, so the client is that many entries from the right (see ``docs/api.md``);
+* ``CURBCUT_TRUST_PROXY=1``: take the client address from proxy headers (set on Render
+  only): from ``CURBCUT_CLIENT_IP_HEADER`` (``cf-connecting-ip`` on Render) when set and
+  present, otherwise from ``X-Forwarded-For``, ``CURBCUT_PROXY_HOPS`` (default 2) entries
+  from the right (see ``docs/api.md``);
 * ``RENDER_GIT_COMMIT``: shown by ``/status`` (Render sets it).
 """
 
@@ -121,20 +122,34 @@ UNITS = "estimate, se, ci_low and ci_high are proportions (0 to 1); ci is a 95% 
 
 
 def client_key(
-    trust_proxy: bool, hops: int, on_short: Callable[[], None] | None = None
+    trust_proxy: bool,
+    hops: int,
+    on_short: Callable[[], None] | None = None,
+    ip_header: str | None = None,
+    on_missing: Callable[[], None] | None = None,
 ) -> Callable[[Request], str]:
     """The rate limit's client key.
 
-    Without ``trust_proxy`` it is the TCP peer. With it, it is the ``X-Forwarded-For``
-    entry ``hops`` places from the right: proxies append, so entries a client sends
-    itself sit to the left of the ones the trusted proxies add and can't move the key.
-    A header with fewer entries than ``hops`` means the proxy chain is shorter than
-    configured: the key is then the rightmost entry (added by the last proxy, never the
-    client's own leftmost one) and ``on_short`` is called so ``/status`` can say so.
+    Without ``trust_proxy`` it is the TCP peer. With it and ``ip_header`` (on Render:
+    ``CF-Connecting-IP``, which Cloudflare always sets itself, overwriting any value the
+    client sent), it is that header's value. Measured on Render (2026-11-04): when a client
+    sends its own ``X-Forwarded-For``, the chain the app sees no longer holds the client's
+    address at all, so no hop count can work there (docs/api.md).
+
+    If ``ip_header`` is missing from a request (``on_missing`` counts it), or not
+    configured, the key falls back to the ``X-Forwarded-For`` entry ``hops`` places from
+    the right. A header with fewer entries than ``hops`` gives the rightmost entry (added by
+    the last proxy, never the client's own leftmost one) and ``on_short`` is called.
     """
 
     def key(request: Request) -> str:
         if trust_proxy:
+            if ip_header:
+                value = request.headers.get(ip_header, "").strip()
+                if value:
+                    return value
+                if on_missing is not None:
+                    on_missing()
             header = request.headers.get("x-forwarded-for", "")
             entries = [e.strip() for e in header.split(",") if e.strip()]
             if len(entries) >= hops:
@@ -183,12 +198,19 @@ def create_app(env: Mapping[str, str] | None = None, store: Store | None = None)
     hops = max(1, int(env.get("CURBCUT_PROXY_HOPS") or 2))
     # Requests whose X-Forwarded-For had fewer entries than `hops` (a count, no addresses).
     short_chains = [0]
+    # Header holding the client address, set by a trusted proxy (CF-Connecting-IP on Render).
+    ip_header = (env.get("CURBCUT_CLIENT_IP_HEADER") or "").strip().lower() or None
+    # Requests that lacked that header (a count, no addresses).
+    missing_header = [0]
 
     def on_short() -> None:
         short_chains[0] += 1
 
+    def on_missing() -> None:
+        missing_header[0] += 1
+
     limiter = Limiter(
-        key_func=client_key(trust_proxy, hops, on_short),
+        key_func=client_key(trust_proxy, hops, on_short, ip_header, on_missing),
         # One budget per client across all routes (default_limits would be per route).
         application_limits=[rate_limit],
         # Off: slowapi would add Retry-After to every response and overwrite the 503's.
@@ -297,6 +319,12 @@ def create_app(env: Mapping[str, str] | None = None, store: Store | None = None)
             "proxy_hops": hops if trust_proxy else None,
             # Non-zero means the proxy chain looks shorter than proxy_hops (docs/api.md).
             "proxy_chain_shorter_than_hops_seen": short_chains[0] if trust_proxy else None,
+            "client_ip_header": ip_header if trust_proxy else None,
+            # Non-zero means some requests lacked client_ip_header and fell back to
+            # X-Forwarded-For (docs/api.md).
+            "client_ip_header_missing_seen": (
+                missing_header[0] if trust_proxy and ip_header else None
+            ),
             "cold_start": COLD_START,
             "site": SITE,
         }

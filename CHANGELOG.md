@@ -8,6 +8,7 @@ All notable changes to this project are documented here. Entries follow [Convent
 - docs: academic polish of the technical write-ups (P6 detour, 2026-11-04): methods docs, data READMEs, `README.md` and the `disability-access-charts` docs brought to journal standard; one bibliography (`docs/references.bib`); `CITATION.cff`; gap report `docs/publication-readiness.md` for three candidate papers. No numbers changed except where a doc disagreed with its committed source file (listed in the PR).
 
 ### Fixed
+- fix(api): the rate limit keys on `CF-Connecting-IP` behind Render (`CURBCUT_CLIENT_IP_HEADER`): the live check on the first deploy showed a forged `X-Forwarded-For` hid the client from that chain, so 61 forged requests all got through. `/status` counts requests without the header.
 - feat(site): self-hosted Noto Sans subset for Nigerian-language text (P6 item 5, D29): covers the Yoruba, Hausa and Igbo letters, stacked tone marks and ₦ (Atkinson Hyperlegible Next lacks 25 of them); 39.6 KB woff2, used only for `lang` yo/ha/ig/pcm, so English pages download nothing extra.
 - fix(site): NVDA no longer reads a whole table when Tab reaches it (P6 item 4): the caption, not the scroll wrapper, is the table's Tab stop (NVDA transcript: 290–315 words before, 46 after); the wrappers are no longer labelled regions.
 

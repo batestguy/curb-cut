@@ -96,3 +96,57 @@ def test_client_key_rules() -> None:
     assert client_key(trust_proxy=True, hops=1)(_request("9.9.9.9, 1.1.1.1")) == "1.1.1.1"
     no_peer = Request({"type": "http", "headers": [], "client": None})
     assert untrusted(no_peer) == "unknown"
+
+
+def _request_headers(headers: dict[str, str], peer: str = "10.0.0.1") -> Request:
+    raw = [(k.lower().encode(), v.encode()) for k, v in headers.items()]
+    return Request({"type": "http", "headers": raw, "client": (peer, 1234)})
+
+
+def test_client_ip_header_rules() -> None:
+    missing: list[int] = []
+    key = client_key(
+        trust_proxy=True,
+        hops=2,
+        ip_header="cf-connecting-ip",
+        on_missing=lambda: missing.append(1),
+    )
+    # The header wins over any X-Forwarded-For the client sends.
+    both = {"CF-Connecting-IP": " 203.0.113.7 ", "X-Forwarded-For": "192.0.2.1, 104.16.0.1"}
+    assert key(_request_headers(both)) == "203.0.113.7"
+    assert missing == []
+    # Missing or empty header: counted, then the X-Forwarded-For rule applies.
+    assert key(_request_headers({"X-Forwarded-For": "1.1.1.1, 2.2.2.2"})) == "1.1.1.1"
+    assert key(_request_headers({"CF-Connecting-IP": " "})) == "10.0.0.1"
+    assert missing == [1, 1]
+    # Not trusted: the header is ignored.
+    untrusted = client_key(trust_proxy=False, hops=2, ip_header="cf-connecting-ip")
+    assert untrusted(_request_headers({"CF-Connecting-IP": "203.0.113.7"})) == "10.0.0.1"
+
+
+def test_client_ip_header_limits_despite_forged_forwarded_for(
+    make_client: Callable[..., TestClient],
+) -> None:
+    # What Render showed: a forged X-Forwarded-For hides the client in that chain, but
+    # CF-Connecting-IP (set by Cloudflare) still names it.
+    env = LIMIT | {"CURBCUT_TRUST_PROXY": "1", "CURBCUT_CLIENT_IP_HEADER": "CF-Connecting-IP"}
+    client = make_client(env)
+    codes = [
+        client.get(
+            "/states",
+            headers={
+                "X-Forwarded-For": f"192.0.2.{i}, 104.16.0.1",
+                "CF-Connecting-IP": "203.0.113.7",
+            },
+        ).status_code
+        for i in range(4)
+    ]
+    assert codes == [200, 200, 200, 429]
+    other = client.get("/states", headers={"CF-Connecting-IP": "203.0.113.8"})
+    assert other.status_code == 200
+    client.get("/states", headers={"X-Forwarded-For": "203.0.113.9, 104.16.0.1"})
+    body = client.get("/status").json()
+    assert body["client_ip_header"] == "cf-connecting-ip"
+    assert body["client_ip_header_missing_seen"] == 1
+    assert "203.0.113" not in str(body)
+    assert make_client().get("/status").json()["client_ip_header_missing_seen"] is None
