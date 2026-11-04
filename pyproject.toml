@@ -21,7 +21,9 @@ curbcut-ingest = { workspace = true }
 [dependency-groups]
 dev = [
     "curbcut-ingest",
+    "brotli==1.2.0",
     "disability-access-charts",
+    "fonttools==4.68.0",
     "pandas-stubs==3.0.5.260914",
     "plotly>=6",
     "pre-commit>=4",
