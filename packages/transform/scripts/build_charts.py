@@ -20,7 +20,9 @@ a data table and an accessibility audit. The build fails if any audit fails.
   so ``unit="number"`` is used with the unit in the value label.
 
 It also writes the main page's table downloads (``main_page_downloads``) to
-``downloads/main/`` with a manifest, ``downloads/main/index.json``, that the page reads.
+``downloads/main/`` with a manifest, ``downloads/main/index.json``, that the page reads, and
+the data explorer's chart set and manifest (``explorer_charts.py``: ``charts/explorer/`` and
+``explorer.json``).
 """
 
 from __future__ import annotations
@@ -387,6 +389,14 @@ def main() -> int:
         status = "passed" if doc["audit"]["passed"] else "FAILED"
         print(f"wrote {path} (audit {status}, {doc['audit']['warnings']} warning(s))")
         failed = failed or not doc["audit"]["passed"]
+    # The data explorer's charts (one per view) and its manifest; explorer_charts.build writes
+    # them into charts/explorer/ (cleared first) and explorer.json. Audited like the others.
+    explorer_docs = _load_sibling("explorer_charts").build(args.data_dir)
+    for name, doc in explorer_docs.items():
+        failed = failed or not doc["audit"]["passed"]
+        if not doc["audit"]["passed"]:
+            print(f"explorer chart {name}: audit FAILED", file=sys.stderr)
+    print(f"wrote {len(explorer_docs)} explorer charts and {args.data_dir / 'explorer.json'}")
     if failed:
         print("A chart failed its accessibility audit.", file=sys.stderr)
         return 1
