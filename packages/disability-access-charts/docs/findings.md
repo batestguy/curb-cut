@@ -2,6 +2,8 @@
 
 `findings=True` on `bar()`, `grouped_bar()` or `dot()` (or `statistical_findings(data)` directly) adds a `findings` block to a chart document. It answers one question: **which differences between these survey estimates are larger than their uncertainty allows, once we allow for how many differences we looked at?**
 
+Here an *estimate* is one plotted value with its confidence interval, a *comparison* is one test of the difference between two estimates (or between an estimate and a reference value), and a comparison is *supported* when it survives the correction below. The false discovery rate (FDR) is the expected share of false positives among the comparisons reported as supported.
+
 It is **descriptive multiple-comparison control**. It describes estimates. It does not explain them, it is not a causal analysis, and "not supported" does not mean "the same": a survey cannot show that two groups are equal.
 
 ## The families, declared before the data
@@ -28,13 +30,13 @@ It is the claim checker's interval test (`describe.difference_test`), written as
 
 ## The correction: Benjamini-Hochberg at q = 0.05
 
-All the comparisons that were tested (every family and every series together) form **one** family for the false discovery rate. Benjamini-Hochberg (1995) adjusts the p-values: sorted ascending, *p*_adj(*i*) = min over *j* ≥ *i* of (*m* / *j*) · *p*(*j*), capped at 1. A comparison is **supported** when *p*_adj ≤ *q* (and, as a guard, the checker's own test passes, which only matters at the 1.96 edge). The default is *q* = 0.05: among the supported findings, at most about 5% are expected to be false discoveries, on average. `fdr_q=` sets a stricter *q*; it must be above 0 and **at most 0.05**, the claim checker's own level, which every finding must also pass (a larger *q* raises a `ValueError` rather than being quietly capped).
+All the comparisons that were tested (every family and every series together) form **one** family for the false discovery rate. The Benjamini-Hochberg procedure (Benjamini and Hochberg, 1995) adjusts the p-values: sorted ascending, *p*_adj(*i*) = min over *j* ≥ *i* of (*m* / *j*) · *p*(*j*), capped at 1. A comparison is **supported** when *p*_adj ≤ *q* (and, as a guard, the checker's own test passes, which only matters at the 1.96 edge). The default is *q* = 0.05: among the supported findings, at most about 5% are expected to be false discoveries, on average. `fdr_q=` sets a stricter *q*; it must be above 0 and **at most 0.05**, the claim checker's own level, which every finding must also pass (a larger *q* raises a `ValueError` rather than being quietly capped).
 
 Why BH and not Bonferroni: with 73 comparisons, Bonferroni controls the chance of even one false finding and would hide most real differences between states. BH controls the expected *share* of false findings among those reported, which is what a reader of a list of findings cares about. BH is proven for independent or positively dependent tests (Benjamini and Yekutieli, 2001). Comparisons that share a state or the reference are dependent, and we have not shown the positive-dependence condition holds for every pair, so treat the 5% as a nominal rate. The block's `dependence` caveat says so and gives how many comparisons Benjamini-Yekutieli (2001), which holds under any dependence, would support (it multiplies the BH adjustment by 1 + 1/2 + ... + 1/*m*). On Curb Cut's state dot plot, BH supports 20 of the 73 and BY 15.
 
 ## Precision and missing cells
 
-A series may carry a precision flag per estimate (`Series(..., precision=...)`): `reliable`, `review`, `unreliable` or `suppressed`. Curb Cut uses the NCHS standard plus a 10-event rule.
+A series may carry a precision flag per estimate (`Series(..., precision=...)`): `reliable`, `review`, `unreliable` or `suppressed`. Curb Cut uses the NCHS Data Presentation Standards for Proportions (Parker et al., 2017) plus its own rule that an otherwise reliable estimate resting on fewer than 10 unweighted events is flagged for review.
 
 - **review**: the comparison is tested and counted. A finding that involves it is **hedged**: its sentence is followed by "Read with care: Area C's estimate is flagged for review."
 - **unreliable** or **suppressed**: the comparison is **not tested**. It goes to `dropped_comparisons`, is counted in `dropped`, and is not part of the BH family. The block says "N more comparisons not tested, because they involve an estimate that is suppressed, too imprecise or has an interval of zero width."
@@ -92,6 +94,8 @@ A name that is also a word of these sentences ("Care", "Flagged") is refused, si
 
 ## References
 
-Benjamini, Y. and Hochberg, Y. (1995). Controlling the false discovery rate: a practical and powerful approach to multiple testing. *Journal of the Royal Statistical Society, Series B*, 57(1), 289–300.
+Benjamini, Y. and Hochberg, Y. (1995). Controlling the false discovery rate: a practical and powerful approach to multiple testing. *Journal of the Royal Statistical Society, Series B*, 57(1), 289–300. https://doi.org/10.1111/j.2517-6161.1995.tb02031.x
 
-Benjamini, Y. and Yekutieli, D. (2001). The control of the false discovery rate in multiple testing under dependency. *Annals of Statistics*, 29(4), 1165–1188.
+Benjamini, Y. and Yekutieli, D. (2001). The control of the false discovery rate in multiple testing under dependency. *Annals of Statistics*, 29(4), 1165–1188. https://doi.org/10.1214/aos/1013699998
+
+Parker, J. D., Talih, M., Malec, D. J., et al. (2017). National Center for Health Statistics data presentation standards for proportions. *Vital and Health Statistics*, Series 2, No. 175. National Center for Health Statistics. https://www.cdc.gov/nchs/data/series/sr_02/sr02_175.pdf
