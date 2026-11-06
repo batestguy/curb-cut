@@ -206,3 +206,62 @@ for (const [colorScheme, width] of VIEWS) {
     });
   }
 }
+
+// --- The adire band -----------------------------------------------------------------------
+
+const PAGES = [
+  './',
+  'methodology.html',
+  'explorer.html',
+  'sensitivity.html',
+  'poverty.html',
+  'data-dictionary.html',
+  'states/',
+  'states/kano.html',
+];
+
+for (const path of PAGES) {
+  test(`${path}: the adire band follows the flag band, hidden from assistive technology`, async ({
+    page,
+  }) => {
+    await page.goto(path);
+    const band = page.locator('.adire-band');
+    await expect(band).toHaveCount(1);
+    await expect(band).toHaveAttribute('aria-hidden', 'true');
+    const next = await page
+      .locator('.flag-band')
+      .evaluate((el) => el.nextElementSibling?.className);
+    expect(next).toBe('adire-band');
+    const box = await band.boundingBox();
+    expect(box.height).toBeGreaterThan(10);
+    // The mask draws the library's tiles in the theme's ink.
+    const mask = await band.evaluate((el) => {
+      const s = getComputedStyle(el, '::before');
+      return s.maskImage || s.webkitMaskImage;
+    });
+    expect(mask).toContain('data:image/svg+xml');
+  });
+}
+
+for (const colorScheme of ['light', 'dark']) {
+  test(`the band's colours are the audited tokens (${colorScheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme });
+    await page.goto('states/kano.html');
+    const colours = await page.locator('.adire-band').evaluate((el) => ({
+      bg: getComputedStyle(el).backgroundColor,
+      ink: getComputedStyle(el, '::before').backgroundColor,
+    }));
+    const want =
+      colorScheme === 'light'
+        ? { bg: 'rgb(29, 43, 100)', ink: 'rgb(255, 255, 255)' }
+        : { bg: 'rgb(74, 99, 200)', ink: 'rgb(240, 240, 240)' };
+    expect(colours).toEqual(want);
+  });
+}
+
+test('the band is hidden in forced colours (Windows High Contrast)', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  await page.goto('./');
+  await expect(page.locator('.adire-band')).toBeHidden();
+  await expect(page.locator('.flag-band')).toBeVisible();
+});

@@ -502,3 +502,4 @@ def test_each_chart_has_its_description_in_four_languages(built) -> None:
             esc = pages.esc(text)
             assert f'<p class="translation-text" lang="{code}">{esc}</p>' in html
         assert html.count("drafted by AI, not reviewed by a native speaker") == 4
+        assert '<div class="adire-band" aria-hidden="true"></div>' in html

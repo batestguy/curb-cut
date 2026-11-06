@@ -605,6 +605,7 @@ def header_html(crumb: str) -> str:
     return (
         '<a class="skip-link" href="#main">Skip to main content</a>'
         '<div class="flag-band" aria-hidden="true"></div>'
+        '<div class="adire-band" aria-hidden="true"></div>'
         '<header class="site-header"><p class="site-name"><a href="../">Curb Cut</a></p>'
         f'<nav class="breadcrumb" aria-label="Breadcrumb"><ol>{crumb}</ol></nav></header>'
     )
