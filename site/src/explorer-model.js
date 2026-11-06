@@ -293,7 +293,8 @@ export function pyFloat(x) {
   return text.includes('.') ? text : `${text}.0`;
 }
 
-function csvCell(value, column) {
+/** A value as a CSV cell (downloads.py's _csv_cell): integers plain, floats as Python's repr. */
+export function csvCell(value, column) {
   if (value == null) return '';
   if (typeof value === 'number') {
     return column.type === 'integer' && Number.isInteger(value) ? String(value) : pyFloat(value);
@@ -301,7 +302,8 @@ function csvCell(value, column) {
   return String(value);
 }
 
-function csvQuote(text) {
+/** Quote a CSV cell as Python's csv module does (only when needed). */
+export function csvQuote(text) {
   return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 

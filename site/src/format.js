@@ -34,12 +34,15 @@ export function formatValue(value, type, decimals = 1) {
  * with every run of other characters replaced by one hyphen, the same rule as
  * build_state_pages.py's state_slug ("Akwa Ibom" -> "akwa-ibom").
  */
-export function stateHref(name) {
-  const slug = String(name)
+export function stateSlug(name) {
+  return String(name)
     .toLowerCase()
     .replace(/[^a-z]+/g, '-')
     .replace(/^-+|-+$/g, '');
-  return `${import.meta.env.BASE_URL}states/${slug}.html`;
+}
+
+export function stateHref(name) {
+  return `${import.meta.env.BASE_URL}states/${stateSlug(name)}.html`;
 }
 
 /**

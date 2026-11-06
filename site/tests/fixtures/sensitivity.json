@@ -1,0 +1,2243 @@
+{
+  "rates": {
+    "min": 2.0,
+    "max": 20.0,
+    "step": 0.5,
+    "default": 15.0
+  },
+  "measure": {
+    "code": "disability3",
+    "short": "DISABILITY3",
+    "label": "Disability: a lot of difficulty or cannot do at all in at least one of six activities",
+    "definition": "The Washington Group Short Set DISABILITY3 measure, \"a lot of difficulty\" or \"cannot do at all\" in at least one of six domains."
+  },
+  "age_groups": [
+    {
+      "value": "18+",
+      "label": "Adults 18 and over",
+      "short": "adults 18+"
+    },
+    {
+      "value": "5-17",
+      "label": "Children 5 to 17",
+      "short": "children 5–17"
+    }
+  ],
+  "assumption": {
+    "label": "JONAPWD 2025",
+    "kind": "assumed",
+    "value_percent": 15.0,
+    "ci_low_percent": null,
+    "ci_high_percent": null,
+    "population": "All ages, all 37 states",
+    "definition": "An assumption, not a count: the global 15% disability rate applied to 2025 population projections. Nobody was counted.",
+    "source": "Joint National Association of Persons with Disabilities (JONAPWD), 2025 Assumptive Disability Disaggregated Data",
+    "source_url": "https://jonapwdng.org/10865-2/"
+  },
+  "global": {
+    "label": "WHO global estimate",
+    "kind": "global estimate",
+    "value_percent": 16.0,
+    "ci_low_percent": null,
+    "ci_high_percent": null,
+    "population": "World population",
+    "definition": "WHO: “An estimated 1.3 billion people experience significant disability… 16% of the world’s population”. The fact sheet does not define “significant disability” or cite a source report for the figure, so it is not a Washington Group cut-off figure.",
+    "source": "World Health Organization, fact sheet “Disability”, 7 March 2023",
+    "source_url": "https://www.who.int/news-room/fact-sheets/detail/disability-and-health"
+  },
+  "population": {
+    "description": "2023 population projection for the state and the row's sex (all ages; both sexes when sex is \"all\"), NBS Demographic Bulletin 2023, Annex 3. Not the denominator of the estimate.",
+    "source": "National Bureau of Statistics, Demographic Bulletin 2023, Annex 3 (source: National Population Commission)",
+    "url": "https://microdata.nigerianstat.gov.ng/index.php/catalog/182"
+  },
+  "flags": {
+    "reliable": "Reliable",
+    "review": "Review: few events, read with care",
+    "unreliable": "Unreliable",
+    "suppressed": "Suppressed",
+    "no_data": "No data"
+  },
+  "missing": {
+    "too_few": "Suppressed (fewer than 30 respondents)",
+    "withheld": "Suppressed (withheld to protect a neighbouring small cell)",
+    "unreliable": "Not shown: too imprecise (unreliable)",
+    "no_data": "No data"
+  },
+  "states": {
+    "18+": [
+      {
+        "state": "Abia",
+        "estimate": 0.03,
+        "ci_low": 0.01,
+        "ci_high": 0.05,
+        "n_unweighted": 1000,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4232255
+      },
+      {
+        "state": "Adamawa",
+        "estimate": 0.031,
+        "ci_low": 0.011,
+        "ci_high": 0.051,
+        "n_unweighted": 1001,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 5017720
+      },
+      {
+        "state": "Akwa Ibom",
+        "estimate": 0.032,
+        "ci_low": 0.012,
+        "ci_high": 0.052,
+        "n_unweighted": 1002,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 5044286
+      },
+      {
+        "state": "Anambra",
+        "estimate": 0.033,
+        "ci_low": 0.013,
+        "ci_high": 0.053,
+        "n_unweighted": 1003,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 6061011
+      },
+      {
+        "state": "Bauchi",
+        "estimate": 0.034,
+        "ci_low": 0.014,
+        "ci_high": 0.054,
+        "n_unweighted": 1004,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 8529872
+      },
+      {
+        "state": "Bayelsa",
+        "estimate": 0.035,
+        "ci_low": 0.015,
+        "ci_high": 0.055,
+        "n_unweighted": 1005,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 2583352
+      },
+      {
+        "state": "Benue",
+        "estimate": 0.036,
+        "ci_low": 0.016,
+        "ci_high": 0.056,
+        "n_unweighted": 1006,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 6259867
+      },
+      {
+        "state": "Borno",
+        "estimate": 0.037,
+        "ci_low": 0.017,
+        "ci_high": 0.057,
+        "n_unweighted": 1007,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 6207654
+      },
+      {
+        "state": "Cross River",
+        "estimate": 0.038,
+        "ci_low": 0.018,
+        "ci_high": 0.058,
+        "n_unweighted": 1008,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4490963
+      },
+      {
+        "state": "Delta",
+        "estimate": 0.039,
+        "ci_low": 0.019,
+        "ci_high": 0.059,
+        "n_unweighted": 1009,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 5737314
+      },
+      {
+        "state": "Ebonyi",
+        "estimate": 0.04,
+        "ci_low": 0.02,
+        "ci_high": 0.06,
+        "n_unweighted": 1010,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 3315180
+      },
+      {
+        "state": "Edo",
+        "estimate": 0.041,
+        "ci_low": 0.021,
+        "ci_high": 0.061,
+        "n_unweighted": 1011,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4874613
+      },
+      {
+        "state": "Ekiti",
+        "estimate": 0.042,
+        "ci_low": 0.022,
+        "ci_high": 0.062,
+        "n_unweighted": 1012,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 3667047
+      },
+      {
+        "state": "Enugu",
+        "estimate": 0.043,
+        "ci_low": 0.023,
+        "ci_high": 0.063,
+        "n_unweighted": 1013,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4768489
+      },
+      {
+        "state": "Federal Capital Territory",
+        "estimate": 0.044,
+        "ci_low": 0.024,
+        "ci_high": 0.064,
+        "n_unweighted": 1014,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 3171148
+      },
+      {
+        "state": "Gombe",
+        "estimate": 0.045,
+        "ci_low": 0.025,
+        "ci_high": 0.065,
+        "n_unweighted": 1015,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4058199
+      },
+      {
+        "state": "Imo",
+        "estimate": 0.046,
+        "ci_low": 0.026,
+        "ci_high": 0.066,
+        "n_unweighted": 1016,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 5548808
+      },
+      {
+        "state": "Jigawa",
+        "estimate": 0.047,
+        "ci_low": 0.027,
+        "ci_high": 0.067,
+        "n_unweighted": 1017,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 7687056
+      },
+      {
+        "state": "Kaduna",
+        "estimate": 0.048,
+        "ci_low": 0.028,
+        "ci_high": 0.068,
+        "n_unweighted": 1018,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 9249537
+      },
+      {
+        "state": "Kano",
+        "estimate": 0.049,
+        "ci_low": 0.029,
+        "ci_high": 0.069,
+        "n_unweighted": 1019,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 15671491
+      },
+      {
+        "state": "Katsina",
+        "estimate": 0.05,
+        "ci_low": 0.03,
+        "ci_high": 0.07,
+        "n_unweighted": 1020,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 10661373
+      },
+      {
+        "state": "Kebbi",
+        "estimate": 0.051,
+        "ci_low": 0.031,
+        "ci_high": 0.071,
+        "n_unweighted": 1021,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 5711801
+      },
+      {
+        "state": "Kogi",
+        "estimate": 0.052,
+        "ci_low": 0.032,
+        "ci_high": 0.072,
+        "n_unweighted": 1022,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4557686
+      },
+      {
+        "state": "Kwara",
+        "estimate": 0.053,
+        "ci_low": 0.033,
+        "ci_high": 0.073,
+        "n_unweighted": 1023,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 3626882
+      },
+      {
+        "state": "Lagos",
+        "estimate": 0.054,
+        "ci_low": 0.034,
+        "ci_high": 0.074,
+        "n_unweighted": 1024,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 13710862
+      },
+      {
+        "state": "Nasarawa",
+        "estimate": 0.055,
+        "ci_low": 0.035,
+        "ci_high": 0.075,
+        "n_unweighted": 1025,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 2948849
+      },
+      {
+        "state": "Niger",
+        "estimate": 0.056,
+        "ci_low": 0.036,
+        "ci_high": 0.076,
+        "n_unweighted": 1026,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 6965970
+      },
+      {
+        "state": "Ogun",
+        "estimate": 0.057,
+        "ci_low": 0.037,
+        "ci_high": 0.077,
+        "n_unweighted": 1027,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 6512195
+      },
+      {
+        "state": "Ondo",
+        "estimate": 0.058,
+        "ci_low": 0.038,
+        "ci_high": 0.078,
+        "n_unweighted": 1028,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 5422399
+      },
+      {
+        "state": "Osun",
+        "estimate": 0.059,
+        "ci_low": 0.039,
+        "ci_high": 0.079,
+        "n_unweighted": 1029,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4494970
+      },
+      {
+        "state": "Oyo",
+        "estimate": 0.06,
+        "ci_low": 0.04,
+        "ci_high": 0.08,
+        "n_unweighted": 1030,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 8127483
+      },
+      {
+        "state": "Plateau",
+        "estimate": 0.061,
+        "ci_low": 0.041,
+        "ci_high": 0.081,
+        "n_unweighted": 1031,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4807502
+      },
+      {
+        "state": "Rivers",
+        "estimate": 0.062,
+        "ci_low": 0.042,
+        "ci_high": 0.082,
+        "n_unweighted": 1032,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 7616859
+      },
+      {
+        "state": "Sokoto",
+        "estimate": 0.063,
+        "ci_low": 0.043,
+        "ci_high": 0.083,
+        "n_unweighted": 1033,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 6501265
+      },
+      {
+        "state": "Taraba",
+        "estimate": 0.064,
+        "ci_low": 0.044,
+        "ci_high": 0.084,
+        "n_unweighted": 1034,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 3689513
+      },
+      {
+        "state": "Yobe",
+        "estimate": 0.065,
+        "ci_low": 0.045,
+        "ci_high": 0.085,
+        "n_unweighted": 1035,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 3728525
+      },
+      {
+        "state": "Zamfara",
+        "estimate": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n_unweighted": null,
+        "precision_flag": "no_data",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": false,
+        "population_2023": 5990131
+      }
+    ],
+    "5-17": [
+      {
+        "state": "Abia",
+        "estimate": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n_unweighted": null,
+        "precision_flag": "suppressed",
+        "precision_reason": "n<30 (disclosure)",
+        "suppressed": true,
+        "has_data": true,
+        "population_2023": 4232255
+      },
+      {
+        "state": "Adamawa",
+        "estimate": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n_unweighted": null,
+        "precision_flag": "suppressed",
+        "precision_reason": "complementary suppression (disclosure)",
+        "suppressed": true,
+        "has_data": true,
+        "population_2023": 5017720
+      },
+      {
+        "state": "Akwa Ibom",
+        "estimate": 0.032,
+        "ci_low": 0.012,
+        "ci_high": 0.052,
+        "n_unweighted": 1002,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 5044286
+      },
+      {
+        "state": "Anambra",
+        "estimate": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n_unweighted": null,
+        "precision_flag": "suppressed",
+        "precision_reason": "complementary suppression (disclosure)",
+        "suppressed": true,
+        "has_data": true,
+        "population_2023": 6061011
+      },
+      {
+        "state": "Bauchi",
+        "estimate": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n_unweighted": null,
+        "precision_flag": "suppressed",
+        "precision_reason": "complementary suppression (disclosure)",
+        "suppressed": true,
+        "has_data": true,
+        "population_2023": 8529872
+      },
+      {
+        "state": "Bayelsa",
+        "estimate": 0.035,
+        "ci_low": 0.015,
+        "ci_high": 0.055,
+        "n_unweighted": 1005,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 2583352
+      },
+      {
+        "state": "Benue",
+        "estimate": 0.036,
+        "ci_low": 0.016,
+        "ci_high": 0.056,
+        "n_unweighted": 1006,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 6259867
+      },
+      {
+        "state": "Borno",
+        "estimate": 0.037,
+        "ci_low": 0.017,
+        "ci_high": 0.057,
+        "n_unweighted": 1007,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 6207654
+      },
+      {
+        "state": "Cross River",
+        "estimate": 0.038,
+        "ci_low": 0.018,
+        "ci_high": 0.058,
+        "n_unweighted": 1008,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4490963
+      },
+      {
+        "state": "Delta",
+        "estimate": 0.039,
+        "ci_low": 0.019,
+        "ci_high": 0.059,
+        "n_unweighted": 1009,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 5737314
+      },
+      {
+        "state": "Ebonyi",
+        "estimate": 0.04,
+        "ci_low": 0.02,
+        "ci_high": 0.06,
+        "n_unweighted": 1010,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 3315180
+      },
+      {
+        "state": "Edo",
+        "estimate": 0.041,
+        "ci_low": 0.021,
+        "ci_high": 0.061,
+        "n_unweighted": 1011,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4874613
+      },
+      {
+        "state": "Ekiti",
+        "estimate": 0.042,
+        "ci_low": 0.022,
+        "ci_high": 0.062,
+        "n_unweighted": 1012,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 3667047
+      },
+      {
+        "state": "Enugu",
+        "estimate": 0.043,
+        "ci_low": 0.023,
+        "ci_high": 0.063,
+        "n_unweighted": 1013,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4768489
+      },
+      {
+        "state": "Federal Capital Territory",
+        "estimate": 0.044,
+        "ci_low": 0.024,
+        "ci_high": 0.064,
+        "n_unweighted": 1014,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 3171148
+      },
+      {
+        "state": "Gombe",
+        "estimate": 0.045,
+        "ci_low": 0.025,
+        "ci_high": 0.065,
+        "n_unweighted": 1015,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4058199
+      },
+      {
+        "state": "Imo",
+        "estimate": 0.046,
+        "ci_low": 0.026,
+        "ci_high": 0.066,
+        "n_unweighted": 1016,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 5548808
+      },
+      {
+        "state": "Jigawa",
+        "estimate": 0.047,
+        "ci_low": 0.027,
+        "ci_high": 0.067,
+        "n_unweighted": 1017,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 7687056
+      },
+      {
+        "state": "Kaduna",
+        "estimate": 0.048,
+        "ci_low": 0.028,
+        "ci_high": 0.068,
+        "n_unweighted": 1018,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 9249537
+      },
+      {
+        "state": "Kano",
+        "estimate": 0.049,
+        "ci_low": 0.029,
+        "ci_high": 0.069,
+        "n_unweighted": 1019,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 15671491
+      },
+      {
+        "state": "Katsina",
+        "estimate": 0.05,
+        "ci_low": 0.03,
+        "ci_high": 0.07,
+        "n_unweighted": 1020,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 10661373
+      },
+      {
+        "state": "Kebbi",
+        "estimate": 0.051,
+        "ci_low": 0.031,
+        "ci_high": 0.071,
+        "n_unweighted": 1021,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 5711801
+      },
+      {
+        "state": "Kogi",
+        "estimate": 0.052,
+        "ci_low": 0.032,
+        "ci_high": 0.072,
+        "n_unweighted": 1022,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4557686
+      },
+      {
+        "state": "Kwara",
+        "estimate": 0.053,
+        "ci_low": 0.033,
+        "ci_high": 0.073,
+        "n_unweighted": 1023,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 3626882
+      },
+      {
+        "state": "Lagos",
+        "estimate": 0.054,
+        "ci_low": 0.034,
+        "ci_high": 0.074,
+        "n_unweighted": 1024,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 13710862
+      },
+      {
+        "state": "Nasarawa",
+        "estimate": 0.055,
+        "ci_low": 0.035,
+        "ci_high": 0.075,
+        "n_unweighted": 1025,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 2948849
+      },
+      {
+        "state": "Niger",
+        "estimate": 0.056,
+        "ci_low": 0.036,
+        "ci_high": 0.076,
+        "n_unweighted": 1026,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 6965970
+      },
+      {
+        "state": "Ogun",
+        "estimate": 0.057,
+        "ci_low": 0.037,
+        "ci_high": 0.077,
+        "n_unweighted": 1027,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 6512195
+      },
+      {
+        "state": "Ondo",
+        "estimate": 0.058,
+        "ci_low": 0.038,
+        "ci_high": 0.078,
+        "n_unweighted": 1028,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 5422399
+      },
+      {
+        "state": "Osun",
+        "estimate": 0.059,
+        "ci_low": 0.039,
+        "ci_high": 0.079,
+        "n_unweighted": 1029,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4494970
+      },
+      {
+        "state": "Oyo",
+        "estimate": 0.06,
+        "ci_low": 0.04,
+        "ci_high": 0.08,
+        "n_unweighted": 1030,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 8127483
+      },
+      {
+        "state": "Plateau",
+        "estimate": 0.061,
+        "ci_low": 0.041,
+        "ci_high": 0.081,
+        "n_unweighted": 1031,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 4807502
+      },
+      {
+        "state": "Rivers",
+        "estimate": 0.062,
+        "ci_low": 0.042,
+        "ci_high": 0.082,
+        "n_unweighted": 1032,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 7616859
+      },
+      {
+        "state": "Sokoto",
+        "estimate": 0.063,
+        "ci_low": 0.043,
+        "ci_high": 0.083,
+        "n_unweighted": 1033,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 6501265
+      },
+      {
+        "state": "Taraba",
+        "estimate": 0.064,
+        "ci_low": 0.044,
+        "ci_high": 0.084,
+        "n_unweighted": 1034,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 3689513
+      },
+      {
+        "state": "Yobe",
+        "estimate": 0.065,
+        "ci_low": 0.045,
+        "ci_high": 0.085,
+        "n_unweighted": 1035,
+        "precision_flag": "reliable",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": true,
+        "population_2023": 3728525
+      },
+      {
+        "state": "Zamfara",
+        "estimate": null,
+        "ci_low": null,
+        "ci_high": null,
+        "n_unweighted": null,
+        "precision_flag": "no_data",
+        "precision_reason": null,
+        "suppressed": false,
+        "has_data": false,
+        "population_2023": 5990131
+      }
+    ]
+  },
+  "dictionary": {
+    "file": "data-dictionary.html#dhs2024-state-prevalence-parquet",
+    "comparison_file": "data-dictionary.html#prevalence-comparison-parquet",
+    "estimate": "data-dictionary.html#dhs2024-state-prevalence-parquet--estimate",
+    "ci_low": "data-dictionary.html#dhs2024-state-prevalence-parquet--ci-low",
+    "ci_high": "data-dictionary.html#dhs2024-state-prevalence-parquet--ci-high",
+    "precision_flag": "data-dictionary.html#dhs2024-state-prevalence-parquet--precision-flag",
+    "population_2023": "data-dictionary.html#dhs2024-state-prevalence-parquet--population-2023"
+  },
+  "files": {
+    "state": "dhs2024_state_prevalence.parquet",
+    "comparison": "prevalence_comparison.parquet"
+  },
+  "download": {
+    "survey": "Nigeria Demographic and Health Survey (DHS)",
+    "year": "2024",
+    "sources": [
+      "The DHS Program, Nigeria Demographic and Health Survey 2024 (National Population Commission and ICF), release NG2024DHS; estimates by Curb Cut from the microdata, disclosure-checked",
+      "National Bureau of Statistics, Demographic Bulletin 2023, Annex 3 (source: National Population Commission)"
+    ],
+    "terms": "Reuse is subject to the source terms; cite the sources. Nigeria DHS 2024: data used only for the registered project \"Curb Cut: disability prevalence and poverty in Nigeria\"; no microdata in any tool or dashboard; only disclosure-checked aggregates are published. Population projections cited from the bulletin; the NBS datasheet itself is not redistributed.",
+    "values": "Numbers are the values behind the page, not rounded for display (at most 12 significant digits); the page rounds each column to its 'decimals'. Where the page shows words instead of figures (a figure not shown), the first value column has the same words and the row's other figures are empty. Where the page shows a floor such as '<0.1' or '<0.0001', the file has the value itself."
+  },
+  "charts": {
+    "18+|2.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-2-0.json"
+    },
+    "18+|2.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-2-5.json"
+    },
+    "18+|3.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-3-0.json"
+    },
+    "18+|3.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-3-5.json"
+    },
+    "18+|4.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-4-0.json"
+    },
+    "18+|4.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-4-5.json"
+    },
+    "18+|5.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-5-0.json"
+    },
+    "18+|5.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-5-5.json"
+    },
+    "18+|6.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-6-0.json"
+    },
+    "18+|6.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-6-5.json"
+    },
+    "18+|7.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-7-0.json"
+    },
+    "18+|7.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-7-5.json"
+    },
+    "18+|8.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-8-0.json"
+    },
+    "18+|8.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-8-5.json"
+    },
+    "18+|9.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-9-0.json"
+    },
+    "18+|9.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-9-5.json"
+    },
+    "18+|10.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-10-0.json"
+    },
+    "18+|10.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-10-5.json"
+    },
+    "18+|11.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-11-0.json"
+    },
+    "18+|11.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-11-5.json"
+    },
+    "18+|12.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-12-0.json"
+    },
+    "18+|12.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-12-5.json"
+    },
+    "18+|13.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-13-0.json"
+    },
+    "18+|13.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-13-5.json"
+    },
+    "18+|14.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-14-0.json"
+    },
+    "18+|14.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-14-5.json"
+    },
+    "18+|15.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-15-0.json"
+    },
+    "18+|15.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-15-5.json"
+    },
+    "18+|16.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-16-0.json"
+    },
+    "18+|16.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-16-5.json"
+    },
+    "18+|17.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-17-0.json"
+    },
+    "18+|17.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-17-5.json"
+    },
+    "18+|18.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-18-0.json"
+    },
+    "18+|18.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-18-5.json"
+    },
+    "18+|19.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-19-0.json"
+    },
+    "18+|19.5": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-19-5.json"
+    },
+    "18+|20.0": {
+      "left_out": [
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/18plus-rate-20-0.json"
+    },
+    "5-17|2.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-2-0.json"
+    },
+    "5-17|2.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-2-5.json"
+    },
+    "5-17|3.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-3-0.json"
+    },
+    "5-17|3.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-3-5.json"
+    },
+    "5-17|4.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-4-0.json"
+    },
+    "5-17|4.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-4-5.json"
+    },
+    "5-17|5.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-5-0.json"
+    },
+    "5-17|5.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-5-5.json"
+    },
+    "5-17|6.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-6-0.json"
+    },
+    "5-17|6.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-6-5.json"
+    },
+    "5-17|7.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-7-0.json"
+    },
+    "5-17|7.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-7-5.json"
+    },
+    "5-17|8.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-8-0.json"
+    },
+    "5-17|8.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-8-5.json"
+    },
+    "5-17|9.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-9-0.json"
+    },
+    "5-17|9.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-9-5.json"
+    },
+    "5-17|10.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-10-0.json"
+    },
+    "5-17|10.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-10-5.json"
+    },
+    "5-17|11.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-11-0.json"
+    },
+    "5-17|11.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-11-5.json"
+    },
+    "5-17|12.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-12-0.json"
+    },
+    "5-17|12.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-12-5.json"
+    },
+    "5-17|13.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-13-0.json"
+    },
+    "5-17|13.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-13-5.json"
+    },
+    "5-17|14.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-14-0.json"
+    },
+    "5-17|14.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-14-5.json"
+    },
+    "5-17|15.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-15-0.json"
+    },
+    "5-17|15.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-15-5.json"
+    },
+    "5-17|16.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-16-0.json"
+    },
+    "5-17|16.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-16-5.json"
+    },
+    "5-17|17.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-17-0.json"
+    },
+    "5-17|17.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-17-5.json"
+    },
+    "5-17|18.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-18-0.json"
+    },
+    "5-17|18.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-18-5.json"
+    },
+    "5-17|19.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-19-0.json"
+    },
+    "5-17|19.5": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-19-5.json"
+    },
+    "5-17|20.0": {
+      "left_out": [
+        {
+          "place": "Abia",
+          "why": "Suppressed (fewer than 30 respondents)"
+        },
+        {
+          "place": "Adamawa",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Anambra",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Bauchi",
+          "why": "Suppressed (withheld to protect a neighbouring small cell)"
+        },
+        {
+          "place": "Zamfara",
+          "why": "No data"
+        }
+      ],
+      "href": "charts/sensitivity/5to17-rate-20-0.json"
+    }
+  }
+}

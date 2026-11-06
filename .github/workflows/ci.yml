@@ -72,7 +72,7 @@ jobs:
           if-no-files-found: error
       - name: Export marts to Parquet
         run: uv run python packages/transform/scripts/export_marts.py
-      - name: Build chart JSON, including the data explorer's (fails on a failed accessibility audit)
+      - name: Build chart JSON, including the data explorer's and the sensitivity page's (fails on a failed accessibility audit)
         run: uv run python packages/transform/scripts/build_charts.py
       - name: Build locator map (from the committed geoBoundaries file; fails if a state is missing)
         run: uv run python packages/transform/scripts/build_map.py
@@ -108,6 +108,7 @@ jobs:
         run: >-
           uv run disability-access-charts check --strict site/public/data/charts/*.json
           site/public/data/charts/states/*.json site/public/data/charts/explorer/*.json
+          site/public/data/charts/sensitivity/*.json
       - uses: actions/upload-artifact@v7
         with:
           name: site-data

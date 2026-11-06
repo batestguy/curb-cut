@@ -30,6 +30,7 @@ import {
   toQuery,
 } from './explorer-model.js';
 import { downloadLine, formatValue, stateHref, watchTableWraps } from './format.js';
+import { SORT_WORDS, cell, headerRow, updateHeader } from './sort-table.js';
 
 const DATA_URL = `${import.meta.env.BASE_URL}data/`;
 const EXTENSIONS_URL = `${import.meta.env.BASE_URL}duckdb-extensions`;
@@ -169,49 +170,6 @@ function showInvalid(invalid, view) {
 }
 
 // --- The table ------------------------------------------------------------------------------
-
-const SORT_WORDS = {
-  text: { asc: 'A to Z', desc: 'Z to A' },
-  number: { asc: 'lowest first', desc: 'highest first' },
-  integer: { asc: 'smallest first', desc: 'largest first' },
-};
-
-function cell(tag, text, className) {
-  const el = document.createElement(tag);
-  if (className) el.className = className;
-  if (text != null) el.textContent = text;
-  return el;
-}
-
-function headerRow(cols, sort) {
-  const tr = document.createElement('tr');
-  for (const col of cols) {
-    const th = cell('th', null, col.type === 'text' ? undefined : 'num');
-    th.scope = 'col';
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'sort-button';
-    button.dataset.key = col.key;
-    button.append(col.label);
-    const icon = cell('span', '', 'sort-icon');
-    icon.setAttribute('aria-hidden', 'true');
-    button.append(icon);
-    th.append(button);
-    tr.append(th);
-  }
-  updateHeader(tr, sort);
-  return tr;
-}
-
-function updateHeader(tr, sort) {
-  for (const th of tr.children) {
-    const button = th.querySelector('button');
-    const on = button.dataset.key === sort.column;
-    if (on) th.setAttribute('aria-sort', sort.dir === 'asc' ? 'ascending' : 'descending');
-    else th.removeAttribute('aria-sort');
-    button.querySelector('.sort-icon').textContent = on ? (sort.dir === 'asc' ? '▲' : '▼') : '↕';
-  }
-}
 
 function bodyRows(tbody, rows, level) {
   const trs = rows.map((row) => {
