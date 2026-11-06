@@ -26,8 +26,9 @@ languages:
 disclosure:
   summary: This description in Hausa, Yorùbá, Igbo and Naijá
   note: >-
-    These descriptions say what the English one says, from the same data. They were drafted
-    by AI (Claude) and have not been reviewed by a native speaker. No screen-reader voice for
+    These descriptions are meant to say what the English one says. A program checks their
+    numbers and comparisons against the same data; the wording was drafted by AI (Claude) and
+    has not been reviewed by a native speaker. No screen-reader voice for
     these languages was found (eSpeak NG, which NVDA uses, has none), so they are for
     reading, not listening.
   label: "drafted by AI, not reviewed by a native speaker"

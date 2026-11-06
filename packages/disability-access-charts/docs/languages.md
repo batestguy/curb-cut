@@ -36,6 +36,16 @@ Numbers are always digits with "." as the decimal point and "," between thousand
 
 The National Commission for Persons with Disabilities and The Leprosy Mission Nigeria published a simplified Disability Act in Hausa, Yoruba and Igbo (`docs/verification.md` D26). **Its terms could not be confirmed**: the report of it could not be fetched on 2026-11-06 (HTTP 403), and no copy of the simplified Act was found. The library's tables contain no disability terms at all (only the caller's titles do). The Curb Cut site's glossary (`packages/transform/translations.yml`) uses the widely printed terms Hausa "nakasa", Yoruba "akanda ẹ̀dá", Igbo "nkwarụ" and Pidgin "disability"; they should be compared with the simplified Act when a copy is found.
 
+## What to check first with a native speaker
+
+The likeliest weak spots, in order (from the 2026-11-06 review; neither the builder nor the reviewer is a native speaker):
+
+1. **Yoruba "akanda ẹ̀dá"** for people with disabilities, the headline of the main map and dot plot. "Abirùn" may be the more common everyday word; it was not confirmed either way.
+2. **Igbo "Ịhụ ụzọ"** for "Seeing" (literally "seeing the way"); "Ịhụ ihe" may be plainer. Also "atụmatụ" for "estimate".
+3. **Hausa noun gender**: the templates use genderless "duk"/"duka" where they cannot know the noun.
+4. **Pidgin activity names** such as "To see", which read awkwardly in "To see 0.9% to 2.1%".
+5. The small hooks of Hausa ƙ ƴ in Noto Sans (D29), a font question rather than a wording one.
+
 ## Screen readers
 
 None of the four languages is in eSpeak NG's language list, so NVDA has no built-in voice for them (D27). These descriptions serve **readers, not listeners**. What NVDA does with text marked `lang="yo"` (and the others) still has to be tested by hand.

@@ -49,7 +49,7 @@
     --map-land: #2e2e2e;
     --map-edge: #9a9a9a;
     --card-bg: #16211b;
-    /* Ink against band 4.7:1; band against the page 3.5:1. */
+    /* Ink against band 4.71:1; band against the page 3.49:1. */
     --adire-bg: #4a63c8;
     --adire-ink: #f0f0f0;
     color-scheme: dark;

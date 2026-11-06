@@ -293,18 +293,33 @@ def _validate(data: ChartData) -> None:
             raise ValueError("counts must be non-negative")
         if data.shares and sum(s.values) <= 0:
             raise ValueError("values must sum to a positive total")
-    checked = [*data.categories, *data.glossary.values()]
-    if len(names) > 1:
-        checked += names
-    for code in _lang.LANGUAGES:
-        table = _lang.checker(code)
-        reserved = reserved_names(table)
-        for name in checked:
-            key = " ".join(name.lower().split())
-            if (_lang.fold(key) if table.FOLD else key) in reserved:
-                raise ValueError(
-                    table.MESSAGES["reserved_name"].format(name=name, example=f"{name} group")
-                )
+    check_reserved(data, "en")
+
+
+def check_reserved(data: ChartData, lang: str) -> None:
+    """Refuse a name that is one of ``lang``'s claim words (it would confuse that language's
+    claim checker). Only the language the text is written in matters: English data is checked
+    against English when it is built, and :func:`describe` and the translations check the
+    language they write, so a name such as "Ila" (an LGA, and a Yoruba word) stays usable in
+    English-only charts."""
+    names = [s.name for s in data.series]
+    if lang == "en":
+        checked = [*data.categories, *data.glossary.values()]
+        if len(names) > 1:
+            checked += names
+    else:
+        # The names as this language writes them (state names that are not translated stay).
+        checked = [data.glossary.get(c) or c for c in data.categories]
+        if len(names) > 1:
+            checked += [data.glossary.get(n) or n for n in names]
+    table = _lang.checker(lang)
+    reserved = reserved_names(table)
+    for name in checked:
+        key = " ".join(name.lower().split())
+        if (_lang.fold(key) if table.FOLD else key) in reserved:
+            raise ValueError(
+                table.MESSAGES["reserved_name"].format(name=name, example=f"{name} group")
+            )
 
 
 def _display(data: ChartData, lang: ModuleType, name: str) -> str:
@@ -673,6 +688,8 @@ def describe(
     it to that. ``verdicts`` decides "can / cannot show a difference" for the pairs it holds
     (see the module docstring).
     """
+    if lang != "en":
+        check_reserved(data, lang)
     writer = _Writer(data, lang, verdicts)
     if chart_type == "bar":
         if len(data.series) == 1:

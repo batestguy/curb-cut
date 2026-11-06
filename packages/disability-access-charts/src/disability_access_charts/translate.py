@@ -47,6 +47,7 @@ from disability_access_charts.describe import (
     Verdicts,
     _level_of,
     check_alt_text,
+    check_reserved,
     describe,
     number_tokens,
 )
@@ -159,6 +160,7 @@ def _is_map(doc: Mapping[str, Any]) -> bool:
 def _generate(doc: Mapping[str, Any], data: ChartData, lang: str, t: Translation) -> dict:
     """The template text (and class sentence, finding sentences) for one language."""
     data_t = translated_data(doc, data, t)
+    check_reserved(data_t, lang)  # names as this language writes them
     entry: dict[str, Any] = {}
     if _is_map(doc):
         from disability_access_charts.maps import _alt_text, class_labels

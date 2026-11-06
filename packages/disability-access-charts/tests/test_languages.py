@@ -22,7 +22,7 @@ from disability_access_charts import (
 )
 from disability_access_charts import bar as bar_chart
 from disability_access_charts._lang import LANGUAGES, checker, en, fold
-from disability_access_charts.describe import errors
+from disability_access_charts.describe import check_reserved, errors
 
 OTHERS = ("ha", "yo", "ig", "pcm")
 STATE = {"en": "State", "ha": "Jiha", "yo": "Ìpínlẹ̀", "ig": "Steeti", "pcm": "State"}
@@ -511,3 +511,27 @@ def test_a_reversed_comparison_in_a_finding_fails(code: str) -> None:
         if c["id"] == "alt-text-translation-matches-data" and c["lang"] == code
     )
     assert not check["passed"] and check["claim_problems"], sentences[k]
+
+
+# Review 2026-11-06: adding languages must not make English-only names fail. "Ila" is an LGA
+# (Osun, Kwara) and a Yoruba word; "Duk" and "Ka" are Hausa words.
+@pytest.mark.parametrize("name", ["Ila", "Isi", "Oke", "Duk", "Ka", "Ihe", "Nke"])
+def test_english_only_names_that_are_words_in_other_languages_still_build(name: str) -> None:
+    data = ChartData(categories=(name, "Kano"), series=(Series("Share", (1.0, 2.0)),))
+    describe(data, chart_type="bar", title="T", source="S")  # no error
+
+
+def test_a_name_that_is_a_claim_word_in_the_language_written_is_refused() -> None:
+    data = ChartData(categories=("Ila", "Kano"), series=(Series("Share", (1.0, 2.0)),))
+    hits = [c for c in ("ha", "yo", "ig", "pcm") if _refuses(data, c)]
+    assert hits, "'Ila' should be reserved in at least one of the new languages"
+    with pytest.raises(ValueError):
+        describe(data, chart_type="bar", title="T", source="S", lang=hits[0])
+
+
+def _refuses(data: ChartData, lang: str) -> bool:
+    try:
+        check_reserved(data, lang)
+    except ValueError:
+        return True
+    return False
