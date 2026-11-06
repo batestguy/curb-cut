@@ -14,8 +14,14 @@ New in 0.3: map colour schemes (:data:`MAP_SCHEMES`; the default is now ``"ylgnb
 ``scheme="green"`` gives the 0.2 look), cased boundaries, map patterns ordered by ink weight
 with an ink per class (:data:`MAP_PATTERNS`), a colour-vision check
 (:mod:`~disability_access_charts.vision`) and legend-filter metadata.
+
+New in 0.4: chart descriptions in Hausa, Yoruba, Igbo and Nigerian Pidgin (``lang=`` and
+``translations=`` with :class:`Translation`, :data:`LANGUAGES`), from templates drafted by
+an AI model and not reviewed by a native speaker, each checked by its own language's claim
+checker (:mod:`~disability_access_charts.translate`).
 """
 
+from disability_access_charts._lang import LANGUAGES
 from disability_access_charts._version import __version__
 from disability_access_charts.audit import audit
 from disability_access_charts.contrast import (
@@ -38,9 +44,11 @@ from disability_access_charts.patterns import MAP_PATTERNS, PATTERNS, Pattern
 from disability_access_charts.plots import bar, dot, figure, grouped_bar
 from disability_access_charts.table import to_csv, to_html
 from disability_access_charts.theme import theme
+from disability_access_charts.translate import Translation
 
 __all__ = [
     "DEFAULT_THEMES",
+    "LANGUAGES",
     "MAP_PATTERNS",
     "MAP_SCHEMES",
     "MAP_THEMES",
@@ -54,6 +62,7 @@ __all__ = [
     "Reference",
     "Series",
     "Theme",
+    "Translation",
     "__version__",
     "audit",
     "bar",

@@ -16,7 +16,10 @@ no Plotly import (the figure is plain dicts):
   :mod:`disability_access_charts.findings`. The alt-text's "can / cannot show a difference"
   then follows the block's corrected ``extremes`` results instead of the uncorrected test;
 * ``patterns`` (bars with patterns on): the pattern tiles, each series' tile and each
-  theme's ink, see :mod:`disability_access_charts.patterns`.
+  theme's ink, see :mod:`disability_access_charts.patterns`;
+* ``alt_text_translations`` (only with ``translations=``, new in 0.4): the description in
+  other languages, from templates, each checked by that language's claim checker, see
+  :mod:`disability_access_charts.translate`.
 
 Patterns are **off** by default for :func:`bar` (so 0.1 documents are unchanged) and **on**
 by default for :func:`grouped_bar`, where they tell the series apart without colour. Dot
@@ -52,8 +55,10 @@ from disability_access_charts.findings import (
 )
 from disability_access_charts.palettes import DEFAULT_THEMES, SYMBOLS, Theme
 from disability_access_charts.patterns import assign, ink_for, plotly_pattern, tile_dict
+from disability_access_charts.translate import Translation, translate
 
-SCHEMA = "1.0"
+SCHEMA = "1.1"
+"""Changed in 0.4 (from "1.0"): the optional ``alt_text_translations`` field."""
 _DEFAULT_DECIMALS = {"count": 0, "percent": 1, "number": 1}
 PRECISION_LABELS = {
     "reliable": "Reliable",
@@ -178,6 +183,7 @@ def _document(
     generator: str,
     findings: dict[str, Any] | None = None,
     patterns: dict[str, Any] | None = None,
+    translations: Mapping[str, Translation] | None = None,
 ) -> dict[str, Any]:
     # With findings, "can / cannot show a difference" in the alt-text follows the findings'
     # corrected extremes results, so the two never disagree.
@@ -215,6 +221,8 @@ def _document(
         doc["findings"] = findings
     if patterns is not None:
         doc["patterns"] = patterns
+    if translations:
+        doc["alt_text_translations"] = translate(doc, translations)
     doc["audit"] = audit(doc)
     return doc
 
@@ -276,6 +284,7 @@ def bar(
     reference: Reference | None = None,
     withheld: Sequence[str] = (),
     fdr_q: float = DEFAULT_Q,
+    translations: Mapping[str, Translation] | None = None,
 ) -> dict[str, Any]:
     """A horizontal bar-chart document (see the module docstring).
 
@@ -291,6 +300,10 @@ def bar(
     ``findings=True`` adds the statistical findings block (needs intervals), with an
     optional ``reference`` (overall value), ``withheld`` (categories left out of the chart)
     and false discovery rate ``fdr_q``.
+
+    New in 0.4: ``translations`` (language code -> :class:`~disability_access_charts.
+    translate.Translation`) adds ``alt_text_translations``, the description in those
+    languages, each checked by the audit.
     """
     _lang.get(lang)
     themes = _themes(themes)
@@ -351,6 +364,7 @@ def bar(
         generator="disability_access_charts.plots.bar",
         findings=_findings(data, findings, reference, withheld, fdr_q, lang),
         patterns=block,
+        translations=translations,
     )
 
 
@@ -383,6 +397,7 @@ def grouped_bar(
     reference: Reference | None = None,
     withheld: Sequence[str] = (),
     fdr_q: float = DEFAULT_Q,
+    translations: Mapping[str, Translation] | None = None,
 ) -> dict[str, Any]:
     """A grouped horizontal bar-chart document: one group of bars per category, one bar per
     series (new in 0.2).
@@ -453,6 +468,7 @@ def grouped_bar(
         generator="disability_access_charts.plots.grouped_bar",
         findings=_findings(data, findings, reference, withheld, fdr_q, lang),
         patterns=block,
+        translations=translations,
     )
 
 
@@ -476,6 +492,7 @@ def dot(
     reference: Reference | None = None,
     withheld: Sequence[str] = (),
     fdr_q: float = DEFAULT_Q,
+    translations: Mapping[str, Translation] | None = None,
 ) -> dict[str, Any]:
     """A dot-plot document: one row per category, one dot (and optional interval) per series.
 
@@ -542,6 +559,7 @@ def dot(
         lang=lang,
         generator="disability_access_charts.plots.dot",
         findings=_findings(data, findings, reference, withheld, fdr_q, lang),
+        translations=translations,
     )
 
 

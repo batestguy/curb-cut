@@ -628,12 +628,14 @@ def _refuse_colliding_names(data: ChartData, reference: Reference | None, lang: 
     """A name that is also a word of the finding sentences ("care", "review") would be read
     as that name by the claim checker; refuse it. Only the sentences the checker reads count,
     and the hedge words; the count, method and left-out lines do not ("Rate", "Survey")."""
-    text = " ".join(re.sub(r"\{\w+\}", " ", v) for v in _checked_templates(lang))
-    words = set(re.findall(r"[a-z]+", text.lower())) | {w.lower() for w in lang.HEDGES}
-    names = [*data.categories, *(s.name for s in data.series)]
+    fold = _lang.fold if lang.FOLD else (lambda s: s)
+    text = fold(" ".join(re.sub(r"\{\w+\}", " ", v) for v in _checked_templates(lang)))
+    words = set(re.findall(lang.WORD, text.lower())) | {fold(w.lower()) for w in lang.HEDGES}
+    # The names as the sentences write them (a translation's glossary applies).
+    names = [data.glossary.get(n, n) for n in (*data.categories, *(s.name for s in data.series))]
     if reference is not None:
-        names.append(reference.label)
-    bad = [n for n in names if " ".join(n.lower().split()) in words]
+        names.append(data.glossary.get(reference.label, reference.label))
+    bad = [n for n in names if fold(" ".join(n.lower().split())) in words]
     if bad:
         raise ValueError(
             f"name(s) {', '.join(bad)} are also words of the findings sentences; "
@@ -687,7 +689,9 @@ def lines(
         "none": f["findings_none"] if checked and not supported else None,
         "dropped": (
             f["findings_dropped"].format(
-                dropped=dropped, comparisons=noun(dropped), they="it" if dropped == 1 else "they"
+                dropped=dropped,
+                comparisons=noun(dropped),
+                they=f["they_one" if dropped == 1 else "they_many"],
             )
             if dropped
             else None
@@ -752,6 +756,22 @@ def _same_cell(got: Mapping[str, Any], want: Mapping[str, Any]) -> bool:
         and got.get("precision") == want["precision"]
         and all(_close(got.get(k), want[k]) for k in ("value", "lower", "upper"))
     )
+
+
+def hedge_present(text: str, cell: Mapping[str, Any], data: ChartData, lang: str) -> bool:
+    """Whether ``text`` carries the "read with care" sentence for ``cell`` (a comparison's
+    side) in ``lang``, with the names as the data's glossary writes them."""
+    f = _lang.get(lang).FINDINGS
+    name = str(cell.get("category"))
+    name = data.glossary.get(name, name)
+    if len(data.series) == 1:
+        want = f["finding_review"].format(name=name)
+    else:
+        series = str(cell.get("series"))
+        want = f["finding_review_series"].format(
+            name=name, series=data.glossary.get(series, series)
+        )
+    return want in text
 
 
 def findings_checks(doc: Mapping[str, Any], data: ChartData) -> list[dict[str, Any]]:
@@ -915,7 +935,9 @@ def findings_checks(doc: Mapping[str, Any], data: ChartData) -> list[dict[str, A
 
     # Hedging: a finding with a "review" estimate says so; no tested comparison involves an
     # unreliable or suppressed estimate, or an interval of zero width. The hedge is found by
-    # its English wording ("'s", "flagged for review"); another language would need its own.
+    # its sentence in the block's language (FINDINGS "finding_review", or "_series" with
+    # several series; since 0.4, before which it was the English words "'s" and "flagged for
+    # review").
     problems = []
     for k, c in enumerate(comparisons):
         flags = {(c.get(side) or {}).get("precision") for side in ("a", "b")}
@@ -939,7 +961,7 @@ def findings_checks(doc: Mapping[str, Any], data: ChartData) -> list[dict[str, A
         ]
         text = st.get("text", "")
         for cell in reviewed:
-            if f"{cell.get('category')}'s" not in text or "flagged for review" not in text:
+            if not hedge_present(text, cell, data, str(method.get("lang", "en"))):
                 problems.append(f"the finding about {cell.get('category')} is not hedged")
     checks.append(
         _check(

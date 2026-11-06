@@ -11,8 +11,10 @@
 * a Plotly ``Figure`` (anything with ``to_plotly_json`` or ``to_dict``).
 
 A document with a ``findings`` block also gets
-:func:`~disability_access_charts.findings.findings_checks`, and one with a ``patterns``
-block gets :func:`~disability_access_charts.patterns.pattern_checks`.
+:func:`~disability_access_charts.findings.findings_checks`, one with a ``patterns``
+block gets :func:`~disability_access_charts.patterns.pattern_checks`, and one with
+``alt_text_translations`` (0.4) gets
+:func:`~disability_access_charts.translate.translation_checks`.
 
 It returns ``{"passed": bool, "checks": [...]}``. Every check has an ``id``, the ``wcag``
 criterion it stands for, a ``severity`` ("error" or "warning") and ``passed``. The
@@ -419,6 +421,10 @@ def _audit_document(doc: Mapping[str, Any], alt_text: str | None) -> list[dict[s
     checks += data_checks(doc, data)
     if "findings" in doc and data is not None:
         checks += findings_checks(doc, data)
+    if "alt_text_translations" in doc:
+        from disability_access_charts.translate import translation_checks
+
+        checks += translation_checks(doc)
     return checks
 
 
