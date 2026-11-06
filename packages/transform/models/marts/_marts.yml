@@ -1,16 +1,38 @@
 version: 2
 
+# Every column of a mart that leaves for the public site (export_marts.py: EXPORTS, QUERIES,
+# states.json, prevalence.json, poverty.json) has a description and, where it has one, a unit
+# (config.meta.unit). scripts/build_data_dictionary.py turns them into site/data-dictionary.html
+# and fails if a public column has no description or a description names a column the mart
+# does not have. Each public mart's config.meta.sources gives its citations and terms.
+# The &anchors below are YAML aliases, so a survey-cell column means the same in every mart.
+
 models:
   - name: mart_jonapwd_state_by_type
     description: >
       JONAPWD assumption-based figures by state and disability type, with each type's
       share of the state total. Exported to site/public/data/ as Parquet.
+    config:
+      meta:
+        sources:
+          - &jonapwd_source
+            citation: >-
+              Joint National Association of Persons with Disabilities (JONAPWD), 2025
+              Assumptive Disability Disaggregated Data
+            url: https://jonapwdng.org/10865-2/
+            terms: >-
+              Cited, not redistributed (all rights reserved): the type-by-state tables are
+              not offered for download; state totals appear in states.json, and the national
+              figure in the comparison, as cited figures. The figures are an assumption (the
+              global 15% disability rate applied to population projections), not a count of
+              anyone.
     data_tests:
       - unique_combination:
           arguments:
             columns: [state, disability_type]
     columns:
       - name: state
+        description: &d_state Canonical state name (one of the 36 states or the Federal Capital Territory).
         data_tests:
           - not_null
           - relationships:
@@ -18,25 +40,74 @@ models:
                 to: ref('dim_states')
                 field: state
       - name: state_code
+        description: &d_state_code ISO 3166-2 code of the state, e.g. NG-KN for Kano and NG-FC for the Federal Capital Territory.
         data_tests: [not_null]
       - name: zone
+        description: &d_zone >-
+          Geopolitical zone of the state: North Central, North East, North West, South East,
+          South South or South West.
         data_tests: [not_null]
+      - name: disability_type
+        description: &d_jonapwd_type >-
+          JONAPWD's disability category as a code: physical, hearing, visual, leprosy,
+          albinism, spinal_cord_injury, intellectual, others, deaf_blindness or
+          little_stature.
+      - name: disability_type_label
+        description: &d_jonapwd_label The category's display label on the site (e.g. "Physical disability").
+      - name: sort_order
+        description: &d_jonapwd_order Display order of the category (1 to 10), as on the site.
       - name: persons
+        description: >-
+          JONAPWD's assumed number of persons with this type of disability in the state, as
+          printed in the publication. An assumption (15% of a 2025 population projection,
+          split by type), not a count or a survey estimate.
+        config:
+          meta: {unit: "persons (assumed)"}
         data_tests: [not_null, non_negative]
+      - name: state_total
+        description: JONAPWD's assumed total for the state, the sum of its ten categories.
+        config:
+          meta: {unit: "persons (assumed)"}
       - name: share_of_state
+        description: This category's share of the state's JONAPWD total.
+        config:
+          meta: {unit: &u_prop "proportion (0 to 1)"}
         data_tests: [not_null, non_negative]
+      - name: source_page
+        description: Page of the JONAPWD PDF (counted from 1) the figure was read from.
+        config:
+          meta: {unit: "page number"}
 
   - name: mart_jonapwd_national_by_type
     description: JONAPWD assumption-based figures summed over the 37 states, by type.
+    config:
+      meta:
+        sources:
+          - *jonapwd_source
     columns:
       - name: disability_type
+        description: *d_jonapwd_type
         data_tests: [unique, not_null]
       - name: disability_type_label
+        description: *d_jonapwd_label
         data_tests: [not_null]
+      - name: sort_order
+        description: *d_jonapwd_order
       - name: persons
+        description: >-
+          JONAPWD's assumed number of persons with this type of disability, summed over the
+          37 states. An assumption, not a count.
+        config:
+          meta: {unit: "persons (assumed)"}
         data_tests: [not_null, non_negative]
+      - name: share_of_total
+        description: This category's share of JONAPWD's all-state total.
+        config:
+          meta: {unit: *u_prop}
       - name: states
         description: Number of states contributing; must be 37.
+        config:
+          meta: {unit: "states"}
         data_tests:
           - accepted_values:
               arguments:
@@ -48,8 +119,26 @@ models:
       One row per state for the site's state card: zone, capital, slogan (blank where it
       could not be sourced), 2023 population projection, and the state's JONAPWD total with
       its share of the all-state total and its rank of 37. Exported into states.json.
+    config:
+      meta:
+        sources:
+          - &population_source
+            citation: >-
+              National Bureau of Statistics, Demographic Bulletin 2023, Annex 3 (source:
+              National Population Commission)
+            url: https://microdata.nigerianstat.gov.ng/index.php/catalog/182
+            terms: >-
+              Population projections cited from the bulletin; the NBS datasheet itself is
+              not redistributed.
+          - citation: >-
+              State capitals: Wikipedia, "States of Nigeria"; slogans: Zikoko (2025), kept
+              only where Wikipedia's "List of nicknames of Nigerian states" agrees
+            url: https://en.wikipedia.org/wiki/States_of_Nigeria
+            terms: Facts cited with the source page given in each row.
+          - *jonapwd_source
     columns:
       - name: state
+        description: *d_state
         data_tests:
           - unique
           - not_null
@@ -58,18 +147,51 @@ models:
                 to: ref('dim_states')
                 field: state
       - name: state_code
+        description: *d_state_code
         data_tests: [unique, not_null]
       - name: zone
+        description: *d_zone
         data_tests: [not_null]
       - name: capital
+        description: The state capital.
         data_tests: [not_null]
+      - name: capital_source_url
+        description: Web page the capital was taken from.
+        config:
+          meta: {unit: &u_url "web address"}
+      - name: slogan
+        description: >-
+          The state's slogan. Null where two sources did not agree; the card then leaves the
+          line out.
+      - name: slogan_source_url
+        description: Web page the slogan was taken from. Present exactly when slogan is present.
+        config:
+          meta: {unit: *u_url}
       - name: population_2023
+        description: &d_population_all >-
+          2023 population projection for the state, all ages, both sexes (NBS Demographic
+          Bulletin 2023, Annex 3; source: National Population Commission).
+        config:
+          meta: {unit: &u_persons "persons"}
         data_tests: [not_null, non_negative]
       - name: jonapwd_total
+        description: >-
+          JONAPWD's assumed number of persons with disabilities in the state (its ten
+          categories summed). An assumption (15% of a 2025 population projection), not a count.
+        config:
+          meta: {unit: "persons (assumed)"}
         data_tests: [not_null, non_negative]
       - name: share_of_national
+        description: The state's share of JONAPWD's total for all 37 states.
+        config:
+          meta: {unit: *u_prop}
         data_tests: [not_null, non_negative]
       - name: rank_of_37
+        description: >-
+          Rank of the state's JONAPWD total among the 37 (1 = largest; tied totals share a
+          rank).
+        config:
+          meta: {unit: "rank (1 to 37)"}
         data_tests:
           - unique
           - not_null
@@ -77,49 +199,214 @@ models:
               arguments:
                 values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37]
                 quote: false
-      - name: slogan
-        description: Null where two sources did not agree; the card then leaves the line out.
-      - name: slogan_source_url
-        description: Present exactly when slogan is present.
 
   - name: mart_prevalence_state
     description: >
       Survey prevalence by state (DHS 2024; MPI 2021), one row per state
       for every source, measure, age group and sex, so all 37 states are always present.
       Only cells with no extra breakdown (breakdown = 'all'); see mart_prevalence_breakdowns.
-      has_data is false where a source has no cell for a state. Not on the site until P4.
+      has_data is false where a source has no cell for a state. The DHS 2024 rows are
+      exported (dhs2024_state_prevalence.parquet, and the headline cell into states.json).
+    config:
+      meta:
+        sources:
+          - &dhs_source
+            citation: >-
+              The DHS Program, Nigeria Demographic and Health Survey 2024 (National
+              Population Commission and ICF); Curb Cut estimates from the microdata,
+              disclosure-checked
+            url: https://dhsprogram.com/
+            terms: >-
+              No open licence: reuse is subject to the DHS terms. Data used only for the
+              registered project "Curb Cut: disability prevalence and poverty in Nigeria";
+              only survey-weighted, disclosure-checked aggregates are published, never
+              microdata. Cite the source.
+          - *population_source
     data_tests:
       - unique_combination:
           arguments:
             columns: [state, source, measure, age_group, sex]
     columns:
       - name: state
+        description: *d_state
         data_tests:
           - not_null
           - relationships:
               arguments:
                 to: ref('dim_states')
                 field: state
+      - name: state_code
+        description: *d_state_code
+      - name: zone
+        description: *d_zone
+      - name: source
+        description: &d_source >-
+          Survey the cell comes from: dhs2024 (Nigeria DHS 2024), ghs_w4 or ghs_w5
+          (GHS-Panel waves 4 and 5, national and zone only) or mpi2021 (NBS MPI Survey
+          2021). The public files hold only dhs2024 rows.
+      - name: dataset_version
+        description: &d_dataset_version The microdata release the estimate was made from (e.g. "NG2024DHS, recode 8B (NGPR8BFL)").
+      - name: measure
+        description: &d_measure >-
+          What is measured. disability3: the Washington Group Short Set DISABILITY3 measure,
+          "a lot of difficulty" or "cannot do at all" in at least one of six domains.
+          <domain>_3plus: one domain alone at that level (seeing, hearing, walking,
+          cognition = remembering or concentrating, selfcare, communication).
+          <domain>_level_1 to _level_4 (national only): the share at each level (no
+          difficulty, some, a lot, cannot do at all). MPI 2021 uses its own names (mpi_...),
+          never DISABILITY3, because its questions are not the Washington Group set.
+      - name: age_group
+        description: &d_age_group Age group of the people the cell covers, "18+" (the headline) or "5-17".
+        config:
+          meta: {unit: &u_years "years of age"}
+      - name: sex
+        description: &d_sex Sex of the people the cell covers, "all", "female" or "male".
+      - name: estimate
+        description: &d_estimate >-
+          Survey-weighted share of people with the measured difficulty. Null when the cell
+          is suppressed or the state has no cell (has_data false).
+        config:
+          meta: {unit: *u_prop}
+      - name: se
+        description: &d_se >-
+          Design-based standard error of the estimate (Taylor linearisation, R survey),
+          reflecting the survey's weights, strata and clusters. Null when suppressed.
+        config:
+          meta: {unit: *u_prop}
+      - name: ci_low
+        description: &d_ci_low >-
+          Lower end of the 95% confidence interval (Korn-Graubard). Null when suppressed.
+        config:
+          meta: {unit: *u_prop}
+      - name: ci_high
+        description: &d_ci_high >-
+          Upper end of the 95% confidence interval (Korn-Graubard). Null when suppressed.
+        config:
+          meta: {unit: *u_prop}
+      - name: n_unweighted
+        description: &d_n_unweighted >-
+          Unweighted number of respondents in the denominator (people in the cell with the
+          item answered). Null when suppressed, since a count could be recovered by
+          subtraction.
+        config:
+          meta: {unit: &u_respondents "respondents"}
+      - name: n_effective
+        description: &d_n_effective >-
+          Effective sample size, p(1-p)/se squared, capped at n_unweighted (NCHS). Null when
+          suppressed.
+        config:
+          meta: {unit: *u_respondents}
+      - name: df
+        description: &d_df >-
+          Design degrees of freedom: survey clusters (PSUs) with a respondent in the cell
+          minus their strata. Null when suppressed.
+        config:
+          meta: {unit: "degrees of freedom"}
       - name: precision_flag
+        description: &d_precision_flag >-
+          How far the estimate can be trusted, under the NCHS Data Presentation Standards
+          for Proportions plus one stricter project rule: reliable; review (shown, but rests
+          on 0 events, all events, fewer than 8 degrees of freedom, or 1 to 9 unweighted
+          events); unreliable (n or effective n under 30, or an interval too wide in
+          absolute or relative terms). "suppressed" when the disclosure check removed the
+          numbers; "no_data" where a state has no cell for the source.
         data_tests:
           - not_null
           - accepted_values:
               arguments:
                 values: [reliable, review, unreliable, suppressed, no_data]
+      - name: precision_reason
+        description: &d_precision_reason >-
+          The rule that set the flag, e.g. "low_events<10", "zero_events", "df<8",
+          "n_effective<30", "relative_ci_width>130%"; for suppressed cells "n<30
+          (disclosure)" (fewer than 30 unweighted respondents) or "complementary suppression
+          (disclosure)" (withheld so a neighbouring small cell cannot be worked out by
+          subtraction). Null when the estimate is reliable.
+      - name: suppressed
+        description: &d_suppressed >-
+          True when the disclosure check removed the cell's numbers: fewer than 30
+          unweighted respondents, or withheld to protect such a cell. The numbers are then
+          null; they are never estimated or filled.
+      - name: has_data
+        description: >-
+          False where the source has no cell for this state, measure, age group and sex;
+          the row exists so that all 37 states are always present.
       - name: population_2023
+        description: >-
+          2023 population projection for the state and the row's sex (all ages; both sexes
+          when sex is "all"), NBS Demographic Bulletin 2023, Annex 3. Not the denominator of
+          the estimate.
+        config:
+          meta: {unit: *u_persons}
         data_tests: [not_null, non_negative]
 
   - name: mart_prevalence_national_zone
     description: >
       National and zone survey cells with no extra breakdown (DHS 2024, GHS W4/W5;
-      MPI 2021), overall and by sex.
+      MPI 2021), overall and by sex. The DHS 2024 rows are exported
+      (dhs2024_national_zone.parquet, and the national headline into prevalence.json).
+    config:
+      meta:
+        sources:
+          - *dhs_source
     data_tests:
       - unique_combination:
           arguments:
             columns: [source, measure, geography_level, geography, age_group, sex]
     columns:
+      - name: source
+        description: *d_source
+      - name: dataset_version
+        description: *d_dataset_version
+      - name: measure
+        description: *d_measure
+      - name: geography_level
+        description: Level of the cell, "national" or "zone".
+      - name: geography
+        description: >-
+          Where the cell is: "NG" (Nigeria) at national level, otherwise the zone's name
+          (North Central, North East, North West, South East, South South, South West).
+      - name: age_group
+        description: *d_age_group
+        config:
+          meta: {unit: *u_years}
+      - name: sex
+        description: *d_sex
+      - name: estimate
+        description: *d_estimate
+        config:
+          meta: {unit: *u_prop}
+      - name: se
+        description: *d_se
+        config:
+          meta: {unit: *u_prop}
+      - name: ci_low
+        description: *d_ci_low
+        config:
+          meta: {unit: *u_prop}
+      - name: ci_high
+        description: *d_ci_high
+        config:
+          meta: {unit: *u_prop}
+      - name: n_unweighted
+        description: *d_n_unweighted
+        config:
+          meta: {unit: *u_respondents}
+      - name: n_effective
+        description: *d_n_effective
+        config:
+          meta: {unit: *u_respondents}
+      - name: df
+        description: *d_df
+        config:
+          meta: {unit: "degrees of freedom"}
       - name: precision_flag
+        description: *d_precision_flag
         data_tests: [not_null]
+      - name: precision_reason
+        description: *d_precision_reason
+      - name: suppressed
+        description: *d_suppressed
 
   - name: mart_prevalence_breakdowns
     description: >
@@ -167,26 +454,67 @@ models:
       for ages 15+ ("any difficulty", computed from the transcription, against the WG
       cut-off), and our DHS 2024 DISABILITY3 estimate for adults 18+ with its 95% interval.
       Exported into prevalence.json.
+    config:
+      meta:
+        sources:
+          - *jonapwd_source
+          - citation: World Health Organization, fact sheet "Disability", 7 March 2023
+            url: https://www.who.int/news-room/fact-sheets/detail/disability-and-health
+            terms: One figure cited with WHO's own wording.
+          - citation: Nigeria DHS 2023-24 final report (NPC and ICF, FR395), Table 14.1, p. 443
+            url: https://dhsprogram.com/pubs/pdf/FR395/FR395.pdf
+            terms: Figures cited from the published report.
+          - *dhs_source
     columns:
       - name: figure_id
+        description: Stable identifier of the figure (e.g. jonapwd_2025, dhs2024_18plus_wg).
         data_tests: [unique, not_null]
       - name: sort_order
+        description: Order of the figure on the main page (1 first).
         data_tests: [unique, not_null]
+      - name: label
+        description: The figure's short name as the page shows it.
+      - name: kind
+        description: >-
+          What sort of figure it is: "assumed" (an assumption, not a measurement), "global
+          estimate" (a world figure) or "measured" (from a survey of Nigeria).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [assumed, global estimate, measured]
       - name: value_percent
+        description: The figure itself.
+        config:
+          meta: {unit: &u_percent "percent (0 to 100)"}
         data_tests:
           - not_null
           - dbt_expectations.expect_column_values_to_be_between:
               arguments:
                 min_value: 0
                 max_value: 100
-      - name: kind
-        data_tests:
-          - accepted_values:
-              arguments:
-                values: [assumed, global estimate, measured]
+      - name: ci_low_percent
+        description: >-
+          Lower end of the 95% confidence interval; only for Curb Cut's own DHS 2024
+          estimate, null for the other figures.
+        config:
+          meta: {unit: *u_percent}
+      - name: ci_high_percent
+        description: >-
+          Upper end of the 95% confidence interval; only for Curb Cut's own DHS 2024
+          estimate, null for the other figures.
+        config:
+          meta: {unit: *u_percent}
+      - name: population
+        description: Who the figure is about (e.g. "Household members aged 18+ (de facto)").
+      - name: definition
+        description: What the figure counts, in words, as its source defines it.
       - name: source
+        description: Citation of the figure's source.
         data_tests: [not_null]
       - name: source_url
+        description: Web address of the figure's source.
+        config:
+          meta: {unit: *u_url}
         data_tests: [not_null]
 
   - name: mart_spatial_state
@@ -194,8 +522,26 @@ models:
       One row per state: exploratory LISA class for DISABILITY3 18+, descriptive profile
       cluster, and GRID3 health facilities per 100,000 people. DHS 2024 direct estimates
       only; never JONAPWD (docs/verification.md D17, D58). Exported to Parquet.
+    config:
+      meta:
+        sources:
+          - &spatial_source
+            citation: >-
+              Curb Cut spatial analysis of the DHS 2024 state estimates (data/public/spatial,
+              R spdep; 9,999 permutations, seed 20261028)
+            url: https://github.com/batestguy/curb-cut/tree/main/data/public/spatial
+            terms: >-
+              Results derived from the public DHS 2024 aggregates and geoBoundaries
+              (CC BY 4.0); reuse is subject to the source terms; cite the sources.
+          - *dhs_source
+          - citation: >-
+              GRID3 NGA - Health Facilities v2.0 (CIESIN, 2024, doi:10.7916/kv1n-0743)
+            url: https://doi.org/10.7916/kv1n-0743
+            terms: CC BY 4.0. Non-exhaustive and not validated by government.
+          - *population_source
     columns:
       - name: state
+        description: *d_state
         data_tests:
           - unique
           - not_null
@@ -204,52 +550,163 @@ models:
                 to: ref('dim_states')
                 field: state
       - name: state_code
+        description: *d_state_code
         data_tests: [unique, not_null]
-      - name: lisa_class
-        data_tests:
-          - not_null
-          - accepted_values:
-              arguments:
-                values: [High-High, Low-Low, High-Low, Low-High, Not significant]
+      - name: zone
+        description: *d_zone
+      - name: disability3_18plus
+        description: >-
+          The state's DHS 2024 DISABILITY3 estimate for adults 18+ (both sexes), the value
+          the local analysis uses.
+        config:
+          meta: {unit: *u_prop}
+      - name: local_i
+        description: >-
+          Exploratory local Moran's I for DISABILITY3 18+ (Anselin, 1995): positive when the
+          state is like its neighbours, negative when unlike them.
+        config:
+          meta: {unit: &u_index "index (no unit)"}
+      - name: lisa_p_perm
+        description: Two-sided conditional permutation p-value of local_i (9,999 permutations).
+        config:
+          meta: {unit: &u_p "probability (0 to 1)"}
       - name: lisa_q_bh
+        description: lisa_p_perm adjusted with Benjamini-Hochberg across the 37 states.
+        config:
+          meta: {unit: *u_p}
         data_tests:
           - not_null
           - dbt_expectations.expect_column_values_to_be_between:
               arguments:
                 min_value: 0
                 max_value: 1
+      - name: lisa_quadrant
+        description: >-
+          Quadrant of the Moran scatterplot whatever the significance (spdep, "mean"):
+          High-High when the state and the average of its neighbours are both above the mean,
+          Low-Low when both are below, High-Low or Low-High when they differ.
+      - name: lisa_class
+        description: >-
+          lisa_quadrant when lisa_q_bh is below 0.05, otherwise "Not significant".
+          Exploratory: with 37 states, local tests have low power.
+        data_tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [High-High, Low-Low, High-Low, Low-High, Not significant]
       - name: profile_cluster
+        description: >-
+          Descriptive cluster of the state's six domain prevalences for adults 18+ (Ward's
+          method on their z-scores; the number of clusters chosen by mean silhouette). The
+          number is a label, not an order.
         data_tests: [not_null]
+      - name: facilities
+        description: Health facilities in the state in GRID3 NGA Health Facilities v2.0 (all ownership).
+        config:
+          meta: {unit: "facilities"}
       - name: facilities_per_100k
+        description: >-
+          facilities per 100,000 people of all ages (NBS 2023 population projection). General
+          health facilities, not disability services.
+        config:
+          meta: {unit: "facilities per 100,000 people"}
         data_tests: [not_null, non_negative]
 
   - name: mart_spatial_moran
     description: Global Moran's I per measure, with a plain label (DISABILITY3 18+ first). Exported to Parquet.
+    config:
+      meta:
+        sources:
+          - *spatial_source
+          - *dhs_source
     data_tests:
       - unique_combination:
           arguments:
             columns: [measure, age_group]
     columns:
-      - name: measure_label
-        data_tests: [not_null]
-      - name: n_states
-        data_tests:
-          - accepted_values:
-              arguments:
-                values: [37]
-                quote: false
+      - name: measure
+        description: >-
+          The DHS 2024 measure tested: disability3 or one domain at "a lot of difficulty" or
+          worse (seeing_3plus, hearing_3plus, walking_3plus, cognition_3plus,
+          selfcare_3plus, communication_3plus).
+      - name: age_group
+        description: *d_age_group
+        config:
+          meta: {unit: *u_years}
+      - name: test_role
+        description: >-
+          The test's role: "primary" (DISABILITY3 18+), "domain" (a single domain, 18+) or
+          "secondary" (DISABILITY3 5-17).
+      - name: moran_i
+        description: >-
+          Global Moran's I of the 37 state estimates (queen contiguity, row-standardised
+          weights): above expected_i means similar states tend to be neighbours.
+        config:
+          meta: {unit: *u_index}
+      - name: expected_i
+        description: Moran's I expected with no spatial pattern, -1/(n-1) for n = 37 states.
+        config:
+          meta: {unit: *u_index}
       - name: p_perm
+        description: >-
+          One-sided permutation p-value (positive clustering only), from nsim permutations.
+        config:
+          meta: {unit: *u_p}
         data_tests:
           - dbt_expectations.expect_column_values_to_be_between:
               arguments:
                 min_value: 0
                 max_value: 1
       - name: p_bh
+        description: p_perm adjusted with Benjamini-Hochberg across the 8 measures tested.
+        config:
+          meta: {unit: *u_p}
         data_tests:
           - dbt_expectations.expect_column_values_to_be_between:
               arguments:
                 min_value: 0
                 max_value: 1
+      - name: nsim
+        description: Number of permutations behind p_perm.
+        config:
+          meta: {unit: "permutations"}
+      - name: n_states
+        description: Number of state estimates in the test; must be 37.
+        config:
+          meta: {unit: &u_states "states"}
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: [37]
+                quote: false
+      - name: n_reliable
+        description: States whose estimate for this measure is flagged reliable.
+        config:
+          meta: {unit: *u_states}
+      - name: n_review
+        description: States whose estimate is flagged review.
+        config:
+          meta: {unit: *u_states}
+      - name: n_unreliable
+        description: States whose estimate is flagged unreliable.
+        config:
+          meta: {unit: *u_states}
+      - name: n_zero_estimate
+        description: States whose estimate is exactly 0.
+        config:
+          meta: {unit: *u_states}
+      - name: n_imprecise
+        description: >-
+          States whose estimate is not flagged reliable or is 0. Noisy estimates pull I
+          towards 0, so a weak result with many imprecise states is not evidence of no
+          pattern.
+        config:
+          meta: {unit: *u_states}
+      - name: measure_label
+        description: The measure in words, as the site shows it (e.g. "Difficulty walking or climbing steps").
+        data_tests: [not_null]
+      - name: sort_group
+        description: Display order group (1 primary, 2 domains, 3 secondary).
 
   - name: mart_p5_estimates
     description: >
@@ -257,10 +714,154 @@ models:
       brief, with the display factor (x100 for percentage points or score points). Adjusted
       associations, not causal effects; exposure uses MPI's own disability questions.
       Exported into poverty.json. assert_p5_estimates_valid checks each interval.
+    config:
+      meta:
+        sources: &p5_sources
+          - citation: >-
+              National Bureau of Statistics, Multidimentional [sic] Poverty index Survey 2021
+              v1.0 (NGA-NBS-MPI-2021-v1.0); the spelling is NBS's required citation
+            url: https://microdata.nigerianstat.gov.ng/index.php/catalog/71
+            terms: >-
+              NBS MPI Survey 2021: used solely for reporting aggregated information; no
+              redistribution of the microdata; an electronic copy of every publication goes
+              to the National Data Archive. No open licence for these results: reuse is
+              subject to the source terms; cite the sources.
+          - citation: >-
+              National Bureau of Statistics, Nigeria, General Household Survey-Panel Wave 4
+              (NGA_2018_GHSP-W4_v03_M), World Bank Microdata Library
+            url: https://microdata.worldbank.org/index.php/catalog/3557
+            terms: &ghs_terms >-
+              GHS-Panel: public-use files under a confidentiality declaration; no
+              re-identification; citation required.
+          - citation: >-
+              National Bureau of Statistics, Nigeria, General Household Survey-Panel Wave 5
+              (NGA_2023_GHSP-W5_v02_M), World Bank Microdata Library
+            url: https://microdata.worldbank.org/index.php/catalog/6410
+            terms: *ghs_terms
+          - citation: Curb Cut P5 analysis, pre-registered at https://osf.io/kes3p/
+            url: https://osf.io/kes3p/
+            terms: >-
+              Each estimate is an adjusted association, not a causal effect. Published only
+              when both compared groups have at least 30 unweighted units.
     columns:
+      - name: source
+        description: Survey behind the estimate, "mpi2021" (NBS MPI Survey 2021) or "ghs_w4_w5" (GHS-Panel waves 4 and 5).
+      - name: dataset_version
+        description: *d_dataset_version
+      - name: analysis
+        description: '"mpi" (the pre-registered poverty analysis) or "ghs" (the exploratory GHS-Panel comparison, E1).'
+      - name: estimate_group
+        description: >-
+          The estimate's group on the page: headline, secondary, dimension, robustness,
+          leave_one_zone_out, subgroup, sensemakr (bounds under assumed unmeasured
+          confounding), e1 (GHS) or r_check (R's check of an E1 estimate).
       - name: estimate_id
+        description: Stable identifier of the estimate (e.g. primary, overlap_population, s2_broad).
         data_tests: [unique, not_null]
+      - name: label
+        description: The estimate in words, as the page shows it.
+      - name: outcome
+        description: >-
+          Code of the outcome (pre-registration section 3.3): poor (multidimensionally
+          poor), score (deprivation score), dim_<dimension> (one MPI dimension), the
+          robustness variants poor_fuel_alt and poor_shock_dk0; for GHS, dwork (change in
+          working) and dlog_consumption (change in log consumption per person). label says
+          it in words.
+      - name: exposure
+        description: >-
+          Code of the exposure definition (pre-registration sections 1 and 3.2). primary: a
+          household member aged 5+ has "a lot of difficulty" or "cannot do at all" in
+          self-care, remembering or concentrating, communication, or (when MPI asked the
+          severity) seeing, hearing or walking; people whose severity was not asked count as
+          not severe. s2: NBS's broad definition, "some difficulty" or worse in any item,
+          including lifting, using the hands and the skin item (albinism or vitiligo). s3: the
+          household head has a severe difficulty. s5: as primary, but people whose seeing,
+          hearing or walking severity was not asked count as severe. s6: routing-free, a
+          severe difficulty in self-care, remembering or communication only. For GHS, onset
+          (disability that began between the waves).
+      - name: scale
+        description: >-
+          The scale of estimate, se, ci_low, ci_high and mu0, in words (e.g. "risk difference
+          (proportion; x100 = percentage points)").
+      - name: learners
+        description: >-
+          Machine-learning models used for the outcome and the exposure (e.g. "outcome
+          boosting, exposure logistic"). Null where none were used (the survey benchmark,
+          the sensemakr bounds and GHS).
+      - name: estimate
+        description: >-
+          The adjusted difference between exposed and unexposed households (or people for
+          GHS), on the row's scale (a proportion, a 0-1 score, or log points for
+          consumption). For the MPI rows estimated with DoubleML it is standardised to the
+          whole population (population-weighted). Null when suppressed.
+        config:
+          meta: {unit: &u_scale "as in scale; multiply by display_factor for the page"}
+      - name: se
+        description: Standard error of the estimate. Null when suppressed.
+        config:
+          meta: {unit: *u_scale}
+        data_tests: [non_negative]
+      - name: ci_low
+        description: Lower end of the 95% confidence interval. Null when suppressed.
+        config:
+          meta: {unit: *u_scale}
+      - name: ci_high
+        description: Upper end of the 95% confidence interval. Null when suppressed.
+        config:
+          meta: {unit: *u_scale}
+      - name: pval
+        description: >-
+          Two-sided p-value for a difference of 0 (DoubleML, standard errors clustered by
+          enumeration area). Only the primary estimate's is a pre-registered test; on the
+          secondary, dimension, robustness, leave-one-zone-out and subgroup rows it is
+          descriptive. Null on the survey benchmark, sensemakr and GHS rows, and when
+          suppressed.
+        config:
+          meta: {unit: *u_p}
+      - name: holm_p
+        description: >-
+          pval adjusted with Holm's method across S1, S2 and S3 (the pre-registered family
+          for saying a secondary difference "is supported"); null on every other row.
+        config:
+          meta: {unit: *u_p}
+      - name: supported
+        description: >-
+          True when holm_p is below 0.05; only for S1 to S3, otherwise null.
+      - name: mu0
+        description: >-
+          The outcome if no household had a member with a severe difficulty, standardised to
+          the whole population (weighted doubly robust estimate): for poverty, the share of
+          people who would be multidimensionally poor. mu0 plus the estimate is the same
+          standardised share with such a member; neither is the observed rate of either
+          group. Null where not computed (survey benchmark, sensemakr bounds, GHS).
+        config:
+          meta: {unit: *u_prop}
+        data_tests: [non_negative]
+      - name: n
+        description: Units in the analysis (households for MPI, people for GHS); n_exposed plus n_unexposed.
+        config:
+          meta: {unit: &u_units "households (MPI) or people (GHS)"}
+      - name: n_exposed
+        description: >-
+          Unweighted exposed households (MPI) or people with onset (GHS). The estimate is
+          suppressed if this or n_unexposed is under 30; both counts are then null.
+        config:
+          meta: {unit: *u_units}
+        data_tests: [non_negative]
+      - name: n_unexposed
+        description: Unweighted comparison households or people; null when suppressed.
+        config:
+          meta: {unit: *u_units}
+        data_tests: [non_negative]
+      - name: suppressed
+        description: >-
+          True when the exposed or the comparison group has fewer than 30 unweighted units.
+          The estimate, se, interval, pval, holm_p, supported, mu0, n_exposed and n_unexposed
+          are then null; n, display_factor and the descriptive columns stay.
       - name: display_factor
+        description: >-
+          Multiplier for display: 100 turns proportions into percentage points and 0-1
+          scores into points out of 100; 1 for GHS log consumption (log points).
         data_tests:
           - not_null
           - accepted_values:
@@ -268,22 +869,44 @@ models:
                 values: [1, 100]
                 quote: false
       - name: group_order
+        description: Display order of estimate_group (1 headline to 9 r_check).
         data_tests: [not_null]
-      - name: se
-        data_tests: [non_negative]
-      - name: n_exposed
-        data_tests: [non_negative]
-      - name: n_unexposed
-        data_tests: [non_negative]
-      - name: mu0
-        data_tests: [non_negative]
 
   - name: mart_p5_summary
     description: P5 scalar results for the poverty page and the brief. Exported into poverty.json.
+    config:
+      meta:
+        sources: *p5_sources
     data_tests:
       - unique_combination:
           arguments:
             columns: [analysis, item_id]
     columns:
+      - name: source
+        description: Survey behind the result, "mpi2021" or "ghs_w4_w5".
+      - name: dataset_version
+        description: *d_dataset_version
+      - name: analysis
+        description: '"mpi" (the pre-registered poverty analysis) or "ghs" (the exploratory GHS-Panel comparison).'
+      - name: section
+        description: >-
+          The part of the analysis the result belongs to (e.g. table7, evalue, sensitivity,
+          placebo, overlap, sample, registration).
+      - name: item_id
+        description: Stable identifier of the result within its analysis.
+      - name: label
+        description: The result in words, including its unit where it has one.
+      - name: kind
+        description: >-
+          How to read value: count, share (a proportion, 0 to 1), number, flag (1 yes, 0
+          no) or text (in value_text).
       - name: value
-        description: Null only for text items and suppressed counts.
+        description: >-
+          The result as a number, read as kind says. Null only for text items and suppressed
+          counts.
+        config:
+          meta: {unit: "depends on kind and label"}
+      - name: value_text
+        description: The result as text, for kind "text" (e.g. the OSF address); otherwise null.
+      - name: suppressed
+        description: True when the result is a count under 30 (above 0); value is then null.

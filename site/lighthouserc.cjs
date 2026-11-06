@@ -10,6 +10,7 @@ const pages = [
   '',
   'methodology.html',
   'poverty.html',
+  'data-dictionary.html',
   'states/',
   'states/kano.html',
   'states/lagos.html',

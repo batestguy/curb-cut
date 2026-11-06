@@ -94,6 +94,16 @@ jobs:
         run: uv run python packages/transform/scripts/build_poverty_page.py
       - name: Check the policy brief matches the exported estimates
         run: uv run python packages/transform/scripts/build_brief.py --check
+      # The data dictionary: every column of every public file needs a description (marts' YAML
+      # or public_files.yml), and no description may name a column a mart or file lacks.
+      - name: Build the data dictionary (fails on an undescribed or stale column)
+        run: uv run python packages/transform/scripts/build_data_dictionary.py
+      # The same check on the fixture warehouse's exports (a suppressed cell, a state with no
+      # headline); the output is thrown away.
+      - name: Build the data dictionary from the fixture warehouse (edge cases)
+        run: |
+          uv run python packages/transform/scripts/export_marts.py --db data/fixtures.duckdb --out-dir "$RUNNER_TEMP/fixture-data"
+          uv run python packages/transform/scripts/build_data_dictionary.py --db data/fixtures.duckdb --data-dir "$RUNNER_TEMP/fixture-data" --page "$RUNNER_TEMP/fixture-data-dictionary.html"
       - name: Audit every chart document, warnings included (e.g. an empty map class)
         run: >-
           uv run disability-access-charts check --strict site/public/data/charts/*.json
@@ -112,6 +122,11 @@ jobs:
         with:
           name: poverty-page
           path: site/poverty.html
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        with:
+          name: data-dictionary-page
+          path: site/data-dictionary.html
           if-no-files-found: error
 
   site:
@@ -138,6 +153,10 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: poverty-page
+          path: site/
+      - uses: actions/download-artifact@v8
+        with:
+          name: data-dictionary-page
           path: site/
       - name: Install
         run: npm ci

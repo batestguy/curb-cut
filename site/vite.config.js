@@ -18,9 +18,16 @@ try {
   statePages = {};
 }
 
-// The poverty page is generated too (packages/transform/scripts/build_poverty_page.py).
-const povertyPage = resolve(import.meta.dirname, 'poverty.html');
-const generated = existsSync(povertyPage) ? { poverty: povertyPage } : {};
+// The poverty page and the data dictionary are generated too
+// (packages/transform/scripts/build_poverty_page.py, build_data_dictionary.py).
+const generated = Object.fromEntries(
+  [
+    ['poverty', 'poverty.html'],
+    ['dataDictionary', 'data-dictionary.html'],
+  ]
+    .map(([name, file]) => [name, resolve(import.meta.dirname, file)])
+    .filter(([, path]) => existsSync(path)),
+);
 
 // GitHub Pages serves the site at /curb-cut/. Override with SITE_BASE=/ for other hosts.
 export default defineConfig({
@@ -29,8 +36,8 @@ export default defineConfig({
     target: 'es2022',
     // Plotly and the DuckDB-WASM bundles are large by nature; they are loaded once.
     chunkSizeWarningLimit: 4000,
-    // The main page, the methodology note, the poverty page and the 37 state pages with
-    // their index.
+    // The main page, the methodology note, the poverty page, the data dictionary and the 37
+    // state pages with their index.
     rollupOptions: {
       input: {
         main: resolve(import.meta.dirname, 'index.html'),

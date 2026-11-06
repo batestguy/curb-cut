@@ -966,3 +966,47 @@ h3[tabindex="-1"]:focus {
   stroke: var(--dot-text);
   stroke-width: 2;
 }
+
+/* The data dictionary (site/data-dictionary.html, built by packages/transform/scripts/
+   build_data_dictionary.py): file and column names wrap only where the page puts a <wbr>
+   (after "_", "." and brackets), never inside a word. */
+.dictionary-page code {
+  overflow-wrap: anywhere;
+}
+
+/* Prose and links name long files (e.g. jonapwd_national_by_type.parquet). With a wider
+   fallback font (Linux CI's DejaVu Sans) they overflowed 320 px by 42 px, so outside the
+   tables they may break anywhere too. */
+.dictionary-page p,
+.dictionary-page li,
+.dictionary-page a {
+  overflow-wrap: anywhere;
+}
+
+.dictionary-page h2,
+.dictionary-page th code {
+  overflow-wrap: normal;
+  hyphens: none;
+}
+
+@media (min-width: 40rem) {
+  .dictionary-page th[scope="row"] {
+    min-width: 12rem;
+  }
+}
+
+/* "Not applicable" (visually hidden) in a units cell stays inside its table's scroll area,
+   so it never widens the page. */
+.dictionary-page td {
+  position: relative;
+}
+
+/* The contents list's heading looks like the sections' headings. */
+.dictionary-page > nav > h2 {
+  border-left: 0.3rem solid var(--flag-green);
+  padding-left: 0.6rem;
+}
+
+.dictionary-page .file-facts {
+  color: var(--muted);
+}
