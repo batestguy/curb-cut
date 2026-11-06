@@ -23,7 +23,8 @@ files:
       each of the six activities, for adults 18+ and children 5-17, both sexes and each sex.
       One row per state, measure, age group and sex. No extra breakdown (urban/rural and
       wealth are on the state pages). The data explorer (explorer.html) reads this file in the
-      browser.
+      browser; the sensitivity page (sensitivity.html) uses its DISABILITY3 cells for both
+      sexes, and population_2023, through data/sensitivity.json.
     marts:
       "": mart_prevalence_state
 
@@ -41,7 +42,8 @@ files:
     about: >-
       The main page's comparison: JONAPWD's assumed 15%, WHO's global 16%, the NDHS 2024
       report's figures for ages 15+, and Curb Cut's DHS 2024 estimate for adults 18+. Values
-      are percentages, not proportions.
+      are percentages, not proportions. The sensitivity page (sensitivity.html) quotes the
+      JONAPWD and WHO rows, through data/sensitivity.json.
     marts:
       "": mart_prevalence_comparison
 
@@ -352,6 +354,14 @@ other_files:
       groups, sexes, precision flags and reasons), the data dictionary's anchors for their
       columns, its downloads' sources and terms, and the chart of each view. Its charts are in
       data/charts/explorer/.
+  - path: data/sensitivity.json
+    about: >-
+      The sensitivity page's data (sensitivity.html): the DISABILITY3 cells for both sexes in
+      each age group from dhs2024_state_prevalence.parquet (proportions, with population_2023),
+      the JONAPWD and WHO rows of prevalence_comparison.parquet, the definitions in this
+      dictionary's words, the slider's rates, its downloads' sources and terms, and the chart
+      of each age group and rate. Its charts are in data/charts/sensitivity/; the static table
+      at JONAPWD's rate, for readers without JavaScript, is in data/downloads/sensitivity/.
   - path: data/nigeria-states.json
     about: >-
       The simplified state outlines for the locator map, from geoBoundaries (CC BY 4.0).
