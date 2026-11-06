@@ -7,6 +7,7 @@
 // the national one for comparison, a locator map) appears above the state's table, and focus
 // moves to the card's heading; the table follows it.
 import { citedLine, formatValue, renderTable, stateHref } from './format.js';
+import { START_TIMEOUT_MS, withTimeout } from './engine.js';
 import { interval, pct } from './prevalence.js';
 
 const PARQUET = 'jonapwd_state_by_type.parquet';
@@ -15,19 +16,8 @@ const SQL = `select disability_type_label, persons, share_of_state * 100 as shar
   where state = ?
   order by persons desc, sort_order`;
 
-// If the wasm fails to download inside the worker, DuckDB's start-up never settles, so give
-// up after a generous limit (the wasm is about 8 MB compressed) and say so.
-const START_TIMEOUT_MS = 90_000;
 // The locator map is optional: past this, the card is shown without it.
 const MAP_TIMEOUT_MS = 10_000;
-
-function withTimeout(promise, ms, message) {
-  let timer;
-  const timeout = new Promise((_, reject) => {
-    timer = setTimeout(() => reject(new Error(message)), ms);
-  });
-  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
-}
 
 function link(href, text) {
   const a = document.createElement('a');

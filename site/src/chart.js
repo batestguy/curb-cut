@@ -1,7 +1,9 @@
 // Render a chart document built by disability_access_charts (see build_charts.py).
 // The chart is a static image to assistive technology: its container has role="img" and is
 // named by the data-derived alt-text, and the Plotly SVG inside is aria-hidden. Every value
-// is also in the HTML table rendered from the same document.
+// is also in an HTML table: the one rendered here from the same document or, in the data
+// explorer's views of every state or zone, the page's own table, which holds exactly the
+// figures the chart draws.
 //
 // One bar can be highlighted (the state chosen in the explorer). That is visual only: the
 // chart's description stays as built, and the state card says the same thing in words. The
@@ -91,7 +93,9 @@ const config = { staticPlot: true, displayModeBar: false, responsive: true };
 /**
  * Render a chart document. Returns a handle whose highlight(category) redraws the chart with
  * that bar highlighted (null clears it); unknown categories highlight nothing. `tableNote`,
- * if given, goes directly after the table (its download line, or the JONAPWD citation).
+ * if given, goes directly after the table (its download line, or the JONAPWD citation). With
+ * `tableEl` null, the document's table is not drawn: only for a page whose own table holds
+ * exactly the figures the chart draws (the explorer's views of every state or zone).
  */
 export async function renderChart(
   doc,
@@ -99,9 +103,12 @@ export async function renderChart(
 ) {
   titleEl.textContent = doc.title;
   descEl.textContent = doc.alt_text;
-  const table = renderTable(doc.table);
-  tableEl.replaceChildren(table);
-  placeAfterTable(table, tableNote);
+  // Without tableEl the page's own table holds exactly the chart's figures (see above).
+  if (tableEl) {
+    const table = renderTable(doc.table);
+    tableEl.replaceChildren(table);
+    placeAfterTable(table, tableNote);
+  }
 
   const plot = container.querySelector('.chart-plot');
   let current = highlight;
@@ -117,6 +124,11 @@ export async function renderChart(
     highlight(category) {
       current = category;
       return draw();
+    },
+    // Stop redrawing on theme or width changes (before the container gets another chart).
+    dispose() {
+      darkQuery.removeEventListener('change', draw);
+      narrowQuery.removeEventListener('change', draw);
     },
   };
 }

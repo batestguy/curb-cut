@@ -133,3 +133,21 @@ export function renderTable(spec) {
   }
   return table;
 }
+
+// A wide table that scrolls sideways (at 320px, say) gets a Tab stop on its caption, so a
+// keyboard user can scroll it with the arrow keys; when it fits, no extra Tab stop. The
+// caption, not the wrapper, takes focus: NVDA reads a focused wrapper's every row, but a
+// focused caption as caption plus table size (P6 item 4, NVDA transcript 2026-11-04).
+export function watchTableWraps() {
+  const update = (wrap) => {
+    const caption = wrap.querySelector('caption');
+    if (!caption) return;
+    if (wrap.scrollWidth > wrap.clientWidth + 1) caption.tabIndex = 0;
+    else caption.removeAttribute('tabindex');
+  };
+  const resized = new ResizeObserver((entries) => entries.forEach((e) => update(e.target)));
+  for (const wrap of document.querySelectorAll('.table-wrap')) {
+    resized.observe(wrap);
+    new MutationObserver(() => update(wrap)).observe(wrap, { childList: true, subtree: true });
+  }
+}

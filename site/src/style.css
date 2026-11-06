@@ -1010,3 +1010,88 @@ h3[tabindex="-1"]:focus {
 .dictionary-page .file-facts {
   color: var(--muted);
 }
+
+/* The data explorer (site/explorer.html): labelled selects in a wrapping grid, one per line
+   on a phone; the table's column headers are sort buttons. */
+.explorer-form fieldset {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  margin: 1rem 0 0.5rem;
+  padding: 0.5rem 1rem 1rem;
+  min-width: 0;
+}
+
+.explorer-form legend {
+  font-weight: 700;
+  padding: 0 0.25rem;
+}
+
+.explorer-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.field-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.field-stack select {
+  width: 100%;
+}
+
+.fallback {
+  margin: 0.5rem 0 1rem;
+}
+
+.sort-button {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  min-height: 2.75rem;
+  margin: -0.35rem -0.25rem;
+  padding: 0.35rem 0.25rem;
+  font: inherit;
+  font-weight: 700;
+  text-align: inherit;
+  color: var(--link);
+  background: transparent;
+  border: 0;
+  border-radius: 4px;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.sort-button:hover {
+  text-decoration-thickness: 2px;
+}
+
+.sort-button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: -3px;
+}
+
+.sort-icon {
+  font-size: 0.8em;
+  text-decoration: none;
+}
+
+thead th.num .sort-button {
+  justify-content: flex-end;
+}
+
+.explorer-page td.words {
+  font-style: italic;
+}
+
+/* File names (dhs2024_state_prevalence.parquet) in the explorer's prose may break anywhere,
+   so they never widen the page at 320 px. */
+.explorer-page p,
+.explorer-page li {
+  overflow-wrap: anywhere;
+}

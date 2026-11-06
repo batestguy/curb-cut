@@ -9,6 +9,7 @@ const origin = `http://127.0.0.1:${port}${base}`;
 const pages = [
   '',
   'methodology.html',
+  'explorer.html',
   'poverty.html',
   'data-dictionary.html',
   'states/',

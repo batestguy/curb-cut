@@ -22,7 +22,8 @@ files:
       Curb Cut's survey estimates for every state from the Nigeria DHS 2024: DISABILITY3 and
       each of the six activities, for adults 18+ and children 5-17, both sexes and each sex.
       One row per state, measure, age group and sex. No extra breakdown (urban/rural and
-      wealth are on the state pages).
+      wealth are on the state pages). The data explorer (explorer.html) reads this file in the
+      browser.
     marts:
       "": mart_prevalence_state
 
@@ -30,7 +31,8 @@ files:
     title: Disability in Nigeria and its zones, DHS 2024
     about: >-
       The same estimates for Nigeria as a whole and for each of the six geopolitical zones,
-      including (nationally) the share at each of the four levels of difficulty.
+      including (nationally) the share at each of the four levels of difficulty. The data
+      explorer (explorer.html) reads this file in the browser.
     marts:
       "": mart_prevalence_national_zone
 
@@ -344,6 +346,12 @@ other_files:
       Chart documents made by the disability-access-charts library at build time: the
       Plotly figure, the alt-text checked against the data, the data table and the
       accessibility audit result. Each chart's numbers are the same as in the files above.
+  - path: data/explorer.json
+    about: >-
+      The data explorer's labels for the codes in the two DHS 2024 files above (measures, age
+      groups, sexes, precision flags and reasons), the data dictionary's anchors for their
+      columns, its downloads' sources and terms, and the chart of each view. Its charts are in
+      data/charts/explorer/.
   - path: data/nigeria-states.json
     about: >-
       The simplified state outlines for the locator map, from geoBoundaries (CC BY 4.0).

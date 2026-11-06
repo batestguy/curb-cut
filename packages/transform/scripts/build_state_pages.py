@@ -603,6 +603,7 @@ FOOTER_HTML = f"""<footer class="site-footer">
 {REPORT_HTML}
 <p><a href="../methodology.html">Methodology: definitions, sources and limits</a>.
 <a href="../data-dictionary.html">Data dictionary: every public file and column</a>.
+<a href="../explorer.html">Data explorer: filter and sort every DHS 2024 figure</a>.
 <a href="../">Back to the main page</a>. Source code and data notes:
 <a href="{REPO}">github.com/batestguy/curb-cut</a>.</p>
 </footer>"""
