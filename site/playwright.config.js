@@ -21,6 +21,9 @@ export default defineConfig({
   use: {
     baseURL: `${origin}${base}`,
     trace: 'retain-on-failure',
+    // Test runs must never add visit counts (P6 item 6): GoatCounter's host does not resolve
+    // in the test browser, so the counting image is requested (tests check that) but fails.
+    launchOptions: { args: ['--host-resolver-rules=MAP *.goatcounter.com ~NOTFOUND'] },
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: {

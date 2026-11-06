@@ -3,6 +3,7 @@
 // files): plain HTML with no script, one section and one table per public file.
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { isVisitCount } from './visit-count.js';
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 // A long page with no script or image; it must still be light on a phone.
@@ -152,22 +153,28 @@ test('data dictionary: headings in order, captions and scoped headers, no sidewa
   expect(await overflow()).toBeLessThanOrEqual(0);
 });
 
-test('data dictionary: within the byte budget, everything from this origin', async ({ page, baseURL }) => {
+test('data dictionary: within the byte budget, everything but the visit count from this origin', async ({ page, baseURL }) => {
   const origin = new URL(baseURL).origin;
   const responses = [];
+  const elsewhere = [];
   page.on('response', (r) => responses.push(r));
+  page.on('request', (r) => {
+    if (!r.url().startsWith(origin) && !r.url().startsWith('data:')) elsewhere.push(r.url());
+  });
   await open(page);
   await page.waitForLoadState('networkidle');
   let total = 0;
   let html = 0;
   for (const r of responses) {
     const url = r.url();
-    expect(url.startsWith(origin) || url.startsWith('data:'), url).toBe(true);
     if (!url.startsWith(origin)) continue;
     const bytes = (await r.body()).length;
     total += bytes;
     if (r.request().resourceType() === 'document') html = bytes;
   }
+  // The one request elsewhere is the GoatCounter image (blocked in test browsers).
+  expect(elsewhere.filter((u) => !isVisitCount(u))).toEqual([]);
+  expect(elsewhere.filter(isVisitCount)).toHaveLength(1);
   console.log(`data dictionary: HTML ${html} bytes, total ${total} bytes`);
   expect(html).toBeGreaterThan(0);
   expect(html).toBeLessThanOrEqual(HTML_BUDGET);
