@@ -37,6 +37,7 @@ import os
 import re
 import shutil
 import sys
+import urllib.parse
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -77,6 +78,31 @@ by a regular screen-reader user. If anything is hard to use or looks wrong, emai
 no account is needed. With a GitHub account you can also
 <a href="{REPORT_URL}">report a problem on GitHub</a>.</p>"""
 )
+# Visit counts (P6 item 6, verification.md D65): one 1x1 GoatCounter image per page, built
+# in with that page's path. No script, no cookies; GoatCounter stores no IP addresses. The
+# one request that leaves the site's origin; site/tests check it is the only one, and the
+# test browsers and Lighthouse block the host so runs never add counts. site/index.html and
+# site/methodology.html repeat count_pixel() and COUNT_NOTE by hand.
+GOATCOUNTER_CODE = "curbcutng"
+COUNT_ORIGIN = f"https://{GOATCOUNTER_CODE}.goatcounter.com"
+
+
+def count_pixel(path: str, title: str) -> str:
+    """The counting image for the page at `path` (from the site root, e.g. /states/kano.html)."""
+    query = urllib.parse.urlencode({"p": path, "t": title}, safe="/", quote_via=urllib.parse.quote)
+    return (
+        f'<img class="visit-count" src="{COUNT_ORIGIN}/count?{esc(query)}" alt="" '
+        'width="1" height="1" referrerpolicy="no-referrer" />'
+    )
+
+
+def count_note(methodology_href: str) -> str:
+    return (
+        "<p>Visits are counted with GoatCounter: no cookies, and no IP addresses stored. "
+        f'<a href="{methodology_href}#visits-heading">What is recorded</a>.</p>'
+    )
+
+
 # Each page must load in about a second on a phone (site/tests/states.spec.js checks the
 # total); the HTML alone may be at most this many bytes.
 HTML_BUDGET = 60 * 1024
@@ -601,6 +627,7 @@ def header_html(crumb: str) -> str:
 FOOTER_HTML = f"""<footer class="site-footer">
 <h2 class="footer-heading">Accessibility and feedback</h2>
 {REPORT_HTML}
+{count_note("../methodology.html")}
 <p><a href="../methodology.html">Methodology: definitions, sources and limits</a>.
 <a href="../data-dictionary.html">Data dictionary: every public file and column</a>.
 <a href="../explorer.html">Data explorer: filter and sort every DHS 2024 figure</a>.
@@ -955,6 +982,7 @@ The published survey aggregates are
 </section>
 </main>
 {FOOTER_HTML}
+{count_pixel(f"/states/{slug}.html", f"Disability in {name}")}
 </body>
 </html>
 """
@@ -988,6 +1016,7 @@ Nigeria's disability law.</p>
 </section>
 </main>
 {FOOTER_HTML}
+{count_pixel("/states/", "State pages")}
 </body>
 </html>
 """

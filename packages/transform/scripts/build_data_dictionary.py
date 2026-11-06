@@ -710,7 +710,9 @@ def page_html(sections: Sequence[FileSection], registry: Registry, site_url: str
 <p><a href="./methodology.html">Methodology: definitions, sources and limits</a>.
 <a href="./">Back to the main page</a>. Source code and data notes:
 <a href="{pages.REPO}">github.com/batestguy/curb-cut</a>.</p>
+{pages.count_note("./methodology.html")}
 </footer>
+{pages.count_pixel("/data-dictionary.html", "Data dictionary: Curb Cut")}
 </body>
 </html>
 """

@@ -6,6 +6,7 @@
 // constants from the pre-registration.
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { isVisitCount } from './visit-count.js';
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 
@@ -264,10 +265,12 @@ test('the main page and the methodology page link the poverty page', async ({ pa
   await expect(page).toHaveURL(/poverty\.html$/);
 });
 
-test('poverty page: nothing comes from another origin', async ({ page, baseURL }) => {
+test('poverty page: nothing comes from another origin but the visit count', async ({ page, baseURL }) => {
   const origin = new URL(baseURL).origin;
   const requests = [];
   page.on('request', (r) => requests.push(r.url()));
   await open(page);
-  expect(requests.filter((u) => !u.startsWith(origin) && !u.startsWith('data:'))).toEqual([]);
+  const elsewhere = requests.filter((u) => !u.startsWith(origin) && !u.startsWith('data:'));
+  expect(elsewhere.filter((u) => !isVisitCount(u))).toEqual([]);
+  expect(elsewhere.filter(isVisitCount)).toHaveLength(1);
 });

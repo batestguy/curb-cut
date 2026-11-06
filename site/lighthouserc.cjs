@@ -28,7 +28,8 @@ module.exports = {
       numberOfRuns: 1,
       settings: {
         onlyCategories: ['accessibility', 'best-practices'],
-        chromeFlags: '--headless=new --no-sandbox',
+        // Lighthouse runs must never add visit counts: GoatCounter's host does not resolve.
+        chromeFlags: '--headless=new --no-sandbox --host-resolver-rules="MAP *.goatcounter.com ~NOTFOUND"',
       },
     },
     assert: {

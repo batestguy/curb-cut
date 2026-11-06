@@ -9,6 +9,7 @@
 import { fileURLToPath } from 'node:url';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { isVisitCount } from './visit-count.js';
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 const FIXTURES = fileURLToPath(new URL('./fixtures/', import.meta.url));
@@ -429,7 +430,8 @@ test('sensitivity: everything comes from this origin', async ({ page, baseURL })
   await ready(page);
   await expect(page.locator('#sensitivity-chart svg').first()).toBeVisible();
   await download(page, 'CSV');
-  expect(elsewhere).toEqual([]);
+  expect(elsewhere.filter((u) => !isVisitCount(u))).toEqual([]);
+  expect(elsewhere.filter(isVisitCount)).toHaveLength(1);
 });
 
 test('sensitivity: when the data cannot load, the page says so and points elsewhere', async ({ page }) => {

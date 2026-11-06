@@ -296,6 +296,21 @@
           <a href="https://github.com/batestguy/curb-cut/blob/main/docs/reproduce.md">docs/reproduce.md</a>.
         </p>
       </section>
+      <section aria-labelledby="visits-heading">
+        <h2 id="visits-heading">Visit counts</h2>
+        <p>
+          Each page asks <a href="https://www.goatcounter.com/">GoatCounter</a> for a
+          one-pixel image, so the site can say how many people use it. That is the only request
+          a page makes to another site, and it runs no script. GoatCounter records the page and
+          the time, and works out the browser, operating system, language and country from the
+          request; it keeps only totals per hour or day. It stores no IP addresses and no full
+          browser identifier, and sets no cookies or other storage in your browser. To tell
+          visits apart, it keeps a random ID in memory for up to eight hours. The data are
+          stored in Finland and Germany and are not shared with anyone else (GoatCounter's
+          <a href="https://www.goatcounter.com/help/privacy">privacy policy</a>, 8 June 2025).
+          Blocking images from goatcounter.com stops the count and changes nothing else.
+        </p>
+      </section>
     </main>
 
     <footer class="site-footer">
@@ -315,11 +330,16 @@
         >); no account is needed. With a GitHub account you can also
         <a href="https://github.com/batestguy/curb-cut/issues/new">report a problem on GitHub</a>.
       </p>
+      <p>
+        Visits are counted with GoatCounter: no cookies, and no IP addresses stored.
+        <a href="./methodology.html#visits-heading">What is recorded</a>.
+      </p>
       <h2 class="footer-heading">More</h2>
       <p>
         <a href="./">Back to the main page</a>. Source code and data notes:
         <a href="https://github.com/batestguy/curb-cut">github.com/batestguy/curb-cut</a>.
       </p>
     </footer>
+    <img class="visit-count" src="https://curbcutng.goatcounter.com/count?p=/methodology.html&amp;t=Methodology%3A%20Curb%20Cut" alt="" width="1" height="1" referrerpolicy="no-referrer" />
   </body>
 </html>
