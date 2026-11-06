@@ -657,6 +657,7 @@ def nav_html() -> str:
         '<li><a href="./">Main page</a></li>'
         '<li><a href="./states/">State pages</a></li>'
         '<li><a href="./explorer.html">Data explorer</a></li>'
+        '<li><a href="./sensitivity.html">Assumed rate vs survey</a></li>'
         '<li><a href="./poverty.html">Disability and poverty</a></li>'
         '<li><a href="./methodology.html">Methodology</a></li>'
         '<li><a href="./data-dictionary.html" aria-current="page">Data dictionary</a></li>'

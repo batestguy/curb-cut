@@ -122,11 +122,11 @@ test('explorer: keyboard only, in Tab order: choose, Show figures, then sort', a
   await ready(page);
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip to main content' })).toBeFocused();
-  // Every stop before the form, in order: site name, six nav links, the intro's link.
+  // Every stop before the form, in order: site name, seven nav links, the intro's link.
   const before = await page.evaluate(() =>
     [...document.querySelectorAll('header a, main > p a')].map((a) => a.textContent.trim()),
   );
-  expect(before).toHaveLength(8);
+  expect(before).toHaveLength(9);
   for (const name of before) {
     await page.keyboard.press('Tab');
     expect(await page.evaluate(() => document.activeElement.textContent.trim())).toBe(name);

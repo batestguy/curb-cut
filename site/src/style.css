@@ -1095,3 +1095,82 @@ thead th.num .sort-button {
 .explorer-page li {
   overflow-wrap: anywhere;
 }
+
+/* The sensitivity page (site/sensitivity.html): a range input with its value shown large,
+   two step buttons and a number input, then the age group as radio buttons. */
+.rate-control {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.rate-value {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.rate-control input[type='range'] {
+  width: 100%;
+  min-height: 2.75rem;
+  margin: 0;
+  accent-color: var(--green);
+}
+
+.rate-control input[type='range']:focus-visible,
+.rate-typed input:focus-visible,
+.radio-line input:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.rate-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.rate-typed input {
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 2px solid var(--border);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+  min-height: 2.75rem;
+  width: 8rem;
+  max-width: 100%;
+}
+
+.rate-typed .hint {
+  margin: 0;
+  min-height: 1.2em;
+  color: var(--muted);
+}
+
+.age-choice {
+  margin: 0;
+}
+
+.radio-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+}
+
+.radio-line input {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin: 0;
+  accent-color: var(--green);
+}
+
+.sensitivity-page td.words {
+  font-style: italic;
+}
+
+.sensitivity-page p,
+.sensitivity-page li {
+  overflow-wrap: anywhere;
+}

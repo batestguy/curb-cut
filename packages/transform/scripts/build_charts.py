@@ -22,7 +22,8 @@ a data table and an accessibility audit. The build fails if any audit fails.
 It also writes the main page's table downloads (``main_page_downloads``) to
 ``downloads/main/`` with a manifest, ``downloads/main/index.json``, that the page reads, and
 the data explorer's chart set and manifest (``explorer_charts.py``: ``charts/explorer/`` and
-``explorer.json``).
+``explorer.json``) and the sensitivity page's (``sensitivity_data.py``: ``charts/sensitivity/``
+and ``sensitivity.json``).
 """
 
 from __future__ import annotations
@@ -397,6 +398,17 @@ def main() -> int:
         if not doc["audit"]["passed"]:
             print(f"explorer chart {name}: audit FAILED", file=sys.stderr)
     print(f"wrote {len(explorer_docs)} explorer charts and {args.data_dir / 'explorer.json'}")
+    # The sensitivity page's charts (one per age group and assumed rate) and its manifest;
+    # sensitivity_data.build writes them into charts/sensitivity/ (cleared first) and
+    # sensitivity.json. Audited like the others.
+    sensitivity_docs = _load_sibling("sensitivity_data").build(args.data_dir)
+    for name, doc in sensitivity_docs.items():
+        failed = failed or not doc["audit"]["passed"]
+        if not doc["audit"]["passed"]:
+            print(f"sensitivity chart {name}: audit FAILED", file=sys.stderr)
+    print(
+        f"wrote {len(sensitivity_docs)} sensitivity charts and {args.data_dir / 'sensitivity.json'}"
+    )
     if failed:
         print("A chart failed its accessibility audit.", file=sys.stderr)
         return 1

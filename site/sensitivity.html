@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en-NG">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Assumed rate against the survey: Curb Cut</title>
+    <meta
+      name="description"
+      content="Change the assumed disability rate behind JONAPWD's 2025 state figures and see, for each of Nigeria's 37 states, whether it falls above, inside or below the DHS 2024 survey's 95% confidence interval."
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 3 2'%3E%3Cpath fill='%23008751' d='M0 0h3v2H0z'/%3E%3Cpath fill='%23fff' d='M1 0h1v2H1z'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./src/style.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to main content</a>
+
+    <div class="flag-band" aria-hidden="true"></div>
+    <header class="site-header">
+      <p class="site-name"><a href="./">Curb Cut</a></p>
+      <nav class="site-nav" aria-label="Site">
+        <ul>
+          <li><a href="./">Main page</a></li>
+          <li><a href="./states/">State pages</a></li>
+          <li><a href="./explorer.html">Data explorer</a></li>
+          <li><a href="./sensitivity.html" aria-current="page">Assumed rate vs survey</a></li>
+          <li><a href="./poverty.html">Disability and poverty</a></li>
+          <li><a href="./methodology.html">Methodology</a></li>
+          <li><a href="./data-dictionary.html">Data dictionary</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main" tabindex="-1" class="sensitivity-page">
+      <h1>An assumed rate against a survey measure, state by state</h1>
+      <p>
+        JONAPWD's 2025 state figures apply one assumed disability rate to every state's
+        projected population. Here you can change that rate and see, for each state, whether it
+        falls above, inside or below the DHS 2024 survey's 95% confidence interval. The assumed
+        rate is an assumption; the survey measures one stated definition, for one age group.
+      </p>
+
+      <section aria-labelledby="what-heading">
+        <h2 id="what-heading">What is compared</h2>
+        <!-- sensitivity:definitions -->
+      </section>
+
+      <noscript>
+        <section aria-labelledby="static-heading">
+          <h2 id="static-heading">The comparison at the assumed rate JONAPWD uses</h2>
+          <p class="status error">
+            Changing the rate needs JavaScript. Here is the comparison at JONAPWD's assumed
+            rate, made when the site was built.
+          </p>
+          <!-- sensitivity:static -->
+          <ul class="sentences">
+            <li>
+              <a href="./explorer.html">The data explorer</a> and
+              <a href="./states/">the 37 state pages</a> have every DHS 2024 figure, with
+              downloads.
+            </li>
+            <li>
+              The file these figures come from,
+              <a href="./data/dhs2024_state_prevalence.parquet">dhs2024_state_prevalence.parquet</a>,
+              is described column by column in the <a href="./data-dictionary.html">data dictionary</a>.
+            </li>
+          </ul>
+        </section>
+      </noscript>
+
+      <form id="rate-form" class="explorer-form sensitivity-form" hidden>
+        <fieldset>
+          <legend>Choose the assumed rate and the survey figures</legend>
+          <div class="rate-control">
+            <label for="rate-range">Assumed rate</label>
+            <p class="rate-value"><span id="rate-value"></span></p>
+            <input type="range" id="rate-range" name="rate" min="2" max="20" step="0.5" value="15" />
+            <div class="rate-buttons">
+              <button type="button" id="rate-down">−0.5 points</button>
+              <button type="button" id="rate-up">+0.5 points</button>
+            </div>
+            <div class="field-stack rate-typed">
+              <label for="rate-number">Or type a rate (%)</label>
+              <input type="number" id="rate-number" inputmode="decimal" min="2" max="20" step="0.5" value="15" aria-describedby="rate-hint" />
+              <p id="rate-hint" class="hint"></p>
+            </div>
+          </div>
+          <fieldset class="age-choice">
+            <legend>Survey figures for</legend>
+            <div id="age-options"></div>
+          </fieldset>
+        </fieldset>
+      </form>
+
+      <p id="url-message" class="status error" hidden></p>
+      <!-- The page's one live region: the summary sentence, debounced so a held arrow key
+           gives one announcement, not one per step. -->
+      <p id="summary" class="lead summary" role="status" aria-live="polite"></p>
+
+      <div id="sensitivity-fallback" class="fallback" hidden>
+        <ul class="sentences">
+          <li>
+            <a href="./explorer.html">The data explorer</a> and
+            <a href="./states/">the 37 state pages</a> have every DHS 2024 figure, with
+            downloads.
+          </li>
+          <li>
+            The file these figures come from,
+            <a href="./data/dhs2024_state_prevalence.parquet">dhs2024_state_prevalence.parquet</a>,
+            is described in the <a href="./data-dictionary.html">data dictionary</a>.
+          </li>
+        </ul>
+      </div>
+
+      <section id="results" aria-labelledby="results-heading" hidden>
+        <h2 id="results-heading">State by state</h2>
+        <div id="results-table" class="table-wrap"></div>
+        <div id="results-downloads"></div>
+        <p id="results-columns"></p>
+
+        <h2 id="chart-heading">Chart: the survey estimates and the assumed rate</h2>
+        <p id="chart-note"></p>
+        <figure id="sensitivity-chart-figure" class="chart-figure" aria-labelledby="sensitivity-chart-title" hidden>
+          <div id="sensitivity-chart" class="chart" role="img" aria-labelledby="sensitivity-chart-desc">
+            <div class="chart-plot tall" aria-hidden="true"></div>
+          </div>
+          <figcaption>
+            <span id="sensitivity-chart-title" class="chart-title"></span>
+            <!-- Read once, as the chart's accessible name; hidden here so screen readers don't hear it twice. -->
+            <span id="sensitivity-chart-desc" class="chart-desc" aria-hidden="true"></span>
+          </figcaption>
+        </figure>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <h2 class="footer-heading">Sources</h2>
+      <p>
+        The DHS Program, <cite>Nigeria Demographic and Health Survey 2024</cite> (National
+        Population Commission and ICF), Washington Group Short Set; estimates by Curb Cut from the
+        survey microdata, used for the registered project "Curb Cut: disability prevalence and
+        poverty in Nigeria". Only disclosure-checked aggregates are published. Population:
+        National Bureau of Statistics, Demographic Bulletin 2023, Annex 3 (source: National
+        Population Commission). The assumed rate: JONAPWD, 2025 Assumptive Disability
+        Disaggregated Data, cited, not redistributed. Reuse is subject to the source terms; cite
+        the sources.
+      </p>
+      <p>
+        <a href="./methodology.html">Methodology: definitions, sources and limits</a>.
+        <a href="./data-dictionary.html">Data dictionary: every public file and column</a>.
+      </p>
+      <h2 class="footer-heading">Accessibility and feedback</h2>
+      <!-- Same text as REPORT_HTML in packages/transform/scripts/build_state_pages.py -->
+      <p>
+        This site has automated accessibility tests (axe, keyboard); it has not yet been tested
+        by a regular screen-reader user. If anything is hard to use or looks wrong, email
+        <a
+          href="mailto:batesthommie@gmail.com?subject=Curb%20Cut%3A%20problem%20report&amp;body=Page%20address%3A%0A%0AWhat%20went%20wrong%3A%0A%0ABrowser%20and%20screen%20reader%2C%20if%20any%3A%0A"
+          >batesthommie@gmail.com</a
+        >
+        (backup:
+        <a
+          href="mailto:jzbannister@atbu.edu.ng?subject=Curb%20Cut%3A%20problem%20report&amp;body=Page%20address%3A%0A%0AWhat%20went%20wrong%3A%0A%0ABrowser%20and%20screen%20reader%2C%20if%20any%3A%0A"
+          >jzbannister@atbu.edu.ng</a
+        >); no account is needed. With a GitHub account you can also
+        <a href="https://github.com/batestguy/curb-cut/issues/new">report a problem on GitHub</a>.
+      </p>
+    </footer>
+
+    <script type="module" src="./src/sensitivity.js"></script>
+  </body>
+</html>

@@ -239,8 +239,9 @@ test('the legend buttons show one class at a time, by keyboard, and Esc shows al
   await expect(status).toBeEmpty();
   await expect(legend.locator('[aria-live], [role="status"], [role="alert"]')).toHaveCount(0);
 
-  // Tab reaches every button in order, after the comparison's links and before the map.
-  await page.locator('#comparison-list a').last().focus();
+  // Tab reaches every button in order, after the comparison's links (the last one goes to the
+  // sensitivity page) and before the map.
+  await page.locator('section[aria-labelledby="comparison-heading"] a[href="./sensitivity.html"]').focus();
   for (let i = 0; i < doc.classes.length; i += 1) {
     await page.keyboard.press('Tab');
     await expect(buttons.nth(i)).toBeFocused();
