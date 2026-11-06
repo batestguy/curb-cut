@@ -8,6 +8,7 @@
 import { fileURLToPath } from 'node:url';
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import { isVisitCount } from './visit-count.js';
 
 const WCAG_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
 // The first DuckDB-WASM start can take a while on a busy machine.
@@ -507,7 +508,8 @@ test('explorer: everything comes from this origin', async ({ page, baseURL }) =>
   await shown(page, 'explorer.html?level=state&measure=disability3&age=18%2B&sex=all');
   await expect(page.locator('#explorer-chart svg').first()).toBeVisible(LOAD);
   await download(page, 'CSV');
-  expect(elsewhere).toEqual([]);
+  expect(elsewhere.filter((u) => !isVisitCount(u))).toEqual([]);
+  expect(elsewhere.filter(isVisitCount)).toHaveLength(1);
 });
 
 test('every page links the data explorer', async ({ page }) => {

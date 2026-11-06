@@ -10,6 +10,9 @@ const PAGES = [
   { path: 'poverty.html', counted: '/poverty.html' },
   { path: 'states/', counted: '/states/' },
   { path: 'states/kano.html', counted: '/states/kano.html' },
+  { path: 'explorer.html', counted: '/explorer.html' },
+  { path: 'sensitivity.html', counted: '/sensitivity.html' },
+  { path: 'data-dictionary.html', counted: '/data-dictionary.html' },
 ];
 
 for (const { path, counted } of PAGES) {

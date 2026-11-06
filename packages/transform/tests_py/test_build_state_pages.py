@@ -498,6 +498,8 @@ def test_visit_count_matches_hand_written_pages() -> None:
     for name, path, title in (
         ("index.html", "/", "Curb Cut: Nigerian disability data"),
         ("methodology.html", "/methodology.html", "Methodology: Curb Cut"),
+        ("explorer.html", "/explorer.html", "Data explorer: Curb Cut"),
+        ("sensitivity.html", "/sensitivity.html", "Assumed rate against the survey: Curb Cut"),
     ):
         html = (ROOT / "site" / name).read_text(encoding="utf-8")
         assert pages.count_pixel(path, title) in html, name
