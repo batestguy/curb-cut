@@ -1,0 +1,148 @@
+# The site's strings for the chart descriptions in Hausa, Yoruba, Igbo and Nigerian Pidgin
+# (P6 item 8). The sentences themselves come from disability-access-charts 0.4 (its language
+# tables); this file holds only what the site supplies: chart titles, the category and
+# interval labels, the source line, the activity names and "Nigeria as a whole", plus the
+# disclosure's own text. State names are not translated.
+#
+# Everything in a language other than English was drafted by an AI model (Claude) on
+# 2026-11-06 and has NOT been reviewed by a native speaker (author's decision of 2026-11-04,
+# docs/STATUS.md decisions log). The page says so on every translated text.
+#
+# Disability terms: Hausa "nakasa", Yoruba "akanda ẹ̀dá", Igbo "nkwarụ", Pidgin
+# "disability", the terms in common print. The simplified Disability Act in Hausa, Yoruba
+# and Igbo (NCPWD with The Leprosy Mission Nigeria, docs/verification.md D26) could not be
+# checked, so these are not taken from it.
+#
+# Read by packages/transform/scripts/translations.py; the builders fail if a language is
+# missing from any string. {where} is the state's name.
+
+languages:
+  ha: Hausa
+  yo: Yorùbá
+  ig: Igbo
+  pcm: Naijá (Nigerian Pidgin)
+
+# The disclosure under each chart (English page text).
+disclosure:
+  summary: This description in Hausa, Yorùbá, Igbo and Naijá
+  note: >-
+    These descriptions are meant to say what the English one says. A program checks their
+    numbers and comparisons against the same data; the wording was drafted by AI (Claude) and
+    has not been reviewed by a native speaker. No screen-reader voice for
+    these languages was found (eSpeak NG, which NVDA uses, has none), so they are for
+    reading, not listening.
+  label: "drafted by AI, not reviewed by a native speaker"
+
+# The same note in each language, shown with its description.
+note:
+  ha: >-
+    AI (Claude) ne ya rubuta wannan bayani daga bayanai iri ɗaya da na Turanci; wani mai jin
+    Hausa bai duba shi ba tukuna. Ba a sami muryar manhajar karanta allo (screen reader) ta
+    Hausa ba, don haka an yi shi ne don karantawa, ba don saurare ba.
+  yo: >-
+    Ẹ̀rọ AI (Claude) ló kọ àpèjúwe yìí láti inú dátà kan náà pẹ̀lú ti Gẹ̀ẹ́sì; ẹni tí ó gbọ́
+    Yorùbá dáadáa kò tíì yẹ̀ ẹ́ wò. A kò rí ohùn ẹ̀rọ ìkàwé ojú-ìwé (screen reader) fún
+    Yorùbá, nítorí náà fún kíkà ni, kì í ṣe fún gbígbọ́.
+  ig: >-
+    Ọ bụ AI (Claude) dere nkọwa a site na otu data ahụ e ji dee nke Bekee; onye na-asụ Igbo
+    nke ọma enyochabeghị ya. A hụghị olu ihe na-agụ ihuenyo (screen reader) maka Igbo, ya
+    mere ọ bụ maka ịgụ, ọ bụghị maka ige ntị.
+  pcm: >-
+    Na AI (Claude) write dis description from di same data wey di English one use; person
+    wey sabi Pidgin well never check am. We no see screen reader voice for Pidgin, so dis one
+    na for reading, no be for listening.
+
+strings:
+  interval_label:
+    en: 95% confidence interval
+    ha: tazarar tabbaci ta 95%
+    yo: ààlà ìgbẹ́kẹ̀lé 95%
+    ig: oke ntụkwasị obi 95%
+    pcm: 95% confidence interval
+  dhs_source:
+    en: Nigeria DHS 2024 (NPC and ICF), Curb Cut estimates
+    ha: Nigeria DHS 2024 (NPC da ICF), ƙiyasin Curb Cut
+    yo: Nigeria DHS 2024 (NPC àti ICF), ìfojúbù Curb Cut
+    ig: Nigeria DHS 2024 (NPC na ICF), atụmatụ Curb Cut
+    pcm: Nigeria DHS 2024 (NPC and ICF), Curb Cut estimates
+  state_label:
+    en: State
+    ha: Jiha
+    yo: Ìpínlẹ̀
+    ig: Steeti
+    pcm: State
+  activity_label:
+    en: Activity
+    ha: Fanni
+    yo: Ẹ̀ka
+    ig: Ngalaba
+    pcm: Activity
+  nigeria_as_a_whole:
+    en: Nigeria as a whole
+    ha: Najeriya baki ɗaya
+    yo: Nàìjíríà lápapọ̀
+    ig: Naịjirịa niile
+    pcm: Naija as a whole
+  map_title:
+    en: Disability among adults 18+ by state
+    ha: Nakasa a tsakanin manya masu shekara 18+, bisa jiha
+    yo: Àwọn àgbàlagbà ọmọ ọdún 18+ tí wọ́n jẹ́ akanda ẹ̀dá, ní ìpínlẹ̀ kọ̀ọ̀kan
+    ig: Nkwarụ n'etiti ndị okenye dị afọ 18+, site na steeti
+    pcm: Disability for adults wey don reach 18+, state by state
+  dots_title:
+    en: Disability among adults 18+ by state, with 95% confidence intervals
+    ha: Nakasa a tsakanin manya masu shekara 18+, bisa jiha, tare da tazarar tabbaci ta 95%
+    yo: >-
+      Àwọn àgbàlagbà ọmọ ọdún 18+ tí wọ́n jẹ́ akanda ẹ̀dá, ní ìpínlẹ̀ kọ̀ọ̀kan, pẹ̀lú ààlà
+      ìgbẹ́kẹ̀lé 95%
+    ig: Nkwarụ n'etiti ndị okenye dị afọ 18+, site na steeti, ya na oke ntụkwasị obi 95%
+    pcm: Disability for adults wey don reach 18+, state by state, wit 95% confidence intervals
+  state_title:
+    en: >-
+      Adults 18+ in {where} with a lot of difficulty or who cannot do it at all, by activity,
+      with 95% confidence intervals
+    ha: >-
+      Manya masu shekara 18+ a {where} masu wahala sosai, ko waɗanda ba sa iya yi kwata-kwata,
+      bisa fanni, tare da tazarar tabbaci ta 95%
+    yo: >-
+      Àwọn àgbàlagbà ọmọ ọdún 18+ ní {where} tí ó ṣòro gidigidi fún, tàbí tí wọn kò lè ṣe é
+      rárá, ní ẹ̀ka kọ̀ọ̀kan, pẹ̀lú ààlà ìgbẹ́kẹ̀lé 95%
+    ig: >-
+      Ndị okenye dị afọ 18+ nọ na {where} nwere nnukwu nsogbu, ma ọ bụ ndị na-enweghị ike ime
+      ya ma ọlị, site na ngalaba, ya na oke ntụkwasị obi 95%
+    pcm: >-
+      Adults wey don reach 18+ for {where} wey get plenty wahala or wey no fit do am at all,
+      by activity, wit 95% confidence intervals
+
+# The six activities (build_state_pages.DOMAINS), by their English label.
+activities:
+  Seeing:
+    ha: Gani
+    yo: Ríran
+    ig: Ịhụ ụzọ
+    pcm: To see
+  Hearing:
+    ha: Jin sauti
+    yo: Gbígbọ́
+    ig: Ịnụ olu
+    pcm: To hear
+  Walking or climbing steps:
+    ha: Tafiya ko hawan matakala
+    yo: Rírìn tàbí gígun àtẹ̀gùn
+    ig: Ịga ije ma ọ bụ ịrị steepụ
+    pcm: To waka or climb steps
+  Remembering or concentrating:
+    ha: Tunawa ko mayar da hankali
+    yo: Rírántí tàbí fífọkànsí
+    ig: Ncheta ma ọ bụ itinye uche
+    pcm: To remember or focus
+  Self-care:
+    ha: Kula da kai
+    yo: Títọ́jú ara ẹni
+    ig: Ilekọta onwe
+    pcm: To take care of yourself
+  Communicating:
+    ha: Sadarwa
+    yo: Bíbánisọ̀rọ̀
+    ig: Nkwurịta okwu
+    pcm: To communicate

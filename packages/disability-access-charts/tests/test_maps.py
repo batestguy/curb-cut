@@ -300,7 +300,7 @@ def test_green_scheme_is_the_02_look() -> None:
     }
     assert make()["meta"]["scheme"] == "ylgnbu"
     assert make(themes=MAP_SCHEMES["green"])["meta"]["scheme"] == "custom"
-    assert make()["meta"]["schema"] == "1.1"
+    assert make()["meta"]["schema"] == "1.2"
     with pytest.raises(ValueError, match="unknown map scheme"):
         make(scheme="viridis")
 

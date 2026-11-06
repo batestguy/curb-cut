@@ -3,6 +3,7 @@ import { setUpExplorer } from './explore.js';
 import { citedLine, downloadLine, watchTableWraps } from './format.js';
 import { renderChoropleth } from './map.js';
 import { renderComparison, renderFindings, renderHeadline, renderSpatial } from './prevalence.js';
+import { placeTranslations } from './translations.js';
 
 const DATA_URL = `${import.meta.env.BASE_URL}data/`;
 
@@ -14,6 +15,20 @@ async function getJson(path) {
 
 // The tables' downloads (build_charts.py). Optional: without it, the tables show no links.
 const downloadsPromise = getJson('downloads/main/index.json').catch(() => null);
+
+// The disclosure's words for the translated descriptions (build_charts.py, from
+// translations.yml). Optional: without it, the charts show no translations.
+const translationsPromise = getJson('translations.json').catch(() => null);
+
+// The chart's description in other languages, under it. Never takes the chart down.
+async function showTranslations(doc, holderId) {
+  const holder = document.getElementById(holderId);
+  try {
+    placeTranslations(holder, doc, await translationsPromise);
+  } catch {
+    holder?.replaceChildren();
+  }
+}
 
 // JONAPWD's charts: all rights reserved, so their tables cite the publication instead.
 const JONAPWD_CHARTS = new Map([
@@ -74,6 +89,7 @@ async function showChart(name, id) {
       tableNote(name),
     ]);
     showFindings(doc, id);
+    showTranslations(doc, `${id}-translations`);
     return await renderChart(doc, {
       container: document.getElementById(id),
       titleEl,
@@ -112,6 +128,7 @@ async function showMap() {
       statusEl: document.getElementById('prevalence-map-filter-status'),
     });
     if (chosenState) prevalenceMap.highlight(chosenState);
+    showTranslations(doc, 'prevalence-map-translations');
   } catch (error) {
     const message = `The map could not be loaded: ${error.message}. The same figures are in the chart and table below.`;
     document.getElementById('prevalence-map-title').textContent = 'Map unavailable';

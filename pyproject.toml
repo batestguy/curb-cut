@@ -55,6 +55,12 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "SIM", "RUF"]
 
+[tool.ruff.lint.per-file-ignores]
+# The language tables and their tests write Hausa, Yoruba and Igbo as they are spelled:
+# the modifier-letter apostrophe ʼ, the curly ’ and en dashes are characters, not typos.
+"packages/disability-access-charts/src/disability_access_charts/_lang/*.py" = ["RUF001", "RUF002"]
+"packages/disability-access-charts/tests/test_languages.py" = ["RUF001"]
+
 [tool.pyright]
 include = ["packages"]
 pythonVersion = "3.12"

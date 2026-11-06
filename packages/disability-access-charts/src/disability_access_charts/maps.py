@@ -113,8 +113,10 @@ from disability_access_charts.vision import (
     neighbour_differences,
 )
 
-SCHEMA = "1.1"
-"""Changed in 0.3 (from "1.0"): themes may carry a ``halo``; ``patterns.class_ink``;
+SCHEMA = "1.2"
+"""Changed in 0.4 (from "1.1"): the optional ``alt_text_translations`` field (see
+:mod:`disability_access_charts.translate`); ``MAP_TEXT`` in the language tables.
+Changed in 0.3 (from "1.0"): themes may carry a ``halo``; ``patterns.class_ink``;
 ``patterns.sequence``; each class's ``regions`` and ``announce``; ``legend``;
 ``keyboard.legend_filter``; ``meta.scheme``."""
 
@@ -218,13 +220,14 @@ def _number(value: float) -> str:
     return f"{value:,.6f}".rstrip("0").rstrip(".")
 
 
-def class_labels(breaks: Sequence[float], unit: str) -> list[str]:
-    """'Under 2%', '2% to under 3%', ..., '6% and over'."""
+def class_labels(breaks: Sequence[float], unit: str, lang: str = "en") -> list[str]:
+    """'Under 2%', '2% to under 3%', ..., '6% and over' (``lang``'s ``MAP_TEXT``)."""
+    t = _lang.get(lang).MAP_TEXT
     suffix = "%" if unit == "percent" else ""
     b = [f"{_number(x)}{suffix}" for x in breaks]
-    labels = [f"Under {b[0]}"]
-    labels += [f"{lo} to under {hi}" for lo, hi in itertools.pairwise(b)]
-    labels.append(f"{b[-1]} and over")
+    labels = [t["class_under"].format(b=b[0])]
+    labels += [t["class_between"].format(lo=lo, hi=hi) for lo, hi in itertools.pairwise(b)]
+    labels.append(t["class_over"].format(b=b[-1]))
     return labels
 
 
@@ -234,13 +237,18 @@ def classify(value: float, breaks: Sequence[float], decimals: int) -> int:
     return sum(1 for b in breaks if shown >= b)
 
 
-def _class_sentence(classes: Sequence[Mapping[str, Any]], label: str) -> str:
+def _class_sentence(classes: Sequence[Mapping[str, Any]], label: str, lang: str = "en") -> str:
+    language = _lang.get(lang)
+    t = language.MAP_TEXT
     items = "; ".join(
-        f"{c['label'].lower() if i == 0 else c['label']}, {c['count']} "
-        f"{label if c['count'] == 1 else label + 's'}"
+        t["class_item"].format(
+            label=c["label"].lower() if i == 0 else c["label"],
+            count=c["count"],
+            noun=language.plural(label, c["count"]),
+        )
         for i, c in enumerate(classes)
     )
-    return f"Shaded in {len(classes)} classes: {items}."
+    return t["classes"].format(k=len(classes), items=items)
 
 
 def _announcements(
@@ -268,11 +276,12 @@ def _announcements(
     return sentences, everything
 
 
-def _intro(title: str, n: int, label: str, interval: str | None) -> str:
-    noun = label if n == 1 else label + "s"
-    if interval:
-        return f"Map: {title}. {n} {noun}, each with its {interval}."
-    return f"Map: {title}. {n} {noun}."
+def _intro(title: str, n: int, label: str, interval: str | None, lang: str = "en") -> str:
+    language = _lang.get(lang)
+    t = language.MAP_TEXT
+    noun = language.plural(label, n)
+    key = "intro_map_ci" if interval else "intro_map"
+    return t[key].format(kind=t["kind_map"], title=title, n=n, noun=noun, interval=interval)
 
 
 def _alt_text(
@@ -300,8 +309,8 @@ def _alt_text(
     if not dots.startswith(dot_intro + " "):
         raise AssertionError("unexpected dot-plot introduction")  # pragma: no cover
     dots = dots[len(dot_intro) + 1 :]
-    intro = _intro(title, n, label, interval)
-    sentence = _class_sentence(classes, label)
+    intro = _intro(title, n, label, interval, lang)
+    sentence = _class_sentence(classes, label, lang)
     checked = f"{intro} {dots}"
     return f"{intro} {sentence} {dots}", sentence, checked
 
@@ -369,6 +378,7 @@ def choropleth(
     patterns: bool | None = None,
     scheme: str = DEFAULT_SCHEME,
     legend_filter: bool = True,
+    translations: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """A choropleth document (see the module docstring).
 
@@ -386,6 +396,10 @@ def choropleth(
     patterns by ink weight with an ink per class. ``themes``, when given, replaces the
     scheme's colours only. ``legend_filter`` adds what a page needs for a legend whose
     items show one class at a time (each class's regions and announcement).
+
+    New in 0.4: ``translations`` (language code -> :class:`~disability_access_charts.
+    translate.Translation`) adds ``alt_text_translations``: the description in those
+    languages (introduction, class sentence and the dot-plot part), each audited.
     """
     _lang.get(lang)
     if scheme not in MAP_SCHEMES:
@@ -439,7 +453,7 @@ def choropleth(
         interval_label=interval_label,
         category_label=category_label,
     )
-    labels = class_labels(breaks, unit)
+    labels = class_labels(breaks, unit, lang)
     class_index = [classify(v, breaks, decimals) for v in values]
     classes = [
         {
@@ -550,6 +564,10 @@ def choropleth(
         doc["patterns"] = pattern_block
     if legend is not None:
         doc["legend"] = legend
+    if translations:
+        from disability_access_charts.translate import translate
+
+        doc["alt_text_translations"] = translate(doc, translations)
     from disability_access_charts.audit import audit
 
     doc["audit"] = audit(doc)
@@ -808,7 +826,8 @@ def map_checks(doc: Mapping[str, Any], alt_text: str | None = None) -> list[dict
     decimals = data.decimals
     regions = doc.get("regions", [])
     classes = doc.get("classes", [])
-    labels = class_labels(breaks, data.unit) if breaks else []
+    doc_lang = str(doc.get("meta", {}).get("alt_text_lang", "en"))
+    labels = class_labels(breaks, data.unit, doc_lang) if breaks else []
 
     # The classes, regions, map and table against the data.
     problems: list[str] = []
@@ -951,7 +970,7 @@ def map_checks(doc: Mapping[str, Any], alt_text: str | None = None) -> list[dict
     sentence = doc.get("alt_text_classes", "")
     label = _lang.get(doc.get("meta", {}).get("alt_text_lang", "en")).label(data.category_label)
     want_classes = [{"label": lab, "count": expected.count(k)} for k, lab in enumerate(labels)]
-    want_sentence = _class_sentence(want_classes, label) if labels else ""
+    want_sentence = _class_sentence(want_classes, label, doc_lang) if labels else ""
     in_text = bool(text) and bool(sentence) and sentence in (text or "")
     checks.append(
         _check(
@@ -964,4 +983,7 @@ def map_checks(doc: Mapping[str, Any], alt_text: str | None = None) -> list[dict
     )
     rest = (text or "").replace(sentence, "", 1).replace("  ", " ") if in_text else text
     checks += alt_text_checks(rest, data, lang=doc.get("meta", {}).get("alt_text_lang", "en"))
+    from disability_access_charts.translate import translation_checks
+
+    checks += translation_checks(doc)
     return checks

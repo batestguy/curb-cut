@@ -348,6 +348,17 @@ other_files:
       Chart documents made by the disability-access-charts library at build time: the
       Plotly figure, the alt-text checked against the data, the data table and the
       accessibility audit result. Each chart's numbers are the same as in the files above.
+      The main page's map and dot plot and each state page's chart also hold
+      alt_text_translations: the description in Hausa, Yoruba, Igbo and Nigerian Pidgin
+      (keyed ha, yo, ig, pcm), each with its text, its origin ("template"), reviewed (false:
+      drafted by AI, not reviewed by a native speaker), the translated inputs (title,
+      source, labels, names) and its finding sentences (for the map, its class sentence),
+      each checked by that language's claim checker in the audit.
+  - path: data/translations.json
+    about: >-
+      The text of the disclosure under each translated chart on the main page (its summary,
+      the English note, the "drafted by AI, not reviewed by a native speaker" label, and each
+      language's code, name and note), from packages/transform/translations.yml.
   - path: data/explorer.json
     about: >-
       The data explorer's labels for the codes in the two DHS 2024 files above (measures, age

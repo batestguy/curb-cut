@@ -8,7 +8,7 @@ This page is the complete reference for `check_alt_text` in `disability-access-c
 
 **Numbers.** A number belongs to the name just before it when only a verb or "of / at / :" separates them ("Lagos's rate is 8.0%"), to the name after it in "2.0% in Ibadan", and otherwise to the nearest category named in its part of the clause, so "Kano, 11.9%" fails if 11.9% is Lagos's figure. In a "respectively" clause the names and numbers pair in order. "X to Y" next to a name with an interval must be its lower and upper bound, in that order. A number in a clause that names no category is an error if it is in nobody's data and a warning if it is. It must be one of that category's figures (value, interval bound or share of the total); the checker does not verify which of those roles the sentence gives it. A number followed by "% of the total" must be the share. Chart-wide numbers count only with the words that announce them: the number of categories before a counting noun ("37 bars", "4 states", "the four states", where a wrong count is an error), the total after "Total:" or before "in total". Rounding to the written decimals is allowed. Numbers in the title, source and interval label are skipped.
 
-**Claims checked** (English):
+**Claims checked** (English; for the other languages see "Other languages" below):
 
 - extremes: *largest, highest, smallest, lowest, the most, the fewest*;
 - pairwise: "A *higher / lower / more / fewer / larger / smaller / less* than B" and "A *trails / lags* B", with lists of names joined by commas, "and" or "or" on either side checked pair by pair. A second comparison that starts with its comparator ("and higher than", "but it is higher than") is about the first subject; one with a new unnamed subject ("but the national rate is higher") is warned about, not checked;
@@ -34,13 +34,31 @@ This page is the complete reference for `check_alt_text` in `disability-access-c
 
 Generated alt-text uses the hedged wording ("highest estimate"), gives each interval with its label, says whether the survey can show a difference from the next estimate, and puts the summary before the detail, following a short-paper interview study with screen-reader users (Sharif et al., 2023). The tests hold every generated text to its own checker.
 
+## Other languages (0.4)
+
+Hausa (`ha`), Yoruba (`yo`), Igbo (`ig`) and Nigerian Pidgin (`pcm`) each have their own vocabulary (`_lang/<code>.py`), read by the same checker. The tables were drafted by an AI model and have not been reviewed by a native speaker. The checker learned five things for them, all off in English, so English results are unchanged:
+
+- **Folding** (`FOLD`, Yoruba and Igbo): the text, names and vocabulary are read without combining marks (tone marks, dots below), because a letter such as "ọ̀" has no single code point and Python's `\b` treats a combining mark as a non-word character. Problem messages then quote the clause without its marks.
+- **The hedge before the superlative** (`HEDGE_BEFORE`): "Ƙiyasi mafi yawa", "Ìfojúbù tó ga jùlọ", "Atụmatụ kachasị elu" (the estimate that is highest) count as hedged, like English's "highest estimate".
+- **Comparatives as verbs** (`UP_VERBS`, `DOWN_VERBS`): Hausa "ya fi / ya gaza", Yoruba "ga ju / kéré ju ... lọ", Igbo "dị elu / dị ala karịa". Pidgin keeps English's form, with "pass" for "than" ("dey higher pass").
+- **Counting nouns before their number** (`COUNT_BEFORE`; Hausa, Yoruba, Igbo: "Ɗigo 37", "Àmì 37", "Ntụpọ 37").
+- **Ranks with digits**: "ƙiyasi na 2 daga sama", "ìfojúbù tó wà ní ipò 2 láti òkè", "atụmatụ nke 2 site n'elu" (2nd from the top). Pidgin uses English ordinals.
+
+The interval level is read from a translated label too ("tazarar tabbaci ta 95%", `LEVEL`).
+
+**Checked in every language:** numbers (attached to the nearest name, interval pairs, shares, totals, counts), extremes, comparisons, ranks, "can / cannot show a difference", "no difference" wording, equality wording, each language's negation and qualifier words, and the fallback warning for a clause that names two groups without a recognised claim.
+
+**English and Pidgin only, and why that is safe here:** ratio words (Hausa "sau biyu", Yoruba "ìlọ́po méjì" and Igbo "okpukpu abụọ" put the multiplier before the number, which the ratio rule does not read), "but not Abuja" exclusions, and the warning for an unknown "the -est" superlative. These are forms a person might write by hand. The generated descriptions never contain them; a template translation must equal what the templates give (`alt-text-translation-matches-template`) and every translation must carry exactly the English description's numbers. A hand-edited translation (`origin: "human"`) using such wording would have those forms pass unchecked, which is one reason the audit also compares its numbers with the English description's.
+
+The vocabularies are small: they cover the generated wording and common comparison words, not natural writing. The false-negative rate on hand-written text in these languages is unknown.
+
 ## The LLM gate
 
 `polish_alt_text` keeps a model's rewording only if the checker reports **no errors and no warnings** in it, apart from the independence warning that the data-built text can carry too, and only if it keeps every category, every number, the interval label and the source of the data-built text. Otherwise the data-built text stays.
 
 ## Limits of the method
 
-- **Coverage is a vocabulary.** The checker tests only the claim forms listed above, in English. Its false-negative rate (false claims it passes because it does not recognise them) has not been measured on a corpus of real descriptions; the test suite exercises the listed forms, not a sample of natural writing.
+- **Coverage is a vocabulary.** The checker tests only the claim forms listed above, in English (and, from 0.4, the smaller AI-drafted vocabularies of Hausa, Yoruba, Igbo and Pidgin). Its false-negative rate (false claims it passes because it does not recognise them) has not been measured on a corpus of real descriptions; the test suite exercises the listed forms, not a sample of natural writing.
 - **The interval test is approximate.** It assumes roughly normal, symmetric intervals and independent groups, uses the normal quantile rather than the survey design's degrees of freedom, and applies no multiple-comparison correction (see [the findings method](findings.md) for the corrected version used in findings blocks).
 - **It checks truth, not usefulness.** Whether a description is clear, complete or helpful to a screen-reader user is outside what the checker can test.
 

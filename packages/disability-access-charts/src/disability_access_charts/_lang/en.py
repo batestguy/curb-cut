@@ -15,6 +15,29 @@ from collections.abc import Sequence
 
 CODE = "en"
 
+# How the claim checker reads this language (new in 0.4; the other languages need them).
+# FOLD: read text and vocabulary without combining marks (_lang.fold). WORD: a lower-case
+# word. CAPITALS: a capitalised word in the templates (reserved as a name). ARTICLE: the
+# definite article, as a regex ("(?!)" for none). HEDGE_BEFORE: a regex that, ending right
+# before a superlative or rank, hedges it ("" for none; English hedges after: "highest
+# estimate", see HEDGES). UP_VERBS: verbs meaning "is higher than" (English has none;
+# DOWN_VERBS holds "trails"). COUNT_BEFORE: a counting noun comes before its number ("37
+# bars" in English, after). SERIES_NOUNS: the counting nouns that count series, not
+# categories. LEVEL: an interval label's level ("95% confidence interval" -> 95).
+# NOT_NAME: what excludes the name after it ("but not Abuja"). UNKNOWN_SUPERLATIVE: a
+# superlative form the checker does not know ("the greatest"), or "" for none.
+FOLD = False
+WORD = r"[a-z]+"
+CAPITALS = r"\b[A-Z][a-z]+\b"
+ARTICLE = r"the"
+HEDGE_BEFORE = ""
+UP_VERBS: tuple[str, ...] = ()
+COUNT_BEFORE = False
+SERIES_NOUNS: tuple[str, ...] = ("series",)
+LEVEL = r"(\d+(?:\.\d+)?)\s*%\s*(?:CI\b|C\.I\.|confidence|credible|uncertainty|interval)"
+NOT_NAME = r"(?:\bbut\s+)?\bnot\s+(?:the\s+)?"
+UNKNOWN_SUPERLATIVE = r"\bthe\s+(?P<w>[a-z]+est)\b"
+
 # Category and series names as written in this language. English keeps the names as given
 # in the data, so the glossary is empty (identity); a translation fills it in.
 GLOSSARY: dict[str, str] = {}
@@ -82,6 +105,21 @@ MAP_LEGEND: dict[str, str] = {
     "names_separator": ", ",
 }
 
+# The choropleth's own sentences (maps.py, new in 0.4: they were fixed English before). The
+# introduction is read by the claim checker; the class sentence is checked against the data
+# by the map audit instead. {noun} is the category label in the singular or plural
+# (plural()); {b}, {lo} and {hi} are class breaks as written ("2%").
+MAP_TEXT: dict[str, str] = {
+    "kind_map": "Map",
+    "intro_map": "{kind}: {title}. {n} {noun}.",
+    "intro_map_ci": "{kind}: {title}. {n} {noun}, each with its {interval}.",
+    "classes": "Shaded in {k} classes: {items}.",
+    "class_item": "{label}, {count} {noun}",
+    "class_under": "Under {b}",
+    "class_between": "{lo} to under {hi}",
+    "class_over": "{b} and over",
+}
+
 # Statistical findings (findings.py). Kept apart from TEMPLATES so they do not change which
 # names the alt-text checker reserves. The "finding_*" sentences must pass the claim
 # checker; the "findings_*" lines are counts and method, checked by the audit instead.
@@ -119,6 +157,9 @@ FINDINGS: dict[str, str] = {
         "Not shown or compared ({count}): {names}; too few respondents or no data."
     ),
     "findings_none": "None of the comparisons is supported.",
+    # {they} in findings_dropped (new in 0.4: lines() took these from English before).
+    "they_one": "it",
+    "they_many": "they",
 }
 
 AND = "and"
@@ -154,6 +195,11 @@ def ordinal(n: int) -> str:
 def label(category_label: str) -> str:
     """The category label as it reads mid-sentence ('one per disability type')."""
     return category_label.lower()
+
+
+def plural(noun: str, n: int) -> str:
+    """The counting noun for ``n`` things: 'state' for 1, 'states' otherwise."""
+    return noun if n == 1 else noun + "s"
 
 
 # --- Claim vocabulary -------------------------------------------------------------------

@@ -4,7 +4,14 @@
 
 Built for [Curb Cut](https://github.com/batestguy/curb-cut), an accessible platform for Nigerian disability data. Every chart ships with alt-text (the text alternative that WCAG 2.2 Success Criterion (SC) 1.1.1 asks for; W3C, 2023) built from its data, and the library then **checks that text against the data**: every number, and every comparison it recognises ("highest", "higher than", "twice", "ranked 3rd"). We call this the **claim checker**. With survey estimates, it tests whether the confidence intervals support the claim. The same checker gates any LLM rewording, and `audit()` runs it in CI on the library's own chart documents and, on a best-effort basis, on plain Plotly bar and scatter figures given their alt-text.
 
-**Status: 0.3 (alpha).** English only, built so other languages can be added. The library has not yet been evaluated with screen-reader users (see "Limitations" below).
+**Status: 0.4 (alpha).** English, plus Hausa, Yoruba, Igbo and Nigerian Pidgin (Naijá) **drafted by an AI model and not reviewed by a native speaker** (see "New in 0.4"). The library has not yet been evaluated with screen-reader users (see "Limitations" below).
+
+## New in 0.4: descriptions in Hausa, Yoruba, Igbo and Pidgin
+
+- **Four more language tables** (`ha`, `yo`, `ig`, `pcm`): the description templates, the findings sentences, the map's own sentences and each language's claim-checker vocabulary, with the same keys and placeholders as English. Numbers stay as digits with "." as the decimal point. **The wording was drafted by an AI model (Claude) and has not been reviewed by a native speaker**; say so wherever you show it. Details, choices and limits: [the languages note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/languages.md).
+- **`translations=`** on `bar`, `grouped_bar`, `dot` and `choropleth`: a `Translation` per language carries the strings you supply (title, source, category label, interval label, and any names to translate). The document gains `alt_text_translations`: each language's description (and finding sentences, and a map's class sentence), from templates only, with `origin: "template"` and `reviewed: false`. No language model is involved.
+- **Each translation is audited by its own language's claim checker**, and must have exactly the English description's numbers, in the same order; a template translation must equal what the templates give. A wrong number in a translation fails the audit.
+- **Schema 1.1** for chart documents and **1.2** for choropleths: only the optional `alt_text_translations` field is new; documents without translations are unchanged apart from the version numbers.
 
 ## New in 0.3: maps that are easier to read
 
@@ -102,6 +109,7 @@ check_alt_text("Area A is higher than Area B.", data)
 | `meta` | generator, library version, source, alt-text language and origin |
 | `findings` | with `findings=True`: the comparisons, their tests, the FDR result and the sentences |
 | `patterns` | with patterns on: the tiles, each series' or class's tile, and the ink (each theme's, or since 0.3 each map class's) |
+| `alt_text_translations` | with `translations=` (0.4): each language's description, origin, review status, inputs, finding sentences and (maps) class sentence |
 
 Also: `audit(fig)` for a document or any Plotly figure, `theme(fig, "dark")`, `to_html(doc)` and `to_csv(doc)`, `figure(doc)` for a Plotly `Figure`, and a CLI for CI:
 
@@ -131,7 +139,7 @@ disability-access-charts check --strict charts/*.json   # warnings fail too
 
 ## More
 
-- **Languages:** one table of templates and claim words per language (`_lang/en.py`); only English ships so far. Numbers stay as digits in every language, so the checker still works.
+- **Languages:** one table of templates and claim words per language (`_lang/en.py`, `ha.py`, `yo.py`, `ig.py`, `pcm.py`; `LANGUAGES`). The four Nigerian-language tables are AI-drafted and unreviewed. Numbers stay as digits in every language, so the checker still works. eSpeak NG (which NVDA uses) has no voice for Hausa, Yoruba, Igbo or Pidgin, so these descriptions serve readers rather than listeners.
 - **Maps:** `choropleth()` builds a shaded-map document in fixed classes, each with its own pattern (up to five classes, ordered by ink weight) on a scale chosen to stay distinguishable under simulated colour-vision deficiency, with cased boundaries, with the same alt-text checks, a table and an audit; `audit()` and `check` handle it. The page draws the SVG from the document. How its colours and patterns meet WCAG is in [the maps note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/maps.md).
 - **Python:** 3.10 or later. Tests and CI run on 3.12 only. Python 3.10 was checked by hand for the 0.2.0 release (installing the wheel and running the examples); it is not part of CI.
 - **Examples** (in the source distribution and the repository's `examples/`): JONAPWD's 2025 *assumed* figures by disability type (a WHO 15% benchmark applied to population, not survey estimates), a synthetic dot plot with intervals and findings, a synthetic patterned map written out as a standalone SVG page, and an audit of a plain Plotly figure. The installed package holds no data.

@@ -486,6 +486,25 @@ def test_a_suppressed_cell_is_downloaded_as_words(built) -> None:
     assert [pages.WITHHELD, "", "", ""] in [r[1:] for r in rows]
 
 
+def test_each_chart_has_its_description_in_four_languages(built) -> None:
+    out, result = built
+    for p in result:
+        html = (out / "states" / f"{p.slug}.html").read_text(encoding="utf-8")
+        if p.chart is None:
+            assert 'class="translations"' not in html
+            continue
+        assert html.count('<details class="translations">') == 1
+        # Under the chart, before its findings.
+        assert html.index("</figure>") < html.index('<details class="translations">')
+        assert html.index('<details class="translations">') < html.index('class="findings"')
+        for code in ("ha", "yo", "ig", "pcm"):
+            text = p.chart["alt_text_translations"][code]["text"]
+            esc = pages.esc(text)
+            assert f'<p class="translation-text" lang="{code}">{esc}</p>' in html
+        assert html.count("drafted by AI, not reviewed by a native speaker") == 4
+        assert '<div class="adire-band" aria-hidden="true"></div>' in html
+
+
 def test_visit_count_matches_hand_written_pages() -> None:
     """Every built page counts its own path; index.html and methodology.html repeat the
     pixel and the footer note by hand (P6 item 6)."""

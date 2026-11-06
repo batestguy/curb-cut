@@ -411,9 +411,9 @@ def test_tampered_generated_claim_is_caught() -> None:
 
 def test_unknown_language_raises() -> None:
     with pytest.raises(ValueError, match="unknown language"):
-        describe(POINT, title="T", source="S", lang="ha")
+        describe(POINT, title="T", source="S", lang="xx")
     with pytest.raises(ValueError, match="unknown language"):
-        check_alt_text("x", POINT, lang="yo")
+        check_alt_text("x", POINT, lang="zz")
 
 
 def test_glossary_names_are_used_and_checked() -> None:

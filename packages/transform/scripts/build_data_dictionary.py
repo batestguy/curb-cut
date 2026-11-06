@@ -690,6 +690,7 @@ def page_html(sections: Sequence[FileSection], registry: Registry, site_url: str
     return f"""{head}<body>
 <a class="skip-link" href="#main">Skip to main content</a>
 <div class="flag-band" aria-hidden="true"></div>
+<div class="adire-band" aria-hidden="true"></div>
 <header class="site-header"><p class="site-name"><a href="./">Curb Cut</a></p>
 {nav_html()}</header>
 <main id="main" tabindex="-1" class="dictionary-page">

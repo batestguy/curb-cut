@@ -30,7 +30,7 @@ def test_bar_document_shape_is_additive() -> None:
     meta = doc["meta"]
     assert meta["experimental"] is False
     assert meta["library_version"] == __version__
-    assert meta["schema"] == "1.0"
+    assert meta["schema"] == "1.1"
     assert meta["chart_type"] == "bar"
     assert meta["alt_text_source"] == "data"
     assert meta["alt_text_lang"] == "en"
@@ -157,7 +157,7 @@ def test_a_light_theme_is_required() -> None:
 
 def test_unknown_language_is_rejected() -> None:
     with pytest.raises(ValueError, match="unknown language"):
-        bar(["A"], [1], lang="ig", **KW)
+        bar(["A"], [1], lang="xx", **KW)
 
 
 def test_figure_needs_and_uses_plotly() -> None:

@@ -22,7 +22,8 @@ number of decimals written. Numbers in the title, the source and the interval la
 skipped. The checker does not verify which *role* a number has (value, bound or share),
 only that it is one of that category's figures.
 
-**Claims** (English vocabulary, :mod:`disability_access_charts._lang.en`):
+**Claims** (English vocabulary, :mod:`disability_access_charts._lang.en`; since 0.4 each of
+Hausa, Yoruba, Igbo and Pidgin has its own, see ``docs/claim-checker.md``):
 
 * extremes: *largest, highest, smallest, lowest*, and *the most, the fewest*. The groups
   named in the same part of the clause must be the extreme;
@@ -127,10 +128,7 @@ _MARK0 = 0xE000  # private-use characters stand in for category and series names
 _MARK = "[-]"
 _MARK_RE = re.compile(_MARK)
 _NUMBER = re.compile(r"(?:(?<![^\s(])-)?(?<![\w.,])(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?!\d)")
-_LEVEL = re.compile(
-    r"(\d+(?:\.\d+)?)\s*%\s*(?:CI\b|C\.I\.|confidence|credible|uncertainty|interval)",
-    re.IGNORECASE,
-)
+_LEVEL = re.compile(_lang.get("en").LEVEL, re.IGNORECASE)
 _APOSTROPHES = "'" + chr(0x2019)  # straight and curly
 
 
@@ -295,16 +293,33 @@ def _validate(data: ChartData) -> None:
             raise ValueError("counts must be non-negative")
         if data.shares and sum(s.values) <= 0:
             raise ValueError("values must sum to a positive total")
-    checked = [*data.categories, *data.glossary.values()]
-    if len(names) > 1:
-        checked += names
-    for language in _lang.LANGUAGES.values():
-        reserved = reserved_names(language)
-        for name in checked:
-            if " ".join(name.lower().split()) in reserved:
-                raise ValueError(
-                    language.MESSAGES["reserved_name"].format(name=name, example=f"{name} group")
-                )
+    check_reserved(data, "en")
+
+
+def check_reserved(data: ChartData, lang: str) -> None:
+    """Refuse a name that is one of ``lang``'s claim words (it would confuse that language's
+    claim checker). Only the language the text is written in matters: English data is checked
+    against English when it is built, and :func:`describe` and the translations check the
+    language they write, so a name such as "Ila" (an LGA, and a Yoruba word) stays usable in
+    English-only charts."""
+    names = [s.name for s in data.series]
+    if lang == "en":
+        checked = [*data.categories, *data.glossary.values()]
+        if len(names) > 1:
+            checked += names
+    else:
+        # The names as this language writes them (state names that are not translated stay).
+        checked = [data.glossary.get(c) or c for c in data.categories]
+        if len(names) > 1:
+            checked += [data.glossary.get(n) or n for n in names]
+    table = _lang.checker(lang)
+    reserved = reserved_names(table)
+    for name in checked:
+        key = " ".join(name.lower().split())
+        if (_lang.fold(key) if table.FOLD else key) in reserved:
+            raise ValueError(
+                table.MESSAGES["reserved_name"].format(name=name, example=f"{name} group")
+            )
 
 
 def _display(data: ChartData, lang: ModuleType, name: str) -> str:
@@ -349,9 +364,24 @@ def shares_of(values: Sequence[float]) -> list[float]:
 # --- The interval test -----------------------------------------------------------------
 
 
+def _level_of(label: str) -> float | None:
+    """The level an interval label states ("95% confidence interval" -> 95), read with the
+    English pattern first, then each other language's (translated labels, new in 0.4)."""
+    match = _LEVEL.search(label)
+    if match:
+        return float(match.group(1))
+    for code in _lang.LANGUAGES:
+        table = _lang.checker(code)
+        text = _lang.fold(label) if table.FOLD else label
+        match = re.search(table.LEVEL, text, re.IGNORECASE)
+        if match:
+            return float(match.group(1))
+    return None
+
+
 def _z_level(data: ChartData) -> float:
-    match = _LEVEL.search(data.interval_label)
-    level = float(match.group(1)) if match else 95.0
+    level = _level_of(data.interval_label)
+    level = 95.0 if level is None else level
     if not 0 < level < 100 or level == 95:
         return TEST_Z  # the conventional 1.96 for a 95% interval
     return NormalDist().inv_cdf(0.5 + level / 200)
@@ -647,7 +677,7 @@ def describe(
     lang: str = "en",
     verdicts: Verdicts | None = None,
 ) -> str:
-    """Alt-text for a chart, built only from ``data``, in ``lang`` (only "en" ships).
+    """Alt-text for a chart, built only from ``data``, in ``lang`` (see ``_lang.LANGUAGES``).
 
     Summary first, detail second (as screen-reader users asked for in a preliminary
     interview study, Sharif et al., ASSETS 2023): the extremes, then (with intervals)
@@ -658,6 +688,8 @@ def describe(
     it to that. ``verdicts`` decides "can / cannot show a difference" for the pairs it holds
     (see the module docstring).
     """
+    if lang != "en":
+        check_reserved(data, lang)
     writer = _Writer(data, lang, verdicts)
     if chart_type == "bar":
         if len(data.series) == 1:
@@ -725,14 +757,18 @@ class _Mark:
 
 
 def _words(words: Iterable[str]) -> str:
-    return "|".join(re.escape(w) for w in sorted(words, key=len, reverse=True))
+    """An alternation of ``words``, longest first; a pattern that never matches if empty."""
+    ordered = sorted(words, key=len, reverse=True)
+    if not ordered:
+        return "(?!)"
+    return "|".join(re.escape(w) for w in ordered)
 
 
-def _regex_words(patterns: Iterable[str]) -> set[str]:
+def _regex_words(patterns: Iterable[str], word: str = r"[a-z]+") -> set[str]:
     """The plain words inside a list of regex fragments (r"\\bfar\\s+from\\b" -> far, from)."""
     out: set[str] = set()
     for p in patterns:
-        out |= set(re.findall(r"[a-z]+", re.sub(r"\\[a-zA-Z]", " ", p).lower()))
+        out |= set(re.findall(word, re.sub(r"\\[a-zA-Z]", " ", p).lower()))
     return out
 
 
@@ -740,7 +776,7 @@ def _regex_words(patterns: Iterable[str]) -> set[str]:
 def _template_words(lang: ModuleType) -> frozenset[str]:
     """Lower-case words the templates and the claim vocabulary use (matched exact-case)."""
     text = " ".join(re.sub(r"\{\w+\}", " ", t) for t in lang.TEMPLATES.values())
-    words = set(re.findall(r"[a-z]+", text.lower())) | set(reserved_names(lang))
+    words = set(re.findall(lang.WORD, text.lower())) | set(reserved_names(lang))
     return frozenset(words)
 
 
@@ -763,6 +799,7 @@ def reserved_names(lang: ModuleType) -> frozenset[str]:
         lang.UP_WORDS,
         lang.DOWN_WORDS,
         lang.DOWN_VERBS,
+        lang.UP_VERBS,
         lang.UNCHECKED,
         lang.SPELLED_NUMBERS,
         lang.CANNOT,
@@ -771,13 +808,13 @@ def reserved_names(lang: ModuleType) -> frozenset[str]:
         tuple(lang.ORDINAL_WORDS),
         tuple(lang.RANK_NUMBER_WORDS),
         lang.RESERVED_PHRASES,
-        (lang.THAN, lang.BETWEEN, lang.FROM, lang.TIMES, "can"),
+        (lang.THAN, lang.BETWEEN, lang.FROM, lang.TIMES, lang.TEMPLATES["can"]),
     ):
         words |= {w.lower() for w in group}
-    words |= _regex_words(lang.NEGATORS) | _regex_words(lang.QUALIFIERS)
-    words |= _regex_words(lang.CONTRASTS) | {lang.LABEL_STANDIN}
+    words |= _regex_words(lang.NEGATORS, lang.WORD) | _regex_words(lang.QUALIFIERS, lang.WORD)
+    words |= _regex_words(lang.CONTRASTS, lang.WORD) | {lang.LABEL_STANDIN}
     capitals = " ".join(re.sub(r"\{\w+\}", " ", t) for t in lang.TEMPLATES.values())
-    words |= {w.lower() for w in re.findall(r"\b[A-Z][a-z]+\b", capitals)}
+    words |= {w.lower() for w in re.findall(lang.CAPITALS, capitals) if w[:1].isupper()}
     return frozenset(words)
 
 
@@ -787,12 +824,15 @@ class _Checker:
     ) -> None:
         self.data = data
         self.verdicts = verdicts
-        self.lang = _lang.get(lang)
+        # The checker's table: folded (no combining marks) for a language with FOLD, and
+        # then the text, names and verbatim strings are folded too (_lang.fold).
+        self.lang = _lang.checker(lang)
         lang_ = self.lang
+        self.fold = _lang.fold if lang_.FOLD else (lambda s: s)
         self.problems: list[Problem] = []
         self.has_ci = data.has_interval
         self.marks: list[_Mark] = []
-        self.skel = self._skeleton(text)
+        self.skel = self._skeleton(self.fold(text))
         self.consumed_numbers: set[int] = set()
         self.recognised = 0
         flags = re.IGNORECASE
@@ -807,21 +847,35 @@ class _Checker:
             )
         )
         verbs = _words(lang_.AND_SPLIT_VERBS)
+        art = lang_.ARTICLE
+        conj = r"\b" + re.escape(lang_.AND) + r"\b"
         self.re_and_split = re.compile(
             # "and" or "," before a new subject: "and Ibadan has", ", Lagos the second"
-            r"(?:\band\b|,)(?=\s+(?:the\s+)?"
+            r"(?:"
+            + conj
+            + r"|,)(?=\s+(?:(?:"
+            + art
+            + r")\s+)?"
             + _MARK
             + r"\s+(?:"
             + verbs
-            + r"|the|"
+            + r"|"
+            + art
+            + r"|"
             + extremes
             + r")\b)"
             # "and" before a second superlative: "... and the lowest is Ibadan"
-            + r"|\band\b(?=\s+(?:the\s+)?(?:"
+            + r"|"
+            + conj
+            + r"(?=\s+(?:(?:"
+            + art
+            + r")\s+)?(?:"
             + extremes
             + r")\b)"
             # "and" before an elided subject: "... and is the highest"
-            + r"|\band\b(?="
+            + r"|"
+            + conj
+            + r"(?="
             + lang_.ELLIPSIS
             + r")",
             flags,
@@ -831,13 +885,16 @@ class _Checker:
         self.re_contrast = re.compile("|".join(lang_.CONTRASTS), flags)
         self.re_ratio_qual = re.compile(r"(?:" + "|".join(lang_.RATIO_QUALIFIERS) + r")\s*$", flags)
         self.re_excluded = re.compile(
-            r"(?:" + "|".join(lang_.EXCLUDERS) + r")\s+(?:the\s+)?$", flags
+            r"(?:" + "|".join(lang_.EXCLUDERS) + r")\s+(?:(?:" + art + r")\s+)?$", flags
         )
         self.re_list_sep = re.compile(lang_.LIST_SEPARATOR, flags)
         self.re_item_sep = re.compile(lang_.ITEM_SEPARATOR, flags)
         self.re_connector = re.compile(lang_.CONNECTOR, flags)
         self.re_ellipsis = re.compile(lang_.ELLIPSIS, flags)
-        self.re_not_name = re.compile(r"(?:\bbut\s+)?\bnot\s+(?:the\s+)?" + _MARK, flags)
+        self.re_not_name = re.compile(r"(?:" + lang_.NOT_NAME + r")" + _MARK, flags)
+        self.re_hedge_before = (
+            re.compile(r"(?:" + lang_.HEDGE_BEFORE + r")$", flags) if lang_.HEDGE_BEFORE else None
+        )
         self.re_link = re.compile(lang_.LINK_AFTER_NAME, flags)
         self.re_in_name = re.compile(lang_.IN_NAME + r"(" + _MARK + r")", flags)
         self.re_range = re.compile(lang_.RANGE_JOIN, flags)
@@ -845,17 +902,20 @@ class _Checker:
 
     # Building the skeleton: verbatim strings removed, names replaced by one marker each.
     def _skeleton(self, text: str) -> str:
-        data, lang = self.data, self.lang
-        quoted = [(f, 0) for f in data.verbatim] + [(data.interval_label, re.IGNORECASE)]
+        data, lang, fold = self.data, self.lang, self.fold
+        quoted = [(fold(f), 0) for f in data.verbatim]
+        quoted.append((fold(data.interval_label), re.IGNORECASE))
         for fixed, flags in sorted(quoted, key=lambda x: len(x[0]), reverse=True):
             if fixed:
                 pattern = r"(?<!\w)" + re.escape(fixed) + r"(?!\w)"
                 text = re.sub(pattern, " ", text, flags=flags)
         names: list[tuple[str, str, int]] = [
-            (_display(data, lang, c), "c", i) for i, c in enumerate(data.categories)
+            (fold(_display(data, lang, c)), "c", i) for i, c in enumerate(data.categories)
         ]
         if len(data.series) > 1:
-            names += [(_display(data, lang, s.name), "s", j) for j, s in enumerate(data.series)]
+            names += [
+                (fold(_display(data, lang, s.name)), "s", j) for j, s in enumerate(data.series)
+            ]
         names.sort(key=lambda x: len(x[0]), reverse=True)
         template = _template_words(lang)
         taken: list[tuple[int, int, str, int]] = []
@@ -877,7 +937,7 @@ class _Checker:
             pos = b
         out.append(text[pos:])
         skel = "".join(out)
-        label = data.category_label.strip()
+        label = fold(data.category_label.strip())
         if label:
             pattern = r"(?<!\w)" + re.escape(label) + r"(?!\w)"
             skel = re.sub(pattern, lang.LABEL_STANDIN, skel, flags=re.IGNORECASE)
@@ -1240,6 +1300,8 @@ class _Checker:
             + _words((*lang.UP_WORDS, *lang.DOWN_WORDS))
             + r")|(?P<v>"
             + _words(lang.DOWN_VERBS)
+            + r")|(?P<u>"
+            + _words(lang.UP_VERBS)
             + r"))\b"
         )
         than = re.compile(r"\b" + lang.THAN + r"\b", re.IGNORECASE)
@@ -1250,9 +1312,18 @@ class _Checker:
             if self.inside(m.start(), consumed):
                 continue
             self.recognised += 1
-            verb = m.group("v") is not None
-            word = (m.group("w") or m.group("v")).lower()
-            up = not verb and word in lang.UP_WORDS
+            up_verb = m.group("u") is not None
+            verb = up_verb or m.group("v") is not None
+            word = (m.group("w") or m.group("v") or m.group("u")).lower()
+            up = up_verb or (not verb and word in lang.UP_WORDS)
+            # The word the problem messages use: "lower" for "trails", "higher" for an
+            # up verb, else the word as written.
+            if up_verb:
+                said = lang.UP_WORDS[0] if lang.UP_WORDS else word
+            elif verb:
+                said = lang.DOWN_WORDS[0] if lang.DOWN_WORDS else word
+            else:
+                said = word
             negator = self.negator(m.start(), clause) or self.contrast(m.start(), clause)
             if verb:
                 right_start, left_limit = m.end(), m.start()
@@ -1295,14 +1366,7 @@ class _Checker:
                 continue
             previous = (left, right_end)
             self.excluded_after(right_end, clause, consumed, m.group())
-            self.check_pairs(
-                left,
-                self._unique(right_chain),
-                up,
-                lang.DOWN_WORDS[0] if verb else word,
-                clause,
-                sentence,
-            )
+            self.check_pairs(left, self._unique(right_chain), up, said, clause, sentence)
 
     def comparison_subject(
         self,
@@ -1448,6 +1512,13 @@ class _Checker:
         )
         return hedge.match(self.skel, pos, clause[1]) is not None
 
+    def hedge_before(self, pos: int, clause: tuple[int, int]) -> bool:
+        """Whether a hedge ends right before ``pos`` (languages that put the noun first:
+        "Ƙiyasi mafi yawa", "the estimate most large"). Never in English."""
+        if self.re_hedge_before is None:
+            return False
+        return self.re_hedge_before.search(self.skel, clause[0], pos) is not None
+
     def ranks(
         self, clause: tuple[int, int], sentence: tuple[int, int], consumed: list[tuple[int, int]]
     ) -> None:
@@ -1504,7 +1575,7 @@ class _Checker:
                         self.msg("rank_count_wrong", actual=n, claimed=m.group("of")),
                         "rank",
                     )
-                hedged = self.hedge_after(m.end(), clause)
+                hedged = self.hedge_after(m.end(), clause) or self.hedge_before(m.start(), clause)
                 if actual == claimed and self.data.series[s].has_interval and not hedged:
                     values = self.data.series[s].values
                     order = sorted(range(n), key=lambda j: values[j], reverse=not ascending)
@@ -1601,7 +1672,7 @@ class _Checker:
         after_the = _words((*lang.MAX_WORDS_AFTER_THE, *lang.MIN_WORDS_AFTER_THE))
         patterns = [
             r"\b(?P<w>" + _words((*lang.MAX_WORDS, *lang.MIN_WORDS)) + r")\b",
-            r"\bthe\s+(?P<w>" + after_the + r")\b",
+            r"\b(?:" + lang.ARTICLE + r")\s+(?P<w>" + after_the + r")\b",
             r"(?:^|(?<=[.;!?]))\s*(?P<w>" + after_the + r")\s*:",
         ]
         hedge = re.compile(
@@ -1625,7 +1696,9 @@ class _Checker:
                     self.warn_unchecked(clause, "qualified", qualifier=qualifier, word=m.group("w"))
                     continue
                 is_max = word in maxes
-                hedged = hedge.match(self.skel, m.end(), clause[1]) is not None
+                hedged = hedge.match(self.skel, m.end(), clause[1]) is not None or (
+                    self.hedge_before(start, clause)
+                )
                 a, b = self.segment(start, clause)
                 # Names after "not" are left out: "Kano is the highest, not Lagos".
                 claimed = self._unique(
@@ -1738,10 +1811,11 @@ class _Checker:
             for m in self.finditer(pattern, clause):
                 if not self.inside(m.start(), consumed):
                     self.warn_unchecked(clause, "unchecked", word=m.group())
-        for m in self.finditer(r"\b(?P<w>[a-z]+)\s+" + lang.THAN + r"\b", clause):
+        for m in self.finditer(r"\b(?P<w>" + lang.WORD + r")\s+" + lang.THAN + r"\b", clause):
             if not self.inside(m.start(), consumed) and m.group("w").lower() not in known:
                 self.warn_unchecked(clause, "unchecked", word=m.group("w") + " " + lang.THAN)
-        for m in self.finditer(r"\bthe\s+(?P<w>[a-z]+est)\b", clause):
+        unknown = lang.UNKNOWN_SUPERLATIVE
+        for m in self.finditer(unknown, clause) if unknown else ():
             word = m.group("w").lower()
             if (
                 not self.inside(m.start("w"), consumed)
@@ -1753,15 +1827,14 @@ class _Checker:
         # states"); any other spelled number next to a named group gives a warning.
         named = bool(self.marks_in(clause[0], clause[1], "c"))
         structural = [m.span() for p in lang.STRUCTURAL for m in self.finditer(p, clause)]
-        count_re = self.count_noun_re()
         for m in self.finditer(r"\b(?P<w>" + _words(lang.SPELLED_NUMBERS) + r")\b", clause):
             if self.inside(m.start(), consumed + structural):
                 continue
             word = m.group("w").lower()
-            noun = count_re.match(self.skel, m.end())
-            if noun and word in lang.SPELLED_VALUES:
+            noun = self.count_noun(m.start(), m.end())
+            if noun is not None and word in lang.SPELLED_VALUES:
                 claimed = lang.SPELLED_VALUES[word]
-                series = noun.group().strip().lower() == "series"
+                series = noun in lang.SERIES_NOUNS
                 actual = len(self.data.series if series else self.data.categories)
                 if claimed != actual:
                     self.add(
@@ -1789,7 +1862,7 @@ class _Checker:
             return
         rest = _MARK_RE.sub(" ", self.skel[clause[0] : clause[1]])
         rest = _NUMBER.sub(" ", rest)
-        words = re.findall(r"[a-z]+", rest.lower())
+        words = re.findall(self.lang.WORD, rest.lower())
         attached = {
             mk.index
             for m in _NUMBER.finditer(self.skel, clause[0], clause[1])
@@ -1830,12 +1903,27 @@ class _Checker:
             out.append(shares_of(series.values)[i])
         return out
 
-    def count_noun_re(self) -> re.Pattern[str]:
+    @functools.cached_property
+    def count_nouns(self) -> str:
         """Counting nouns and the category label (and its plural): "4 states", "37 bars"."""
         lang = self.lang
-        label = lang.label(self.data.category_label)
-        nouns = (*lang.COUNT_NOUNS, label + "s", label + "es")
-        return re.compile(r"\s*(?:" + _words(nouns) + r")\b", re.IGNORECASE)
+        label = self.fold(lang.label(self.data.category_label))
+        nouns = [*lang.COUNT_NOUNS, label + "s", label + "es"]
+        if lang.COUNT_BEFORE:  # the noun before its number, often in the singular
+            nouns += [label, self.fold(lang.plural(label, 2))]
+        return _words(nouns)
+
+    def count_noun(self, start: int, end: int) -> str | None:
+        """The counting noun announcing the number (or spelled number) at ``start:end``,
+        lower-case, or None: after it ("37 bars"), or before it in a language with
+        ``COUNT_BEFORE`` ("ɗigo 37")."""
+        if self.lang.COUNT_BEFORE:
+            m = re.compile(r"\b(" + self.count_nouns + r")\s*$", re.IGNORECASE).search(
+                self.skel, max(0, start - 40), start
+            )
+        else:
+            m = re.compile(r"\s*(" + self.count_nouns + r")\b", re.IGNORECASE).match(self.skel, end)
+        return None if m is None else m.group(1).lower()
 
     def parse(self, m: re.Match[str]) -> tuple[str, float, float, int]:
         """A number token: (as written, value, rounding tolerance, end incl. scale word)."""
@@ -1924,7 +2012,6 @@ class _Checker:
 
     def numbers(self, clause: tuple[int, int], sentence: tuple[int, int]) -> None:
         data, lang = self.data, self.lang
-        count_re = self.count_noun_re()
         total_before = re.compile(lang.TOTAL_BEFORE, re.IGNORECASE)
         total_after = re.compile(lang.TOTAL_AFTER, re.IGNORECASE)
         share_after = re.compile(lang.SHARE_AFTER, re.IGNORECASE)
@@ -1953,7 +2040,7 @@ class _Checker:
             after = self.skel[end : end + 40]
             before = self.skel[max(clause[0], m.start() - 30) : m.start()]
             # Chart-wide figures, only with the words that announce them.
-            if count_re.match(self.skel, end) and (
+            if self.count_noun(m.start(), end) is not None and (
                 close(n_categories) or (n_series > 1 and close(n_series))
             ):
                 continue
