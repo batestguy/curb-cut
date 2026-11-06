@@ -16,6 +16,8 @@ async function loaded(page) {
   await expect(page.locator('#national-chart svg').first()).toBeVisible();
   await expect(page.locator('#state-chart svg').first()).toBeVisible();
   await expect(page.locator('#state-select')).toBeEnabled();
+  // The map's and the dot plot's descriptions in other languages (P6 item 8).
+  await expect(page.locator('details.translations')).toHaveCount(2);
 }
 
 // The by-state chart's bar colours and outline widths, read from Plotly's live data.
@@ -59,17 +61,18 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   await expect(page.locator('main')).toBeFocused();
 
   // Tab from <main>: the state pages link, the methodology link, five comparison source links,
-  // the link to the sensitivity page, the map key's five buttons and the map come first, then
-  // "Skip the state table" (the 15th stop), which jumps the 37 state links in the map's table and its two download links. After
-  // it: "Why", the findings' <summary>, the dot-plot table's two download links, "Methods and
-  // limits", the Moran <summary> (its table and downloads are inside), the two JONAPWD
-  // citation links under the JONAPWD tables, then the select. Exact counts, so a trap or a
-  // new stop fails the test.
+  // the link to the sensitivity page, the map key's five buttons, the map and the <summary> of
+  // the map's description in other languages come first, then "Skip the state table" (the 16th
+  // stop), which jumps the 37 state links in the map's table and its two download links. After
+  // it: the dot plot's other-languages <summary>, "Why", the findings' <summary>, the dot-plot
+  // table's two download links, "Methods and limits", the Moran <summary> (its table and
+  // downloads are inside), the two JONAPWD citation links under the JONAPWD tables, then the
+  // select. Exact counts, so a trap or a new stop fails the test.
   const select = page.locator('#state-select');
-  for (let i = 0; i < 15; i += 1) await page.keyboard.press('Tab');
+  for (let i = 0; i < 16; i += 1) await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: 'Skip the state table' })).toBeFocused();
   await page.keyboard.press('Enter');
-  for (let i = 0; i < 9; i += 1) await page.keyboard.press('Tab');
+  for (let i = 0; i < 10; i += 1) await page.keyboard.press('Tab');
   await expect(select).toBeFocused();
 
   // Choose Lagos by typing its name, as a keyboard user would on a closed select. Nothing loads
@@ -92,14 +95,14 @@ test('keyboard: skip link first, Tab reaches the state select, and a state can b
   await expect(page.getByRole('heading', { level: 3, name: 'Lagos' })).toBeFocused();
 });
 
-test('keyboard: without the skip, the select is the 63rd stop after <main>', async ({ page }) => {
+test('keyboard: without the skip, the select is the 65th stop after <main>', async ({ page }) => {
   await loaded(page);
   await page.locator('main').focus();
-  // 15 stops up to and including "Skip the state table", the 37 state links, the map table's
-  // two download links, then "Why", the findings' <summary>, the dot-plot table's two download
-  // links, "Methods and limits", the Moran <summary>, the two JONAPWD citation links and the
-  // select.
-  for (let i = 0; i < 62; i += 1) await page.keyboard.press('Tab');
+  // 16 stops up to and including "Skip the state table", the 37 state links, the map table's
+  // two download links, then the dot plot's other-languages <summary>, "Why", the findings'
+  // <summary>, the dot-plot table's two download links, "Methods and limits", the Moran
+  // <summary>, the two JONAPWD citation links and the select.
+  for (let i = 0; i < 64; i += 1) await page.keyboard.press('Tab');
   await expect(page.locator('#state-select')).not.toBeFocused();
   await page.keyboard.press('Tab');
   await expect(page.locator('#state-select')).toBeFocused();

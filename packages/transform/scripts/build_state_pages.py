@@ -12,7 +12,9 @@ artefacts (git-ignored):
 * ``site/public/data/charts/states/<slug>.json``: each state's dot plot of the six activities
   (DHS 2024, adults 18+, the state alone; Nigeria is in a table after it), made with
   ``disability_access_charts.dot`` with its findings and audit. The page draws it as a static
-  SVG (``dot_svg.py``), names it with the alt-text and shows the library's data table;
+  SVG (``dot_svg.py``), names it with the alt-text and shows the library's data table. Under
+  the chart, a no-script ``<details>`` gives the description in Hausa, Yoruba, Igbo and
+  Pidgin, each labelled as drafted by AI and not reviewed (``translations.py``, P6 item 8);
 * ``site/states/share-images.json``: each page's headline sentence, for the share images
   (``site/scripts/make-share-images.mjs`` screenshots one PNG per state before ``vite build``);
 * ``site/public/data/downloads/states/<slug>/<table-id>.csv`` and ``.json`` (with
@@ -30,6 +32,7 @@ exactly the 37 states.
 from __future__ import annotations
 
 import argparse
+import functools
 import html
 import importlib.util
 import json
@@ -161,6 +164,14 @@ def _load(name: str) -> ModuleType:
 
 dot_svg = _load("dot_svg")
 downloads = _load("downloads")
+translations = _load("translations")
+
+
+@functools.cache
+def glossary() -> Any:
+    """The site's translated strings (translations.yml), read once; the build fails if a
+    language is missing from any string or activity."""
+    return translations.load(activities=[label for _, label in DOMAINS])
 
 
 def state_slug(name: str) -> str:
@@ -534,6 +545,7 @@ def chart_html(doc: Mapping[str, Any], dl: Any, where: str, national_table: str 
         f'<span id="domains-chart-desc" class="chart-desc" aria-hidden="true">'
         f"{esc(doc['alt_text'])}</span>"
         "</figcaption></figure>"
+        f"{translations.disclosure_html(doc, translations.ui_json(glossary()))}"
         f"{findings_html(doc)}"
         '<p class="table-intro">The same figures as a table:</p>'
         f"{wide_table(doc_table(doc), caption)}{dl.add(data)}"
@@ -705,6 +717,14 @@ def domain_chart(state: Mapping[str, Any], data: SiteData) -> dict[str, Any] | N
         chart_id=f"state_domains_{state['slug'].replace('-', '_')}",
         findings=True,
         withheld=withheld,
+        # The description in Hausa, Yoruba, Igbo and Pidgin (P6 item 8; state names stay).
+        translations=translations.translations(
+            glossary(),
+            title="state_title",
+            category="activity_label",
+            activities=[r[0] for r in shown],
+            where=name,
+        ),
     )
 
 

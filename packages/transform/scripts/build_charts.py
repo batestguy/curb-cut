@@ -12,6 +12,10 @@ a data table and an accessibility audit. The build fails if any audit fails.
 * ``prevalence_by_state``: the same 37 estimates with their 95% intervals and precision
   flags, as a dot plot, with the library's statistical findings (each state against the
   next in the ranking and against the national estimate, false discovery rate 5%);
+  Both carry their description in Hausa, Yoruba, Igbo and Pidgin
+  (``alt_text_translations``, P6 item 8), from the library's templates and the site's
+  strings in ``packages/transform/translations.yml`` (``translations.py``); the strings
+  for the page's disclosure go to ``translations.json``;
 * ``national_by_type`` and ``national_by_state``: JONAPWD's assumed figures, as bars;
 * ``poverty_headline`` and ``poverty_dimensions`` (P5, from ``poverty.json``): the five
   headline estimates and the four MPI dimensions (S4), each with its 95% interval, as dot
@@ -161,8 +165,14 @@ def national_reference(data_dir: Path) -> Reference:
     return Reference(NATIONAL_LABEL, float(row[0]), float(row[1]), float(row[2]))
 
 
+def glossary() -> object:
+    """The site's translated strings (translations.yml); fails if a language is missing."""
+    return _load_sibling("translations").load()
+
+
 def prevalence_by_state(data_dir: Path) -> dict:
     rows = headline_rows(data_dir)
+    tr = _load_sibling("translations")
     return dot(
         [str(r[0]) for r in rows],
         [
@@ -184,6 +194,9 @@ def prevalence_by_state(data_dir: Path) -> dict:
         findings=True,
         reference=national_reference(data_dir),
         withheld=withheld_states(data_dir),
+        translations=tr.translations(
+            glossary(), title="dots_title", category="state_label", reference=True
+        ),
     )
 
 
@@ -211,6 +224,9 @@ def prevalence_map(data_dir: Path, build_map: ModuleType) -> dict:
         decimals=1,
         extra_columns=[("Precision", [FLAG_LABELS.get(str(r[5]), str(r[5])) for r in rows])],
         chart_id="prevalence_map",
+        translations=_load_sibling("translations").translations(
+            glossary(), title="map_title", category="state_label"
+        ),
     )
 
 
@@ -413,6 +429,12 @@ def main() -> int:
         print("A chart failed its accessibility audit.", file=sys.stderr)
         return 1
     print(f"wrote {main_page_downloads(docs, args.data_dir, args.site_url)} and its tables' files")
+    ui = _load_sibling("translations").ui_json(glossary())
+    path = args.data_dir / "translations.json"
+    path.write_text(
+        json.dumps(ui, indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
+    )
+    print(f"wrote {path}")
     return 0
 
 
