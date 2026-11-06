@@ -516,3 +516,12 @@ def test_every_built_page_counts_its_own_path(built) -> None:
         assert page.html.count('class="visit-count"') == 1 and pixel in page.html
     index = (out / "states" / "index.html").read_text(encoding="utf-8")
     assert pages.count_pixel("/states/", "State pages") in index
+
+
+def test_visit_count_code_is_the_authors_and_in_step_with_the_tests() -> None:
+    # "curbcut" was a placeholder that belongs to someone else's GoatCounter account.
+    assert pages.GOATCOUNTER_CODE == "curbcutng"
+    js = (ROOT / "site" / "tests" / "visit-count.js").read_text(encoding="utf-8")
+    assert f"COUNT_ORIGIN = '{pages.COUNT_ORIGIN}';" in js
+    for path in (ROOT / "site").glob("*.html"):
+        assert "curbcut.goatcounter.com" not in path.read_text(encoding="utf-8"), path.name

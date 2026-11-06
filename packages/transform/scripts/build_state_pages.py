@@ -83,7 +83,7 @@ no account is needed. With a GitHub account you can also
 # one request that leaves the site's origin; site/tests check it is the only one, and the
 # test browsers and Lighthouse block the host so runs never add counts. site/index.html and
 # site/methodology.html repeat count_pixel() and COUNT_NOTE by hand.
-GOATCOUNTER_CODE = "curbcut"
+GOATCOUNTER_CODE = "curbcutng"
 COUNT_ORIGIN = f"https://{GOATCOUNTER_CODE}.goatcounter.com"
 
 
