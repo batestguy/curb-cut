@@ -169,6 +169,7 @@ All phases (P0–P7) are complete: version 1.0.0, 2026-11-08. A regular screen-r
 - [`docs/fay-herriot-covariates.md`](docs/fay-herriot-covariates.md): the pre-declared small-area model and why it was not used.
 - [`docs/verification.md`](docs/verification.md): every source and check, dated.
 - [`data/README.md`](data/README.md) and the README in each `data/public/` folder: contents, definitions, licence and citation.
+- [`docs/paper-handoff.md`](docs/paper-handoff.md) and [`docs/publication-readiness.md`](docs/publication-readiness.md): candidate papers, where to submit them, and what each still needs.
 - [`docs/references.bib`](docs/references.bib): every method and data source cited in these documents.
 
 ## Contributing
