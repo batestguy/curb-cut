@@ -7,12 +7,23 @@
 **Nigeria's best-known disability figures are an assumption. Curb Cut is building the measured alternative: state-level survey estimates with honest uncertainty, on a site anyone can use by keyboard or screen reader, at zero cost.**
 
 - **Live site:** https://batestguy.github.io/curb-cut/
-- **Chart library:** [`disability-access-charts`](packages/disability-access-charts/), charts that check their own words
+- **Chart library:** [`disability-access-charts` on PyPI](https://pypi.org/project/disability-access-charts/) (`pip install disability-access-charts`; [source](packages/disability-access-charts/)), charts that check their own words
 - **Walkthrough video** (5 min 40 s, narrated, with captions and a transcript; part of it is NVDA reading the site): https://batestguy.github.io/curb-cut/walkthrough.html (a [one-minute version](https://batestguy.github.io/curb-cut/walkthrough.html#short-heading) too)
 - **Data explorer, state pages and data dictionary:** [explorer](https://batestguy.github.io/curb-cut/explorer.html), [37 state pages](https://batestguy.github.io/curb-cut/states/), [data dictionary](https://batestguy.github.io/curb-cut/data-dictionary.html)
 - **Data API** (optional, read-only, free plan: a request after a quiet spell takes about a minute): https://curb-cut-api.onrender.com/docs ([`docs/api.md`](docs/api.md)); the site never depends on it
 
 [![The Curb Cut site: a chart of JONAPWD's 2025 figures by disability type, under a notice that they are assumed, not counted.](docs/images/site.png)](https://batestguy.github.io/curb-cut/)
+
+## Screenshots
+
+| | |
+|---|---|
+| [![The map of disability among adults by state, with its key as five buttons. "4% to under 6%: 6 states" is pressed: those six states are cross-hatched and outlined, the rest are faded, and the line under the key reads "Showing 6 states in 4% to under 6%: Adamawa, Ebonyi, Enugu, Kano, Kogi, Plateau."](docs/images/map-legend.png)](https://batestguy.github.io/curb-cut/) | [![The Kano state page: in Kano, 4.6% of adults have a lot of difficulty or cannot do at least one of six everyday activities (95% confidence interval 3.6% to 5.7%), against 3.0% for Nigeria, followed by a table by sex and age with intervals and precision flags, and CSV and JSON download links.](docs/images/state-page-kano.png)](https://batestguy.github.io/curb-cut/states/kano.html) |
+| **The map key filters by keyboard** and says which states it shows. | **A page for each of the 37 states**, with intervals and precision flags. |
+| [![The data explorer: drop-downs for level, measure, age group, sex and state, a Show figures button, the message "Showing 37 rows", and a sortable results table of each state's estimate, interval, precision flag and number of respondents.](docs/images/explorer.png)](https://batestguy.github.io/curb-cut/explorer.html) | [![The poverty page's main result: people in households with a member who has a severe difficulty are 11.7 percentage points more likely to be multidimensionally poor than people in comparable households (95% confidence interval 6.1 to 17.2), shown with a secondary estimate of 8.1 points (2.1 to 14.1).](docs/images/poverty-result.png)](https://batestguy.github.io/curb-cut/poverty.html) |
+| **The data explorer** queries the published files in the browser. | **The pre-registered poverty result**, as an adjusted association. |
+
+Screenshots of the live site's pages, taken 2026-11-08 (light theme; every page also has a dark theme). Each links to its page.
 
 ## The chart library in eight steps
 
