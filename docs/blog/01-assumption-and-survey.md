@@ -6,11 +6,16 @@ You will often hear that about 35 million Nigerians are disabled. That figure, f
 
 I am a statistician in Bauchi and a wheelchair user. Nigeria does have measurements; they had not been put in one place, with their uncertainty, in a form a screen-reader user can read. So I built [Curb Cut](https://batestguy.github.io/curb-cut/).
 
-## Data and method
+## Data
 
-- **Data:** the Nigeria DHS 2024, which asked every household member aged 5 and over the Washington Group Short Set: six questions on difficulty seeing, hearing, walking, remembering, self-care and communicating.
-- **Privacy:** the microdata stay on my computer. Only survey-weighted estimates that pass a disclosure check (no cell under 30 respondents) are published.
-- **Checks:** my code first reproduces 1,360 cells of the official NDHS report. Every estimate has a 95% confidence interval, and state comparisons are corrected for multiple testing.
+The Nigeria DHS 2024 asked every household member aged 5 and over the Washington Group Short Set: six questions on difficulty seeing, hearing, walking, remembering, self-care and communicating. The microdata stay on my computer; only estimates that pass a disclosure check (no cell under 30 respondents) are published.
+
+## Methods
+
+- **Prevalence:** design-based estimates in R's `survey` package (clusters, strata and sampling weights; Taylor linearisation), with Korn–Graubard 95% confidence intervals, cross-checked in Python (`svy`). My code first reproduces 1,360 cells of the official NDHS report.
+- **State comparisons:** Benjamini–Hochberg false-discovery-rate control at 5%, so a difference is reported only if it survives correction.
+- **Spatial pattern:** Moran's I with permutation tests, also corrected. A Fay–Herriot small-area model was tried and dropped: it failed the diagnostics I set in advance.
+- **Poverty:** double machine learning (`DoubleML`, interactive regression model) with 5-fold cluster cross-fitting repeated 5 times, learners chosen by out-of-fold loss, and cluster-robust standard errors. Robustness: 100 placebo permutations, omitted-variable sensitivity bounds and an E-value. The plan was registered on OSF before any poverty figure was split by disability.
 
 ## What the survey measured
 
