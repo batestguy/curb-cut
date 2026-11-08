@@ -32,7 +32,10 @@ identifiers:
     description: "All versions (concept DOI)"
   - type: doi
     value: "10.5281/zenodo.24050359"
-    description: "Version 0.7.0 (version 1.0.0 gets its own DOI on release)"
+    description: "Version 0.7.0"
+  - type: doi
+    value: "10.5281/zenodo.24051559"
+    description: "Version 1.0.0"
 keywords:
   - disability
   - Nigeria

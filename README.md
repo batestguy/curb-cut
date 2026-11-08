@@ -177,6 +177,6 @@ Reports of anything hard to use matter most, and need no account: see [`CONTRIBU
 
 ## How to cite
 
-Cite the software and public aggregates as Bannister, J. (2026), *Curb Cut: accessible open data on disability in Nigeria*, Zenodo, https://doi.org/10.5281/zenodo.24050358 (all versions; version 0.7.0 is https://doi.org/10.5281/zenodo.24050359), with the metadata in [`CITATION.cff`](CITATION.cff) (GitHub's "Cite this repository" button reads it). The P5 analysis plan is citable separately as its OSF registration, https://osf.io/kes3p/. Please also cite the surveys the figures come from (Nigeria DHS 2024, NBS MPI Survey 2021, GHS-Panel Waves 4 and 5); their citations and terms of use are in each data folder's README.
+Cite the software and public aggregates as Bannister, J. (2026), *Curb Cut: accessible open data on disability in Nigeria*, Zenodo, https://doi.org/10.5281/zenodo.24050358 (all versions; version 1.0.0 is https://doi.org/10.5281/zenodo.24051559), with the metadata in [`CITATION.cff`](CITATION.cff) (GitHub's "Cite this repository" button reads it). The P5 analysis plan is citable separately as its OSF registration, https://osf.io/kes3p/. Please also cite the surveys the figures come from (Nigeria DHS 2024, NBS MPI Survey 2021, GHS-Panel Waves 4 and 5); their citations and terms of use are in each data folder's README.
 
 MIT licensed. Figures are cited from their sources; third-party PDFs are not redistributed.
