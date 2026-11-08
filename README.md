@@ -34,28 +34,30 @@ Screenshots of the live site's pages, taken 2026-11-08 (light theme; every page 
 | Accessibility / frontend | the [live site](https://batestguy.github.io/curb-cut/) by keyboard; the [walkthrough video](https://batestguy.github.io/curb-cut/walkthrough.html) (NVDA reads the site); [the chart library's README](packages/disability-access-charts/); [`site/tests/`](site/tests/) (Playwright + axe) and [`site/lighthouserc.cjs`](site/lighthouserc.cjs) |
 | Data / analytics engineering | [`packages/transform/`](packages/transform/) (dbt models and tests); the [two data zones](#how-its-built); the [data dictionary](https://batestguy.github.io/curb-cut/data-dictionary.html) and [explorer](https://batestguy.github.io/curb-cut/explorer.html); [`docs/verification.md`](docs/verification.md), every source checked and dated |
 | Data science / statistics | [the methodology page](https://batestguy.github.io/curb-cut/methodology.html) (survey estimates, Fay-Herriot attempt, spatial methods); [the pre-registered poverty analysis](https://batestguy.github.io/curb-cut/poverty.html) ([OSF](https://osf.io/kes3p/)); [the claim checker's interval test](packages/disability-access-charts/docs/claim-checker.md) |
-| Python / library design | [`disability-access-charts`](packages/disability-access-charts/) and [the eight steps above](#the-chart-library-in-eight-steps): zero dependencies, typed, tested in CI, trusted publishing to PyPI |
+| Python / library design | [`disability-access-charts`](packages/disability-access-charts/) and [the ten steps above](#the-chart-library-in-ten-steps): zero dependencies, typed, tested in CI, trusted publishing to PyPI |
 | Policy / communication | [the site](https://batestguy.github.io/curb-cut/)'s plain-language caveats; [`PLAN.md`](PLAN.md) |
 
-## The chart library in eight steps
+## The chart library in ten steps
 
-![An 80-second looping animation in eight captioned steps, each showing the code and its real output: 1, pip install disability-access-charts installs version 0.4.0 with no dependencies; 2, three made-up estimates, each with a 95% confidence interval; 3, dot() returns one JSON document holding the Plotly spec, the description, a data table and an audit; 4, the description, written from the data, says Area A is highest but the survey cannot show a difference from Area B; 5, the audit passes 15 checks, each naming its WCAG success criterion; 6, the sentence "Area A is higher than Area D" gets an empty list, so no problems; 7, "Area A is higher than Area B" is rejected because the difference, 0.70, is not more than 2.27, with the safer wording "the survey cannot show a difference"; 8, the command disability-access-charts check --strict passes the chart. The same steps follow as text.](docs/images/disability-access-charts-tour.gif)
+![A 98-second looping animation in ten captioned steps, each showing real output: 1, the package's page on PyPI, disability-access-charts 0.4.0, with its pip install command, "Data verified by PyPI" and the release date, 6 November 2026; 2, pip install "disability-access-charts[plotly]" installs 0.4.0 and Plotly; 3, three made-up estimates, each with a 95% confidence interval; 4, dot() returns one JSON document holding the Plotly spec, the description, a data table and an audit; 5, figure() draws the chart: a dot plot of Areas A, B and D with their intervals, in a light and a dark theme, where Area A's and Area B's intervals overlap and Area D's sits well below; 6, the description, written from the data, says Area A is highest but the survey cannot show a difference from Area B; 7, the audit passes 15 checks, each naming its WCAG success criterion; 8, the sentence "Area A is higher than Area D" gets an empty list, so no problems; 9, "Area A is higher than Area B" is rejected because the difference, 0.70, is not more than 2.27, with the safer wording "the survey cannot show a difference"; 10, the command disability-access-charts check --strict passes the chart. The same steps follow as text.](docs/images/disability-access-charts-tour.gif)
 
 <details>
-<summary>The same eight steps as text (copy and run them)</summary>
+<summary>The same ten steps as text (copy and run them)</summary>
+
+Step 1: the package's page is https://pypi.org/project/disability-access-charts/.
 
 ```bash
-pip install disability-access-charts   # step 1: no dependencies
+pip install "disability-access-charts[plotly]"   # step 2: the core has no dependencies; [plotly] adds Plotly to draw
 ```
 
 ```python
 from disability_access_charts import ChartData, Series, check_alt_text, dot
 
-# Step 2: each estimate with its 95% confidence interval (made-up numbers).
+# Step 3: each estimate with its 95% confidence interval (made-up numbers).
 areas = ["Area A", "Area B", "Area D"]
 women = Series("Women", values=(9.8, 9.1, 4.0), lower=(8.1, 7.6, 3.1), upper=(11.5, 10.6, 4.9))
 
-# Step 3: one JSON document per chart.
+# Step 4: one JSON document per chart.
 doc = dot(
     areas,
     [women],
@@ -68,7 +70,13 @@ doc = dot(
 print(list(doc))
 # ['id', 'title', 'plotly', 'themes', 'alt_text', 'table', 'data', 'keyboard', 'meta', 'audit']
 
-# Step 4: the description, written from the data.
+# Step 5: draw it (light and dark themes); open the HTML files in a browser.
+from disability_access_charts import figure
+
+figure(doc, "light").write_html("chart-light.html")
+figure(doc, "dark").write_html("chart-dark.html")
+
+# Step 6: the description, written from the data.
 print(doc["alt_text"])
 # Dot plot: Synthetic prevalence (not real data). 3 dots, one per area, each with its
 # 95% confidence interval. Highest estimate: Area A, 9.8%, and the survey cannot show a
@@ -77,15 +85,15 @@ print(doc["alt_text"])
 # confidence interval): Area A 8.1% to 11.5%; Area B 7.6% to 10.6%; Area D 3.1% to 4.9%.
 # Source: Synthetic.
 
-# Step 5: the audit (every check names its WCAG success criterion).
+# Step 7: the audit (every check names its WCAG success criterion).
 audit = doc["audit"]
 print(audit["passed"], len(audit["checks"]), audit["warnings"])  # True 15 0
 
-# Step 6: a claim the data supports: no problems.
+# Step 8: a claim the data supports: no problems.
 data = ChartData.from_dict(doc["data"])
 print(check_alt_text("Area A is higher than Area D.", data))  # []
 
-# Step 7: a claim it cannot support is rejected.
+# Step 9: a claim it cannot support is rejected.
 for p in check_alt_text("Area A is higher than Area B.", data):
     print(p.severity + ":", p.reason)
     print("suggestion:", p.suggestion)
@@ -94,13 +102,13 @@ for p in check_alt_text("Area A is higher than Area B.", data):
 # suggestion: the survey cannot show a difference
 ```
 
-Step 8, in CI: audit every chart file (exit code 1 on a failure; with `--strict`, on a warning too). To try it on the chart above, first save it with `import json; json.dump(doc, open("chart.json", "w"))`.
+Step 10, in CI: audit every chart file (exit code 1 on a failure; with `--strict`, on a warning too). To try it on the chart above, first save it with `import json; json.dump(doc, open("chart.json", "w"))`.
 
 ```bash
 disability-access-charts check --strict chart.json   # chart.json: passed
 ```
 
-Every output above, and in the animation, comes from a real run of version 0.4.0 installed from PyPI into a fresh environment (2026-11-08; [`scripts/readme-gif/`](scripts/readme-gif/)).
+Every output above, and in the animation, comes from a real run of version 0.4.0 installed from PyPI into a fresh environment, and the first frame is a screenshot of the PyPI page (2026-11-08; [`scripts/readme-gif/`](scripts/readme-gif/)).
 
 </details>
 

@@ -3,14 +3,15 @@
 Makes `docs/images/disability-access-charts-tour.gif`, the eight-step tour of
 `disability-access-charts` in the main README. Every output in it comes from a real run.
 
-1. In a fresh environment: `pip install disability-access-charts`, saving the last three lines of its output as `pip.txt`.
+1. In a fresh environment: `pip install "disability-access-charts[plotly]"`, saving the last lines of its output as `pip.txt`.
+   Take `pypi.png`, a 1100 × 760 screenshot of https://pypi.org/project/disability-access-charts/ (a headed Playwright Chromium loaded it on 2026-11-08; PyPI has sometimes shown automated browsers a challenge page instead).
 2. `python frames.py pip.txt` with that environment's Python: runs each step and writes `frames.json`.
-3. `node render-gif.mjs <folder with frames.json>` (Playwright): one PNG per frame in `png/`.
+3. `node render-gif.mjs <folder with frames.json, chart-*.html and pypi.png>` (Playwright): screenshots the charts figure() wrote, then one PNG per frame in `png/`.
 4. Assemble with ffmpeg (each step held 6 to 12 seconds so it can be read):
 
 ```
-ffmpeg -f concat -safe 0 -i png/list.txt -vf "fps=1,scale=1000:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=64:stats_mode=full[p];[b][p]paletteuse=dither=none" -loop 0 disability-access-charts-tour.gif
+ffmpeg -f concat -safe 0 -i png/list.txt -vf "fps=1,scale=1000:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=200:stats_mode=full[p];[b][p]paletteuse=dither=none" -loop 0 disability-access-charts-tour.gif
 ```
 
-`png/list.txt` lists each PNG with a `duration` line (seconds): 4, 6, 8, 8, 12, 9, 7, 10, 7, 5.
+`png/list.txt` lists each PNG with a `duration` line (seconds): 8, 6, 8, 8, 11, 12, 9, 7, 10, 7, 6 (the last PNG is listed once more at the end, as ffmpeg's concat format needs).
 If the library's output changes, rebuild the GIF and update the text version in the README.
