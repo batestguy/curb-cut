@@ -323,7 +323,7 @@ Steps:
 
 ### P7 — Launch (weeks 10–11)
 - README with the role table, the author's story, a Mermaid diagram and a GIF.
-- MkDocs, Zenodo DOI, CONTRIBUTING and CHANGELOG.
+- ~~MkDocs~~ (dropped 2026-11-08, author: Material for MkDocs reached end of life on 2026-11-05; docs stay as Markdown on GitHub plus the site's methodology page and data dictionary), Zenodo DOI, CONTRIBUTING and CHANGELOG.
 - **Blog posts:**
   - "Alt-text that can't lie"
   - "Nigeria's disability numbers are an assumption — here's what surveys say"
