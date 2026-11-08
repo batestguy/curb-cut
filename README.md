@@ -153,6 +153,8 @@ Phases P0–P6 are done (P6 gate passed 2026-11-08); P7 (launch) is in progress.
 
 ## Methods and data documentation
 
+- [`docs/blog/`](docs/blog/): plain-language write-ups (drafts until published): [the assumption and what the surveys measured](docs/blog/01-assumption-and-survey.md).
+
 - [`docs/reproduce.md`](docs/reproduce.md): from licensed microdata to every public aggregate, with software versions.
 - [`docs/preregistration.md`](docs/preregistration.md) (frozen at tag `p5-freeze`, registered at https://osf.io/kes3p/) and [`docs/preregistration-deviations.md`](docs/preregistration-deviations.md).
 - [`docs/fay-herriot-covariates.md`](docs/fay-herriot-covariates.md): the pre-declared small-area model and why it was not used.
