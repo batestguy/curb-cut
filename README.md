@@ -171,6 +171,10 @@ Phases P0–P6 are done (P6 gate passed 2026-11-08); P7 (launch) is in progress.
 - [`data/README.md`](data/README.md) and the README in each `data/public/` folder: contents, definitions, licence and citation.
 - [`docs/references.bib`](docs/references.bib): every method and data source cited in these documents.
 
+## Contributing
+
+Reports of anything hard to use matter most, and need no account: see [`CONTRIBUTING.md`](CONTRIBUTING.md). If you use a screen reader every day and could give 30 minutes to a guided test, see [`docs/screen-reader-testing.md`](docs/screen-reader-testing.md). Native speakers of Hausa, Yorùbá, Igbo or Pidgin can help by reviewing the AI-drafted chart descriptions.
+
 ## How to cite
 
 Cite the software and public aggregates as Bannister, J. (2026), *Curb Cut: accessible open data on disability in Nigeria*, Zenodo, https://doi.org/10.5281/zenodo.24050358 (all versions; version 0.7.0 is https://doi.org/10.5281/zenodo.24050359), with the metadata in [`CITATION.cff`](CITATION.cff) (GitHub's "Cite this repository" button reads it). The P5 analysis plan is citable separately as its OSF registration, https://osf.io/kes3p/. Please also cite the surveys the figures come from (Nigeria DHS 2024, NBS MPI Survey 2021, GHS-Panel Waves 4 and 5); their citations and terms of use are in each data folder's README.
