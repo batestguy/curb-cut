@@ -6,6 +6,20 @@ Built for [Curb Cut](https://github.com/batestguy/curb-cut), an accessible platf
 
 **Status: 0.4 (alpha).** English, plus Hausa, Yoruba, Igbo and Nigerian Pidgin (Naijá) **drafted by an AI model and not reviewed by a native speaker** (see "New in 0.4"). The library has not yet been evaluated with screen-reader users (see "Limitations" below).
 
+## How it compares
+
+Other tools make charts explorable; this one checks what a chart's description *claims*. In a search of PyPI, GitHub and the literature (2026-10-21) we found no other library that checks the comparative claims in a chart description against the chart's data. The closest work we found is AggChecker (Jo et al., 2019), a research system that checks natural-language claims about aggregates against a relational database rather than a chart.
+
+| Tool | Language | What it does for access | Checks a description's claims against the data? |
+|---|---|---|---|
+| **disability-access-charts** | Python | A chart document with a description written from the data, a data table, light and dark themes and a WCAG-tagged audit; statistical findings with false-discovery-rate control | **Yes**: every number, and comparisons such as "higher than" or "highest", tested against the confidence intervals |
+| [maidr](https://pypi.org/project/maidr/) (Seo et al., 2024) | Python (also R and JavaScript) | Charts explorable by keyboard, with sound, braille and text | Not described in the documentation we checked |
+| [Olli](https://mitvis.github.io/olli/) (Blanco et al., 2022) | JavaScript | Turns a chart into a keyboard-navigable tree of text descriptions for screen readers, through adapters for charting toolkits | Not described in the documentation we checked |
+| [a11yviz](https://pypi.org/project/a11yviz/) | Python | WCAG-tagged palettes, alt-text scaffolds and audits for plotnine, plotly and Quarto | Not described in the documentation we checked |
+| Highcharts accessibility module | JavaScript | Keyboard navigation and ARIA markup; exposes the title, axis titles, series names and an author-written description | No generated summaries described on the page we checked |
+
+Use maidr or Olli for exploring a chart by keyboard, sound or braille. Use this library to catch numbers and comparisons in a description (written by a person, a template or an LLM) that contradict the data, and to report which differences survive a multiple-comparison correction. They are complementary rather than alternatives. Sources and dates: a11yviz 0.1.8 and maidr 1.28.1 from their PyPI pages (2026-10-29); the Highcharts accessibility-module documentation (2026-11-04); Olli from its project pages (2026-11-08). No benchmark comparison with these tools has been run.
+
 ## New in 0.4: descriptions in Hausa, Yoruba, Igbo and Pidgin
 
 - **Four more language tables** (`ha`, `yo`, `ig`, `pcm`): the description templates, the findings sentences, the map's own sentences and each language's claim-checker vocabulary, with the same keys and placeholders as English. Numbers stay as digits with "." as the decimal point. **The wording was drafted by an AI model (Claude) and has not been reviewed by a native speaker**; say so wherever you show it. Details, choices and limits: [the languages note](https://github.com/batestguy/curb-cut/blob/main/packages/disability-access-charts/docs/languages.md).
@@ -144,16 +158,6 @@ disability-access-charts check --strict charts/*.json   # warnings fail too
 - **Python:** 3.10 or later. Tests and CI run on 3.12 only. Python 3.10 was checked by hand for the 0.2.0 release (installing the wheel and running the examples); it is not part of CI.
 - **Examples** (in the source distribution and the repository's `examples/`): JONAPWD's 2025 *assumed* figures by disability type (a WHO 15% benchmark applied to population, not survey estimates), a synthetic dot plot with intervals and findings, a synthetic patterned map written out as a standalone SVG page, and an audit of a plain Plotly figure. The installed package holds no data.
 
-## How it compares
-
-In a search of PyPI, GitHub and the literature (2026-10-21) we found no other library that checks the comparative claims in a chart description against the chart's data. The closest work we found is AggChecker (Jo et al., 2019), a research system that checks natural-language claims about aggregates against a relational database rather than a chart.
-
-- [a11yviz](https://pypi.org/project/a11yviz/) has WCAG-tagged palettes, alt-text scaffolds and audits for plotnine, plotly and Quarto.
-- [maidr](https://pypi.org/project/maidr/), the Python package of the MAIDR system (Seo et al., 2024), makes charts explorable by keyboard, with sound, braille and text descriptions.
-- The Highcharts accessibility module (a JavaScript charting library, not Python) adds keyboard navigation and ARIA markup and exposes the title, axis titles, series names and an author-written description to screen readers; the page we checked does not describe generated summaries.
-
-Use maidr for multimodal exploration. Use this library to catch numbers and comparisons in a description that contradict the data, and to report which differences in a chart survive a multiple-comparison correction. The two are complementary rather than alternatives. (The a11yviz and maidr descriptions were checked against their PyPI pages on 2026-10-29: a11yviz 0.1.8, maidr 1.28.1. The Highcharts description was checked against its accessibility-module documentation on 2026-11-04.) No benchmark comparison with these tools has been run.
-
 ## Limitations
 
 - **No evaluation with screen-reader users yet.** The generated wording follows a published interview study (Sharif et al., 2023), but the library's own output has not been tested with regular screen-reader users. The author is not a screen-reader user.
@@ -172,6 +176,8 @@ Jo, S., Trummer, I., Yu, W., Wang, X., Yu, C., Liu, D. and Mehta, N. (2019). Agg
 Luo, M. R., Cui, G. and Rigg, B. (2001). The development of the CIE 2000 colour-difference formula: CIEDE2000. *Color Research and Application*, 26(5), 340–350. https://doi.org/10.1002/col.1049
 
 Machado, G. M., Oliveira, M. M. and Fernandes, L. A. F. (2009). A physiologically-based model for simulation of color vision deficiency. *IEEE Transactions on Visualization and Computer Graphics*, 15(6), 1291–1298. https://doi.org/10.1109/TVCG.2009.113
+
+Blanco, M., Zong, J. and Satyanarayan, A. (2022). Olli: an extensible visualization library for screen reader accessibility. *IEEE VIS 2022 Posters*. https://vis.mit.edu/pubs/olli
 
 Seo, J., Xia, Y., Lee, B., McCurry, S. and Yam, Y. J. (2024). MAIDR: making statistical visualizations accessible with multimodal data representation. In *Proceedings of the CHI Conference on Human Factors in Computing Systems*. https://doi.org/10.1145/3613904.3642730
 
