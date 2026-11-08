@@ -25,6 +25,14 @@ url: "https://batestguy.github.io/curb-cut/"
 license: MIT
 version: "0.7.0"
 date-released: "2026-11-08"
+doi: "10.5281/zenodo.24050358"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.24050358"
+    description: "All versions (concept DOI)"
+  - type: doi
+    value: "10.5281/zenodo.24050359"
+    description: "Version 0.7.0"
 keywords:
   - disability
   - Nigeria
