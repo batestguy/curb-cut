@@ -7,7 +7,8 @@ FILE defaults to data/sources/video/script.md (git-ignored); pass the transcript
 SRT too once they exist.
 Reads the live site's JSON (or site/public/data with --local) and the committed
 P5 CSVs. Exit 1 if a claim's text is missing from the script, a claim's value
-differs from the published one, or a caption line has a number no claim covers.
+differs from the published one, or a caption (or "Correction:" footnote) line has a
+number no claim covers.
 """
 
 from __future__ import annotations
@@ -63,6 +64,8 @@ vals = dict(zip(chart["data"]["categories"], chart["data"]["series"][0]["values"
 m = re.search(r"Total: ([\d,]+)", jon["alt_text"])
 assert m, "JONAPWD total not in the chart description"
 jon_total = int(m[1].replace(",", ""))
+JONAPWD_PRINTED = 34901403  # the publication's printed national total (docs/STATUS.md, P1)
+jon_pct = next(c["value_percent"] for c in prev["comparison"] if c["figure_id"] == "jonapwd_2025")
 methodology = (ROOT / "site/methodology.html").read_text(encoding="utf-8")
 status = (ROOT / "docs/STATUS.md").read_text(encoding="utf-8")
 ndhs_cells = 1360 if "reproduces all 1,360 transcribed report cells" in status else -1
@@ -71,20 +74,14 @@ p = lambda x: 100 * float(x)  # noqa: E731
 
 # (text in the script, value it states, published value, tolerance)
 CLAIMS = [
-    ("34.9 million", 34.9, jon_total / 1e6, 0.05),
     ("thirty-five million", 35, jon_total / 1e6, 0.5),
-    (
-        "15% of projected population",
-        15,
-        next(c["value_percent"] for c in prev["comparison"] if c["figure_id"] == "jonapwd_2025"),
-        0,
-    ),
-    (
-        "fifteen percent",
-        15,
-        next(c["value_percent"] for c in prev["comparison"] if c["figure_id"] == "jonapwd_2025"),
-        0,
-    ),
+    # JONAPWD PDF p. 7 (docs/verification.md D66): NPC 2025 projection x 15% = printed total;
+    # the per-state sum (jon_total) is 3 higher, as printed (STATUS P1).
+    ("232,676,020 (NPC 2025 projection)", 232676020 * 0.15, JONAPWD_PRINTED, 0.5),
+    ("= 34,901,403", 34901403, jon_total, 3),
+    ("about two hundred and thirty-three million", 233, 232.676020, 0.5),
+    ("× 15% (WHO and World Bank global estimate)", 15, jon_pct, 0),
+    ("fifteen percent", 15, jon_pct, 0),
     ("3.0% (95% CI 2.8–3.2)", 3.0, p(nat["estimate"]), 0.05),
     ("3.0% (95% CI 2.8–3.2)", 2.8, p(nat["ci_low"]), 0.05),
     ("3.0% (95% CI 2.8–3.2)", 3.2, p(nat["ci_high"]), 0.05),
@@ -101,7 +98,6 @@ CLAIMS = [
     ("fifteen in a hundred people aged fifteen", 15, 15.5, 0.5),
     ("1,360 official report cells", 1360, ndhs_cells, 0),
     ("(5,816 cells)", 5816, svy_cells, 0),
-    ("thirty-seven states", 37, len(vals), 0),
     ("ages 15+", 15, 15 if "aged 15 and over" in methodology else -1, 0),
     ("six to seventeen", 6, p(mpi["primary"]["ci_low"]), 0.5),
     ("six to seventeen", 17, p(mpi["primary"]["ci_high"]), 0.5),
@@ -114,7 +110,6 @@ CLAIMS = [
         else -1,
         0,
     ),
-    ("thirteen hundred and sixty", 1360, ndhs_cells, 0),
     ("Taraba 11.3%", 11.3, vals["Taraba"], 0.05),
     ("Lagos 0.8%", 0.8, vals["Lagos"], 0.05),
     ("Taraba it's about eleven in a hundred", 11, vals["Taraba"], 0.5),
@@ -224,12 +219,6 @@ CLAIMS += [
         100 if "'categories:accessibility': ['error', { minScore: 1 }]" in lhci else -1,
         0,
     ),
-    (
-        "scores a hundred on Lighthouse's accessibility check",
-        100,
-        100 if "minScore: 1" in lhci else -1,
-        0,
-    ),
 ]
 # Optional claims (the sensitivity benchmark; the NBS gap) if a file mentions them.
 OPTIONAL = [
@@ -237,12 +226,37 @@ OPTIONAL = [
     ("10.7–12.7", 12.7, p(der["benchmarks"]["max"]), 0.05),
     ("10.1 vs 9.6", 10.1, summ["table7_gap"]["value"], 0.05),
     ("10.1 vs 9.6", 9.6, summ["table7_gap_nbs"]["value"], 0),
+    # The video's on-screen correction footnotes (make_video.py).
+    ("6 to 17 percentage points (95% CI 6.1–17.2)", 6, p(mpi["primary"]["ci_low"]), 0.5),
+    ("6 to 17 percentage points (95% CI 6.1–17.2)", 17, p(mpi["primary"]["ci_high"]), 0.5),
+    ("6 to 17 percentage points (95% CI 6.1–17.2)", 6.1, p(mpi["primary"]["ci_low"]), 0.05),
+    ("6 to 17 percentage points (95% CI 6.1–17.2)", 17.2, p(mpi["primary"]["ci_high"]), 0.05),
+    ("the 73 comparisons", 73, chart["findings"]["checked"], 0),
+    # Wordings of earlier script drafts and of the author's recording (the transcript).
+    ("thirty-seven states", 37, len(vals), 0),
+    ("thirteen hundred and sixty", 1360, ndhs_cells, 0),
+    (
+        "scores a hundred on Lighthouse's accessibility check",
+        100,
+        100 if "minScore: 1" in lhci else -1,
+        0,
+    ),
+    (
+        "score a hundred on the Lighthouse accessibility checks",
+        100,
+        100 if "minScore: 1" in lhci else -1,
+        0,
+    ),
+    ("about twenty held up", 20, chart["findings"]["supported"], 0),
 ]
 
 NUM = re.compile(r"[−-]?\d[\d,]*(?:\.\d+)?")
 bad = 0
 for f in files:
     text = f.read_text(encoding="utf-8")
+    if f.suffix == ".srt":  # one line per cue: a caption's line breaks are only wrapping
+        cues = text.strip().split("\n\n")
+        text = "\n".join(" ".join(b.split("\n")[2:]) for b in cues)
     used = []
     for snippet, stated, actual, tol in CLAIMS:
         if snippet not in text:
@@ -260,15 +274,15 @@ for f in files:
             if abs(stated - actual) > tol + 1e-9:
                 print(f"WRONG    {f.name}: {snippet!r} says {stated}, published {actual:.4g}")
                 bad += 1
-    # Every number on a caption line must sit inside a checked snippet.
+    # Every number on a caption or correction-footnote line must sit inside a checked snippet.
     for line in text.splitlines():
-        if not line.lstrip().startswith("CAPTION:"):
+        if not line.lstrip().startswith(("CAPTION:", "Correction:")):
             continue
         rest = line
         for s in sorted(set(used), key=len, reverse=True):
             rest = rest.replace(s, " ")
         rest = re.sub(r"^\s*CAPTION:\s*\d\.\s*", "", rest)  # list markers in act 5
-        left = [n for n in NUM.findall(rest.replace("CAPTION:", ""))]
+        left = [n for n in NUM.findall(rest.replace("CAPTION:", "").replace("Correction:", ""))]
         if left:
             print(f"UNCHECKED {f.name}: {left} in {line.strip()!r}")
             bad += 1
