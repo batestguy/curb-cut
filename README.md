@@ -15,7 +15,7 @@
 - **What the survey measured.** In the Nigeria DHS 2024, 3.0% of adults aged 18 and over (95% confidence interval 2.8% to 3.2%) have a lot of difficulty with, or cannot do, at least one of six everyday activities (the Washington Group cut-off). The official report's broader count, any difficulty at all among people aged 15 and over, is 15.5%. The figures count different things; the site explains each.
 - **Disability and poverty.** In a pre-registered analysis of NBS MPI 2021, people in households with a member who has a severe difficulty are 11.7 percentage points (95% CI 6.1 to 17.2) more likely to be multidimensionally poor than people in comparable households: an adjusted association, not proof of cause.
 
-Also: [data explorer](https://batestguy.github.io/curb-cut/explorer.html) · [37 state pages](https://batestguy.github.io/curb-cut/states/) · [data dictionary](https://batestguy.github.io/curb-cut/data-dictionary.html) · [poverty results](https://batestguy.github.io/curb-cut/poverty.html) · [optional API](https://curb-cut-api.onrender.com/docs) ([`docs/api.md`](docs/api.md); free plan, so a request after a quiet spell takes about a minute; the site never depends on it)
+Also: [data explorer](https://batestguy.github.io/curb-cut/explorer.html) · [37 state pages](https://batestguy.github.io/curb-cut/states/) · [data dictionary](https://batestguy.github.io/curb-cut/data-dictionary.html) · [poverty results](https://batestguy.github.io/curb-cut/poverty.html) · [public visit counts](https://curbcutng.goatcounter.com/) · [optional API](https://curb-cut-api.onrender.com/docs) ([`docs/api.md`](docs/api.md); free plan, so a request after a quiet spell takes about a minute; the site never depends on it)
 
 ## Screenshots
 
