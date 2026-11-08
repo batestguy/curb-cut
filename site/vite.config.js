@@ -53,6 +53,7 @@ export default defineConfig({
         methodology: resolve(import.meta.dirname, 'methodology.html'),
         explorer: resolve(import.meta.dirname, 'explorer.html'),
         sensitivity: resolve(import.meta.dirname, 'sensitivity.html'),
+        walkthrough: resolve(import.meta.dirname, 'walkthrough.html'),
         ...generated,
         ...statePages,
       },

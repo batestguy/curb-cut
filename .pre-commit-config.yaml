@@ -5,6 +5,9 @@ repos:
     hooks:
       - id: check-added-large-files
         args: ["--maxkb=10240"]
+        # The approved walkthrough video (P6 gate) is published from the Pages site, by the
+        # author's choice; packages/transform/tests_py/test_video.py caps each file at 40 MB.
+        exclude: ^site/public/video/curbcut-(walkthrough|1min)\.mp4$
       - id: check-yaml
       - id: check-toml
       - id: end-of-file-fixer

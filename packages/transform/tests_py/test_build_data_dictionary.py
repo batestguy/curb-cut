@@ -452,9 +452,17 @@ def test_site_nav_is_the_same_on_every_page_that_has_one() -> None:
     assert ("./data-dictionary.html", "Data dictionary") in expected
     assert ("./explorer.html", "Data explorer") in expected
     assert ("./sensitivity.html", "Assumed rate vs survey") in expected
+    assert ("./walkthrough.html", "Walkthrough video") in expected
     assert _nav_links(poverty_page.nav_html()) == expected
-    for name in ("index.html", "methodology.html", "explorer.html", "sensitivity.html"):
+    for name in (
+        "index.html",
+        "methodology.html",
+        "explorer.html",
+        "sensitivity.html",
+        "walkthrough.html",
+    ):
         assert _nav_links((ROOT / "site" / name).read_text(encoding="utf-8")) == expected, name
     assert 'href="../data-dictionary.html"' in dd.pages.FOOTER_HTML
     assert 'href="../explorer.html"' in dd.pages.FOOTER_HTML
     assert 'href="../sensitivity.html"' in dd.pages.FOOTER_HTML
+    assert 'href="../walkthrough.html"' in dd.pages.FOOTER_HTML

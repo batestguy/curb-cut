@@ -11,6 +11,7 @@ const pages = [
   'methodology.html',
   'explorer.html',
   'sensitivity.html',
+  'walkthrough.html',
   'poverty.html',
   'data-dictionary.html',
   'states/',

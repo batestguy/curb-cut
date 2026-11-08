@@ -32,6 +32,7 @@
           <li><a href="./poverty.html">Disability and poverty</a></li>
           <li><a href="./methodology.html" aria-current="page">Methodology</a></li>
           <li><a href="./data-dictionary.html">Data dictionary</a></li>
+          <li><a href="./walkthrough.html">Walkthrough video</a></li>
         </ul>
       </nav>
     </header>
@@ -295,6 +296,17 @@
           The scripts that turn the microdata into the published aggregates are public, so anyone
           with their own DHS access can reproduce every figure:
           <a href="https://github.com/batestguy/curb-cut/blob/main/docs/reproduce.md">docs/reproduce.md</a>.
+        </p>
+      </section>
+      <section aria-labelledby="api-heading">
+        <h2 id="api-heading">Data API (optional)</h2>
+        <p>
+          The same public files are also served read-only by a small API at
+          <a href="https://curb-cut-api.onrender.com/docs">curb-cut-api.onrender.com</a>
+          (states, prevalence, the comparison and the poverty result, as JSON; at most 60
+          requests a minute per client). It runs on a free plan that sleeps when unused, so a request after a quiet spell can take about a minute to answer. This site never calls it:
+          every page works without it. Details:
+          <a href="https://github.com/batestguy/curb-cut/blob/main/docs/api.md">docs/api.md</a>.
         </p>
       </section>
       <section aria-labelledby="visits-heading">

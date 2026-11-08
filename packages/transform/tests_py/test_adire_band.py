@@ -69,7 +69,7 @@ def test_the_band_is_hidden_in_forced_colours() -> None:
 
 @pytest.mark.parametrize(
     "page",
-    ["index.html", "methodology.html", "explorer.html", "sensitivity.html"],
+    ["index.html", "methodology.html", "explorer.html", "sensitivity.html", "walkthrough.html"],
 )
 def test_every_hand_written_page_has_the_band_after_the_flag(page: str) -> None:
     html = (ROOT / "site" / page).read_text(encoding="utf-8")
