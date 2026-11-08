@@ -23,6 +23,8 @@ authors:
 repository-code: "https://github.com/batestguy/curb-cut"
 url: "https://batestguy.github.io/curb-cut/"
 license: MIT
+version: "0.7.0"
+date-released: "2026-11-08"
 keywords:
   - disability
   - Nigeria
