@@ -6,13 +6,15 @@
 
 **Nigeria's best-known disability figures are an assumption. Curb Cut is building the measured alternative: state-level survey estimates with honest uncertainty, on a site anyone can use by keyboard or screen reader, at zero cost.**
 
-- **Live site:** https://batestguy.github.io/curb-cut/
-- **Chart library:** [`disability-access-charts` on PyPI](https://pypi.org/project/disability-access-charts/) (`pip install disability-access-charts`; [source](packages/disability-access-charts/)), charts that check their own words
-- **Walkthrough video** (5 min 40 s, narrated, with captions and a transcript; part of it is NVDA reading the site): https://batestguy.github.io/curb-cut/walkthrough.html (a [one-minute version](https://batestguy.github.io/curb-cut/walkthrough.html#short-heading) too)
-- **Data explorer, state pages and data dictionary:** [explorer](https://batestguy.github.io/curb-cut/explorer.html), [37 state pages](https://batestguy.github.io/curb-cut/states/), [data dictionary](https://batestguy.github.io/curb-cut/data-dictionary.html)
-- **Data API** (optional, read-only, free plan: a request after a quiet spell takes about a minute): https://curb-cut-api.onrender.com/docs ([`docs/api.md`](docs/api.md)); the site never depends on it
+**[Live site](https://batestguy.github.io/curb-cut/)** · **[Walkthrough video](https://batestguy.github.io/curb-cut/walkthrough.html)** (5:40, captioned; part of it is the NVDA screen reader reading the site) · **[`pip install disability-access-charts`](https://pypi.org/project/disability-access-charts/)**
 
-[![The Curb Cut site: a chart of JONAPWD's 2025 figures by disability type, under a notice that they are assumed, not counted.](docs/images/site.png)](https://batestguy.github.io/curb-cut/)
+**What it found**
+
+- **The assumption.** The widely cited figure of about 35 million disabled Nigerians (JONAPWD, 2025) is the projected population multiplied by an assumed 15%; no one was counted ([`docs/verification.md`](docs/verification.md), D66).
+- **What the survey measured.** In the Nigeria DHS 2024, 3.0% of adults aged 18 and over (95% confidence interval 2.8% to 3.2%) have a lot of difficulty with, or cannot do, at least one of six everyday activities (the Washington Group cut-off). The official report's broader count, any difficulty at all among people aged 15 and over, is 15.5%. The figures count different things; the site explains each.
+- **Disability and poverty.** In a pre-registered analysis of NBS MPI 2021, people in households with a member who has a severe difficulty are 11.7 percentage points (95% CI 6.1 to 17.2) more likely to be multidimensionally poor than people in comparable households: an adjusted association, not proof of cause.
+
+Also: [data explorer](https://batestguy.github.io/curb-cut/explorer.html) · [37 state pages](https://batestguy.github.io/curb-cut/states/) · [data dictionary](https://batestguy.github.io/curb-cut/data-dictionary.html) · [poverty results](https://batestguy.github.io/curb-cut/poverty.html) · [optional API](https://curb-cut-api.onrender.com/docs) ([`docs/api.md`](docs/api.md); free plan, so a request after a quiet spell takes about a minute; the site never depends on it)
 
 ## Screenshots
 
@@ -24,6 +26,16 @@
 | **The data explorer** queries the published files in the browser. | **The pre-registered poverty result**, as an adjusted association. |
 
 Screenshots of the live site's pages, taken 2026-11-08 (light theme; every page also has a dark theme). Each links to its page.
+
+## Start here if you're hiring for…
+
+| Role | Look at |
+|---|---|
+| Accessibility / frontend | the [live site](https://batestguy.github.io/curb-cut/) by keyboard; the [walkthrough video](https://batestguy.github.io/curb-cut/walkthrough.html) (NVDA reads the site); [the chart library's README](packages/disability-access-charts/); [`site/tests/`](site/tests/) (Playwright + axe) and [`site/lighthouserc.cjs`](site/lighthouserc.cjs) |
+| Data / analytics engineering | [`packages/transform/`](packages/transform/) (dbt models and tests); the [two data zones](#how-its-built); the [data dictionary](https://batestguy.github.io/curb-cut/data-dictionary.html) and [explorer](https://batestguy.github.io/curb-cut/explorer.html); [`docs/verification.md`](docs/verification.md), every source checked and dated |
+| Data science / statistics | [the methodology page](https://batestguy.github.io/curb-cut/methodology.html) (survey estimates, Fay-Herriot attempt, spatial methods); [the pre-registered poverty analysis](https://batestguy.github.io/curb-cut/poverty.html) ([OSF](https://osf.io/kes3p/)); [the claim checker's interval test](packages/disability-access-charts/docs/claim-checker.md) |
+| Python / library design | [`disability-access-charts`](packages/disability-access-charts/) and [the eight steps above](#the-chart-library-in-eight-steps): zero dependencies, typed, tested in CI, trusted publishing to PyPI |
+| Policy / communication | [the site](https://batestguy.github.io/curb-cut/)'s plain-language caveats; [`PLAN.md`](PLAN.md) |
 
 ## The chart library in eight steps
 
@@ -119,16 +131,6 @@ JONAPWD's widely cited 2025 figures (about 35 million people) come from applying
 | ✅ | **37 state pages (P4b):** plain HTML with no script, each about 50 KB: DHS 2024 with intervals and precision flags, the six activities as a dot plot drawn from a checked chart document, MPI 2021 under its own definition, JONAPWD's assumed figure with its caveat, population, a locator map and the law's national facts; tested with axe, keyboard and an NVDA transcript | [all states](https://batestguy.github.io/curb-cut/states/), [Kano](https://batestguy.github.io/curb-cut/states/kano.html) |
 | ✅ | **Disability and poverty (P5):** a pre-registered analysis (OSF, frozen before any poverty figure was split by disability) of NBS MPI 2021: people in households with a member aged 5+ who has a severe difficulty (on MPI's own disability questions, not the WG-SS) are 11.7 percentage points more likely to be multidimensionally poor than people in comparable households (95% interval 6.1 to 17.2; an adjusted association, not a causal effect; DoubleML with sensitivity analysis, refutations and a disclosure-gated release), plus an exploratory GHS-Panel two-round comparison and a two-page policy brief | [results page](https://batestguy.github.io/curb-cut/poverty.html), [pre-registration](https://osf.io/kes3p/) |
 | ✅ | **Site polish and tools (P6):** a [data explorer](https://batestguy.github.io/curb-cut/explorer.html) (DuckDB-WASM, keyboard-sortable, the view in the URL); an [assumed rate against the survey](https://batestguy.github.io/curb-cut/sensitivity.html) page; a generated [data dictionary](https://batestguy.github.io/curb-cut/data-dictionary.html) whose build fails if a public column is undescribed; CSV and JSON under every table; a map palette that stays distinguishable under simulated colour-vision deficiency, with a keyboard legend; chart descriptions in four Nigerian languages; a "report a problem" route that needs no account; an optional read-only API; a captioned [walkthrough video](https://batestguy.github.io/curb-cut/walkthrough.html). Checked by keyboard and NVDA at the gate; not yet tested by a regular screen-reader user | [live](https://batestguy.github.io/curb-cut/), [`docs/api.md`](docs/api.md) |
-
-## Start here if you're hiring for…
-
-| Role | Look at |
-|---|---|
-| Accessibility / frontend | the [live site](https://batestguy.github.io/curb-cut/) by keyboard; the [walkthrough video](https://batestguy.github.io/curb-cut/walkthrough.html) (NVDA reads the site); [the chart library's README](packages/disability-access-charts/); [`site/tests/`](site/tests/) (Playwright + axe) and [`site/lighthouserc.cjs`](site/lighthouserc.cjs) |
-| Data / analytics engineering | [`packages/transform/`](packages/transform/) (dbt models and tests); the [two data zones](#how-its-built); the [data dictionary](https://batestguy.github.io/curb-cut/data-dictionary.html) and [explorer](https://batestguy.github.io/curb-cut/explorer.html); [`docs/verification.md`](docs/verification.md), every source checked and dated |
-| Data science / statistics | [the methodology page](https://batestguy.github.io/curb-cut/methodology.html) (survey estimates, Fay-Herriot attempt, spatial methods); [the pre-registered poverty analysis](https://batestguy.github.io/curb-cut/poverty.html) ([OSF](https://osf.io/kes3p/)); [the claim checker's interval test](packages/disability-access-charts/docs/claim-checker.md) |
-| Python / library design | [`disability-access-charts`](packages/disability-access-charts/) and [the eight steps above](#the-chart-library-in-eight-steps): zero dependencies, typed, tested in CI, trusted publishing to PyPI |
-| Policy / communication | [the site](https://batestguy.github.io/curb-cut/)'s plain-language caveats; [`PLAN.md`](PLAN.md) |
 
 ## How it's built
 
