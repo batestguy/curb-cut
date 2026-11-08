@@ -13,6 +13,7 @@ const PAGES = [
   { path: 'explorer.html', counted: '/explorer.html' },
   { path: 'sensitivity.html', counted: '/sensitivity.html' },
   { path: 'data-dictionary.html', counted: '/data-dictionary.html' },
+  { path: 'walkthrough.html', counted: '/walkthrough.html' },
 ];
 
 for (const { path, counted } of PAGES) {

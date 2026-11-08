@@ -8,6 +8,8 @@
 
 - **Live site:** https://batestguy.github.io/curb-cut/
 - **Chart library:** [`disability-access-charts`](packages/disability-access-charts/), charts that check their own words
+- **Walkthrough video** (5 min 40 s, narrated, with captions and a transcript; part of it is NVDA reading the site): https://batestguy.github.io/curb-cut/walkthrough.html (a [one-minute version](https://batestguy.github.io/curb-cut/walkthrough.html#short-heading) too)
+- **Data API** (optional, read-only, free plan: the first request after a quiet spell takes about a minute): https://curb-cut-api.onrender.com/docs ([`docs/api.md`](docs/api.md)); the site never depends on it
 
 [![The Curb Cut site: a chart of JONAPWD's 2025 figures by disability type, under a notice that they are assumed, not counted.](docs/images/site.png)](https://batestguy.github.io/curb-cut/)
 

@@ -1254,3 +1254,32 @@ thead th.num .sort-button {
   overflow: hidden;
   clip-path: inset(50%);
 }
+
+/* The walkthrough video page (P6 gate). */
+.walkthrough-page video {
+  display: block;
+  width: 100%;
+  max-width: 64rem;
+  height: auto;
+  background: #000;
+}
+
+.walkthrough-page .transcript-label {
+  font-weight: 700;
+}
+
+.walkthrough-page .transcript-screen,
+.walkthrough-page .transcript-nvda {
+  border-left: 0.3rem solid var(--border);
+  margin-left: 0;
+  padding-left: 0.75rem;
+}
+
+.walkthrough-page .transcript-when {
+  color: var(--muted);
+}
+
+.walkthrough-page p,
+.walkthrough-page li {
+  overflow-wrap: anywhere;
+}

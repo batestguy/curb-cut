@@ -404,7 +404,7 @@ def test_report_paragraph_matches_hand_written_pages() -> None:
     assert any(h.startswith(f"mailto:{pages.REPORT_EMAIL}?") for h in hrefs)
     assert any(h.startswith(f"mailto:{pages.REPORT_EMAIL_BACKUP}?") for h in hrefs)
     assert pages.REPORT_URL in hrefs
-    for name in ("index.html", "methodology.html", "explorer.html"):
+    for name in ("index.html", "methodology.html", "explorer.html", "walkthrough.html"):
         html = (ROOT / "site" / name).read_text(encoding="utf-8")
         for href in hrefs:
             assert f'href="{href}"' in html, (name, href)
@@ -519,6 +519,7 @@ def test_visit_count_matches_hand_written_pages() -> None:
         ("methodology.html", "/methodology.html", "Methodology: Curb Cut"),
         ("explorer.html", "/explorer.html", "Data explorer: Curb Cut"),
         ("sensitivity.html", "/sensitivity.html", "Assumed rate against the survey: Curb Cut"),
+        ("walkthrough.html", "/walkthrough.html", "Walkthrough video: Curb Cut"),
     ):
         html = (ROOT / "site" / name).read_text(encoding="utf-8")
         assert pages.count_pixel(path, title) in html, name

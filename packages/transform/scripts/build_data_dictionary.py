@@ -661,6 +661,7 @@ def nav_html() -> str:
         '<li><a href="./poverty.html">Disability and poverty</a></li>'
         '<li><a href="./methodology.html">Methodology</a></li>'
         '<li><a href="./data-dictionary.html" aria-current="page">Data dictionary</a></li>'
+        '<li><a href="./walkthrough.html">Walkthrough video</a></li>'
         "</ul></nav>"
     )
 

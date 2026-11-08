@@ -13,6 +13,7 @@ recording, cards, clips); nothing here is published until the author approves th
 | `demo_library.py` | Act 5b: `disability-access-charts`'s claim checker on the real state chart. |
 | `make_video.py` | Assembles `out/curbcut-walkthrough.mp4` and `out/curbcut-1min.mp4` (acts 1–2) from the author's voice files (`voice/*.aac`) and act 5: speech trimmed to 0.4 s margins, each act at -16 LUFS (TP -1.5), shots cut on the spoken words with a slow zoom, the script's `CAPTION:` lines and four correction footnotes timed to the words, 0.5 s crossfades; writes closed captions (`.en.srt`, also muxed as a `mov_text` track) and a transcript. Never runs the scripts that read restricted data: `validate_ndhs` and `crosscheck_svy` appear as cards quoting `docs/verification.md`. `--no-shots` reuses the stills. |
 | `shots.mjs` | Run by `make_video.py`: screenshots of the site from the local build under the live URL (after checking the pages and data files match the live site), PyPI/OSF/GitHub Actions live where they load (else a card from their public APIs or `gh run view`), terminal and code cards, captions and footnotes; axe contrast check on every card. |
+| `publish_video.py` | After the author's approval: copies both cuts to `site/public/video/` (committed), converts their SRTs to WebVTT, and writes the transcript into `site/walkthrough.html` between its markers. `--check` exits 1 if the committed files are stale. |
 | `whisper_words.py` | Word timestamps of the voice files with faster-whisper `small.en` (local, CPU), cached in `build/words.json`. |
 
 ```
@@ -24,6 +25,7 @@ uv run python -I scripts/video/check_numbers.py
 uv run python -I scripts/video/demo_library.py
 uv run python -I scripts/video/make_video.py
 uv run python -I scripts/video/check_numbers.py data/sources/video/script.md data/sources/video/out/curbcut-walkthrough.en.srt data/sources/video/out/curbcut-walkthrough-transcript.md
+uv run python -I scripts/video/publish_video.py
 ```
 
 On 2026-11-07 the connection ran at about 18 KB/s, too slow for DuckDB-WASM's 34 MB
