@@ -327,8 +327,8 @@ Steps:
 - **Blog posts:**
   - "Alt-text that can't lie"
   - "Nigeria's disability numbers are an assumption — here's what surveys say"
-- **Launch copy** (README, posts, outreach) uses only claims backed by the P4 "first" check in `docs/verification.md`.
-- Optional: reach out to JONAPWD/NCPWD with the demo.
+- ~~**Launch copy**~~ (dropped 2026-11-08, author). The README and posts still use only claims backed by the P4 "first" check in `docs/verification.md`.
+- ~~Optional: reach out to JONAPWD/NCPWD with the demo.~~ (dropped 2026-11-08, author)
 
 ## Candidates (not scheduled)
 
