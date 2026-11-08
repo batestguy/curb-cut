@@ -162,7 +162,7 @@ Phases P0–P6 are done (P6 gate passed 2026-11-08); P7 (launch) is in progress.
 
 ## Methods and data documentation
 
-- [`docs/blog/`](docs/blog/): plain-language write-ups (drafts until published): [the assumption and what the surveys measured](docs/blog/01-assumption-and-survey.md).
+- [`docs/blog/`](docs/blog/): plain-language write-ups (drafts until published): [the assumption and what the surveys measured](docs/blog/01-assumption-and-survey.md); [alt-text that can't lie](docs/blog/02-alt-text-that-cant-lie.md).
 
 - [`docs/reproduce.md`](docs/reproduce.md): from licensed microdata to every public aggregate, with software versions.
 - [`docs/preregistration.md`](docs/preregistration.md) (frozen at tag `p5-freeze`, registered at https://osf.io/kes3p/) and [`docs/preregistration-deviations.md`](docs/preregistration-deviations.md).
