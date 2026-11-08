@@ -158,7 +158,7 @@ Survey licences forbid publishing household-level data, so microdata never leave
 
 ## Status
 
-Phases P0–P6 are done (P6 gate passed 2026-11-08); P7 (launch) is in progress. A regular screen-reader user has not yet tested the site; feedback is welcome through the "report a problem" links in every page's footer. See [`docs/STATUS.md`](docs/STATUS.md) for where things stand and [`PLAN.md`](PLAN.md) for the roadmap.
+All phases (P0–P7) are complete: version 1.0.0, 2026-11-08. A regular screen-reader user has not yet tested the site; feedback is welcome through the "report a problem" links in every page's footer. See [`docs/STATUS.md`](docs/STATUS.md) for where things stand and [`PLAN.md`](PLAN.md) for the roadmap.
 
 ## Methods and data documentation
 

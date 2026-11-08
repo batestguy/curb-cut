@@ -2,6 +2,21 @@
 
 All notable changes to this project are documented here. Entries follow [Conventional Commits](https://www.conventionalcommits.org/).
 
+## P7 — 2026-11-08 (gate passed; release 1.0.0)
+
+### Documentation
+- docs(readme): the findings first (the assumed 35 million, the measured 3.0%, the poverty association), screenshots of four pages, a ten-step GIF of the chart library that opens on its PyPI page and shows the real chart, the role table, current test counts and the coverage gate CI enforces (85%).
+- docs(charts): "How it compares" moves to the top of the library README as a table, adding Olli; it ships to PyPI with the next library release.
+- docs(blog): two posts, "Nigeria's disability numbers are an assumption" (with a methods section) and "Alt-text that can't lie".
+- docs: CONTRIBUTING (problem reports and translation reviews first) and a screen-reader testing kit (`docs/screen-reader-testing.md`).
+- docs: the GoatCounter visit counts are public, linked from the README and the methodology page.
+
+### Added
+- chore: Zenodo archiving; releases v0.7.0 and v1.0.0; concept DOI 10.5281/zenodo.24050358 in the README and `CITATION.cff`.
+
+### Dropped (author, 2026-11-08)
+- The MkDocs site (Material for MkDocs reached end of life on 2026-11-05), launch copy, outreach to JONAPWD/NCPWD, and screen-reader user sessions.
+
 ## P6 — 2026-11-08 (gate passed)
 
 ### Documentation
