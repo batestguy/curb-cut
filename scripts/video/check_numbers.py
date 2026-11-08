@@ -20,6 +20,8 @@ import sys
 import urllib.request
 from pathlib import Path
 
+sys.stdout.reconfigure(encoding="utf-8")  # type: ignore[union-attr]  # claims hold non-ASCII text
+
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 LIVE = "https://batestguy.github.io/curb-cut/data/"
@@ -248,6 +250,21 @@ OPTIONAL = [
         0,
     ),
     ("about twenty held up", 20, chart["findings"]["supported"], 0),
+    ("about fifteen in a hundred people that are aged fifteen", 15, 15.5, 0.5),
+    ("In Taraba, it's about eleven in a hundred", 11, vals["Taraba"], 0.5),
+    ("In Lagos, it's under one in a hundred", 1, 1 if vals["Lagos"] < 1 else -1, 0),
+    (
+        "Taraba, being the highest, can't",
+        0,
+        0 if not ext["supported"] and max(vals, key=vals.get) == "Taraba" else 1,
+        0,
+    ),
+    (
+        "clear for health, for work and shocks",
+        0,
+        0 if all(float(mpi[k]["ci_low"]) > 0 for k in ("s4_health", "s4_work_and_shocks")) else 1,
+        0,
+    ),
 ]
 
 NUM = re.compile(r"[−-]?\d[\d,]*(?:\.\d+)?")
@@ -263,6 +280,8 @@ for f in files:
             if f.name == "script.md":
                 print(f"MISSING  {f.name}: {snippet!r}")
                 bad += 1
+            else:  # said or captioned differently: covered only if an optional wording matches
+                print(f"skipped  {f.name}: {snippet!r} (not in this file)")
             continue
         used.append(snippet)
         if abs(stated - actual) > tol + 1e-9:

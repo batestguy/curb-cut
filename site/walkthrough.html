@@ -43,13 +43,19 @@
         A narrated tour of what the surveys measured about disability in Nigeria, what held up and
         what did not, and how the site works, in about five and a half minutes. Jerry Bannister,
         who built Curb Cut, narrates. In one part there is no narration: the NVDA screen reader
-        reads the live site. Recorded in November 2026; every figure in it comes from this site.
+        reads the live site. Recorded in November 2026. Every figure in it comes from this site's
+        published data or from the project's check log,
+        <a href="https://github.com/batestguy/curb-cut/blob/main/docs/verification.md"
+          >docs/verification.md</a
+        >, and a script checked each one against them before release.
       </p>
       <p>
         Both videos have English captions (turn them on with the player's captions button). The
-        <a href="#transcript-heading">full transcript</a> below gives the narration, the on-screen
-        captions and what NVDA says. Where a spoken word differs from the site's figures, the
-        video shows a correction on screen, and the transcript gives it too.
+        <a href="#transcript-heading">full transcript</a> below gives the narration, the text shown
+        on screen, what NVDA says, and a short line on what each part shows. There is no separate
+        audio-description track: some figures appear only on screen, and the transcript gives them.
+        Where a spoken word differs from the site's figures, the video shows a correction on
+        screen, and the transcript gives it too.
       </p>
 
       <section aria-labelledby="full-heading">
@@ -73,7 +79,7 @@
           <a href="./video/curbcut-walkthrough.mp4">Download the walkthrough (MP4)</a>.
         </video>
         <p class="video-download">
-          Download: <a href="./video/curbcut-walkthrough.mp4" download>video, MP4, 72.4 MB</a> ·
+          Download: <a href="./video/curbcut-walkthrough.mp4" download>video, MP4, 29.0 MB</a> ·
           <a href="./video/curbcut-walkthrough.en.vtt" download>captions, WebVTT</a>
         </p>
       </section>
@@ -103,7 +109,7 @@
           <a href="./video/curbcut-1min.mp4">Download the one-minute version (MP4)</a>.
         </video>
         <p class="video-download">
-          Download: <a href="./video/curbcut-1min.mp4" download>video, MP4, 19.4 MB</a> ·
+          Download: <a href="./video/curbcut-1min.mp4" download>video, MP4, 7.6 MB</a> ·
           <a href="./video/curbcut-1min.en.vtt" download>captions, WebVTT</a>
         </p>
       </section>
@@ -115,20 +121,24 @@
 <h3>Title card (0:00.0)</h3>
 <p>Curb Cut: Nigerian disability data, measured</p>
 <h3>Act 1: Hook (0:02.8)</h3>
+<p class="transcript-shown"><span class="transcript-label">On screen:</span> The main page's section on JONAPWD's 2025 estimates, with its notice that they are built on an assumption; the chart of JONAPWD's figures for all 37 states by type of disability; the top of the main page, with the national figure.</p>
 <p>How many disabled people live in Nigeria? You often hear thirty-five million. That's a figure from the Joint National Association of People with Disabilities in 2025, which itself is an estimate from the global prevalence of fifteen percent of the population in Nigeria. That global rate was found in a study by the World Bank and the World Health Organization in 2011. My name is Jerry Bannister. I'm a statistician in Bauchi and a wheelchair user. Come along with me to see what the surveys actually measured.</p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> JONAPWD 2025: 232,676,020 (NPC 2025 projection) × 15% (WHO and World Bank global estimate) = 34,901,403: assumed, not counted <span class="transcript-when">(on screen from 0:07.6)</span></p>
 <h3>Act 2: The measured answer (0:31.9)</h3>
+<p class="transcript-shown"><span class="transcript-label">On screen:</span> The top of the main page, with the national figure; the main page's section “Why you may see 15% or 3%”; the methodology page's “What is new here, and what is not”; a card quoting the check that reproduces the official NDHS report tables; a card quoting the cross-check of the estimates in R and Python.</p>
 <p>Nigeria's 2024 Demographic and Health Survey asked the Washington Group questions. That's the international standard. Three in a hundred adults have a lot of difficulty or completely lack the ability to engage in seeing, hearing, walking, remembering, caring for themselves or communicating. The official report, counting those with any difficulty at all, gets about fifteen in a hundred people that are aged fifteen and over. But that's a different question. The report already publishes state figures for men and women separately, without any margins of error. I combined them into one figure per state, which roughly doubles each state's sample, and gave every state a confidence interval using the survey data and sampling weights.</p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> Nigeria DHS 2024 · adults 18+: 3.0% (95% CI 2.8–3.2) <span class="transcript-when">(on screen from 0:38.8)</span></p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> NDHS report, ages 15+: any difficulty 15.5% · at the Washington Group cut-off 2.8% <span class="transcript-when">(on screen from 0:49.3)</span></p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> R survey, checked in Python svy (5,816 cells) · 1,360 official report cells reproduced <span class="transcript-when">(on screen from 1:05.7)</span></p>
 <h3>Act 3: What was found, and what wasn't (1:15.4)</h3>
+<p class="transcript-shown"><span class="transcript-label">On screen:</span> The dot plot of disability by state, with 95% confidence intervals; the dot plot's statistical findings (73 comparisons checked, 20 supported); the map of disability by state; the main page's section “Do neighbouring states look alike?”; the methodology page's section on the small-area model.</p>
 <p>The states are not alike. In Taraba, it's about eleven in a hundred. In Lagos, it's under one in a hundred. Seven states are clearly above the national figure, and twelve clearly below after correcting for multiple testing. But two things I expected didn't hold. Neighbouring states don't show a clear pattern of being alike. A spatial test was conducted, Moran's I, and it found none of the claims survives correction. As a follow-up, a small-area model meant to sharpen the state figures failed the checks I set in advance [correction: the small-area model failed the checks set in advance], so I also left it out.</p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> Taraba 11.3% · Lagos 0.8% · 7 above, 12 below national (Benjamini-Hochberg, FDR 5%) <span class="transcript-when">(on screen from 1:17.6)</span></p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> No geographic pattern survives correction: Moran's I 0.13, adjusted p 0.105 (37 states, low power; not proof of no pattern) <span class="transcript-when">(on screen from 1:31.2)</span></p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> Fay-Herriot small-area model failed its pre-declared diagnostics: not used <span class="transcript-when">(on screen from 1:42.0)</span></p>
 <p class="transcript-screen"><span class="transcript-label">On-screen correction:</span> the small-area model failed the checks set in advance. <span class="transcript-when">(footnote on screen 1:44.8–1:49.8)</span></p>
 <h3>Act 4: Poverty (1:49.8)</h3>
+<p class="transcript-shown"><span class="transcript-label">On screen:</span> The top of the poverty page; a card with the pre-registration on OSF (osf.io/kes3p); the poverty page's headline chart; the poverty page's “Checks that should find nothing”; the poverty page's “How strong would a hidden factor need to be?”; the poverty page's “Compared with factors we did measure”; the poverty page's exploratory GHS-Panel section; the GHS-Panel table's row for household consumption.</p>
 <p>So, does disability go with poverty? I registered the plan publicly before I split poverty by disability. Our results were expected. Using double machine learning on the national poverty survey, people in households with a member who has severe difficulty are about twelve percentage points more likely to be poor on the national multidimensional poverty index than people in comparable households. The range is six to seventeen percent [correction: 6 to 17 percentage points (95% CI 6.1–17.2)]. When I shuffled who was disabled a hundred times, the fake results averaged almost about zero. But I'll be honest about the weak spots. In the worst case, a hidden factor I didn't measure, even a small one, could explain it away. A factor as strong as the head of household's education would barely move it, but it would be impossible to rule out something stronger. So it's an association, and not proof of cause. A smaller panel survey looks at work. Among people whose severe difficulty began between 2018 and 2023, the proportion working fell about twenty-six points more than among comparable people whose difficulty didn't begin during that time period. That part is exploratory, and it can't say which came first.</p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> NBS MPI 2021 · pre-registered at osf.io/kes3p · DoubleML: +11.7 points (95% CI 6.1–17.2) <span class="transcript-when">(on screen from 1:59.6)</span></p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> 100 placebo shuffles: mean 0.6 points, empirical p = 0.010 <span class="transcript-when">(on screen from 2:15.7)</span></p>
@@ -136,6 +146,7 @@
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> GHS-Panel 2018/19 → 2023/24, exploratory: working −26.4 points relative to comparable people without onset (−33.2 to −19.7); consumption: survey cannot show a difference <span class="transcript-when">(on screen from 2:41.3)</span></p>
 <p class="transcript-screen"><span class="transcript-label">On-screen correction:</span> 6 to 17 percentage points (95% CI 6.1–17.2). <span class="transcript-when">(footnote on screen 2:11.9–2:16.9)</span></p>
 <h3>Act 4b: What wasn't significant (2:59.7)</h3>
+<p class="transcript-shown"><span class="transcript-label">On screen:</span> The dot plot's statistical findings (73 comparisons checked, 20 supported); the dot plot of disability by state, with 95% confidence intervals; the poverty page's chart of where the difference sits, by dimension; the GHS-Panel table's row for household consumption; the Lighthouse CI settings that require an accessibility score of 100; a passing GitHub Actions run.</p>
 <p>A lot of what I tested wasn't significant, and the site says so. The state chart tested seventy-three comparisons: neighbouring states and each state were tested against the national figure [correction: the 73 comparisons are states next to each other in the ranking, the highest and lowest, and each state against the national figure]. Only about twenty held up after corrections for multiple testing. Taraba, being the highest, can't [this word is unclear in the recording; the on-screen footnote states the finding] be told apart from Abia, the second highest. Looking at where the poverty difference sits, the deprivation gap is clear for health, for work and shocks, but the survey can't show one for education or living standards. The panel survey also fails to show a difference in how household consumption changed. As a check, the site can't deploy unless every page and its types score a hundred on the Lighthouse accessibility checks.</p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> State chart: 73 comparisons tested, 20 significant (Benjamini-Hochberg) · Taraba vs Abia: no detectable difference <span class="transcript-when">(on screen from 3:04.5)</span></p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> Not significant: education and living-standards deprivation differences · GHS consumption: survey cannot show a difference <span class="transcript-when">(on screen from 3:20.8)</span></p>
@@ -143,6 +154,7 @@
 <p class="transcript-screen"><span class="transcript-label">On-screen correction:</span> the 73 comparisons are states next to each other in the ranking, the highest and lowest, and each state against the national figure. <span class="transcript-when">(footnote on screen 3:07.1–3:14.8)</span></p>
 <p class="transcript-screen"><span class="transcript-label">On-screen correction:</span> Taraba can't be told apart from Abia: their intervals overlap. <span class="transcript-when">(footnote on screen 3:15.1–3:20.1)</span></p>
 <h3>Act 5: The site, in a screen reader's voice (3:44.5)</h3>
+<p class="transcript-shown"><span class="transcript-label">On screen:</span> The main page, the state chart and the poverty page, at the part NVDA is reading.</p>
 <p>No narration: NVDA reads the live site. What NVDA says is below.</p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> The main page, read by NVDA — Main heading and the national figure</p>
 <blockquote class="transcript-nvda"><p><span class="transcript-label">NVDA:</span> The DHS 2024 survey estimates that 3.0 percent of adults aged 18 and over living in households in Nigeria (95 percent confidence interval 2.8 percent to 3.2 percent ) have a lot of difficulty with, or cannot do at all, at least one of six everyday activities.</p></blockquote>
@@ -151,18 +163,20 @@
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> The poverty result, in one sentence — The poverty page's main result</p>
 <blockquote class="transcript-nvda"><p><span class="transcript-label">NVDA:</span> The main result, region, The main result, heading, level 2 People in households with a member aged 5 or older who has a severe difficulty are 11.7 percentage points more likely to be multidimensionally poor than people in comparable households (95 percent confidence interval 6.1 to 17.2 points).</p></blockquote>
 <h3>Act 5b: My library, in action (4:42.0)</h3>
+<p class="transcript-shown"><span class="transcript-label">On screen:</span> A card with the library's details on PyPI; a terminal running the claim checker on the site's state chart; the first claim and its verdict (passes); the second claim and its verdict (rejected); the claim checker's source code; a terminal running “disability-access-charts check --strict” on every chart, passing.</p>
 <p>This is my open-source Python library. It's called disability-access-charts. It builds each chart with a description written from the data, and then checks that text against the data, with intervals and all. Let's take a look. The check: “Taraba has a higher rate than Lagos” passes, but “Taraba has a higher rate than Abia” is rejected. The gap is small, and the uncertainty doesn't allow it. The site's descriptions are built only from the differences that held up, and this check runs in strict mode on every chart before the site is built, as a second guard.</p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> pip install disability-access-charts · open source (MIT) <span class="transcript-when">(on screen from 4:42.3)</span></p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> check_alt_text(): "Taraba &gt; Lagos" passes · "Taraba &gt; Abia" rejected (difference 0.70, needs more than 3.74) <span class="transcript-when">(on screen from 4:57.2)</span></p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> CI: disability-access-charts check --strict on every chart before the site is built <span class="transcript-when">(on screen from 5:11.8)</span></p>
 <h3>Act 6: Close (5:17.1)</h3>
+<p class="transcript-shown"><span class="transcript-label">On screen:</span> The top of the main page, with the national figure.</p>
 <p>Every chart describes itself, and my open-source library checks the numbers and comparisons in those words against the data before the site is built. It's free, every figure names its source, and it hasn't yet been tested by a regular screen-reader user. If you use one, tell me what works and what doesn't. Thank you.</p>
 <p class="transcript-screen"><span class="transcript-label">On-screen caption:</span> batestguy.github.io/curb-cut · pip install disability-access-charts <span class="transcript-when">(on screen from 5:25.7)</span></p>
 <h3>End card (5:36.2)</h3>
 <p>batestguy.github.io/curb-cut · pip install disability-access-charts</p>
 <h3>Note on corrections and transcription</h3>
 <p>The author chose on-screen correction footnotes over re-recording. Four footnotes are shown on screen: in act 3, the small-area model <em>failed</em> the checks set in advance (the recording may sound like "filled"); in act 4, the range is 6 to 17 percentage points, not percent (95% CI 6.1–17.2); in act 4b, the 73 comparisons are states next to each other in the ranking, the highest and lowest, and each state against the national figure (said as "neighbouring states and each state were tested against the national figure"). Also in act 4b, whether the author says "can" or "can't" before "be told apart from Abia" is unclear in the recording; the footnote states the finding (Taraba can't be told apart from Abia). Act 1's opening differs from the script by the author's choice; it is not corrected.</p>
-<p>Speech-recognition errors fixed in this transcript (what the recogniser heard → what was said): Gerry → Jerry; survey is → surveys; Maran's eye → Moran's I; special test → spatial test; shoveled → shuffled; proof of course → proof of cause; Smaller panels of A → A smaller panel survey; which game first → which came first; them in three → seventy-three; Tarabah → Taraba; The panels will be also filled to show → The panel survey also fails to show; every pitch and its types cause a hundred → every page and its types score a hundred; The checked error bar has a higher read than Legos → The check: “Taraba has a higher rate than Lagos”; error bar has a higher read than RBIs → “Taraba has a higher rate than Abia”; side descriptions → site's descriptions; the difference that I held up → the differences that held up; strict mood → strict mode; every forgot name is its source → every figure names its source. Spoken numbers are written in words, as in the script.</p>
+<details><summary>Speech-recognition fixes in this transcript</summary><p>Speech-recognition errors fixed in this transcript (what the recogniser heard → what was said): Gerry → Jerry; survey is → surveys; Maran's eye → Moran's I; special test → spatial test; shoveled → shuffled; proof of course → proof of cause; Smaller panels of A → A smaller panel survey; which game first → which came first; them in three → seventy-three; Tarabah → Taraba; The panels will be also filled to show → The panel survey also fails to show; every pitch and its types cause a hundred → every page and its types score a hundred; The checked error bar has a higher read than Legos → The check: “Taraba has a higher rate than Lagos”; error bar has a higher read than RBIs → “Taraba has a higher rate than Abia”; side descriptions → site's descriptions; the difference that I held up → the differences that held up; strict mood → strict mode; every forgot name is its source → every figure names its source. Spoken numbers are written in words, as in the script.</p></details>
 <!-- transcript:end -->
       </section>
     </main>

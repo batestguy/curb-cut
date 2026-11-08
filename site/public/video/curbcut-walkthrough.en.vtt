@@ -1,472 +1,447 @@
 WEBVTT
 
 1
-00:00:02.500 --> 00:00:04.750
+00:00:02.500 --> 00:00:04.750 line:16%
 How many disabled people live in Nigeria?
 
 2
-00:00:04.940 --> 00:00:07.190
+00:00:04.940 --> 00:00:07.190 line:16%
 You often hear thirty-five million.
 
 3
-00:00:07.360 --> 00:00:11.510
+00:00:07.360 --> 00:00:11.510 line:16%
 That's a figure from the Joint National
 Association of People with Disabilities in
 
 4
-00:00:11.560 --> 00:00:16.250
+00:00:11.560 --> 00:00:16.250 line:16%
 2025, which itself is an estimate from the
 global prevalence of fifteen percent of
 
 5
-00:00:16.300 --> 00:00:17.650
+00:00:16.300 --> 00:00:17.650 line:16%
 the population in Nigeria.
 
 6
-00:00:18.100 --> 00:00:22.630
+00:00:18.100 --> 00:00:22.630 line:16%
 That global rate was found in a study
 by the World Bank and the World Health
 
 7
-00:00:22.680 --> 00:00:23.910
+00:00:22.680 --> 00:00:23.910 line:16%
 Organization in 2011.
 
 8
-00:00:24.340 --> 00:00:25.910
+00:00:24.340 --> 00:00:25.910 line:16%
 My name is Jerry Bannister.
 
 9
-00:00:25.960 --> 00:00:28.610
+00:00:25.960 --> 00:00:28.610 line:16%
 I'm a statistician in Bauchi
 and a wheelchair user.
 
 10
-00:00:28.660 --> 00:00:31.760
+00:00:28.660 --> 00:00:31.760 line:16%
 Come along with me to see what
 the surveys actually measured.
 
 11
-00:00:31.966 --> 00:00:35.896
+00:00:31.966 --> 00:00:35.896 line:16%
 Nigeria's 2024 Demographic and Health
 Survey asked the Washington Group
 
 12
-00:00:35.946 --> 00:00:38.336
+00:00:35.946 --> 00:00:38.336 line:16%
 questions. That's the
 international standard.
 
 13
-00:00:38.646 --> 00:00:42.796
+00:00:38.646 --> 00:00:42.796 line:16%
 Three in a hundred adults have a lot of
 difficulty or completely lack the ability
 
 14
-00:00:42.846 --> 00:00:44.696
+00:00:42.846 --> 00:00:44.696 line:16%
 to engage in seeing, hearing,
 
 15
-00:00:44.746 --> 00:00:48.616
+00:00:44.746 --> 00:00:48.616 line:16%
 walking, remembering, caring
 for themselves or communicating.
 
 16
-00:00:49.066 --> 00:00:52.816
+00:00:49.066 --> 00:00:52.816 line:16%
 The official report, counting
 those with any difficulty at all,
 
 17
-00:00:52.866 --> 00:00:56.416
+00:00:52.866 --> 00:00:56.416 line:16%
 gets about fifteen in a hundred
 people that are aged fifteen and over.
 
 18
-00:00:56.466 --> 00:00:58.116
+00:00:56.466 --> 00:00:58.116 line:16%
 But that's a different question.
 
 19
-00:00:59.246 --> 00:01:03.476
+00:00:59.246 --> 00:01:03.476 line:16%
 The report already publishes state
 figures for men and women separately,
 
 20
-00:01:03.526 --> 00:01:05.276
+00:01:03.526 --> 00:01:05.276 line:16%
 without any margins of error.
 
 21
-00:01:05.506 --> 00:01:07.996
+00:01:05.506 --> 00:01:07.996 line:16%
 I combined them into one figure per state,
 
 22
-00:01:08.046 --> 00:01:10.196
+00:01:08.046 --> 00:01:10.196 line:16%
 which roughly doubles each state's sample,
 
 23
-00:01:10.246 --> 00:01:14.896
+00:01:10.246 --> 00:01:14.896 line:16%
 and gave every state a confidence interval
 using the survey data and sampling
 
 24
-00:01:14.946 --> 00:01:15.464
+00:01:14.946 --> 00:01:15.464 line:16%
 weights.
 
 25
-00:01:15.504 --> 00:01:17.474
+00:01:15.504 --> 00:01:17.474 line:16%
 The states are not alike.
 
 26
-00:01:17.524 --> 00:01:20.554
+00:01:17.524 --> 00:01:20.554 line:16%
 In Taraba, it's about eleven in a hundred.
 
 27
-00:01:20.604 --> 00:01:23.454
+00:01:20.604 --> 00:01:23.454 line:16%
 In Lagos, it's under one in a hundred.
 
 28
-00:01:23.504 --> 00:01:26.104
+00:01:23.504 --> 00:01:26.104 line:16%
 Seven states are clearly
 above the national figure,
 
 29
-00:01:26.154 --> 00:01:29.354
+00:01:26.154 --> 00:01:29.354 line:16%
 and twelve clearly below after
 correcting for multiple testing.
 
 30
-00:01:29.404 --> 00:01:31.514
+00:01:29.404 --> 00:01:31.514 line:16%
 But two things I expected didn't hold.
 
 31
-00:01:31.564 --> 00:01:34.854
+00:01:31.564 --> 00:01:34.854 line:16%
 Neighbouring states don't show
 a clear pattern of being alike.
 
 32
-00:01:34.904 --> 00:01:37.074
+00:01:34.904 --> 00:01:37.074 line:16%
 A spatial test was conducted,
 
 33
-00:01:37.124 --> 00:01:41.274
+00:01:37.124 --> 00:01:41.274 line:16%
 Moran's I, and it found none of
 the claims survives correction.
 
 34
-00:01:41.784 --> 00:01:46.474
+00:01:41.784 --> 00:01:46.474 line:16%
 As a follow-up, a small-area model meant
 to sharpen the state figures failed the
 
 35
-00:01:44.814 --> 00:01:49.774
-Correction: the small-area model
-failed the checks set in advance.
-
-36
-00:01:46.524 --> 00:01:49.514
+00:01:46.524 --> 00:01:49.514 line:16%
 checks I set in advance,
 so I also left it out.
 
-37
-00:01:50.554 --> 00:01:53.124
+36
+00:01:50.554 --> 00:01:53.124 line:16%
 So, does disability go with poverty?
 
-38
-00:01:53.594 --> 00:01:57.044
+37
+00:01:53.594 --> 00:01:57.044 line:16%
 I registered the plan publicly
 before I split poverty by disability.
 
-39
-00:01:57.594 --> 00:01:59.124
+38
+00:01:57.594 --> 00:01:59.124 line:16%
 Our results were expected.
 
-40
-00:01:59.394 --> 00:02:02.494
+39
+00:01:59.394 --> 00:02:02.494 line:16%
 Using double machine learning
 on the national poverty survey,
 
-41
-00:02:02.544 --> 00:02:06.584
+40
+00:02:02.544 --> 00:02:06.584 line:16%
 people in households with a member who
 has severe difficulty are about twelve
 
-42
-00:02:06.634 --> 00:02:10.734
+41
+00:02:06.634 --> 00:02:10.734 line:16%
 percentage points more likely to be poor
 on the national multidimensional poverty
 
-43
-00:02:10.784 --> 00:02:12.984
+42
+00:02:10.784 --> 00:02:12.984 line:16%
 index than people in
 comparable households.
 
-44
-00:02:11.874 --> 00:02:16.834
-Correction: 6 to 17 percentage
-points (95% CI 6.1–17.2).
-
-45
-00:02:13.034 --> 00:02:15.484
+43
+00:02:13.034 --> 00:02:15.484 line:16%
 The range is six to seventeen percent.
 
-46
-00:02:15.534 --> 00:02:19.064
+44
+00:02:15.534 --> 00:02:19.064 line:16%
 When I shuffled who was
 disabled a hundred times,
 
-47
-00:02:19.114 --> 00:02:21.604
+45
+00:02:19.114 --> 00:02:21.604 line:16%
 the fake results averaged
 almost about zero.
 
-48
-00:02:21.749 --> 00:02:24.039
+46
+00:02:21.749 --> 00:02:24.039 line:16%
 But I'll be honest about the weak spots.
 
-49
-00:02:24.109 --> 00:02:27.139
+47
+00:02:24.109 --> 00:02:27.139 line:16%
 In the worst case, a hidden
 factor I didn't measure,
 
-50
-00:02:27.189 --> 00:02:29.719
+48
+00:02:27.189 --> 00:02:29.719 line:16%
 even a small one, could explain it away.
 
-51
-00:02:29.809 --> 00:02:33.539
+49
+00:02:29.809 --> 00:02:33.539 line:16%
 A factor as strong as the head of
 household's education would barely move
 
-52
-00:02:33.589 --> 00:02:36.739
+50
+00:02:33.589 --> 00:02:36.739 line:16%
 it, but it would be impossible
 to rule out something stronger.
 
-53
-00:02:36.789 --> 00:02:41.659
+51
+00:02:36.789 --> 00:02:41.659 line:16%
 So it's an association,
 and not proof of cause.
 
-54
-00:02:41.709 --> 00:02:43.609
+52
+00:02:41.709 --> 00:02:43.609 line:16%
 A smaller panel survey looks at work.
 
-55
-00:02:43.659 --> 00:02:47.179
+53
+00:02:43.659 --> 00:02:47.179 line:16%
 Among people whose severe difficulty
 began between 2018 and 2023,
 
-56
-00:02:47.229 --> 00:02:51.899
+54
+00:02:47.229 --> 00:02:51.899 line:16%
 the proportion working fell about
 twenty-six points more than among
 
-57
-00:02:51.949 --> 00:02:55.819
+55
+00:02:51.949 --> 00:02:55.819 line:16%
 comparable people whose difficulty
 didn't begin during that time period.
 
-58
-00:02:55.869 --> 00:02:59.359
+56
+00:02:55.869 --> 00:02:59.359 line:16%
 That part is exploratory, and
 it can't say which came first.
 
-59
-00:02:59.419 --> 00:03:04.489
+57
+00:02:59.419 --> 00:03:04.489 line:16%
 A lot of what I tested wasn't
 significant, and the site says so.
 
-60
-00:03:04.539 --> 00:03:07.509
+58
+00:03:04.539 --> 00:03:07.509 line:16%
 The state chart tested
 seventy-three comparisons:
 
-61
-00:03:07.059 --> 00:03:11.327
-Correction: the 73 comparisons are states
-next to each other in the ranking, the
-
-62
-00:03:07.559 --> 00:03:11.869
+59
+00:03:07.559 --> 00:03:11.869 line:16%
 neighbouring states and each state were
 tested against the national figure.
 
-63
-00:03:11.367 --> 00:03:14.719
-highest and lowest, and each
-state against the national figure.
-
-64
-00:03:11.999 --> 00:03:15.569
+60
+00:03:11.999 --> 00:03:15.569 line:16%
 Only about twenty held up after
 corrections for multiple testing.
 
-65
-00:03:15.119 --> 00:03:20.079
-Correction: Taraba can't be told apart
-from Abia: their intervals overlap.
-
-66
-00:03:15.619 --> 00:03:20.369
+61
+00:03:15.619 --> 00:03:20.369 line:16%
 Taraba, being the highest, can't be told
 apart from Abia, the second highest.
 
-67
-00:03:20.639 --> 00:03:23.169
+62
+00:03:20.639 --> 00:03:23.169 line:16%
 Looking at where the
 poverty difference sits,
 
-68
-00:03:23.219 --> 00:03:25.389
+63
+00:03:23.219 --> 00:03:25.389 line:16%
 the deprivation gap is clear for health,
 
-69
-00:03:25.439 --> 00:03:30.129
+64
+00:03:25.439 --> 00:03:30.129 line:16%
 for work and shocks, but the survey
 can't show one for education or living
 
-70
-00:03:30.179 --> 00:03:34.589
+65
+00:03:30.179 --> 00:03:34.589 line:16%
 standards. The panel survey also fails
 to show a difference in how household
 
-71
-00:03:34.639 --> 00:03:35.969
+66
+00:03:34.639 --> 00:03:35.969 line:16%
 consumption changed.
 
-72
-00:03:36.139 --> 00:03:42.209
+67
+00:03:36.139 --> 00:03:42.209 line:16%
 As a check, the site can't deploy unless
 every page and its types score a hundred
 
-73
-00:03:42.259 --> 00:03:44.259
+68
+00:03:42.259 --> 00:03:44.259 line:16%
 on the Lighthouse accessibility checks.
 
-74
-00:03:44.785 --> 00:03:50.710
+69
+00:03:44.785 --> 00:03:50.710 line:16%
 NVDA: The DHS 2024 survey estimates that
 3.0 percent of adults aged 18 and over
 
-75
-00:03:50.750 --> 00:03:56.949
+70
+00:03:50.750 --> 00:03:56.949 line:16%
 living in households in Nigeria (95
 percent confidence interval 2.8 percent to
 
-76
-00:03:56.989 --> 00:04:03.106
+71
+00:03:56.989 --> 00:04:03.106 line:16%
 3.2 percent) have a lot of difficulty
 with, or cannot do at all, at least one of
 
-77
-00:04:03.146 --> 00:04:04.845
+72
+00:04:03.146 --> 00:04:04.845 line:16%
 six everyday activities.
 
-78
-00:04:05.185 --> 00:04:11.267
+73
+00:04:05.185 --> 00:04:11.267 line:16%
 NVDA: Dot plot: Disability among adults 18
 plus by state, with 95 percent confidence
 
-79
-00:04:11.307 --> 00:04:17.545
+74
+00:04:11.307 --> 00:04:17.545 line:16%
 intervals. 37 dots, one per state, each
 with its 95 percent confidence interval.
 
-80
-00:04:17.885 --> 00:04:22.545
+75
+00:04:17.885 --> 00:04:22.545 line:16%
 NVDA: The main result, region,
 The main result, heading, level 2
 
-81
-00:04:22.585 --> 00:04:29.168
+76
+00:04:22.585 --> 00:04:29.168 line:16%
 People in households with a member aged 5
 or older who has a severe difficulty are
 
-82
-00:04:29.208 --> 00:04:34.559
+77
+00:04:29.208 --> 00:04:34.559 line:16%
 11.7 percentage points more likely to be
 multidimensionally poor than people in
 
-83
-00:04:34.599 --> 00:04:41.745
+78
+00:04:34.599 --> 00:04:41.745 line:16%
 comparable households (95 percent
 confidence interval 6.1 to 17.2 points).
 
-84
-00:04:42.085 --> 00:04:44.635
+79
+00:04:42.085 --> 00:04:44.635 line:16%
 This is my open-source Python library.
 
-85
-00:04:44.785 --> 00:04:47.975
+80
+00:04:44.785 --> 00:04:47.975 line:16%
 It's called disability-access-charts.
 
-86
-00:04:48.025 --> 00:04:51.175
+81
+00:04:48.025 --> 00:04:51.175 line:16%
 It builds each chart with a
 description written from the data,
 
-87
-00:04:51.225 --> 00:04:54.895
+82
+00:04:51.225 --> 00:04:54.895 line:16%
 and then checks that text against
 the data, with intervals and all.
 
-88
-00:04:54.945 --> 00:04:56.035
+83
+00:04:54.945 --> 00:04:56.035 line:16%
 Let's take a look.
 
-89
-00:04:57.045 --> 00:05:00.295
+84
+00:04:57.045 --> 00:05:00.295 line:16%
 The check: “Taraba has a
 higher rate than Lagos” passes,
 
-90
-00:05:00.365 --> 00:05:03.335
+85
+00:05:00.365 --> 00:05:03.335 line:16%
 but “Taraba has a higher
 rate than Abia” is rejected.
 
-91
-00:05:03.725 --> 00:05:08.075
+86
+00:05:03.725 --> 00:05:08.075 line:16%
 The gap is small, and the
 uncertainty doesn't allow it.
 
-92
-00:05:08.125 --> 00:05:11.825
+87
+00:05:08.125 --> 00:05:11.825 line:16%
 The site's descriptions are built only
 from the differences that held up,
 
-93
-00:05:11.875 --> 00:05:15.675
+88
+00:05:11.875 --> 00:05:15.675 line:16%
 and this check runs in strict mode on
 every chart before the site is built,
 
-94
-00:05:15.725 --> 00:05:16.795
+89
+00:05:15.725 --> 00:05:16.795 line:16%
 as a second guard.
 
-95
-00:05:17.195 --> 00:05:19.225
+90
+00:05:17.195 --> 00:05:19.225 line:16%
 Every chart describes itself,
 
-96
-00:05:19.275 --> 00:05:23.285
+91
+00:05:19.275 --> 00:05:23.285 line:16%
 and my open-source library checks the
 numbers and comparisons in those words
 
-97
-00:05:23.335 --> 00:05:25.485
+92
+00:05:23.335 --> 00:05:25.485 line:16%
 against the data before the site is built.
 
-98
-00:05:25.535 --> 00:05:28.265
+93
+00:05:25.535 --> 00:05:28.265 line:16%
 It's free, every figure names its source,
 
-99
-00:05:28.315 --> 00:05:31.465
+94
+00:05:28.315 --> 00:05:31.465 line:16%
 and it hasn't yet been tested
 by a regular screen-reader user.
 
-100
-00:05:31.555 --> 00:05:34.865
+95
+00:05:31.555 --> 00:05:34.865 line:16%
 If you use one, tell me
 what works and what doesn't.
 
-101
-00:05:34.915 --> 00:05:35.915
+96
+00:05:34.915 --> 00:05:35.915 line:16%
 Thank you.
