@@ -27,6 +27,7 @@ the counted words exceed the limit, or if the abstract is too long.
 from __future__ import annotations
 
 import argparse
+import csv
 import importlib.util
 import json
 import os
@@ -41,6 +42,9 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DATA = ROOT / "site" / "public" / "data" / "poverty.json"
+DEFAULT_TABLE1 = ROOT / "data" / "public" / "aggregates" / "p5_table1.csv"
+"""Table 1 (household characteristics by exposure), written by the disclosure gate
+(``curbcut_ingest.restricted.p5_table1``); committed, so CI can rebuild the manuscript."""
 PAPER_DIR = ROOT / "docs" / "paper"
 DEFAULT_MD = PAPER_DIR / "p5-manuscript.md"
 OUT_DIR = PAPER_DIR / "out"
@@ -159,11 +163,138 @@ def guards(nums: Any) -> None:
         )
 
 
-def manuscript_md(payload: Mapping[str, Any]) -> str:
+T1_LABELS = {
+    "zone": "Zone",
+    "sector": "Sector",
+    "head_sex": "Head's sex",
+    "head_age": "Head's age (years)",
+    "head_education": "Head's highest education",
+    "age_structure": "Household members (mean number)",
+}
+T1_CATEGORIES = {
+    "none": "None",
+    "non_formal": "Non-formal",
+    "preschool": "Pre-school",
+    "primary_incomplete": "Primary, not completed",
+    "primary": "Primary completed",
+    "secondary": "Secondary",
+    "higher": "Higher",
+    "missing": "Missing",
+}
+T1_ORDER = {
+    "head_age": ["under 30", "30-44", "45-59", "60+", "missing"],
+    "head_education": list(T1_CATEGORIES),
+    "age_structure": [
+        "household members, all ages",
+        "members aged 0-4",
+        "members aged 5",
+        "members aged 6-14",
+        "members aged 15-17",
+        "members aged 18-59",
+        "members aged 60-69",
+        "members aged 70+",
+    ],
+}
+
+
+def load_table1(path: Path = DEFAULT_TABLE1) -> list[dict[str, str]]:
+    with path.open(encoding="utf-8", newline="") as fh:
+        rows = list(csv.DictReader(fh))
+    if not rows or any(r["table"] != "table1" for r in rows):
+        raise ValueError(f"{path} is not the Table 1 file")
+    return rows
+
+
+class Table1:
+    """Cells of Table 1 by (characteristic, category, group)."""
+
+    def __init__(self, rows: list[dict[str, str]]) -> None:
+        self.rows = rows
+        self.cells = {(r["characteristic"], r["category"], r["group"]): r for r in rows}
+
+    def cell(self, char: str, cat: str, group: str) -> dict[str, str]:
+        return self.cells[(char, cat, group)]
+
+    def value(self, char: str, cat: str, group: str) -> float:
+        cell = self.cell(char, cat, group)
+        if cell["suppressed"] == "True" or cell["value"] == "":
+            raise ValueError(f"Table 1 cell {char}/{cat}/{group} is suppressed")
+        return float(cell["value"])
+
+    def shown(self, char: str, cat: str, group: str) -> str:
+        cell = self.cell(char, cat, group)
+        if cell["suppressed"] == "True":
+            return "suppressed"
+        value = float(cell["value"])
+        if cell["kind"] == "mean":
+            return text.fixed(value, 1)
+        return f"{text.fixed(100 * value, 1)} ({int(float(cell['n'])):,})"
+
+    def categories(self, char: str) -> list[str]:
+        found = {r["category"] for r in self.rows if r["characteristic"] == char}
+        order = T1_ORDER.get(char, sorted(found))
+        return [c for c in order if c in found] + sorted(found - set(order))
+
+
+def table1_md(t: Table1) -> str:
+    lines = [
+        "**Table 1.** Household characteristics by exposure, primary analysis sample, Nigeria "
+        "MPI Survey 2021: weighted % of people (unweighted households), or weighted mean.",
+        "",
+        "| Characteristic | Exposed | Unexposed |",
+        "|---|---|---|",
+        f"| Households (n) | {int(float(t.cell('households', 'all', 'exposed')['n'])):,} | "
+        f"{int(float(t.cell('households', 'all', 'unexposed')['n'])):,} |",
+    ]
+    for char, label in T1_LABELS.items():
+        lines.append(f"| **{label}** | | |")
+        for cat in t.categories(char):
+            name = T1_CATEGORIES.get(cat, cat) if char == "head_education" else cat
+            name = name[0].upper() + name[1:]
+            lines.append(
+                f"| {name} | {t.shown(char, cat, 'exposed')} | {t.shown(char, cat, 'unexposed')} |"
+            )
+    lines += [
+        "",
+        "*Note:* Not pre-registered; descriptive. Weighted by the population weight. Cells from "
+        "fewer than 30 households are suppressed, with a second cell suppressed where one "
+        "could otherwise be worked out from the rest.",
+    ]
+    return "\n".join(lines)
+
+
+def table1_guards(t: Table1) -> None:
+    def gt(char: str, cat: str) -> bool:
+        return t.value(char, cat, "exposed") > t.value(char, cat, "unexposed")
+
+    checks = {
+        "exposed households larger": gt("age_structure", "household members, all ages"),
+        "more members 70+": gt("age_structure", "members aged 70+"),
+        "head 60+ more often": gt("head_age", "60+"),
+        "female head more often": gt("head_sex", "female"),
+        "head without education more often": gt("head_education", "none"),
+        "more often North West and South South": gt("zone", "North West")
+        and gt("zone", "South South"),
+    }
+    failed = [name for name, ok in checks.items() if not ok]
+    if failed:
+        raise ValueError(f"the Table 1 sentence no longer holds: {failed}")
+
+
+def manuscript_md(payload: Mapping[str, Any], table1_rows: list[dict[str, str]]) -> str:
     nums = text.Numbers(payload, html_mode=False)
     if nums.raw("derived.verdict") != "higher":
         raise ValueError("the manuscript is written for the 'higher' verdict; rewrite it first")
     guards(nums)
+    table = Table1(table1_rows)
+    table1_guards(table)
+
+    def t1(char: str, cat: str, group: str = "exposed") -> str:
+        return text.fixed(100 * table.value(char, cat, group), 1) + "%"
+
+    def t1m(cat: str, group: str = "exposed") -> str:
+        return text.fixed(table.value("age_structure", cat, group), 1)
+
     m = "summary.mpi"
 
     def sv(item: str, analysis: str = "mpi") -> str:
@@ -233,11 +364,13 @@ only of aid users."""
 
     body = f"""## Introduction
 
-Disability and poverty are linked in both directions. Poverty raises the risk of
-impairment through poor nutrition, unsafe work and little health care, and disability can
-reduce earnings, schooling and participation while adding costs (Groce et al., 2011; Mitra et
-al., 2017; Palmer, 2011). A systematic review of studies in low- and middle-income countries
-found that most report a positive association between disability and poverty (Banks et al.,
+The relationship between disability and poverty is widely recognised but remains
+ill-defined and under-researched (Groce et al., 2011). However poverty is defined, it is
+closely related to disability (Palmer, 2011), and the relationship is often described as a
+"vicious circle" in which each can lead to the other (Trani & Loeb, 2012). Disability also
+brings extra costs of living that income-based measures miss (Mitra et al., 2017). A
+systematic review of 150 studies in low- and middle-income countries found that 122 (81%)
+reported a positive association between disability and a marker of poverty (Banks et al.,
 2017). Studies using multidimensional measures, which count deprivations in health, education
 and living standards rather than income alone, find higher deprivation among persons with
 disabilities in several, though not all, countries and dimensions (Mitra et al., 2013;
@@ -368,11 +501,12 @@ screen-reader users.
 
 ### Ethical considerations
 
-[AUTHOR TO DECIDE BEFORE SUBMISSION. The journal requires either the name of the review board
-that cleared the study or a statement that it is exempt; ask the editor whether a secondary
-analysis of de-identified, licensed survey data counts as exempt.] This study analysed
-de-identified survey data obtained under licence from NBS and the World Bank Microdata
-Library. No new data were collected and no person could be identified.
+This study is a secondary analysis of anonymised data collected by NBS, whose
+respondents' confidentiality is protected by the Statistics Act 2007. The data were obtained
+under licence from NBS and the World Bank Microdata Library, contain no names or addresses,
+and were kept on the author's computer; only estimates from at least 30 households or people
+per group were published. No new data were collected and no person was contacted, so no
+separate ethical approval was sought.
 
 ## Results
 
@@ -389,12 +523,22 @@ median estimated propensity among exposed households was
 {nums.value("quantile_exposed_q50", decimals=2)}, and the propensity was clipped for
 {nums.share("overlap_clipped_share_weighted")} of people.
 
+Table 1 describes the two groups; it was added after registration and is descriptive only.
+Exposed households were larger ({t1m("household members, all ages")} against
+{t1m("household members, all ages", "unexposed")} members on average) and had more members
+aged 70 or over ({t1m("members aged 70+")} against {t1m("members aged 70+", "unexposed")}).
+Their head was more often aged 60 or over ({t1("head_age", "60+")} against
+{t1("head_age", "60+", "unexposed")}), female ({t1("head_sex", "female")} against
+{t1("head_sex", "female", "unexposed")}) or without education ({t1("head_education", "none")}
+against {t1("head_education", "none", "unexposed")}), and they lived more often in the North
+West and South South zones.
+
 ### Main result
 
 People in households with a member aged 5 or older with a severe difficulty were
 {nums.est("primary")} percentage points more likely to be multidimensionally poor than people
 in comparable households (95% CI {nums.ci("primary")}; {pval(nums, "estimates.primary.pval")};
-Table 1). {text.comparison_rates(nums)} The risk ratio was {nums.value("evalue_rr")}
+Table 2). {text.comparison_rates(nums)} The risk ratio was {nums.value("evalue_rr")}
 ({nums.value("evalue_rr_ci_low")} to {nums.value("evalue_rr_ci_high")}; this interval treats
 the comparison rate as fixed). The whole interval lies above the smallest difference of
 interest. In the households where the comparison is better supported (estimated propensity
@@ -421,7 +565,7 @@ The survey-weighted linear model gave a lower estimate, {nums.est("survey_lpm")}
 the flexible learners do not. Other learners and adjustment sets gave
 {nums.num("derived.robustness.min")} to {nums.num("derived.robustness.max")} points, and
 leaving out one zone at a time {nums.num("derived.leave_one_zone_out.min")} to
-{nums.num("derived.leave_one_zone_out.max")} (Table 2). The
+{nums.num("derived.leave_one_zone_out.max")} (Table 3). The
 {nums.value("placebo_n", decimals=0)} placebo estimates averaged {pts("placebo_mean", 1)}
 points (standard deviation {pts("placebo_sd", 1)}); none was as far from zero as the real
 estimate (empirical p = {apa_p("placebo_empirical_p")}). Of their intervals,
@@ -435,7 +579,7 @@ strata, may be slightly too small. Adding a random covariate moved the estimate 
 
 In the worst case, an unmeasured factor aligned perfectly with both poverty and exposure,
 and accounting for {nums.share("rv")} of what is left unexplained in each, could bring the
-estimate to zero (Table 3). This is far weaker than the measured covariates: place, for
+estimate to zero (Table 4). This is far weaker than the measured covariates: place, for
 example, accounts for {nums.share("bench_place_cf_y")} (poverty) and {nums.share("bench_place_cf_d")} (exposure).
 A factor as strong as the head's education, place or sector, and aligned with poverty and
 exposure as each of those is, would move the estimate only to between
@@ -451,7 +595,7 @@ the comparison rate). With a base rate of about 60%, the risk ratio cannot excee
 
 The difference was larger in urban ({nums.est("x1_sector_urban")} points,
 {nums.ci("x1_sector_urban")}) than rural areas ({nums.est("x1_sector_rural")},
-{nums.ci("x1_sector_rural")}); zone estimates varied and were imprecise (Table 4). No
+{nums.ci("x1_sector_rural")}); zone estimates varied and were imprecise (Table 5). No
 interaction was tested. In the panel, {ghs_line} Those lost to follow-up were younger (mean
 age {nums.value("attrition_age_attriters", "ghs", 1)} against
 {nums.value("attrition_age_stayers", "ghs", 1)} years) and more often had a severe difficulty
@@ -537,7 +681,9 @@ difficulties more often, and its comparison assumes the two groups would otherwi
 changed alike. Like the national MPI, the measure ignores the extra costs of disability, so
 it may understate deprivation in exposed households (Mitra et al., 2017)."""
 
-    tables = f"""**Table 1.** Primary and secondary estimates: difference in the share of people who are
+    tables = f"""{table1_md(table)}
+
+**Table 2.** Primary and secondary estimates: difference in the share of people who are
 multidimensionally poor (percentage points; S1 and S4 on the 0–100 deprivation score),
 exposed versus comparable unexposed households, Nigeria MPI Survey 2021.
 
@@ -561,7 +707,7 @@ S2 {pval(nums, "estimates.s2_broad.holm_p")}, S3 {pval(nums, "estimates.s3_head.
 S4–S6 are descriptive and unadjusted for multiplicity. Exposed counts differ slightly between
 rows because each outcome or definition has its own missing answers.
 
-**Table 2.** Robustness and refutation checks of the primary estimate (percentage points).
+**Table 3.** Robustness and refutation checks of the primary estimate (percentage points).
 
 | Specification | Exposed households (n) | Difference | 95% CI |
 |---|---|---|---|
@@ -583,7 +729,7 @@ rows because each outcome or definition has its own missing answers.
 
 *Note:* Robustness and leave-one-zone-out runs use one cross-fitting repetition.
 
-**Table 3.** Sensitivity of the primary estimate to unmeasured confounding.
+**Table 4.** Sensitivity of the primary estimate to unmeasured confounding.
 
 | Measure | Value |
 |---|---|
@@ -606,7 +752,7 @@ rows because each outcome or definition has its own missing answers.
 sensemakr model is a weighted linear model that ignores the survey design. The E-value for
 the confidence limit ignores uncertainty in the comparison rate.
 
-**Table 4.** Exploratory estimates (percentage points; GHS-Panel consumption in log points).
+**Table 5.** Exploratory estimates (percentage points; GHS-Panel consumption in log points).
 
 | Estimate | Exposed / onset (n) | Difference | 95% CI |
 |---|---|---|---|
@@ -622,11 +768,7 @@ the confidence limit ignores uncertainty in the comparison rate.
 | GHS-Panel: change in log consumption per person (n = {nums.n("dlog_consumption_n", "ghs")}) | {nums.n("dlog_consumption_onset_cases", "ghs")} | {nums.est("ghs_dlog_consumption", decimals=2)} | {nums.ci("ghs_dlog_consumption", 2)} |
 
 *Note:* Exploratory: no multiplicity adjustment and no interaction test. GHS-Panel: people
-aged 15 and over without a severe difficulty in 2018/19, longitudinal weights.
-
-**[TABLE TO ADD BEFORE SUBMISSION: household characteristics by exposure (place, sector, age
-structure, head's sex, age and education; weighted shares). Not yet produced: it needs a new
-disclosure-checked run on the restricted data.]**"""
+aged 15 and over without a severe difficulty in 2018/19, longitudinal weights."""
 
     return f"""---
 title: "Household disability and multidimensional poverty in Nigeria: a pre-registered secondary analysis"
@@ -650,7 +792,7 @@ lang: en-GB
 
 ## Acknowledgements
 
-[AUTHOR TO COMPLETE AND CONFIRM.] The National Bureau of Statistics and the World Bank
+The National Bureau of Statistics and the World Bank
 Microdata Library provided the survey data. The first draft of this manuscript was generated
 with Claude (Claude Opus 5.5, Anthropic) from the registered plan and the published
 estimates; every number in the text and tables is inserted by a script from the published
@@ -677,7 +819,7 @@ the analysis code and the registered plan are openly available ({REPO_URL}; {COD
 """
 
 
-ACCESS = "[AUTHOR TO ADD: accessed date]"
+ACCESS = "Accessed 10 November 2026."
 
 REFERENCES = f"""Alkire, S., & Foster, J. (2011). Counting and multidimensional poverty measurement.
 *Journal of Public Economics, 95*(7–8), 476–487. https://doi.org/10.1016/j.jpubeco.2010.11.006
@@ -735,22 +877,20 @@ Mitra, S., Posarac, A., & Vick, B. (2013). Disability and poverty in developing 
 multidimensional study. *World Development, 41*, 1–18.
 https://doi.org/10.1016/j.worlddev.2012.05.024
 
-National Bureau of Statistics. (2019). *General Household Survey, Panel 2018–2019, Wave 4*
-(NGA_2018_GHSP-W4_v03_M) [Data set]. World Bank Microdata Library.
-https://microdata.worldbank.org/index.php/catalog/3557 [AUTHOR TO CHECK: citation wording,
-year and access date from the catalogue's citation tab]
+National Bureau of Statistics. (2019). *General Household Survey, Panel (GHS-Panel)
+2018–2019* (NGA_2018_GHSP-W4_v03_M) [Data set]. World Bank Microdata Library.
+https://microdata.worldbank.org/index.php/catalog/3557 Downloaded 16 October 2026.
 
 National Bureau of Statistics. (2022). *Nigeria Multidimensional Poverty Index (2022)*.
 https://ophi.org.uk/sites/default/files/2024-05/Nigeria_MPI_2022_report.pdf {ACCESS}
 
-National Bureau of Statistics. (2023). *Multidimentional Poverty index Survey 2021, v1.0*
-[sic] (NGA-NBS-MPI-2021-v1.0) [Data set]. NBS Microdata Catalogue.
-https://microdata.nigerianstat.gov.ng/index.php/catalog/71 {ACCESS}
+National Bureau of Statistics. (2023). *Multidimentional Poverty index Survey 2021 v1.0*
+[sic] (NGA-NBS-MPI-2021-v1.0; public use, April 2023) [Data set]. National Data Archive.
+https://microdata.nigerianstat.gov.ng/index.php/catalog/71 Downloaded 16 October 2026.
 
-National Bureau of Statistics. (2024). *General Household Survey, Panel 2023–2024, Wave 5*
-(NGA_2023_GHSP-W5_v02_M) [Data set]. World Bank Microdata Library.
-https://microdata.worldbank.org/index.php/catalog/6410 [AUTHOR TO CHECK: citation wording,
-year and access date from the catalogue's citation tab]
+National Bureau of Statistics. (2024). *Nigeria General Household Survey, Panel
+(GHS-Panel) Wave 5 2023–2024* (NGA_2023_GHSP-W5_v02_M) [Data set]. World Bank Microdata
+Library. https://microdata.worldbank.org/index.php/catalog/6410 Downloaded 16 October 2026.
 
 Palmer, M. (2011). Disability and poverty: A conceptual review. *Journal of Disability Policy
 Studies, 21*(4), 210–218. https://doi.org/10.1177/1044207310389333
@@ -765,12 +905,12 @@ Cameroon, and Guatemala. *SSM – Population Health, 11*, 100591.
 https://doi.org/10.1016/j.ssmph.2020.100591
 
 Smith, N. (2011). The face of disability in Nigeria: A disability survey in Kogi and Niger
-States. *Disability, CBR & Inclusive Development, 22*(1), 35. [AUTHOR TO CHECK: end page]
+States. *Disability, CBR & Inclusive Development, 22*(1), 35–47.
 https://doi.org/10.5463/dcid.v22i1.11
 
 Trani, J.-F., & Loeb, M. (2012). Poverty and disability: A vicious circle? Evidence from
-Afghanistan and Zambia. *Journal of International Development, 24*(S1). [AUTHOR TO CHECK:
-pages] https://doi.org/10.1002/jid.1709
+Afghanistan and Zambia. *Journal of International Development, 24*(S1), S19–S52.
+https://doi.org/10.1002/jid.1709
 
 Van den Akker, O. R., Weston, S., Campbell, L., Chopik, B., Damian, R., Davis-Kean, P., Hall,
 A., Kosie, J., Kruse, E., Olsen, J., Ritchie, S., Valentine, K. D., Van 't Veer, A., &
@@ -794,8 +934,9 @@ def abstract_words(md: str) -> int:
     return len(re.findall(r"\S+", part.replace("**", "")))
 
 
-def build(payload: Mapping[str, Any]) -> str:
-    out = manuscript_md(payload).replace("{REFERENCES}", REFERENCES)
+def build(payload: Mapping[str, Any], table1_rows: list[dict[str, str]] | None = None) -> str:
+    rows = load_table1() if table1_rows is None else table1_rows
+    out = manuscript_md(payload, rows).replace("{REFERENCES}", REFERENCES)
     if re.search(r"\{[A-Za-z_.]+\}", out):
         raise ValueError("an unfilled placeholder is left in the text")
     out = out.replace("\n\n\n", "\n\n")
@@ -888,13 +1029,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Write the P5 journal manuscript.")
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA)
     parser.add_argument("--md", type=Path, default=DEFAULT_MD)
+    parser.add_argument("--table1", type=Path, default=DEFAULT_TABLE1)
     parser.add_argument("--docx", action="store_true", help="also write Word files (pandoc)")
     parser.add_argument("--out-dir", type=Path, default=OUT_DIR)
     parser.add_argument("--pandoc", default=os.environ.get("PANDOC", DEFAULT_PANDOC))
     parser.add_argument("--check", action="store_true", help="fail if the committed md differs")
     args = parser.parse_args(argv)
     try:
-        out = build(json.loads(args.data.read_text(encoding="utf-8")))
+        out = build(json.loads(args.data.read_text(encoding="utf-8")), load_table1(args.table1))
     except (ValueError, KeyError) as error:
         print(f"Manuscript failed: {error!r}", file=sys.stderr)
         return 1

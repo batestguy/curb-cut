@@ -1,0 +1,63 @@
+source,dataset_version,table,characteristic,category,kind,group,n,value,suppressed
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,households,all,share,exposed,680,1.0,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,zone,North Central,share,exposed,98,0.12564489,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,zone,North East,share,exposed,87,0.10187131,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,zone,North West,share,exposed,136,0.31610909,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,zone,South East,share,exposed,126,0.12639129,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,zone,South South,share,exposed,173,0.22229526,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,zone,South West,share,exposed,60,0.10768816,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,sector,rural,share,exposed,504,0.7255887,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,sector,urban,share,exposed,176,0.2744113,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_sex,female,share,exposed,185,0.19297864,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_sex,male,share,exposed,495,0.80702136,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_age,30-44,share,exposed,,,True
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_age,45-59,share,exposed,171,0.32294227,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_age,60+,share,exposed,385,0.51911114,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_age,under 30,share,exposed,,,True
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,higher,share,exposed,78,0.11994724,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,missing,share,exposed,,,True
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,non_formal,share,exposed,46,0.09879285,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,none,share,exposed,237,0.29875957,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,preschool,share,exposed,,,True
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,primary,share,exposed,157,0.21432577,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,primary_incomplete,share,exposed,34,0.04221998,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,secondary,share,exposed,127,0.22571127,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 0-4,mean,exposed,680,0.69935357,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 5,mean,exposed,680,0.17842117,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 6-14,mean,exposed,680,1.80522395,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 15-17,mean,exposed,680,0.65775543,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 18-59,mean,exposed,680,3.18664333,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 60-69,mean,exposed,680,0.34116251,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 70+,mean,exposed,680,0.43557381,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,"household members, all ages",mean,exposed,680,7.30413377,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,households,all,share,unexposed,50742,1.0,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,zone,North Central,share,unexposed,9902,0.14408101,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,zone,North East,share,unexposed,8494,0.12670219,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,zone,North West,share,unexposed,9708,0.28332478,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,zone,South East,share,unexposed,6694,0.10405796,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,zone,South South,share,unexposed,8098,0.14852213,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,zone,South West,share,unexposed,7846,0.19331194,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,sector,rural,share,unexposed,36382,0.69624434,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,sector,urban,share,unexposed,14360,0.30375566,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_sex,female,share,unexposed,9706,0.14155923,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_sex,male,share,unexposed,41036,0.85844077,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_age,30-44,share,unexposed,18522,0.3648579,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_age,45-59,share,unexposed,14158,0.34122204,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_age,60+,share,unexposed,12135,0.22764868,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_age,under 30,share,unexposed,5927,0.06627138,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,higher,share,unexposed,8105,0.15787104,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,missing,share,unexposed,,,True
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,non_formal,share,unexposed,4406,0.0943735,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,none,share,unexposed,12886,0.24087118,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,preschool,share,unexposed,,,True
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,primary,share,unexposed,7624,0.15843051,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,primary_incomplete,share,unexposed,1239,0.02324014,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,head_education,secondary,share,unexposed,16422,0.3235601,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 0-4,mean,unexposed,50742,0.88483764,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 5,mean,unexposed,50742,0.22926952,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 6-14,mean,unexposed,50742,1.84901651,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 15-17,mean,unexposed,50742,0.47584304,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 18-59,mean,unexposed,50742,2.7046119,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 60-69,mean,unexposed,50742,0.18772582,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,members aged 70+,mean,unexposed,50742,0.11845792,False
+mpi2021,NGA-NBS-MPI-2021-v1.0,table1,age_structure,"household members, all ages",mean,unexposed,50742,6.44976234,False

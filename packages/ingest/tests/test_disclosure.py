@@ -203,3 +203,42 @@ def test_held_source_goes_to_its_own_folder(tmp_path: Path) -> None:
 
 def test_script_commit_outside_git(tmp_path: Path) -> None:
     assert disclosure.script_commit(tmp_path) == "unknown"
+
+
+# --- descriptive tables (gate_table) ---------------------------------------------------------
+
+
+def _table(rows: list[tuple[str, str, str, str, int, float]]) -> pd.DataFrame:
+    return pd.DataFrame(
+        rows, columns=["characteristic", "category", "kind", "group", "n", "value"]
+    ).assign(table="t1")
+
+
+def test_gate_table_suppresses_small_cells_and_their_complement() -> None:
+    raw = _table(
+        [
+            ("age", "young", "share", "exposed", 12, 0.05),
+            ("age", "middle", "share", "exposed", 100, 0.45),
+            ("age", "old", "share", "exposed", 200, 0.50),
+            ("age", "young", "share", "unexposed", 40, 0.1),
+            ("age", "middle", "share", "unexposed", 400, 0.9),
+            ("size", "members", "mean", "exposed", 312, 6.1),
+        ]
+    )
+    out = disclosure.gate_table(raw, DATASET)
+    hidden = set(out.loc[out["suppressed"], "category"] + "/" + out.loc[out["suppressed"], "group"])
+    assert hidden == {"young/exposed", "middle/exposed"}
+    assert out.loc[out["suppressed"], ["n", "value"]].isna().all().all()
+    assert out.loc[out["category"] == "members", "value"].item() == 6.1
+
+
+def test_gate_table_hides_a_small_mean_and_refuses_bad_rows() -> None:
+    out = disclosure.gate_table(_table([("size", "m", "mean", "exposed", 5, 2.0)]), DATASET)
+    assert out["suppressed"].item()
+    with pytest.raises(disclosure.GateError):
+        disclosure.gate_table(_table([("a", "b", "median", "g", 50, 1.0)]), DATASET)
+    with pytest.raises(disclosure.GateError):
+        disclosure.gate_table(
+            _table([("a", "b", "share", "g", 50, 1.0), ("a", "b", "share", "g", 60, 1.0)]),
+            DATASET,
+        )

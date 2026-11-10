@@ -140,3 +140,25 @@ def test_prereg_exposure_shares_are_in_the_frozen_plan() -> None:
 def test_committed_manuscript_has_no_microdata_paths() -> None:
     md = (ROOT / "docs" / "paper" / "p5-manuscript.md").read_text(encoding="utf-8")
     assert "data/restricted" not in md
+
+
+def test_table1_shows_suppressed_cells_as_suppressed() -> None:
+    rows = ms.load_table1()
+    table = ms.Table1(rows)
+    hidden = [r for r in rows if r["suppressed"] == "True"]
+    assert hidden, "the committed Table 1 has suppressed cells"
+    r = hidden[0]
+    assert table.shown(r["characteristic"], r["category"], r["group"]) == "suppressed"
+    with pytest.raises(ValueError, match="suppressed"):
+        table.value(r["characteristic"], r["category"], r["group"])
+    md = ms.table1_md(table)
+    assert md.startswith("**Table 1.**") and "suppressed" in md
+
+
+def test_table1_guard_names_the_claim(payload: dict[str, Any]) -> None:
+    rows = [dict(r) for r in ms.load_table1()]
+    for r in rows:
+        if r["characteristic"] == "head_sex" and r["category"] == "female":
+            r["value"] = "0.5" if r["group"] == "unexposed" else "0.1"
+    with pytest.raises(ValueError, match="female head"):
+        ms.build(payload, rows)

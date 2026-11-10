@@ -177,6 +177,20 @@
       "source": "NBS Multidimensional Poverty Index Survey 2021",
       "suppressed_cells": 0,
       "terms": "NBS access terms: aggregated reporting only; an electronic copy of every publication goes to the National Data Archive."
+    },
+    "p5_table1.csv": {
+      "citation": "National Bureau of Statistics, Multidimentional Poverty index Survey 2021 v1.0",
+      "dataset_version": "NGA-NBS-MPI-2021-v1.0",
+      "design": "P5 pre-registered analysis (docs/preregistration.md, OSF https://osf.io/kes3p/): households with a completed interview; exposure on MPI's own disability items (not the WG-SS); outcome the rebuilt MPI (k = 26%). DoubleML IRM, population weights in the score, EA-clustered standard errors. Counts are households.",
+      "disclosure_rule": "Descriptive tables: a cell from fewer than 30 unweighted units (above 0) is suppressed (n and value null). Shares of one characteristic in one group add to 1, so where exactly one share would be suppressed the smallest other share is suppressed too, until none is alone.",
+      "disclosure_threshold": 30,
+      "generated_on": "2026-11-10",
+      "rows": 62,
+      "script_commit": "296393d55e416b37555407bd4bb5d44bb61ec8dc-dirty",
+      "sha256": "7885aad59d8cad836911ee4770f887a7d092b06fea0e6fdf1dce806bc4736e9a",
+      "source": "NBS Multidimensional Poverty Index Survey 2021",
+      "suppressed_cells": 6,
+      "terms": "NBS access terms: aggregated reporting only; an electronic copy of every publication goes to the National Data Archive."
     }
   },
   "interval": "95% Korn-Graubard (Clopper-Pearson with effective n and design df).",
