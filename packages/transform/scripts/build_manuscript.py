@@ -349,14 +349,12 @@ Other learners and adjustment sets gave {nums.num("derived.robustness.min")} to
 {nums.num("derived.robustness.max")} points; a survey-weighted linear model gave
 {nums.est("survey_lpm")}.
 
-**Conclusions:** Multidimensional poverty is more common in households that include a person
-with a severe functional difficulty (an adjusted association). Recording disability in
-poverty programmes and social registers could help reach these households.
-
-**Limitations:** This is an adjusted association, not a causal effect: earlier poverty can
-lead to disability, and a hidden factor much weaker than those measured could explain the
-difference if aligned with both. The survey asked severity of seeing, hearing and walking
-only of aid users."""
+**Conclusion and Implications:** Multidimensional poverty is more common in households that
+include a person with a severe functional difficulty. This is an adjusted association, not a
+causal effect: earlier poverty can lead to disability, a hidden factor much weaker than those
+measured could explain the difference if aligned with both, and the survey asked severity of
+seeing, hearing and walking only of aid users. Recording disability in poverty programmes and
+social registers could help reach these households."""
 
     keywords = (
         "functional difficulty; Alkire–Foster; double machine learning; pre-registration; "
