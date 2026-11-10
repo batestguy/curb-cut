@@ -177,6 +177,20 @@
       "source": "NBS Multidimensional Poverty Index Survey 2021",
       "suppressed_cells": 0,
       "terms": "NBS access terms: aggregated reporting only; an electronic copy of every publication goes to the National Data Archive."
+    },
+    "p5_table1.csv": {
+      "citation": "National Bureau of Statistics, Multidimentional Poverty index Survey 2021 v1.0",
+      "dataset_version": "NGA-NBS-MPI-2021-v1.0",
+      "design": "P5 manuscript Table 1 (not pre-registered; descriptive): households in the primary analysis sample (non-missing primary exposure and outcome), by primary exposure; shares and means weighted by pop_wgt (person-weighted). No poverty figure.",
+      "disclosure_rule": "Descriptive tables: a cell from fewer than 30 unweighted units (above 0) is suppressed (n and value null). Shares of one characteristic in one group add to 1 and their n's to the published group total, so the suppressed cells' combined n can be found by subtraction: the smallest other non-empty share is suppressed too until the suppressed cells are at least two non-empty cells holding at least 30 units together. Empty cells (n = 0) are never suppressed (hiding one protects nothing) and are shown as 0.",
+      "disclosure_threshold": 30,
+      "generated_on": "2026-11-10",
+      "rows": 62,
+      "script_commit": "f8b0a4c2a129011ccf4e36e15dfdfc456a6dc3a2",
+      "sha256": "13dcef8f6add37212b24ce2c6b0a1047bd3d3274af13c6cfc0142294b81b8bdd",
+      "source": "NBS Multidimensional Poverty Index Survey 2021",
+      "suppressed_cells": 6,
+      "terms": "NBS access terms: aggregated reporting only; an electronic copy of every publication goes to the National Data Archive."
     }
   },
   "interval": "95% Korn-Graubard (Clopper-Pearson with effective n and design df).",
