@@ -64,3 +64,5 @@ data/sources/
 
 # Claude Code local settings and agent worktrees (personal, not shared)
 .claude/
+# Word files of the journal manuscript (build_manuscript.py --docx)
+docs/paper/out/
