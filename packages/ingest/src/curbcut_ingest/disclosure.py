@@ -587,3 +587,73 @@ def publish_summary(
     """Gate scalar results (:func:`gate_summary`), write them and record the manifest."""
     public = gate_summary(raw, dataset, threshold)
     return _write_entry(public, dataset, filename, out_root, threshold, SUMMARY_RULE)
+
+
+# --- Descriptive tables by group (P5 manuscript Table 1) -------------------------------------
+
+TABLE_COLUMNS = ("table", "characteristic", "category", "kind", "group", "n", "value")
+"""One cell of a descriptive table: the weighted ``value`` (a share 0-1, or a mean) of
+``characteristic`` = ``category`` in ``group`` (e.g. exposed / unexposed), from ``n``
+unweighted units. For a share, ``n`` is the units in the category; for a mean, the units in
+the group. ``kind`` is "share" or "mean"."""
+PUBLIC_TABLE_COLUMNS = ("source", "dataset_version", *TABLE_COLUMNS, "suppressed")
+TABLE_RULE = (
+    "Descriptive tables: a cell from fewer than 30 unweighted units (above 0) is suppressed "
+    "(n and value null). Shares of one characteristic in one group add to 1 and their n's to "
+    "the published group total, so the suppressed cells' combined n can be found by "
+    "subtraction: the smallest other non-empty share is suppressed too until the suppressed "
+    "cells are at least two non-empty cells holding at least 30 units together. Empty cells "
+    "(n = 0) are never suppressed (hiding one protects nothing) and are shown as 0."
+)
+
+
+def gate_table(raw: pd.DataFrame, dataset: Dataset, threshold: int = THRESHOLD) -> pd.DataFrame:
+    """Apply the table rule (:data:`TABLE_RULE`). Returns public rows only."""
+    missing = [c for c in TABLE_COLUMNS if c not in raw.columns]
+    if missing:
+        raise GateError(f"table rows lack columns {missing}")
+    out = raw.loc[:, list(TABLE_COLUMNS)].copy().reset_index(drop=True)
+    if out.duplicated(["table", "characteristic", "category", "group"]).any():
+        raise GateError("two table cells share a key")
+    if sorted(set(out["kind"]) - {"share", "mean"}):
+        raise GateError("a table cell's kind must be share or mean")
+    counts = [parse_count(v) for v in out["n"]]
+    if any(c is None or c < 0 for c in counts):
+        raise GateError("n must be present and non-negative on every table cell")
+    n = pd.Series(counts, dtype="int64")
+    hide = ((n > 0) & (n < threshold)).to_numpy().copy()
+    shares = out["kind"] == "share"
+    for _, idx in out[shares].groupby(["table", "characteristic", "group"]).groups.items():
+        rows = [r for r in idx if n[r] > 0]
+
+        def exposed_by_subtraction(rows: list[int] = rows) -> bool:
+            hidden = [r for r in rows if hide[r]]
+            return bool(hidden) and (len(hidden) < 2 or sum(n[r] for r in hidden) < threshold)
+
+        while exposed_by_subtraction():
+            shown = [r for r in rows if not hide[r]]
+            if not shown:
+                break  # every non-empty cell is already hidden
+            hide[min(shown, key=lambda r: (n[r], r))] = True
+    value = pd.to_numeric(out["value"], errors="coerce").astype("float64")
+    if value[~hide].isna().any():
+        raise GateError("a shown table cell has no value")
+    out["value"] = value.mask(hide).round(SUMMARY_DECIMALS)
+    out["n"] = pd.array(counts, dtype="Int64")
+    out["n"] = out["n"].mask(pd.Series(hide))
+    out["suppressed"] = hide
+    out["source"] = dataset.source
+    out["dataset_version"] = dataset.version
+    return out.loc[:, list(PUBLIC_TABLE_COLUMNS)]
+
+
+def publish_table(
+    raw: pd.DataFrame,
+    dataset: Dataset,
+    filename: str,
+    out_root: Path = AGGREGATES,
+    threshold: int = THRESHOLD,
+) -> tuple[Path, dict[str, Any]]:
+    """Gate a descriptive table (:func:`gate_table`), write it and record the manifest."""
+    public = gate_table(raw, dataset, threshold)
+    return _write_entry(public, dataset, filename, out_root, threshold, TABLE_RULE)

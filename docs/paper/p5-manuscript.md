@@ -45,11 +45,13 @@ only of aid users.
 
 ## Introduction
 
-Disability and poverty are linked in both directions. Poverty raises the risk of
-impairment through poor nutrition, unsafe work and little health care, and disability can
-reduce earnings, schooling and participation while adding costs (Groce et al., 2011; Mitra et
-al., 2017; Palmer, 2011). A systematic review of studies in low- and middle-income countries
-found that most report a positive association between disability and poverty (Banks et al.,
+The relationship between disability and poverty is widely recognised but remains
+ill-defined and under-researched (Groce et al., 2011). However poverty is defined, it is
+closely related to disability (Palmer, 2011), and the two are believed to operate in a
+cycle, each reinforcing the other (Banks et al., 2017). Disability also
+brings extra costs of living that income-based measures miss (Mitra et al., 2017). A
+systematic review of 150 studies in low- and middle-income countries found that 122 (81%)
+reported a positive association between disability and a marker of poverty (Banks et al.,
 2017). Studies using multidimensional measures, which count deprivations in health, education
 and living standards rather than income alone, find higher deprivation among persons with
 disabilities in several, though not all, countries and dimensions (Mitra et al., 2013;
@@ -180,11 +182,13 @@ screen-reader users.
 
 ### Ethical considerations
 
-[AUTHOR TO DECIDE BEFORE SUBMISSION. The journal requires either the name of the review board
-that cleared the study or a statement that it is exempt; ask the editor whether a secondary
-analysis of de-identified, licensed survey data counts as exempt.] This study analysed
-de-identified survey data obtained under licence from NBS and the World Bank Microdata
-Library. No new data were collected and no person could be identified.
+This study is a secondary analysis of anonymised data collected by NBS; the
+confidentiality of individual respondents is protected by law (Statistical Act 2007; NBS,
+2023). The data were obtained under licence from NBS and the World Bank Microdata Library and
+kept on the author's computer; only estimates and table cells from at least 30 households or
+people per group were published, with further cells withheld where a hidden value could
+otherwise be worked out. No new data were collected and no person was contacted, so no
+separate ethical approval was sought.
 
 ## Results
 
@@ -201,12 +205,24 @@ median estimated propensity among exposed households was
 0.02, and the propensity was clipped for
 62.0% of people.
 
+Table 1 describes the two groups; it was added after registration, is descriptive only, and
+its differences were not tested. People in exposed households lived in larger households
+(7.3 against 6.4
+members, person-weighted; a larger household is also more likely to include someone with a
+severe difficulty) with more members aged 70 or over (0.4 against
+0.1).
+Their head was more often aged 60 or over (51.9% against
+22.8%), female (19.3% against
+14.2%) or without education (29.9%
+against 24.1%), and they lived more often in the North
+West and South South zones.
+
 ### Main result
 
 People in households with a member aged 5 or older with a severe difficulty were
 11.7 percentage points more likely to be multidimensionally poor than people
 in comparable households (95% CI 6.1 to 17.2; p < .001;
-Table 1). In comparable households without such a member, 62.9% of people are multidimensionally poor. Standardised to the same mix of households, the figure with such a member would be 74.6%. The risk ratio was 1.19
+Table 2). In comparable households without such a member, 62.9% of people are multidimensionally poor. Standardised to the same mix of households, the figure with such a member would be 74.6%. The risk ratio was 1.19
 (1.10 to 1.27; this interval treats
 the comparison rate as fixed). The whole interval lies above the smallest difference of
 interest. In the households where the comparison is better supported (estimated propensity
@@ -233,7 +249,7 @@ The survey-weighted linear model gave a lower estimate, 8.0 points
 the flexible learners do not. Other learners and adjustment sets gave
 10.1 to 13.0 points, and
 leaving out one zone at a time 9.3 to
-12.7 (Table 2). The
+12.7 (Table 3). The
 100 placebo estimates averaged 0.6
 points (standard deviation 2.7); none was as far from zero as the real
 estimate (empirical p = .010). Of their intervals,
@@ -247,7 +263,7 @@ strata, may be slightly too small. Adding a random covariate moved the estimate 
 
 In the worst case, an unmeasured factor aligned perfectly with both poverty and exposure,
 and accounting for 1.8% of what is left unexplained in each, could bring the
-estimate to zero (Table 3). This is far weaker than the measured covariates: place, for
+estimate to zero (Table 4). This is far weaker than the measured covariates: place, for
 example, accounts for 7.8% (poverty) and 14.6% (exposure).
 A factor as strong as the head's education, place or sector, and aligned with poverty and
 exposure as each of those is, would move the estimate only to between
@@ -263,7 +279,7 @@ the comparison rate). With a base rate of about 60%, the risk ratio cannot excee
 
 The difference was larger in urban (29.4 points,
 18.2 to 40.5) than rural areas (6.7,
-0.8 to 12.0); zone estimates varied and were imprecise (Table 4). No
+0.8 to 12.0); zone estimates varied and were imprecise (Table 5). No
 interaction was tested. In the panel, of 15,229 people aged 15 and over in 2018/19, 13,266 were found again (87.1%). After keeping those with no severe difficulty in 2018/19 and complete answers, 10,933 could be used. 364 of them had a severe difficulty by 2023/24. Those lost to follow-up were younger (mean
 age 31.9 against
 37.4 years) and more often had a severe difficulty
@@ -353,7 +369,7 @@ it may understate deprivation in exposed households (Mitra et al., 2017).
 
 ## Acknowledgements
 
-[AUTHOR TO COMPLETE AND CONFIRM.] The National Bureau of Statistics and the World Bank
+The National Bureau of Statistics and the World Bank
 Microdata Library provided the survey data. The first draft of this manuscript was generated
 with Claude (Claude Opus 5.5, Anthropic) from the registered plan and the published
 estimates; every number in the text and tables is inserted by a script from the published
@@ -377,7 +393,7 @@ Alkire, S., & Foster, J. (2011). Counting and multidimensional poverty measureme
 
 Bach, P., Chernozhukov, V., Kurz, M. S., & Spindler, M. (2022). DoubleML – An object-oriented
 implementation of double machine learning in Python. *Journal of Machine Learning Research,
-23*(53), 1–6. https://jmlr.org/papers/v23/21-0862.html [AUTHOR TO ADD: accessed date]
+23*(53), 1–6. https://jmlr.org/papers/v23/21-0862.html Accessed 10 November 2026.
 
 Banks, L. M., Kuper, H., & Polack, S. (2017). Poverty and disability in low- and
 middle-income countries: A systematic review. *PLOS ONE, 12*(12), e0189996.
@@ -428,22 +444,20 @@ Mitra, S., Posarac, A., & Vick, B. (2013). Disability and poverty in developing 
 multidimensional study. *World Development, 41*, 1–18.
 https://doi.org/10.1016/j.worlddev.2012.05.024
 
-National Bureau of Statistics. (2019). *General Household Survey, Panel 2018–2019, Wave 4*
-(NGA_2018_GHSP-W4_v03_M) [Data set]. World Bank Microdata Library.
-https://microdata.worldbank.org/index.php/catalog/3557 [AUTHOR TO CHECK: citation wording,
-year and access date from the catalogue's citation tab]
+National Bureau of Statistics. (2019). *General Household Survey, Panel (GHS-Panel)
+2018–2019* (NGA_2018_GHSP-W4_v03_M) [Data set]. World Bank Microdata Library.
+https://microdata.worldbank.org/index.php/catalog/3557 Downloaded 16 October 2026.
 
 National Bureau of Statistics. (2022). *Nigeria Multidimensional Poverty Index (2022)*.
-https://ophi.org.uk/sites/default/files/2024-05/Nigeria_MPI_2022_report.pdf [AUTHOR TO ADD: accessed date]
+https://ophi.org.uk/sites/default/files/2024-05/Nigeria_MPI_2022_report.pdf Accessed 10 November 2026.
 
-National Bureau of Statistics. (2023). *Multidimentional Poverty index Survey 2021, v1.0*
-[sic] (NGA-NBS-MPI-2021-v1.0) [Data set]. NBS Microdata Catalogue.
-https://microdata.nigerianstat.gov.ng/index.php/catalog/71 [AUTHOR TO ADD: accessed date]
+National Bureau of Statistics. (2023). *Multidimentional Poverty index Survey 2021 v1.0*
+[sic] (NGA-NBS-MPI-2021-v1.0; public use, April 2023) [Data set]. National Data Archive.
+https://microdata.nigerianstat.gov.ng/index.php/catalog/71 Downloaded 16 October 2026.
 
-National Bureau of Statistics. (2024). *General Household Survey, Panel 2023–2024, Wave 5*
-(NGA_2023_GHSP-W5_v02_M) [Data set]. World Bank Microdata Library.
-https://microdata.worldbank.org/index.php/catalog/6410 [AUTHOR TO CHECK: citation wording,
-year and access date from the catalogue's citation tab]
+National Bureau of Statistics. (2024). *Nigeria General Household Survey, Panel
+(GHS-Panel) Wave 5 2023–2024* (NGA_2023_GHSP-W5_v02_M) [Data set]. World Bank Microdata
+Library. https://microdata.worldbank.org/index.php/catalog/6410 Downloaded 16 October 2026.
 
 Palmer, M. (2011). Disability and poverty: A conceptual review. *Journal of Disability Policy
 Studies, 21*(4), 210–218. https://doi.org/10.1177/1044207310389333
@@ -458,12 +472,12 @@ Cameroon, and Guatemala. *SSM – Population Health, 11*, 100591.
 https://doi.org/10.1016/j.ssmph.2020.100591
 
 Smith, N. (2011). The face of disability in Nigeria: A disability survey in Kogi and Niger
-States. *Disability, CBR & Inclusive Development, 22*(1), 35. [AUTHOR TO CHECK: end page]
+States. *Disability, CBR & Inclusive Development, 22*(1), 35–47.
 https://doi.org/10.5463/dcid.v22i1.11
 
 Trani, J.-F., & Loeb, M. (2012). Poverty and disability: A vicious circle? Evidence from
-Afghanistan and Zambia. *Journal of International Development, 24*(S1). [AUTHOR TO CHECK:
-pages] https://doi.org/10.1002/jid.1709
+Afghanistan and Zambia. *Journal of International Development, 24*(S1), S19–S52.
+https://doi.org/10.1002/jid.1709
 
 Van den Akker, O. R., Weston, S., Campbell, L., Chopik, B., Damian, R., Davis-Kean, P., Hall,
 A., Kosie, J., Kruse, E., Olsen, J., Ritchie, S., Valentine, K. D., Van 't Veer, A., &
@@ -476,7 +490,51 @@ https://doi.org/10.7326/M16-2607
 
 ## Tables
 
-**Table 1.** Primary and secondary estimates: difference in the share of people who are
+**Table 1.** Household characteristics by exposure, primary analysis sample, Nigeria MPI Survey 2021: weighted % of people (unweighted households), or weighted mean.
+
+| Characteristic | Exposed | Unexposed |
+|---|---|---|
+| Households (n) | 680 | 50,742 |
+| **Zone** | | |
+| North Central | 12.6 (98) | 14.4 (9,902) |
+| North East | 10.2 (87) | 12.7 (8,494) |
+| North West | 31.6 (136) | 28.3 (9,708) |
+| South East | 12.6 (126) | 10.4 (6,694) |
+| South South | 22.2 (173) | 14.9 (8,098) |
+| South West | 10.8 (60) | 19.3 (7,846) |
+| **Sector** | | |
+| Rural | 72.6 (504) | 69.6 (36,382) |
+| Urban | 27.4 (176) | 30.4 (14,360) |
+| **Head's sex** | | |
+| Female | 19.3 (185) | 14.2 (9,706) |
+| Male | 80.7 (495) | 85.8 (41,036) |
+| **Head's age (years)** | | |
+| Under 30 | suppressed | 6.6 (5,927) |
+| 30-44 | suppressed | 36.5 (18,522) |
+| 45-59 | 32.3 (171) | 34.1 (14,158) |
+| 60+ | 51.9 (385) | 22.8 (12,135) |
+| **Head's highest education** | | |
+| None | 29.9 (237) | 24.1 (12,886) |
+| Non-formal | 9.9 (46) | 9.4 (4,406) |
+| Pre-school | 0.0 (0) | suppressed |
+| Primary, not completed | suppressed | 2.3 (1,239) |
+| Primary completed | 21.4 (157) | 15.8 (7,624) |
+| Secondary | 22.6 (127) | 32.4 (16,422) |
+| Higher | 12.0 (78) | 15.8 (8,105) |
+| Missing | suppressed | suppressed |
+| **Household members (person-weighted mean number)** | | |
+| Household members, all ages | 7.3 | 6.4 |
+| Members aged 0-4 | 0.7 | 0.9 |
+| Members aged 5 | 0.2 | 0.2 |
+| Members aged 6-14 | 1.8 | 1.8 |
+| Members aged 15-17 | 0.7 | 0.5 |
+| Members aged 18-59 | 3.2 | 2.7 |
+| Members aged 60-69 | 0.3 | 0.2 |
+| Members aged 70+ | 0.4 | 0.1 |
+
+*Note:* Not pre-registered; descriptive; differences not tested. Weighted by the population weight, so shares are of people and means are the household make-up seen by the average person. Cells from fewer than 30 households are suppressed, with further cells suppressed until no suppressed value can be worked out from the rest.
+
+**Table 2.** Primary and secondary estimates: difference in the share of people who are
 multidimensionally poor (percentage points; S1 and S4 on the 0–100 deprivation score),
 exposed versus comparable unexposed households, Nigeria MPI Survey 2021.
 
@@ -500,7 +558,7 @@ S2 p < .001, S3 p = .001.
 S4–S6 are descriptive and unadjusted for multiplicity. Exposed counts differ slightly between
 rows because each outcome or definition has its own missing answers.
 
-**Table 2.** Robustness and refutation checks of the primary estimate (percentage points).
+**Table 3.** Robustness and refutation checks of the primary estimate (percentage points).
 
 | Specification | Exposed households (n) | Difference | 95% CI |
 |---|---|---|---|
@@ -522,7 +580,7 @@ rows because each outcome or definition has its own missing answers.
 
 *Note:* Robustness and leave-one-zone-out runs use one cross-fitting repetition.
 
-**Table 3.** Sensitivity of the primary estimate to unmeasured confounding.
+**Table 4.** Sensitivity of the primary estimate to unmeasured confounding.
 
 | Measure | Value |
 |---|---|
@@ -545,7 +603,7 @@ rows because each outcome or definition has its own missing answers.
 sensemakr model is a weighted linear model that ignores the survey design. The E-value for
 the confidence limit ignores uncertainty in the comparison rate.
 
-**Table 4.** Exploratory estimates (percentage points; GHS-Panel consumption in log points).
+**Table 5.** Exploratory estimates (percentage points; GHS-Panel consumption in log points).
 
 | Estimate | Exposed / onset (n) | Difference | 95% CI |
 |---|---|---|---|
@@ -562,7 +620,3 @@ the confidence limit ignores uncertainty in the comparison rate.
 
 *Note:* Exploratory: no multiplicity adjustment and no interaction test. GHS-Panel: people
 aged 15 and over without a severe difficulty in 2018/19, longitudinal weights.
-
-**[TABLE TO ADD BEFORE SUBMISSION: household characteristics by exposure (place, sector, age
-structure, head's sex, age and education; weighted shares). Not yet produced: it needs a new
-disclosure-checked run on the restricted data.]**
