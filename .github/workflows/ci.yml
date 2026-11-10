@@ -94,6 +94,8 @@ jobs:
         run: uv run python packages/transform/scripts/build_poverty_page.py
       - name: Check the policy brief matches the exported estimates
         run: uv run python packages/transform/scripts/build_brief.py --check
+      - name: Check the journal manuscript matches the exported estimates
+        run: uv run python packages/transform/scripts/build_manuscript.py --check
       # The data dictionary: every column of every public file needs a description (marts' YAML
       # or public_files.yml), and no description may name a column a mart or file lacks.
       - name: Build the data dictionary (fails on an undescribed or stale column)
