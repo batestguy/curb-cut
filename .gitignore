@@ -66,3 +66,9 @@ data/sources/
 .claude/
 # Word files of the journal manuscript (build_manuscript.py --docx)
 docs/paper/out/
+
+# Local browser-automation helpers for the journal submission (never commit)
+site/launch.mjs
+site/step.mjs
+site/pw-*.mjs
+site/pw-*.json
